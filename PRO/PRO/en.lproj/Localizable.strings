@@ -1,0 +1,60 @@
+/* 
+  Localizable.strings
+  PRO
+
+  Created by VMO on 2/11/20.
+  Copyright © 2020 VMO. All rights reserved.
+*/
+
+
+"appName" = "VMO";
+
+"envBirthdays" = "Birthdays";
+"envContact" = "Contact";
+"envContacts" = "Contacts";
+"envDashboard" = "Dashboard";
+"envDeactivate" = "Deactivate";
+"envDetail" = "Detail";
+"envEdit" = "Edit";
+"envExtraVisit" = "Extra";
+"envHData" = "H. Data";
+"envKeyInfo" = "Info.";
+"envLogout" = "Logout";
+"envMessages" = "Messages";
+"envNotifications" = "Notifications";
+"envRecord" = "Record";
+"envSearch" = "Search";
+"envSLAID" = "SLAID";
+"envVisit" = "Visit";
+
+
+"errLaboratoryNotFound" = "Laboratory not found";
+
+"formDomain" = "Domain";
+"formPassword" = "Password";
+"formSignIn" = "Sign In";
+"formReport" = "Report";
+"formUsername" = "Username";
+
+"msgInitInfo" = "You only have to perform this process every time you sign in";
+"msgInitWarning" = "We're sync the data. Please don't close the app.";
+
+"msgSyncError" = "Data can't be downloaded. You need this to start to working in the platform.";
+
+"modMedic" = "Medic";
+"modPharmacy" = "Pharmacy";
+"modClient" = "Client";
+"modPatient" = "Patient";
+"modDiary" = "Diary";
+"modActivity" = "Activity";
+"modPeopleRoute" = "Routes";
+"modBatchReport" = "Batch report";
+"modPotentialProfessional" = "Potential professional";
+"modRequestDays" = "Request days";
+"modRequestMaterial" = "Request marketing stuff";
+"modMaterialDelivery" = "Material Delivery";
+"modExpenses" = "Expenses";
+"modTransference" = "Transference";
+"modReports" = "Reports";
+"modSupport" = "Support";
+

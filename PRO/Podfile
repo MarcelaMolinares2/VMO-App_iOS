@@ -1,0 +1,28 @@
+# Uncomment the next line to define a global platform for your project
+# platform :ios, '9.0'
+
+target 'PRO' do
+  # Comment the next line if you don't want to use dynamic frameworks
+  use_frameworks!
+
+  # Pods for PRO
+  pod 'Firebase/Analytics'
+  pod 'Firebase/Messaging'
+  pod 'Firebase/Crashlytics'
+  pod 'RealmSwift'
+  pod 'AlertToast'
+  pod 'URLImage'
+  pod 'GoogleMaps'
+  pod 'GooglePlaces'
+  pod 'SwiftUIPager'
+
+  target 'PROTests' do
+    inherit! :search_paths
+    # Pods for testing
+  end
+
+  target 'PROUITests' do
+    # Pods for testing
+  end
+
+end

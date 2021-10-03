@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>566664332579-l7s7333fub9vt6nsotdl3i6sv2gv0g0r.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.566664332579-l7s7333fub9vt6nsotdl3i6sv2gv0g0r</string>
+	<key>API_KEY</key>
+	<string>AIzaSyDmPp3DkAk_-3fRTj_-vm-L1TKQ-A1Zwt0</string>
+	<key>GCM_SENDER_ID</key>
+	<string>566664332579</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.vmo.PRO</string>
+	<key>PROJECT_ID</key>
+	<string>vmoapp-3d234</string>
+	<key>STORAGE_BUCKET</key>
+	<string>vmoapp-3d234.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:566664332579:ios:c1968b691136f2bee03896</string>
+	<key>DATABASE_URL</key>
+	<string>https://vmoapp-3d234.firebaseio.com</string>
+</dict>
+</plist>
