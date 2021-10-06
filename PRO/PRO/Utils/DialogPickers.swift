@@ -129,5 +129,6 @@ struct CustomDialogPicker: View {
     func done() {
         selected = viewModel.items.filter { item in item.selected }.map { $0.id }
         modalToggle.status.toggle()
+        print("ffff")
     }
 }
