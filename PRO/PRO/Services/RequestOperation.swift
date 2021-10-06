@@ -96,7 +96,7 @@ class RequestOperation: Operation {
                     if let rs = data as? [String] {
                         //print(rs)
                         for item in rs {
-                            print(item)
+                            //print(item)
                             let object = Utils.jsonDictionary(string: item)
                             let objectId = Utils.castInt(value: object[primaryKey])
                             if let local = realm.objects(from.self).filter("id = %@", objectId > 0 ? objectId : Utils.castString(value: object[primaryKey])).first {

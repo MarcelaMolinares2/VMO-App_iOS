@@ -48,6 +48,35 @@ class Activity: Object, Codable, SyncEntity {
     
 }
 
+
+class AdvertisingMaterialDelivery: Object, Codable, SyncEntity {
+    @Persisted(primaryKey: true) var objectId: ObjectId
+    @Persisted(indexed: true) var id = 0
+    @Persisted var transactionStatus: String? = ""
+    @Persisted var transactionPending: String? = ""
+    @Persisted var transactionResponse: String? = ""
+    @Persisted var userId: Int = 0
+    @Persisted var userTo: Int = 0
+    @Persisted var materialId: Int = 0
+    @Persisted var type: String = ""
+    @Persisted var date: String = ""
+    @Persisted var comment: String = ""
+    @Persisted var category: String = ""
+    @Persisted var sets = List<AdvertisingMaterialDeliverySet>()
+    
+    var material: AdvertisingMaterial? = nil
+    
+    private enum CodingKeys: String, CodingKey {
+        case id = "id"
+    }
+}
+
+class AdvertisingMaterialDeliverySet: Object {
+    @Persisted(primaryKey: true) var objectId: ObjectId
+    var id: String = ""
+    var quantity: Int = 0
+}
+
 /*
 var neighborhood: String? { get set }
 var institution: String? { get set }

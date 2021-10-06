@@ -32,6 +32,10 @@ class MaterialDao: GenericDao {
         return Array(realm.objects(AdvertisingMaterial.self).sorted(byKeyPath: "name"))
     }
     
+    func by(id: String) -> AdvertisingMaterial? {
+        return realm.objects(AdvertisingMaterial.self).filter("id == \(id)").first
+    }
+    
 }
 
 class GenericSelectableDao: GenericDao {
