@@ -16,6 +16,8 @@ struct WrapperView: View {
             ClientFormView()
         case "MATERIAL-DELIVERY":
             MaterialDeliveryView()
+        case "MATERIAL-REQUEST":
+            MaterialRequestView()
         case "MEDIC-FORM":
             MedicFormView(viewRouter: viewRouter)
         case "MOVEMENT-FORM":

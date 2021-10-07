@@ -13,6 +13,7 @@ struct MaterialRequestView: View {
     
     
     @ObservedObject private var selectMaterialsModalToggle = ModalToggle()
+    @EnvironmentObject var viewRouter: ViewRouter
     
     @State private var selectedMaterials = [String]()
     @State private var deliveries = [AdvertisingMaterialDelivery]()
@@ -30,8 +31,16 @@ struct MaterialRequestView: View {
                 }
                 List {
                     ForEach(deliveries, id: \.materialId) { item in
-                        Text("MAT \(item.materialId)")
-                        Text(item.material?.name ?? "--")
+                        CardDelivery(item: item)
+                    }
+                }
+            }
+            VStack {
+                Spacer()
+                HStack {
+                    Spacer()
+                    FAB(image: "ic-cloud", foregroundColor: .cPrimaryLight) {
+                        self.goTo(page: "MATERIAL-DELIVERY")
                     }
                 }
             }
@@ -59,6 +68,60 @@ struct MaterialRequestView: View {
     
     func load() {
         
+    }
+    
+    func goTo(page: String) {
+        viewRouter.currentPage = page
+    }
+}
+
+struct CardDelivery: View {
+    var item: AdvertisingMaterialDelivery
+    var body: some View{
+        VStack{
+            HStack {
+                Text(item.material?.name ?? "")
+                Spacer()
+                Button(action: {
+                    print("hh")
+                }, label: {
+                    Image("ic-delete")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(height: 20)
+                    /*
+                    Label("", systemImage: "trash.fill")
+                        .foregroundColor(.cIconLight)
+                    */
+                })
+                .background(Color.white)
+            }
+            VStack{
+                HStack {
+                    Text("ffff")
+                    Spacer()
+                    Text("fff")
+                }
+                HStack {
+                    Button(action: {
+                        print("hh")
+                    }, label: {
+                        Text("-")
+                    })
+                    .background(Color.white)
+                    Spacer()
+                    Text("ffff")
+                    Spacer()
+                    Button(action: {
+                        print("hh")
+                    }, label: {
+                        Text("+")
+                    })
+                    .background(Color.white)
+                }
+                
+            }
+        }
     }
 }
 
