@@ -33,7 +33,7 @@ struct MaterialRequestView: View {
                     ForEach(deliveries, id: \.materialId) { item in
                         CardDelivery(item: item)
                     }
-                }
+                }.buttonStyle(PlainButtonStyle())
             }
             VStack {
                 Spacer()
@@ -86,8 +86,6 @@ struct MaterialRequestView: View {
 struct CardDelivery: View {
     @State var observacion: String = ""
     var item: AdvertisingMaterialDelivery
-    var item_Material: AdvertisingMaterialSet
-    var array_Material = [AdvertisingMaterialSet]()
     var body: some View{
         VStack{
             HStack {
@@ -104,49 +102,40 @@ struct CardDelivery: View {
                     Label("", systemImage: "trash.fill")
                         .foregroundColor(.cIconLight)
                     */
-                })
+                }).buttonStyle(PlainButtonStyle())
                 .background(Color.white)
             }
             Spacer()
-            List {
-                /*
-                ForEach(array_Material) { i in
-                    Text(i)
+            VStack{
+                HStack {
+                    Text(String(item.material?.id ?? 0))
+                    Spacer()
+                    Text("fecha")
                 }
-                */
-                /*
-                VStack{
-                    HStack {
-                        Text(String(item.material?.id ?? 0))
-                        Spacer()
-                        Text("fecha")
+                Spacer()
+                HStack {
+                    Button(action: {
+                        print("menos")
+                    }, label: {
+                        Text("-")
+                            .font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/)
+                    }).buttonStyle(PlainButtonStyle())
+                    .background(Color.white)
+                    Spacer()
+                    VStack {
+                        Text("0")
+                        Text("Saldo: 037")
                     }
                     Spacer()
-                    HStack {
-                        Button(action: {
-                            print("menos")
-                        }, label: {
-                            Text("-")
-                                .font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/)
-                        })
-                        .background(Color.white)
-                        Spacer()
-                        VStack {
-                            Text("0")
-                            Text("Saldo: 037")
-                        }
-                        Spacer()
-                        Button(action: {
-                            print("mas")
-                        }, label: {
-                            Text("+")
-                                .font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/)
-                        })
-                        .background(Color.white)
-                    }
-                    TextField("Observaciones...", text: $observacion)
+                    Button(action: {
+                        print("mas")
+                    }, label: {
+                        Text("+")
+                            .font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/)
+                    })
+                    .background(Color.white)
                 }
-                */
+                TextField("Observaciones...", text: $observacion)
             }
         }
     }
