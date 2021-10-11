@@ -55,6 +55,14 @@ struct MaterialRequestView: View {
                             let delivery = AdvertisingMaterialDelivery()
                             delivery.materialId = material.id
                             delivery.material =  material
+                            print("_______deliveries append__________")
+                            for i in material.sets {
+                                print(i.id)
+                                print(i.objectId)
+                                print(i.dueDate ?? "")
+                                print(i.stock)
+                                print(i.delivered)
+                            }
                             deliveries.append(delivery)
                         }
                     }
@@ -76,14 +84,17 @@ struct MaterialRequestView: View {
 }
 
 struct CardDelivery: View {
+    @State var observacion: String = ""
     var item: AdvertisingMaterialDelivery
+    var item_Material: AdvertisingMaterialSet
+    var array_Material = [AdvertisingMaterialSet]()
     var body: some View{
         VStack{
             HStack {
                 Text(item.material?.name ?? "")
                 Spacer()
                 Button(action: {
-                    print("hh")
+                    print("trash")
                 }, label: {
                     Image("ic-delete")
                         .resizable()
@@ -96,30 +107,46 @@ struct CardDelivery: View {
                 })
                 .background(Color.white)
             }
-            VStack{
-                HStack {
-                    Text("ffff")
-                    Spacer()
-                    Text("fff")
+            Spacer()
+            List {
+                /*
+                ForEach(array_Material) { i in
+                    Text(i)
                 }
-                HStack {
-                    Button(action: {
-                        print("hh")
-                    }, label: {
-                        Text("-")
-                    })
-                    .background(Color.white)
+                */
+                /*
+                VStack{
+                    HStack {
+                        Text(String(item.material?.id ?? 0))
+                        Spacer()
+                        Text("fecha")
+                    }
                     Spacer()
-                    Text("ffff")
-                    Spacer()
-                    Button(action: {
-                        print("hh")
-                    }, label: {
-                        Text("+")
-                    })
-                    .background(Color.white)
+                    HStack {
+                        Button(action: {
+                            print("menos")
+                        }, label: {
+                            Text("-")
+                                .font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/)
+                        })
+                        .background(Color.white)
+                        Spacer()
+                        VStack {
+                            Text("0")
+                            Text("Saldo: 037")
+                        }
+                        Spacer()
+                        Button(action: {
+                            print("mas")
+                        }, label: {
+                            Text("+")
+                                .font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/)
+                        })
+                        .background(Color.white)
+                    }
+                    TextField("Observaciones...", text: $observacion)
                 }
-                
+                */
             }
         }
     }
