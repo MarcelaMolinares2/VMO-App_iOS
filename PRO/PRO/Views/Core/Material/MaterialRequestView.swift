@@ -33,7 +33,9 @@ struct MaterialRequestView: View {
                     ForEach(deliveries, id: \.materialId) { item in
                         CardDelivery(item: item)
                     }
-                }.buttonStyle(PlainButtonStyle())
+                    .onDelete(perform: self.delete)
+                }
+                .buttonStyle(PlainButtonStyle())
             }
             VStack {
                 Spacer()
@@ -55,14 +57,6 @@ struct MaterialRequestView: View {
                             let delivery = AdvertisingMaterialDelivery()
                             delivery.materialId = material.id
                             delivery.material =  material
-                            print("_______deliveries append__________")
-                            for i in material.sets {
-                                print(i.id)
-                                print(i.objectId)
-                                print(i.dueDate ?? "")
-                                print(i.stock)
-                                print(i.delivered)
-                            }
                             deliveries.append(delivery)
                         }
                     }
@@ -81,18 +75,23 @@ struct MaterialRequestView: View {
     func goTo(page: String) {
         viewRouter.currentPage = page
     }
+    
+    private func delete(at offsets: IndexSet) {
+        self.deliveries.remove(atOffsets: offsets)
+    }
 }
 
 struct CardDelivery: View {
     @State var observacion: String = ""
+    @State var tvNumber: Int = 0
     var item: AdvertisingMaterialDelivery
-    var body: some View{
+    var body: some View {
         VStack{
             HStack {
                 Text(item.material?.name ?? "")
                 Spacer()
                 Button(action: {
-                    print("trash")
+                    
                 }, label: {
                     Image("ic-delete")
                         .resizable()
@@ -102,33 +101,34 @@ struct CardDelivery: View {
                     Label("", systemImage: "trash.fill")
                         .foregroundColor(.cIconLight)
                     */
-                }).buttonStyle(PlainButtonStyle())
+                })
                 .background(Color.white)
             }
             Spacer()
             VStack{
                 HStack {
-                    Text(String(item.material?.id ?? 0))
+                    Text(String(item.material?.sets[0].id ?? ""))
                     Spacer()
-                    Text("fecha")
+                    Text(String(item.material?.sets[0].dueDate ?? ""))
                 }
                 Spacer()
                 HStack {
                     Button(action: {
-                        print("menos")
+                        tvNumber = tvNumber - 1
+                        if tvNumber <= 0 {tvNumber = 0}
                     }, label: {
                         Text("-")
                             .font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/)
-                    }).buttonStyle(PlainButtonStyle())
+                    })
                     .background(Color.white)
                     Spacer()
                     VStack {
-                        Text("0")
-                        Text("Saldo: 037")
+                        Text("\(String(tvNumber))")
+                        Text(String((item.material?.sets[0].stock ?? 0) - (item.material?.sets[0].delivered ?? 0)))
                     }
                     Spacer()
                     Button(action: {
-                        print("mas")
+                        tvNumber = tvNumber + 1
                     }, label: {
                         Text("+")
                             .font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/)

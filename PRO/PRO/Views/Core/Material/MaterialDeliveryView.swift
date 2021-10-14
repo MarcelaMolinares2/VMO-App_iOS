@@ -24,7 +24,6 @@ struct MaterialDeliveryView: View {
             VStack{
                 HeaderToggleView(couldSearch: false, title: "modMaterialDelivery", icon: Image("ic-material"), color: Color.cPanelMaterial)
                 Spacer()
-                
             }
             VStack {
                 Spacer()
