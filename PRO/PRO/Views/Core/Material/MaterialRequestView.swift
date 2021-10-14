@@ -26,7 +26,7 @@ struct MaterialRequestView: View {
                     Button(action: {
                         selectMaterialsModalToggle.status.toggle()
                     }) {
-                        Text("...Material prueba...")
+                        Text("modMaterialDelivery")
                     }
                 }
                 List {
@@ -109,7 +109,8 @@ struct CardDelivery: View {
                 HStack {
                     Text(String(item.material?.sets[0].id ?? ""))
                     Spacer()
-                    Text(String(item.material?.sets[0].dueDate ?? ""))
+                    //Text("materialRemainder1" + String(item.material?.sets[0].dueDate ?? "") + "materialRemainder2")
+                    Text("\("materialRemainder1")" + String(item.material?.sets[0].dueDate ?? "") + "\("materialRemainder2")")
                 }
                 Spacer()
                 HStack {
@@ -117,6 +118,7 @@ struct CardDelivery: View {
                         tvNumber = tvNumber - 1
                         if tvNumber <= 0 {tvNumber = 0}
                     }, label: {
+                        //let a = "Hello"
                         Text("-")
                             .font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/)
                     })

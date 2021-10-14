@@ -58,3 +58,6 @@
 "modReports" = "Reports";
 "modSupport" = "Support";
 
+
+"materialRemainder1" = "Remainder: ";
+"materialRemainder2" = "units";
