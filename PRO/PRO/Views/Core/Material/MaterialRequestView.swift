@@ -85,6 +85,10 @@ struct CardDelivery: View {
     @State var observacion: String = ""
     @State var tvNumber: Int = 0
     var item: AdvertisingMaterialDelivery
+    //let x_1 = "materialRemainder1"
+    //let x_2 = "materialRemainder2"
+    let materialRemainder = NSLocalizedString("materialRemainder", comment: "")
+    let expDate = NSLocalizedString("expDate", comment: "")
     var body: some View {
         VStack{
             HStack {
@@ -110,7 +114,16 @@ struct CardDelivery: View {
                     Text(String(item.material?.sets[0].id ?? ""))
                     Spacer()
                     //Text("materialRemainder1" + String(item.material?.sets[0].dueDate ?? "") + "materialRemainder2")
-                    Text("\("materialRemainder1")" + String(item.material?.sets[0].dueDate ?? "") + "\("materialRemainder2")")
+                    
+                    Text(String(item.material?.sets[0].dueDate ?? ""))
+                    //Text(String(format: expDate, String(item.material?.sets[0].dueDate ?? "")))
+                    //let x = String(item.material?.sets[0].dueDate ?? "").split(separator: -)
+                    //Text(String(format: expDate, Double(String(item.material?.sets[0].dueDate ?? "").split(separator: "-")[2])))
+                    //String(item.material?.sets[0].dueDate ?? "").split(separator: "-")[2]
+                    //Text(String(format: expDate, formatter.number(from: "9,999.99")))
+                    //Text(String(item.material?.sets[0].dueDate ?? ""))
+                    //Text(String(format: materialRemainder, 20))
+                    //Text("\(x_1) \(String(item.material?.sets[0].dueDate ?? "")) \(x_2)")
                 }
                 Spacer()
                 HStack {

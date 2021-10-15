@@ -58,6 +58,5 @@
 "modReports" = "Reports";
 "modSupport" = "Support";
 
-
-"materialRemainder1" = "Remainder: ";
-"materialRemainder2" = "units";
+"materialRemainder" = "(Remainder: %d units)";
+"expDate" = "(Exp.: %d)";
