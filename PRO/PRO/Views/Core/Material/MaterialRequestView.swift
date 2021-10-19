@@ -85,53 +85,27 @@ struct CardDelivery: View {
     @State var observacion: String = ""
     @State var tvNumber: Int = 0
     var item: AdvertisingMaterialDelivery
-    //let x_1 = "materialRemainder1"
-    //let x_2 = "materialRemainder2"
     let materialRemainder = NSLocalizedString("materialRemainder", comment: "")
     let expDate = NSLocalizedString("expDate", comment: "")
     var body: some View {
         VStack{
             HStack {
                 Text(item.material?.name ?? "")
-                Spacer()
-                Button(action: {
-                    
-                }, label: {
-                    Image("ic-delete")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(height: 20)
-                    /*
-                    Label("", systemImage: "trash.fill")
-                        .foregroundColor(.cIconLight)
-                    */
-                })
-                .background(Color.white)
             }
             Spacer()
             VStack{
                 HStack {
                     Text(String(item.material?.sets[0].id ?? ""))
                     Spacer()
-                    //Text("materialRemainder1" + String(item.material?.sets[0].dueDate ?? "") + "materialRemainder2")
-                    
-                    Text(String(item.material?.sets[0].dueDate ?? ""))
-                    //Text(String(format: expDate, String(item.material?.sets[0].dueDate ?? "")))
-                    //let x = String(item.material?.sets[0].dueDate ?? "").split(separator: -)
-                    //Text(String(format: expDate, Double(String(item.material?.sets[0].dueDate ?? "").split(separator: "-")[2])))
-                    //String(item.material?.sets[0].dueDate ?? "").split(separator: "-")[2]
-                    //Text(String(format: expDate, formatter.number(from: "9,999.99")))
-                    //Text(String(item.material?.sets[0].dueDate ?? ""))
-                    //Text(String(format: materialRemainder, 20))
-                    //Text("\(x_1) \(String(item.material?.sets[0].dueDate ?? "")) \(x_2)")
+                    Text(String(format: expDate, formatStringDate(date: String(item.material?.sets[0].dueDate ?? ""))))
                 }
                 Spacer()
                 HStack {
                     Button(action: {
-                        tvNumber = tvNumber - 1
+                        tvNumber -= 1
                         if tvNumber <= 0 {tvNumber = 0}
+                        item.sets[0].quantity = tvNumber
                     }, label: {
-                        //let a = "Hello"
                         Text("-")
                             .font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/)
                     })
@@ -139,11 +113,13 @@ struct CardDelivery: View {
                     Spacer()
                     VStack {
                         Text("\(String(tvNumber))")
-                        Text(String((item.material?.sets[0].stock ?? 0) - (item.material?.sets[0].delivered ?? 0)))
+                        Text(String(format: materialRemainder,
+                        String((item.material?.sets[0].stock ?? 0) - (item.material?.sets[0].delivered ?? 0))))
                     }
                     Spacer()
                     Button(action: {
-                        tvNumber = tvNumber + 1
+                        tvNumber += 1
+                        item.sets[0].quantity = tvNumber
                     }, label: {
                         Text("+")
                             .font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/)
@@ -154,6 +130,15 @@ struct CardDelivery: View {
             }
         }
     }
+    
+    func formatStringDate(date: String) -> String {
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "yyyy-MM-dd"
+            let newDate = dateFormatter.date(from: date)
+            dateFormatter.setLocalizedDateFormatFromTemplate("MMMM d, yyyy")
+            return dateFormatter.string(from: newDate!)
+    }
+    
 }
 
 struct MaterialRequestView_Previews: PreviewProvider {

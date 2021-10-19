@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Bucket
+   uuid = "82CA8CDC-EDF6-4EA6-980A-204A1A9B072F"
+   type = "0"
+   version = "2.0">
+   <Breakpoints>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "672F82E4-0F0B-4D4D-8121-1864653B0177"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "PRO/Entities/VMConfigData.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "11"
+            endingLineNumber = "11"
+            landmarkName = "AdvertisingMaterial"
+            landmarkType = "3">
+            <Locations>
+               <Location
+                  uuid = "672F82E4-0F0B-4D4D-8121-1864653B0177 - bbfaccf48eb1e1f8"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "PRO.AdvertisingMaterial.__deallocating_deinit"
+                  moduleName = "PRO"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/fernandogarcia/Documents/GitLab/vmo-app_ios/PRO/PRO/Entities/VMConfigData.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "0"
+                  endingLineNumber = "0"
+                  offsetFromSymbolStart = "16">
+               </Location>
+               <Location
+                  uuid = "672F82E4-0F0B-4D4D-8121-1864653B0177 - 21e329626062c3e9"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "PRO.AdvertisingMaterial.__allocating_init() -&gt; PRO.AdvertisingMaterial"
+                  moduleName = "PRO"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/fernandogarcia/Documents/GitLab/vmo-app_ios/PRO/PRO/Entities/VMConfigData.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "0"
+                  endingLineNumber = "0"
+                  offsetFromSymbolStart = "4">
+               </Location>
+               <Location
+                  uuid = "672F82E4-0F0B-4D4D-8121-1864653B0177 - d401bf1dd80fa075"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "PRO.AdvertisingMaterial.init() -&gt; PRO.AdvertisingMaterial"
+                  moduleName = "PRO"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/fernandogarcia/Documents/GitLab/vmo-app_ios/PRO/PRO/Entities/VMConfigData.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "12"
+                  endingLineNumber = "12"
+                  offsetFromSymbolStart = "339">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "7DE627AE-59A3-462B-9AD9-BCEAF20227E3"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "PRO/Entities/VMCoreData.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "52"
+            endingLineNumber = "52"
+            landmarkName = "AdvertisingMaterialDelivery"
+            landmarkType = "3">
+            <Locations>
+               <Location
+                  uuid = "7DE627AE-59A3-462B-9AD9-BCEAF20227E3 - 33f4967f502fc355"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "PRO.AdvertisingMaterialDelivery.__deallocating_deinit"
+                  moduleName = "PRO"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/fernandogarcia/Documents/GitLab/vmo-app_ios/PRO/PRO/Entities/VMCoreData.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "0"
+                  endingLineNumber = "0"
+                  offsetFromSymbolStart = "16">
+               </Location>
+               <Location
+                  uuid = "7DE627AE-59A3-462B-9AD9-BCEAF20227E3 - 55a48f9892d2a630"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "PRO.AdvertisingMaterialDelivery.__allocating_init() -&gt; PRO.AdvertisingMaterialDelivery"
+                  moduleName = "PRO"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/fernandogarcia/Documents/GitLab/vmo-app_ios/PRO/PRO/Entities/VMCoreData.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "0"
+                  endingLineNumber = "0"
+                  offsetFromSymbolStart = "4">
+               </Location>
+               <Location
+                  uuid = "7DE627AE-59A3-462B-9AD9-BCEAF20227E3 - a74b9036553afdd3"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "PRO.AdvertisingMaterialDelivery.init() -&gt; PRO.AdvertisingMaterialDelivery"
+                  moduleName = "PRO"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/fernandogarcia/Documents/GitLab/vmo-app_ios/PRO/PRO/Entities/VMCoreData.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "53"
+                  endingLineNumber = "53"
+                  offsetFromSymbolStart = "362">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+   </Breakpoints>
+</Bucket>
