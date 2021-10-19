@@ -48,7 +48,6 @@ class Activity: Object, Codable, SyncEntity {
     
 }
 
-
 class AdvertisingMaterialDelivery: Object, Codable, SyncEntity {
     @Persisted(primaryKey: true) var objectId: ObjectId
     @Persisted(indexed: true) var id = 0

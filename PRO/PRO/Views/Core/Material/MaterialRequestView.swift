@@ -42,6 +42,10 @@ struct MaterialRequestView: View {
                 HStack {
                     Spacer()
                     FAB(image: "ic-cloud", foregroundColor: .cPrimaryLight) {
+                        print(deliveries)
+                        for i in deliveries{
+                            print(i.sets[0])
+                        }
                         self.goTo(page: "MATERIAL-DELIVERY")
                     }
                 }
@@ -78,12 +82,15 @@ struct MaterialRequestView: View {
     
     private func delete(at offsets: IndexSet) {
         self.deliveries.remove(atOffsets: offsets)
+        print("Se elimino")
     }
 }
 
 struct CardDelivery: View {
     @State var observacion: String = ""
+    @State var updateObject: AdvertisingMaterialDelivery?
     @State var tvNumber: Int = 0
+    let realm = try! Realm()
     var item: AdvertisingMaterialDelivery
     let materialRemainder = NSLocalizedString("materialRemainder", comment: "")
     let expDate = NSLocalizedString("expDate", comment: "")
@@ -104,7 +111,26 @@ struct CardDelivery: View {
                     Button(action: {
                         tvNumber -= 1
                         if tvNumber <= 0 {tvNumber = 0}
-                        item.sets[0].quantity = tvNumber
+                        //item.sets[0].quantity = 45
+                        
+                        guard let dbRef = try? Realm() else{return}
+                        try? dbRef.write{
+                            
+                            //checking and writing data..
+                             
+                            guard let availableObject = updateObject else {
+                                
+                                dbRef.add(item)
+                                
+                                return
+                            }
+                             
+                            availableObject.sets[0].quantity = 23
+                            
+                        }
+                        
+                        //print(item.sets[0].quantity)
+                        
                     }, label: {
                         Text("-")
                             .font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/)
@@ -119,7 +145,26 @@ struct CardDelivery: View {
                     Spacer()
                     Button(action: {
                         tvNumber += 1
-                        item.sets[0].quantity = tvNumber
+                        //item.sets[0].quantity = Int(43)
+                        
+                        guard let dbRef = try? Realm() else{return}
+                        try? dbRef.write{
+                            
+                            //checking and writing data..
+                             
+                            guard let availableObject = updateObject else {
+                                
+                                dbRef.add(item)
+                                
+                                return
+                            }
+                             
+                            availableObject.sets[0].quantity = 89
+                            
+                        }
+                        
+                        //print(item.sets[0].quantity)
+                        
                     }, label: {
                         Text("+")
                             .font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/)
