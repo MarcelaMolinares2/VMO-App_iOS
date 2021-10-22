@@ -18,6 +18,8 @@ struct MaterialRequestView: View {
     @State private var selectedMaterials = [String]()
     @State private var deliveries = [AdvertisingMaterialDelivery]()
     
+    var realm = try? Realm()
+    
     var body: some View {
         ZStack {
             VStack {
@@ -42,9 +44,23 @@ struct MaterialRequestView: View {
                 HStack {
                     Spacer()
                     FAB(image: "ic-cloud", foregroundColor: .cPrimaryLight) {
+                        print("_________MaterialDao_________")
+                        print(MaterialDao(realm: try! Realm()).all())
+                        print("_________MaterialDao_________")
+                        
+                        MaterialDeliveryDao(realm: try! Realm()).store(deliveries: deliveries)
+                        
+                        print("_________MaterialDeliveryDao_________")
+                        print(MaterialDeliveryDao(realm: try! Realm()).all())
+                        print("_________MaterialDeliveryDao_________")
+                        
+                        print("_________deliveries_________")
                         print(deliveries)
-                        for i in deliveries{
-                            print(i.sets[0])
+                        print("_________deliveries_________")
+                        for i in deliveries {
+                            print("_________i_________")
+                            print(i)
+                            print("_________i_________")
                         }
                         self.goTo(page: "MATERIAL-DELIVERY")
                     }
@@ -59,9 +75,18 @@ struct MaterialRequestView: View {
                     selectedMaterials.forEach { id in
                         if let material = MaterialDao(realm: try! Realm()).by(id: id) {
                             let delivery = AdvertisingMaterialDelivery()
-                            delivery.materialId = material.id
-                            delivery.material =  material
-                            deliveries.append(delivery)
+                            var verif = false
+                            for i in deliveries {
+                                if i.materialId == material.id {
+                                    verif = true
+                                    break
+                                }
+                            }
+                            if !verif {
+                                delivery.materialId = material.id
+                                delivery.material =  material
+                                deliveries.append(delivery)
+                            }
                         }
                     }
                 }
@@ -88,13 +113,18 @@ struct MaterialRequestView: View {
 
 struct CardDelivery: View {
     @State var observacion: String = ""
-    @State var updateObject: AdvertisingMaterialDelivery?
     @State var tvNumber: Int = 0
-    let realm = try! Realm()
+    let deliverieSet = AdvertisingMaterialDeliverySet()
     var item: AdvertisingMaterialDelivery
     let materialRemainder = NSLocalizedString("materialRemainder", comment: "")
     let expDate = NSLocalizedString("expDate", comment: "")
     var body: some View {
+        let binding = Binding<String>(get: {
+            self.item.comment
+        }, set: {
+            self.item.comment = $0
+            // do whatever you want here
+        })
         VStack{
             HStack {
                 Text(item.material?.name ?? "")
@@ -111,25 +141,12 @@ struct CardDelivery: View {
                     Button(action: {
                         tvNumber -= 1
                         if tvNumber <= 0 {tvNumber = 0}
-                        //item.sets[0].quantity = 45
+                        deliverieSet.id = String(item.materialId)
+                        deliverieSet.objectId = item.objectId
+                        deliverieSet.quantity = tvNumber
                         
-                        guard let dbRef = try? Realm() else{return}
-                        try? dbRef.write{
-                            
-                            //checking and writing data..
-                             
-                            guard let availableObject = updateObject else {
-                                
-                                dbRef.add(item)
-                                
-                                return
-                            }
-                             
-                            availableObject.sets[0].quantity = 23
-                            
-                        }
-                        
-                        //print(item.sets[0].quantity)
+                        item.sets.removeAll()
+                        item.sets.append(deliverieSet)
                         
                     }, label: {
                         Text("-")
@@ -145,34 +162,26 @@ struct CardDelivery: View {
                     Spacer()
                     Button(action: {
                         tvNumber += 1
-                        //item.sets[0].quantity = Int(43)
+                        deliverieSet.id = String(item.materialId)
+                        deliverieSet.objectId = item.objectId
+                        deliverieSet.quantity = tvNumber
                         
-                        guard let dbRef = try? Realm() else{return}
-                        try? dbRef.write{
-                            
-                            //checking and writing data..
-                             
-                            guard let availableObject = updateObject else {
-                                
-                                dbRef.add(item)
-                                
-                                return
-                            }
-                             
-                            availableObject.sets[0].quantity = 89
-                            
-                        }
-                        
-                        //print(item.sets[0].quantity)
-                        
+                        item.sets.removeAll()
+                        item.sets.append(deliverieSet)
                     }, label: {
                         Text("+")
                             .font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/)
                     })
                     .background(Color.white)
                 }
-                TextField("Observaciones...", text: $observacion)
+                //TextField("Observaciones...", text: $(item.comment))
+                TextField("Observaciones...", text: binding)
             }
+            
+            Divider()
+             .frame(height: 1)
+             .padding(.horizontal, 30)
+             .background(Color.red)
         }
     }
     
