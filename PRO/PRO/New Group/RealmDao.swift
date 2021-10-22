@@ -43,7 +43,7 @@ class MaterialDeliveryDao: GenericDao {
     @Published var updateObject: AdvertisingMaterialDelivery?
     
     func all() -> [AdvertisingMaterialDelivery] {
-        return Array(realm.objects(AdvertisingMaterialDelivery.self).sorted(byKeyPath: "name"))
+        return Array(realm.objects(AdvertisingMaterialDelivery.self).sorted(byKeyPath: "objectId"))
     }
     
     func by(id: String) -> AdvertisingMaterialDelivery? {
@@ -75,7 +75,7 @@ class MaterialDeliveryDao: GenericDao {
              realm.materialDao().updateStock(materialDelivery)
          }
      }
-     */
+    */
     
 }
 

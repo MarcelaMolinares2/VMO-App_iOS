@@ -8,6 +8,7 @@
 
 import SwiftUI
 import RealmSwift
+import AlertToast
 
 struct MaterialRequestView: View {
     
@@ -17,8 +18,11 @@ struct MaterialRequestView: View {
     
     @State private var selectedMaterials = [String]()
     @State private var deliveries = [AdvertisingMaterialDelivery]()
+    @State private var d_print = MaterialDeliveryDao(realm: try! Realm()).all()
     
     var realm = try? Realm()
+    
+    @State private var showToast = false
     
     var body: some View {
         ZStack {
@@ -44,27 +48,23 @@ struct MaterialRequestView: View {
                 HStack {
                     Spacer()
                     FAB(image: "ic-cloud", foregroundColor: .cPrimaryLight) {
-                        print("_________MaterialDao_________")
-                        print(MaterialDao(realm: try! Realm()).all())
-                        print("_________MaterialDao_________")
                         
-                        MaterialDeliveryDao(realm: try! Realm()).store(deliveries: deliveries)
-                        
-                        print("_________MaterialDeliveryDao_________")
-                        print(MaterialDeliveryDao(realm: try! Realm()).all())
-                        print("_________MaterialDeliveryDao_________")
-                        
-                        print("_________deliveries_________")
-                        print(deliveries)
-                        print("_________deliveries_________")
-                        for i in deliveries {
-                            print("_________i_________")
-                            print(i)
-                            print("_________i_________")
+                        if deliveries.count > 0 {
+                            MaterialDeliveryDao(realm: try! Realm()).store(deliveries: deliveries)
+                            self.goTo(page: "MATERIAL-DELIVERY")
+                        } else {
+                            self.showToast.toggle()
                         }
-                        self.goTo(page: "MATERIAL-DELIVERY")
                     }
                 }
+                .toast(isPresenting: $showToast){
+
+                            // `.alert` is the default displayMode
+                            AlertToast(type: .regular, title: NSLocalizedString("noneMaterialDelivery", comment: ""))
+                            
+                            //Choose .hud to toast alert from the top of the screen
+                            //AlertToast(displayMode: .hud, type: .regular, title: "Message Sent!")
+                        }
             }
             if selectMaterialsModalToggle.status {
                 GeometryReader {geo in
@@ -92,13 +92,6 @@ struct MaterialRequestView: View {
                 }
             }
         }
-        .onAppear {
-            load()
-        }
-    }
-    
-    func load() {
-        
     }
     
     func goTo(page: String) {
@@ -134,7 +127,7 @@ struct CardDelivery: View {
                 HStack {
                     Text(String(item.material?.sets[0].id ?? ""))
                     Spacer()
-                    Text(String(format: expDate, formatStringDate(date: String(item.material?.sets[0].dueDate ?? ""))))
+                    Text(String(format: NSLocalizedString("expDate", comment: ""), formatStringDate(date: String(item.material?.sets[0].dueDate ?? ""))))
                 }
                 Spacer()
                 HStack {
@@ -156,7 +149,7 @@ struct CardDelivery: View {
                     Spacer()
                     VStack {
                         Text("\(String(tvNumber))")
-                        Text(String(format: materialRemainder,
+                        Text(String(format: NSLocalizedString("materialRemainder", comment: ""),
                         String((item.material?.sets[0].stock ?? 0) - (item.material?.sets[0].delivered ?? 0))))
                     }
                     Spacer()
@@ -174,7 +167,6 @@ struct CardDelivery: View {
                     })
                     .background(Color.white)
                 }
-                //TextField("Observaciones...", text: $(item.comment))
                 TextField("Observaciones...", text: binding)
             }
             
