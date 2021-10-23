@@ -18,7 +18,6 @@ struct MaterialRequestView: View {
     
     @State private var selectedMaterials = [String]()
     @State private var deliveries = [AdvertisingMaterialDelivery]()
-    @State private var d_print = MaterialDeliveryDao(realm: try! Realm()).all()
     
     var realm = try? Realm()
     
@@ -48,7 +47,6 @@ struct MaterialRequestView: View {
                 HStack {
                     Spacer()
                     FAB(image: "ic-cloud", foregroundColor: .cPrimaryLight) {
-                        
                         if deliveries.count > 0 {
                             MaterialDeliveryDao(realm: try! Realm()).store(deliveries: deliveries)
                             self.goTo(page: "MATERIAL-DELIVERY")
@@ -58,12 +56,7 @@ struct MaterialRequestView: View {
                     }
                 }
                 .toast(isPresenting: $showToast){
-
-                            // `.alert` is the default displayMode
                             AlertToast(type: .regular, title: NSLocalizedString("noneMaterialDelivery", comment: ""))
-                            
-                            //Choose .hud to toast alert from the top of the screen
-                            //AlertToast(displayMode: .hud, type: .regular, title: "Message Sent!")
                         }
             }
             if selectMaterialsModalToggle.status {
@@ -75,6 +68,9 @@ struct MaterialRequestView: View {
                     selectedMaterials.forEach { id in
                         if let material = MaterialDao(realm: try! Realm()).by(id: id) {
                             let delivery = AdvertisingMaterialDelivery()
+                            let dateDescription = String(Date().description)
+                            let date = dateDescription.components(separatedBy: " ")[0]
+                            
                             var verif = false
                             for i in deliveries {
                                 if i.materialId == material.id {
@@ -85,6 +81,7 @@ struct MaterialRequestView: View {
                             if !verif {
                                 delivery.materialId = material.id
                                 delivery.material =  material
+                                delivery.date = date
                                 deliveries.append(delivery)
                             }
                         }
@@ -100,24 +97,21 @@ struct MaterialRequestView: View {
     
     private func delete(at offsets: IndexSet) {
         self.deliveries.remove(atOffsets: offsets)
-        print("Se elimino")
     }
 }
 
 struct CardDelivery: View {
     @State var observacion: String = ""
     @State var tvNumber: Int = 0
-    let deliverieSet = AdvertisingMaterialDeliverySet()
+    var deliverieSet = AdvertisingMaterialDeliverySet()
     var item: AdvertisingMaterialDelivery
-    let materialRemainder = NSLocalizedString("materialRemainder", comment: "")
-    let expDate = NSLocalizedString("expDate", comment: "")
     var body: some View {
         let binding = Binding<String>(get: {
             self.item.comment
         }, set: {
             self.item.comment = $0
-            // do whatever you want here
         })
+        
         VStack{
             HStack {
                 Text(item.material?.name ?? "")
@@ -139,8 +133,7 @@ struct CardDelivery: View {
                         deliverieSet.quantity = tvNumber
                         
                         item.sets.removeAll()
-                        item.sets.append(deliverieSet)
-                        
+                        item.sets.insert(deliverieSet, at: 0)
                     }, label: {
                         Text("-")
                             .font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/)
@@ -160,7 +153,7 @@ struct CardDelivery: View {
                         deliverieSet.quantity = tvNumber
                         
                         item.sets.removeAll()
-                        item.sets.append(deliverieSet)
+                        item.sets.insert(deliverieSet, at: 0)
                     }, label: {
                         Text("+")
                             .font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/)
@@ -172,8 +165,8 @@ struct CardDelivery: View {
             
             Divider()
              .frame(height: 1)
-             .padding(.horizontal, 30)
-             .background(Color.red)
+             .padding(.horizontal, 5)
+             .background(Color.gray)
         }
     }
     

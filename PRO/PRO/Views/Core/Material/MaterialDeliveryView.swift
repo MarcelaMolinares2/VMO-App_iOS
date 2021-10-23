@@ -14,10 +14,7 @@ struct MaterialDeliveryView: View {
     @ObservedObject private var selectMaterialsModalToggle = ModalToggle()
     @EnvironmentObject var viewRouter: ViewRouter
     
-    //@Binding var isPresented: Bool
-    
     @State private var selectedMaterials = [String]()
-    //@State private var deliveries = [AdvertisingMaterialDelivery]()
     @State private var deliveries = MaterialDeliveryDao(realm: try! Realm()).all()
     
     var body: some View {
@@ -26,23 +23,34 @@ struct MaterialDeliveryView: View {
                 HeaderToggleView(couldSearch: false, title: "modMaterialDelivery", icon: Image("ic-material"), color: Color.cPanelMaterial)
                 Spacer()
                 List {
-                    ForEach(deliveries, id: \.id) { item in
-                        VStack{
-                            Text(item.material?.name ?? "")
-                            Spacer()
-                            HStack{
-                                Text("hhh: \(String(item.comment))")
+                    ForEach(deliveries, id: \.self) { item in
+                        if let material = MaterialDao(realm: try! Realm()).by(id: String(item.materialId)) {
+                            VStack{
+                                HStack{
+                                    Text(material.name ?? "")
+                                    Spacer()
+                                }
                                 Spacer()
-                                Text("Cantidad")
-                                //Text(String(item.sets.quantity))
+                                HStack{
+                                    Text(String(material.sets[0].id))
+                                    Spacer()
+                                    Text(String(format: NSLocalizedString("materialQuantity", comment: ""), String(item.sets[0].quantity)))
+                                        .font(.system(size: 18, weight: .heavy, design: .default))
+                                }
+                                Spacer()
+                                HStack{
+                                    Spacer()
+                                    Text(formatStringDate(date: String(item.date)))
+                                        .font(.system(size: 14))
+                                }
+                                
+                                Divider()
+                                 .frame(height: 1)
+                                 .padding(.horizontal, 5)
+                                 .background(Color.gray)
                             }
-                            
-                            
-                            Divider()
-                             .frame(height: 1)
-                             .padding(.horizontal, 30)
-                             .background(Color.red)
                         }
+                        
                     }
                 }
             }
@@ -63,16 +71,20 @@ struct MaterialDeliveryView: View {
     }
     
     func load() {
-        print("__________For deliveries__________")
-        for i in deliveries{
-            print(i.material ?? [])
-        }
-        print("__________For deliveries__________")
+        print(deliveries)
     }
     
     func goTo(page: String) {
         viewRouter.currentPage = page
-        //self.isPresented = false
+    }
+    
+    
+    func formatStringDate(date: String) -> String {
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "yyyy-MM-dd"
+            let newDate = dateFormatter.date(from: date)
+            dateFormatter.setLocalizedDateFormatFromTemplate("MMMM d, yyyy")
+            return dateFormatter.string(from: newDate!)
     }
     
 }

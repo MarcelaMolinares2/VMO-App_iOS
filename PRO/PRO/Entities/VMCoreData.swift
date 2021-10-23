@@ -72,8 +72,8 @@ class AdvertisingMaterialDelivery: Object, Codable, SyncEntity {
 
 class AdvertisingMaterialDeliverySet: Object {
     @Persisted(primaryKey: true) var objectId: ObjectId
-    var id: String = ""
-    var quantity: Int = 0
+    @Persisted var id: String = ""
+    @Persisted var quantity: Int = 0
 }
 
 /*
