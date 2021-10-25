@@ -12,15 +12,30 @@ import AlertToast
 
 struct MaterialDeliveryView: View {
     
-    @StateObject var moduleRouter = ModuleRouter()
+    //@EnvironmentObject var moduleRouter: ModuleRouter
+    //private var moduleRouter = ModuleRouter()
+    @ObservedObject private var moduleRouter = ModuleRouter()
     
+    //@EnvironmentObject var moduleRouter = ModuleRouter()
+
     var body: some View {
+        
+        
+        if moduleRouter.status {
+            MaterialDeliveryFormView()
+        } else {
+            MaterialDeliveryListView()
+        }
+        /*
         switch moduleRouter.currentPage {
         case "LIST":
             MaterialDeliveryListView()
+        case "FORM":
+            MaterialDeliveryFormView()
         default:
             Text("")
         }
+         */
         /*
         VStack {
             
@@ -39,8 +54,6 @@ struct MaterialDeliveryView: View {
             loadData()
         }
         */
-        
-        MaterialDeliveryListView()
     }
     func loadData() {
         //moduleRouter.currentPage = "LIST";
@@ -49,8 +62,8 @@ struct MaterialDeliveryView: View {
 
 struct MaterialDeliveryListView: View {
     
-    @ObservedObject private var selectMaterialsModalToggle = ModalToggle()
-    @EnvironmentObject var moduleRouter: ModuleRouter
+    //@ObservedObject var moduleRouter = ModuleRouter()
+    @ObservedObject var moduleRouter: ModuleRouter = ModuleRouter()
     
     @State private var selectedMaterials = [String]()
     @State private var deliveries = MaterialDeliveryDao(realm: try! Realm()).all()
@@ -97,7 +110,9 @@ struct MaterialDeliveryListView: View {
                 HStack {
                     Spacer()
                     FAB(image: "ic-plus", foregroundColor: .cPrimaryLight) {
-                        moduleRouter.currentPage = "FORM"
+                        print("cambie pez")
+                        moduleRouter.status.toggle()
+                        print(moduleRouter.status)
                     }
                 }
             }
@@ -123,7 +138,9 @@ struct MaterialDeliveryListView: View {
 
 struct MaterialDeliveryFormView: View {
     
-    @EnvironmentObject var moduleRouter: ModuleRouter;
+    //@ObservedObject var moduleRouter = ModuleRouter()
+    @ObservedObject var moduleRouter = ModuleRouter()
+    //@EnvironmentObject var moduleRouter: ModuleRouter
     @ObservedObject private var selectMaterialsModalToggle = ModalToggle()
     @EnvironmentObject var viewRouter: ViewRouter
     
@@ -160,7 +177,8 @@ struct MaterialDeliveryFormView: View {
                     FAB(image: "ic-cloud", foregroundColor: .cPrimaryLight) {
                         if deliveries.count > 0 {
                             MaterialDeliveryDao(realm: try! Realm()).store(deliveries: deliveries)
-                            moduleRouter.currentPage = "LIST"
+                            
+                            moduleRouter.status.toggle()
                             //self.goTo(page: "MATERIAL-DELIVERY")
                         } else {
                             self.showToast.toggle()
@@ -290,4 +308,22 @@ struct CardDelivery: View {
             return dateFormatter.string(from: newDate!)
     }
     
+}
+
+struct MaterialDeliveryView_Previews: PreviewProvider {
+    static var previews: some View {
+        MaterialDeliveryView()
+    }
+}
+
+struct MaterialDeliveryListView_Previews: PreviewProvider {
+    static var previews: some View {
+        MaterialDeliveryListView()
+    }
+}
+
+struct MaterialDeliveryFormView_Previews: PreviewProvider {
+    static var previews: some View {
+        MaterialDeliveryFormView()
+    }
 }
