@@ -12,7 +12,7 @@ import AlertToast
 
 struct MaterialDeliveryView: View {
     
-    @StateObject var moduleRouter: ModuleRouter
+    @StateObject var moduleRouter = ModuleRouter()
     
     var body: some View {
         switch moduleRouter.currentPage {
