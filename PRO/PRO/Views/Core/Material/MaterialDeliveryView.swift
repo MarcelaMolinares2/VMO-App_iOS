@@ -12,7 +12,7 @@ import RealmSwift
 struct MaterialDeliveryView: View {
     
     @ObservedObject private var selectMaterialsModalToggle = ModalToggle()
-    @EnvironmentObject var viewRouter: ViewRouter
+    @EnvironmentObject var moduleRouter: ModuleRouter
     
     @State private var selectedMaterials = [String]()
     @State private var deliveries = MaterialDeliveryDao(realm: try! Realm()).all()
@@ -59,25 +59,12 @@ struct MaterialDeliveryView: View {
                 HStack {
                     Spacer()
                     FAB(image: "ic-plus", foregroundColor: .cPrimaryLight) {
-                        
-                        self.goTo(page: "MATERIAL-REQUEST")
+                        moduleRouter.currentPage = "FORM"
                     }
                 }
             }
         }
-        .onAppear{
-            load()
-        }
     }
-    
-    func load() {
-        print(deliveries)
-    }
-    
-    func goTo(page: String) {
-        viewRouter.currentPage = page
-    }
-    
     
     func formatStringDate(date: String) -> String {
             let dateFormatter = DateFormatter()
@@ -89,3 +76,22 @@ struct MaterialDeliveryView: View {
     
 }
 
+struct MaterialDeliveryListView: View {
+    
+    var body: some View {
+        VStack {
+            
+        }
+    }
+    
+}
+
+struct MaterialDeliveryFormView: View {
+    
+    var body: some View {
+        VStack {
+            
+        }
+    }
+    
+}

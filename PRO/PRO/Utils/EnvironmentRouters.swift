@@ -10,6 +10,17 @@ import Combine
 import SwiftUI
 import RealmSwift
 
+class ModuleRouter: ObservableObject {
+    let objectWillChange = PassthroughSubject<ModuleRouter, Never>()
+    var currentPage: String = "LIST" {
+        didSet {
+            withAnimation() {
+                objectWillChange.send(self)
+            }
+        }
+    }
+}
+
 class ViewRouter: ObservableObject {
     let objectWillChange = PassthroughSubject<ViewRouter, Never>()
     var currentPage: String = "MASTER" {
