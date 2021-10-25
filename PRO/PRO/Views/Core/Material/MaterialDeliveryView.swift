@@ -11,40 +11,17 @@ import RealmSwift
 import AlertToast
 
 struct MaterialDeliveryView: View {
-    
-    //@EnvironmentObject var moduleRouter: ModuleRouter
-    //private var moduleRouter = ModuleRouter()
     @ObservedObject private var moduleRouter = ModuleRouter()
     
-    //@EnvironmentObject var moduleRouter = ModuleRouter()
-
     var body: some View {
         switch moduleRouter.currentPage {
         case "LIST":
             MaterialDeliveryListView(moduleRouter: moduleRouter)
         case "FORM":
-            MaterialDeliveryFormView()
+            MaterialDeliveryFormView(moduleRouter: moduleRouter)
         default:
             Text("")
         }
-        /*
-        VStack {
-            
-            
-            /*
-            
-            switch moduleRouter.currentPage {
-            
-            case "LIST":
-                MaterialDeliveryListView()
-            default:
-                Text("")
-            }
-            */
-        }.onAppear {
-            loadData()
-        }
-        */
     }
     func loadData() {
         //moduleRouter.currentPage = "LIST";
@@ -58,6 +35,10 @@ struct MaterialDeliveryListView: View {
     
     @State private var selectedMaterials = [String]()
     @State private var deliveries = MaterialDeliveryDao(realm: try! Realm()).all()
+    
+    private let Booll: Bool = false
+    private let Intt: Int16 = 0
+    private let Anyy: Any = ""
     
     var body: some View {
         ZStack {
@@ -112,6 +93,23 @@ struct MaterialDeliveryListView: View {
     }
     
     func loadData() {
+        let appServer = AppServer()
+        //let x = [String: Any]()
+        //appServer.postRequest(data: x, path: "vm/material-delivery/filter") { (Booll, Intt, Anyy) in
+        appServer.postRequest(data: [String: Any](), path: "vm/material-delivery/filter") { (Booll, Intt, Anyy) in
+            print("____________")
+            print(Booll)
+            print(Intt)
+            print(Anyy)
+            
+            /*
+            for i in x {
+                
+            }
+            */
+            
+            print("____________")
+        }
         print("ajajaja")
     }
     
@@ -128,7 +126,7 @@ struct MaterialDeliveryListView: View {
 struct MaterialDeliveryFormView: View {
     
     //@ObservedObject var moduleRouter = ModuleRouter()
-    @ObservedObject var moduleRouter = ModuleRouter()
+    @ObservedObject var moduleRouter: ModuleRouter
     //@EnvironmentObject var moduleRouter: ModuleRouter
     @ObservedObject private var selectMaterialsModalToggle = ModalToggle()
     @EnvironmentObject var viewRouter: ViewRouter
