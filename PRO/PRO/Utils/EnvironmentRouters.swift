@@ -11,9 +11,6 @@ import SwiftUI
 import RealmSwift
 
 class ModuleRouter: ObservableObject {
-    @Published var status: Bool = false
-    
-    /*
     let objectWillChange = PassthroughSubject<ModuleRouter, Never>()
     var currentPage: String = "LIST" {
         didSet {
@@ -22,7 +19,6 @@ class ModuleRouter: ObservableObject {
             }
         }
     }
-    */
 }
 
 class ViewRouter: ObservableObject {

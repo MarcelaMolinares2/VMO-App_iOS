@@ -19,23 +19,14 @@ struct MaterialDeliveryView: View {
     //@EnvironmentObject var moduleRouter = ModuleRouter()
 
     var body: some View {
-        
-        
-        if moduleRouter.status {
-            MaterialDeliveryFormView()
-        } else {
-            MaterialDeliveryListView()
-        }
-        /*
         switch moduleRouter.currentPage {
         case "LIST":
-            MaterialDeliveryListView()
+            MaterialDeliveryListView(moduleRouter: moduleRouter)
         case "FORM":
             MaterialDeliveryFormView()
         default:
             Text("")
         }
-         */
         /*
         VStack {
             
@@ -63,7 +54,7 @@ struct MaterialDeliveryView: View {
 struct MaterialDeliveryListView: View {
     
     //@ObservedObject var moduleRouter = ModuleRouter()
-    @ObservedObject var moduleRouter: ModuleRouter = ModuleRouter()
+    @ObservedObject var moduleRouter: ModuleRouter
     
     @State private var selectedMaterials = [String]()
     @State private var deliveries = MaterialDeliveryDao(realm: try! Realm()).all()
@@ -110,9 +101,7 @@ struct MaterialDeliveryListView: View {
                 HStack {
                     Spacer()
                     FAB(image: "ic-plus", foregroundColor: .cPrimaryLight) {
-                        print("cambie pez")
-                        moduleRouter.status.toggle()
-                        print(moduleRouter.status)
+                        moduleRouter.currentPage = "FORM"
                     }
                 }
             }
@@ -177,9 +166,7 @@ struct MaterialDeliveryFormView: View {
                     FAB(image: "ic-cloud", foregroundColor: .cPrimaryLight) {
                         if deliveries.count > 0 {
                             MaterialDeliveryDao(realm: try! Realm()).store(deliveries: deliveries)
-                            
-                            moduleRouter.status.toggle()
-                            //self.goTo(page: "MATERIAL-DELIVERY")
+                            moduleRouter.currentPage = "LIST"
                         } else {
                             self.showToast.toggle()
                         }
@@ -308,22 +295,4 @@ struct CardDelivery: View {
             return dateFormatter.string(from: newDate!)
     }
     
-}
-
-struct MaterialDeliveryView_Previews: PreviewProvider {
-    static var previews: some View {
-        MaterialDeliveryView()
-    }
-}
-
-struct MaterialDeliveryListView_Previews: PreviewProvider {
-    static var previews: some View {
-        MaterialDeliveryListView()
-    }
-}
-
-struct MaterialDeliveryFormView_Previews: PreviewProvider {
-    static var previews: some View {
-        MaterialDeliveryFormView()
-    }
 }
