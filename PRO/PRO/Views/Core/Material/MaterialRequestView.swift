@@ -36,7 +36,7 @@ struct MaterialRequestView: View {
                 }
                 List {
                     ForEach(deliveries, id: \.materialId) { item in
-                        CardDelivery(item: item)
+                        CardDelivery2(item: item)
                     }
                     .onDelete(perform: self.delete)
                 }
@@ -100,7 +100,7 @@ struct MaterialRequestView: View {
     }
 }
 
-struct CardDelivery: View {
+struct CardDelivery2: View {
     @State var observacion: String = ""
     @State var tvNumber: Int = 0
     var deliverieSet = AdvertisingMaterialDeliverySet()
