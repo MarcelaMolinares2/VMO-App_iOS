@@ -61,4 +61,4 @@
 "materialRemainder" = "(Remainder: %@ units)";
 "expDate" = "(Exp.: %@)";
 "noneMaterialDelivery" = "Did not write material";
-"materialQuantity" = "Quantity: %@";
+"materialQuantity" = "Q: %@";

@@ -35,17 +35,25 @@ struct MaterialDeliveryListView: View {
     
     @State private var selectedMaterials = [String]()
     @State private var deliveries = MaterialDeliveryDao(realm: try! Realm()).all()
-    
-    private let Booll: Bool = false
-    private let Intt: Int16 = 0
-    private let Anyy: Any = ""
-    
+    @State private var arreglo: Dictionary<String, Any> = Dictionary()
+
     var body: some View {
         ZStack {
             VStack{
                 HeaderToggleView(couldSearch: false, title: "modMaterialDelivery", icon: Image("ic-material"), color: Color.cPanelMaterial)
                 Spacer()
                 List {
+                    
+                    /*
+                    ForEach(Array(zip(heights, labels)), id: \.0) { item in
+                        VStack {
+                            Text("\(item.0)")
+                            Text(item.1)
+                        }
+                    }
+                    */
+                    
+                    
                     ForEach(deliveries, id: \.self) { item in
                         if let material = MaterialDao(realm: try! Realm()).by(id: String(item.materialId)) {
                             VStack{
@@ -73,7 +81,6 @@ struct MaterialDeliveryListView: View {
                                  .background(Color.gray)
                             }
                         }
-                        
                     }
                 }
             }
@@ -93,24 +100,53 @@ struct MaterialDeliveryListView: View {
     }
     
     func loadData() {
+        
+        print("_______deliveries_______")
+        print(deliveries)
+        print("_______deliveries_______")
+        
         let appServer = AppServer()
-        //let x = [String: Any]()
-        //appServer.postRequest(data: x, path: "vm/material-delivery/filter") { (Booll, Intt, Anyy) in
         appServer.postRequest(data: [String: Any](), path: "vm/material-delivery/filter") { (Booll, Intt, Anyy) in
-            print("____________")
-            print(Booll)
-            print(Intt)
-            print(Anyy)
+            let b = Anyy as? Array<String> ?? []
             
-            /*
-            for i in x {
-                
+            print("________bbbb________")
+            for i in b{
+                print(i)
+                print(type(of: i))
+                //i.data(using: .utf8)
+                //let decoded = try JSONDecoder().decode(self.AdvertisingMaterialDelivery, from: i.data(using: .utf8))
+                /*
+                arreglo = Utils.jsonDictionary(string: i)
+                print(arreglo)
+                print(type(of: arreglo))
+                print("jjjjjjjjjjjjjjjjjj")
+            
+                for j in arreglo{
+                    
+                    if j.key == "lote"{
+                        print("lote: \(j.value)")
+                    } else if j.key == "cantidad" {
+                        print("cantidad: \(j.value)")
+                    } else if j.key == "fecha"{
+                        let date = j.value as? NSCFString ?? ""
+                        print(type(of: String(date)))
+                        //print(formatStringDate(date: j.value))
+                    }
+                    
+                    //print(j.value)
+                    //print(type(of: j))
+                }
+                */
+            
+                print("jjjjjjjjjjjjjjjjjj")
             }
-            */
+            print("________bbbb________")
             
-            print("____________")
+            //print("____________")
+            
+            
         }
-        print("ajajaja")
+        
     }
     
     func formatStringDate(date: String) -> String {
@@ -185,6 +221,7 @@ struct MaterialDeliveryFormView: View {
                             let delivery = AdvertisingMaterialDelivery()
                             let dateDescription = String(Date().description)
                             let date = dateDescription.components(separatedBy: " ")[0]
+                            let deliverieSet = AdvertisingMaterialDeliverySet()
                             
                             var verif = false
                             for i in deliveries {
@@ -197,6 +234,15 @@ struct MaterialDeliveryFormView: View {
                                 delivery.materialId = material.id
                                 delivery.material =  material
                                 delivery.date = date
+                                delivery.comment = ""
+                                
+                                deliverieSet.id = String(delivery.materialId)
+                                deliverieSet.objectId = delivery.objectId
+                                deliverieSet.quantity = 0
+                                
+                                delivery.sets.removeAll()
+                                delivery.sets.insert(deliverieSet, at: 0)
+                                
                                 deliveries.append(delivery)
                             }
                         }
@@ -204,10 +250,6 @@ struct MaterialDeliveryFormView: View {
                 }
             }
         }
-    }
-    
-    func goTo(page: String) {
-        viewRouter.currentPage = page
     }
     
     private func delete(at offsets: IndexSet) {
