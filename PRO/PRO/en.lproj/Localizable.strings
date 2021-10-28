@@ -62,3 +62,5 @@
 "expDate" = "(Exp.: %@)";
 "noneMaterialDelivery" = "Did not write material";
 "materialQuantity" = "Q: %@";
+"materialObservations" = "Observations";
+"addMaterialDelivery" = "Material and samples";
