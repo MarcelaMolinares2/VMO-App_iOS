@@ -115,8 +115,8 @@ struct MaterialDeliveryListView: View {
             }
         }
         let appServer = AppServer()
-        appServer.postRequest(data: [String: Any](), path: "vm/material-delivery/filter") { (Booll, Intt, Anyy) in
-            let b = Anyy as? Array<String> ?? []
+        appServer.postRequest(data: [String: Any](), path: "vm/material-delivery/filter") { (bool, int, any) in
+            let b = any as? Array<String> ?? []
             for i in b{
                 let decoded = try! JSONDecoder().decode(StockApi.self, from: i.data(using: .utf8)!)
                 array.append(Stock(name: decoded.material.nombre, lot: decoded.lote, quantity: decoded.cantidad, date: decoded.fecha))

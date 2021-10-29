@@ -28,8 +28,8 @@ struct WrapperView: View {
             RequestDayView()
         case "REQUEST-MATERIAL":
             MaterialRequestView()
-        case "ROUTE-LIST":
-            RouteListView()
+        case "ROUTE-VIEW":
+            RouteView()
         case "ROUTE-FORM":
             RouteFormView()
         case "SUPPORT":

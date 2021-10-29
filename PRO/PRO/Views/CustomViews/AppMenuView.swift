@@ -314,7 +314,7 @@ struct GlobalMenu: View {
                 }
                 Spacer()
                 Button(action: {
-                    self.goTo(page: "ROUTE-LIST")
+                    self.goTo(page: "ROUTE-VIEW")
                 }) {
                     VStack {
                         Image("ic-people-route")
