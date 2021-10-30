@@ -64,3 +64,6 @@
 "materialQuantity" = "Q: %@";
 "materialObservations" = "Observations";
 "addMaterialDelivery" = "Material and samples";
+
+"envName" = "Name";
+"addRouters" = "Panels";

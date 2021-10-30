@@ -8,7 +8,7 @@
 
 import SwiftUI
 
-struct RouteFormView: View {
+struct RouteFormView2: View {
     
     @State private var name = ""
     @State private var items = [Panel & SyncEntity]()
@@ -62,8 +62,8 @@ struct RouteFormView: View {
     
 }
 
-struct RouteFormView_Previews: PreviewProvider {
+struct RouteFormView2_Previews: PreviewProvider {
     static var previews: some View {
-        RouteFormView()
+        RouteFormView2()
     }
 }

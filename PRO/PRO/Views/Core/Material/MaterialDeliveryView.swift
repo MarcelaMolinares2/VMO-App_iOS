@@ -96,7 +96,7 @@ struct MaterialDeliveryListView: View {
                 Spacer()
                 HStack {
                     Spacer()
-                    FAB(image: "ic-plus", foregroundColor: .cPrimaryLight) {
+                    FAB(image: "ic-plus", foregroundColor: .cPrimary) {
                         moduleRouter.currentPage = "FORM"
                     }
                 }
@@ -109,7 +109,6 @@ struct MaterialDeliveryListView: View {
     
     func loadData() {
         for i in deliveries{
-            
             if let material = MaterialDao(realm: try! Realm()).by(id: String(i.materialId)) {
                 array.append(Stock(name: material.name ?? "", lot: material.sets[0].id, quantity: i.sets[0].quantity, date: i.date))
             }
@@ -175,7 +174,7 @@ struct MaterialDeliveryFormView: View {
                 Spacer()
                 HStack {
                     Spacer()
-                    FAB(image: "ic-cloud", foregroundColor: .cPrimaryLight) {
+                    FAB(image: "ic-cloud", foregroundColor: .cPrimary) {
                         if deliveries.count > 0 {
                             MaterialDeliveryDao(realm: try! Realm()).store(deliveries: deliveries)
                             moduleRouter.currentPage = "LIST"
@@ -368,5 +367,11 @@ struct CardDeliveryFormView: View {
             let newDate = dateFormatter.date(from: date)
             dateFormatter.setLocalizedDateFormatFromTemplate("MMMM d, yyyy")
             return dateFormatter.string(from: newDate!)
+    }
+}
+
+struct MaterialDeliveryView_Previews: PreviewProvider {
+    static var previews: some View {
+        MaterialDeliveryView()
     }
 }

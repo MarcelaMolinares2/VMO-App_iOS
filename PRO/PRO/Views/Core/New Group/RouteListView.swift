@@ -8,7 +8,7 @@
 
 import SwiftUI
 
-struct RouteListView: View {
+struct RouteListView2: View {
     
     @EnvironmentObject var viewRouter: ViewRouter
     
@@ -32,8 +32,8 @@ struct RouteListView: View {
     }
 }
 
-struct RouteListView_Previews: PreviewProvider {
+struct RouteListView2_Previews: PreviewProvider {
     static var previews: some View {
-        RouteListView()
+        RouteListView2()
     }
 }
