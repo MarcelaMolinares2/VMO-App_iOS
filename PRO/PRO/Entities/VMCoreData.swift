@@ -74,6 +74,7 @@ class AdvertisingMaterialDeliverySet: Object {
     @Persisted(primaryKey: true) var objectId: ObjectId
     @Persisted var id: String = ""
     @Persisted var quantity: Int = 0
+    var set: AdvertisingMaterialSet = AdvertisingMaterialSet()
 }
 
 /*
