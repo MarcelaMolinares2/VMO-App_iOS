@@ -232,8 +232,8 @@ struct MaterialDeliveryFormView: View {
                     }
                 }
                 .toast(isPresenting: $showToast){
-                            AlertToast(type: .regular, title: NSLocalizedString("noneMaterialDelivery", comment: ""))
-                        }
+                    AlertToast(type: .regular, title: NSLocalizedString("noneMaterialDelivery", comment: ""))
+                }
             }
             if selectMaterialsModalToggle.status {
                 GeometryReader {geo in
@@ -250,10 +250,15 @@ struct MaterialDeliveryFormView: View {
                             delivery.comment = ""
                             material.sets.forEach { set in
                                 let deliverySet = AdvertisingMaterialDeliverySet()
-                                deliverySet.id = String(delivery.materialId)
-                                deliverySet.objectId = delivery.objectId
+                                //deliverySet.objectId = delivery.objectId
+                                deliverySet.objectId = set.objectId
+                                //deliverySet.id = String(delivery.materialId)
+                                deliverySet.id = String(set.id)
                                 deliverySet.quantity = 0
+                                deliverySet.set = set
                                 delivery.sets.append(deliverySet)
+                                print("______deliverySet.id______")
+                                print(deliverySet.id)
                             }
                             deliveries.append(delivery)
                         }
@@ -268,50 +273,8 @@ struct MaterialDeliveryFormView: View {
     }
 }
 
-struct MaterialDeliverySetFormCardView: View {
-    var set: AdvertisingMaterialDeliverySet
-    
-    var body: some View {
-        VStack {
-            HStack {
-                Text(String(set.set.id))
-                Spacer()
-                Text(String(format: NSLocalizedString("expDate", comment: ""), Utils.dateFormat(date: Utils.strToDate(value: set.set.dueDate ?? ""), format: "MMMM d, yyyy")))
-            }
-            Spacer()
-            HStack {
-                Button(action: {
-                    if set.quantity > 0 {
-                        set.quantity -= 1
-                    }
-                }, label: {
-                    Text("-")
-                        .font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/)
-                })
-                .background(Color.white)
-                Spacer()
-                VStack {
-                    Text("\(String(set.quantity))")
-                    Text(String(format: NSLocalizedString("materialRemainder", comment: ""),
-                                String((set.set.stock) - (set.set.delivered))))
-                }
-                Spacer()
-                Button(action: {
-                    if set.quantity < set.set.stock {
-                        set.quantity += 1
-                    }
-                }, label: {
-                    Text("+")
-                        .font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/)
-                })
-                .background(Color.white)
-            }
-        }
-    }
-}
 
 struct MaterialDeliveryFormCardView: View {
-    
     @State var observation: String = ""
     var material: AdvertisingMaterialDelivery
     
@@ -346,6 +309,78 @@ struct MaterialDeliveryFormCardView: View {
         .shadow(color: Color.gray, radius: 4, x: 0, y: 0)
     }
     
+}
+
+struct MaterialDeliverySetFormCardView: View {
+    //@Binding var set: AdvertisingMaterialDeliverySet
+    @State var set: AdvertisingMaterialDeliverySet
+    var deliverieSet = AdvertisingMaterialDeliverySet()
+    //@Binding var i = Int
+    @State var cont: Int = 0
+    var body: some View {
+        
+        /*
+        var binding = Binding<AdvertisingMaterialDeliverySet>(
+            get: {set},
+            set: {set = $0}
+        )
+        */
+        
+        /*
+        let binding = Binding<Int>(
+            get: { self.set.quantity },
+            set: { self.set.quantity = $0 }
+        )
+        */
+        VStack {
+            HStack {
+                Text(String(set.id))
+                Spacer()
+                Text(String(format: NSLocalizedString("expDate", comment: ""), Utils.dateFormat(date: Utils.strToDate(value: set.set.dueDate ?? ""), format: "MMMM d, yyyy")))
+            }
+            Spacer()
+            HStack {
+                Button(action: {
+                    if set.quantity > 0 {
+                        //set.quantity -= 1
+                        //binding -= 1
+                    }
+                    //deliverieSet
+                    //cont -= 1
+                    //binding = $res
+                    //set.quantity -= 1
+                }, label: {
+                    Text("-")
+                        .font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/)
+                })
+                .background(Color.white)
+                Spacer()
+                VStack {
+                    Text("\(String(set.quantity))")
+                    //Text("\(String(binding))")
+                    //Text("\(String(cont))")
+                    Text(String(format: NSLocalizedString("materialRemainder", comment: ""),
+                                String((set.set.stock) - (set.set.delivered))))
+                }
+                Spacer()
+                Button(action: {
+                    /*
+                    if set.quantity < set.set.stock {
+                        set.quantity += 1
+                    }
+                    */
+                    //set.quantity += 1
+                    //binding = $res_2
+                    //binding += 1
+                    //cont += 1
+                }, label: {
+                    Text("+")
+                        .font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/)
+                })
+                .background(Color.white)
+            }
+        }
+    }
 }
 
 struct MaterialDeliveryView_Previews: PreviewProvider {

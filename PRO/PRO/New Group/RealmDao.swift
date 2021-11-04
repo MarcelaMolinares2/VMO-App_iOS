@@ -51,8 +51,6 @@ class MaterialDeliveryDao: GenericDao {
     }
     
     func store(deliveries: [AdvertisingMaterialDelivery]){
-        //realm.objects(AdvertisingMaterialDelivery.self)
-        //if realm.objects(Group.self).count == 0
         if realm.objects(AdvertisingMaterialDelivery.self).count == 0 {
             try! realm.write {
                 realm.add(deliveries)
