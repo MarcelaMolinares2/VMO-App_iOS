@@ -243,24 +243,48 @@ struct MaterialDeliveryFormView: View {
                 .onDisappear {
                     selectedMaterials.forEach { id in
                         if let material = MaterialDao(realm: try! Realm()).by(id: id) {
-                            let delivery = AdvertisingMaterialDelivery()
-                            delivery.materialId = material.id
-                            delivery.material =  material
-                            delivery.date = Utils.currentDate()
-                            delivery.comment = ""
-                            material.sets.forEach { set in
-                                let deliverySet = AdvertisingMaterialDeliverySet()
-                                //deliverySet.objectId = delivery.objectId
-                                deliverySet.objectId = set.objectId
-                                //deliverySet.id = String(delivery.materialId)
-                                deliverySet.id = String(set.id)
-                                deliverySet.quantity = 0
-                                deliverySet.set = set
-                                delivery.sets.append(deliverySet)
-                                print("______deliverySet.id______")
-                                print(deliverySet.id)
+                            var toogle = false
+                            for i in deliveries {
+                                if i.materialId == material.id {
+                                    toogle = true
+                                    break
+                                }
                             }
-                            deliveries.append(delivery)
+                            if !toogle {
+                                print("_________material_________")
+                                print(material)
+                                print("_________material_________")
+                                let delivery = AdvertisingMaterialDelivery()
+                                delivery.materialId = material.id
+                                delivery.material =  material
+                                delivery.date = Utils.currentDate()
+                                delivery.comment = ""
+                                if material.sets.count == 0 {
+                                    let materialSet = AdvertisingMaterialSet()
+                                    materialSet.dueDate = ""
+                                    materialSet.id = "0"
+                                    materialSet.stock = 1001001
+                                    let deliverySet = AdvertisingMaterialDeliverySet()
+                                    deliverySet.objectId = materialSet.objectId
+                                    deliverySet.id = materialSet.id
+                                    deliverySet.quantity = 0
+                                    deliverySet.set = materialSet
+                                    print("_________material EDIT_________")
+                                    print(material)
+                                    print("_________material EDIT_________")
+                                    delivery.sets.append(deliverySet)
+                                } else {
+                                    material.sets.forEach { set in
+                                        let deliverySet = AdvertisingMaterialDeliverySet()
+                                        deliverySet.objectId = set.objectId
+                                        deliverySet.id = set.id
+                                        deliverySet.quantity = 0
+                                        deliverySet.set = set
+                                        delivery.sets.append(deliverySet)
+                                    }
+                                }
+                                deliveries.append(delivery)
+                            }
                         }
                     }
                 }
@@ -279,6 +303,11 @@ struct MaterialDeliveryFormCardView: View {
     var material: AdvertisingMaterialDelivery
     
     var body: some View {
+        let bindingComment = Binding<String>(get: {
+            self.material.comment
+        }, set: {
+            self.material.comment = $0
+        })
         VStack(alignment: .leading, spacing: 5){
             VStack{
                 HStack {
@@ -295,7 +324,7 @@ struct MaterialDeliveryFormCardView: View {
                         MaterialDeliverySetFormCardView(set: set)
                     }
                 }
-                TextField(NSLocalizedString("materialObservations", comment: ""), text: $observation)
+                TextField(NSLocalizedString("materialObservations", comment: ""), text: bindingComment)
                 Divider()
                  .frame(height: 1)
                  .padding(.horizontal, 5)
@@ -312,43 +341,25 @@ struct MaterialDeliveryFormCardView: View {
 }
 
 struct MaterialDeliverySetFormCardView: View {
-    //@Binding var set: AdvertisingMaterialDeliverySet
     @State var set: AdvertisingMaterialDeliverySet
-    var deliverieSet = AdvertisingMaterialDeliverySet()
-    //@Binding var i = Int
-    @State var cont: Int = 0
+    @State var tvNumber: Int = 0
+    
     var body: some View {
         
-        /*
-        var binding = Binding<AdvertisingMaterialDeliverySet>(
-            get: {set},
-            set: {set = $0}
-        )
-        */
-        
-        /*
-        let binding = Binding<Int>(
-            get: { self.set.quantity },
-            set: { self.set.quantity = $0 }
-        )
-        */
         VStack {
             HStack {
                 Text(String(set.id))
                 Spacer()
                 Text(String(format: NSLocalizedString("expDate", comment: ""), Utils.dateFormat(date: Utils.strToDate(value: set.set.dueDate ?? ""), format: "MMMM d, yyyy")))
+                Text(set.set.dueDate ?? "")
             }
             Spacer()
             HStack {
                 Button(action: {
                     if set.quantity > 0 {
-                        //set.quantity -= 1
-                        //binding -= 1
+                        tvNumber -= 1
+                        set.quantity = tvNumber
                     }
-                    //deliverieSet
-                    //cont -= 1
-                    //binding = $res
-                    //set.quantity -= 1
                 }, label: {
                     Text("-")
                         .font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/)
@@ -356,23 +367,16 @@ struct MaterialDeliverySetFormCardView: View {
                 .background(Color.white)
                 Spacer()
                 VStack {
-                    Text("\(String(set.quantity))")
-                    //Text("\(String(binding))")
-                    //Text("\(String(cont))")
+                    Text("\(String(tvNumber))")
                     Text(String(format: NSLocalizedString("materialRemainder", comment: ""),
                                 String((set.set.stock) - (set.set.delivered))))
                 }
                 Spacer()
                 Button(action: {
-                    /*
                     if set.quantity < set.set.stock {
-                        set.quantity += 1
+                        tvNumber += 1
+                        set.quantity = tvNumber
                     }
-                    */
-                    //set.quantity += 1
-                    //binding = $res_2
-                    //binding += 1
-                    //cont += 1
                 }, label: {
                     Text("+")
                         .font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/)
