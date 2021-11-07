@@ -107,8 +107,10 @@ struct MaterialDeliveryListView: View {
     }
     
     func loadData() {
+        print("ABRIO")
         for i in deliveries{
             if let material = MaterialDao(realm: try! Realm()).by(id: String(i.materialId)) {
+                print("LLEGO AQUI")
                 array.append(Stock(name: material.name ?? "", lot: material.sets[0].id, quantity: i.sets[0].quantity, date: i.date))
             }
         }
@@ -152,8 +154,13 @@ struct MaterialDeliveryListCardView: View {
                 Spacer()
                 HStack{
                     Spacer()
-                    Text(formatStringDate(date: item.date))
-                        .font(.system(size: 14))
+                    if item.date != "" {
+                        Text(Utils.formatStringDate(date: item.date))
+                            .font(.system(size: 14))
+                    } else {
+                        Text("")
+                            .font(.system(size: 14))
+                    }
                 }
             }
             .padding(7)
@@ -162,13 +169,6 @@ struct MaterialDeliveryListCardView: View {
         .frame(alignment: Alignment.center)
         .clipped()
         .shadow(color: Color.gray, radius: 4, x: 0, y: 0)
-    }
-    func formatStringDate(date: String) -> String {
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateFormat = "yyyy-MM-dd"
-            let newDate = dateFormatter.date(from: date)
-            dateFormatter.setLocalizedDateFormatFromTemplate("MMMM d, yyyy")
-            return dateFormatter.string(from: newDate!)
     }
 }
 
@@ -224,6 +224,18 @@ struct MaterialDeliveryFormView: View {
                     Spacer()
                     FAB(image: "ic-cloud", foregroundColor: .cPrimary) {
                         if deliveries.count > 0 {
+                            deliveries.forEach{ item in
+                                item.sets.forEach{i in
+                                    print(i.set.dueDate ?? "")
+                                    print(i.set.delivered)
+                                    print(i.set.stock)
+                                    print(i.set.id)
+                                    print(i.set.objectId)
+                                    print("_______")
+                                }
+                                
+                            }
+                            print(deliveries)
                             MaterialDeliveryDao(realm: try! Realm()).store(deliveries: deliveries)
                             moduleRouter.currentPage = "LIST"
                         } else {
@@ -251,9 +263,6 @@ struct MaterialDeliveryFormView: View {
                                 }
                             }
                             if !toogle {
-                                print("_________material_________")
-                                print(material)
-                                print("_________material_________")
                                 let delivery = AdvertisingMaterialDelivery()
                                 delivery.materialId = material.id
                                 delivery.material =  material
@@ -261,17 +270,14 @@ struct MaterialDeliveryFormView: View {
                                 delivery.comment = ""
                                 if material.sets.count == 0 {
                                     let materialSet = AdvertisingMaterialSet()
-                                    materialSet.dueDate = ""
                                     materialSet.id = "0"
+                                    materialSet.dueDate = ""
                                     materialSet.stock = 1001001
                                     let deliverySet = AdvertisingMaterialDeliverySet()
                                     deliverySet.objectId = materialSet.objectId
                                     deliverySet.id = materialSet.id
                                     deliverySet.quantity = 0
                                     deliverySet.set = materialSet
-                                    print("_________material EDIT_________")
-                                    print(material)
-                                    print("_________material EDIT_________")
                                     delivery.sets.append(deliverySet)
                                 } else {
                                     material.sets.forEach { set in
@@ -350,8 +356,11 @@ struct MaterialDeliverySetFormCardView: View {
             HStack {
                 Text(String(set.id))
                 Spacer()
-                Text(String(format: NSLocalizedString("expDate", comment: ""), Utils.dateFormat(date: Utils.strToDate(value: set.set.dueDate ?? ""), format: "MMMM d, yyyy")))
-                Text(set.set.dueDate ?? "")
+                if set.set.dueDate ?? "" != ""{
+                    Text(String(format: NSLocalizedString("expDate", comment: ""), Utils.formatStringDate(date: set.set.dueDate ?? "")))
+                } else {
+                    Text(String(format: NSLocalizedString("expDate", comment: ""), set.set.dueDate ?? ""))
+                }
             }
             Spacer()
             HStack {
