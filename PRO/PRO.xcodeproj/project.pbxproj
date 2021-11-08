@@ -25,7 +25,7 @@
 		AC34452B25637F7000C0D668 /* NotificationTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC34452A25637F7000C0D668 /* NotificationTabView.swift */; };
 		AC3445302563880F00C0D668 /* DashboardRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC34452F2563880F00C0D668 /* DashboardRouter.swift */; };
 		AC344536256389A800C0D668 /* DiaryListTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC344535256389A800C0D668 /* DiaryListTabView.swift */; };
-		AC34454025638A2300C0D668 /* MedicListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC34453F25638A2300C0D668 /* MedicListView.swift */; };
+		AC34454025638A2300C0D668 /* DoctorListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC34453F25638A2300C0D668 /* DoctorListView.swift */; };
 		AC34454825638B3D00C0D668 /* ActivityListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC34454725638B3D00C0D668 /* ActivityListView.swift */; };
 		AC34454D25638B5C00C0D668 /* PharmacyListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC34454C25638B5C00C0D668 /* PharmacyListView.swift */; };
 		AC34455225638B6B00C0D668 /* ClientListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC34455125638B6B00C0D668 /* ClientListView.swift */; };
@@ -123,7 +123,7 @@
 		AC34452A25637F7000C0D668 /* NotificationTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationTabView.swift; sourceTree = "<group>"; };
 		AC34452F2563880F00C0D668 /* DashboardRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardRouter.swift; sourceTree = "<group>"; };
 		AC344535256389A800C0D668 /* DiaryListTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DiaryListTabView.swift; path = PRO/Utils/DiaryListTabView.swift; sourceTree = SOURCE_ROOT; };
-		AC34453F25638A2300C0D668 /* MedicListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MedicListView.swift; path = PRO/Utils/MedicListView.swift; sourceTree = SOURCE_ROOT; };
+		AC34453F25638A2300C0D668 /* DoctorListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DoctorListView.swift; path = PRO/Utils/DoctorListView.swift; sourceTree = SOURCE_ROOT; };
 		AC34454725638B3D00C0D668 /* ActivityListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityListView.swift; sourceTree = "<group>"; };
 		AC34454C25638B5C00C0D668 /* PharmacyListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PharmacyListView.swift; sourceTree = "<group>"; };
 		AC34455125638B6B00C0D668 /* ClientListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClientListView.swift; sourceTree = "<group>"; };
@@ -334,7 +334,7 @@
 		AC34453E25638A1500C0D668 /* Medic */ = {
 			isa = PBXGroup;
 			children = (
-				AC34453F25638A2300C0D668 /* MedicListView.swift */,
+				AC34453F25638A2300C0D668 /* DoctorListView.swift */,
 				AC3E5C1A25AB78CE00C70FC2 /* MedicFormView.swift */,
 			);
 			path = Medic;
@@ -869,7 +869,7 @@
 				ACC0539C2550DA2300B9753A /* VMConfigData.swift in Sources */,
 				AC3444E32563683F00C0D668 /* SLAIDPanelView.swift in Sources */,
 				AC34454D25638B5C00C0D668 /* PharmacyListView.swift in Sources */,
-				AC34454025638A2300C0D668 /* MedicListView.swift in Sources */,
+				AC34454025638A2300C0D668 /* DoctorListView.swift in Sources */,
 				ACA106E22575E8D000FDD7E4 /* SupportView.swift in Sources */,
 				AC62C2DE25A7D12700FA5868 /* DynamicForm.swift in Sources */,
 				ACA106F52575F77800FDD7E4 /* RealmMVVM.swift in Sources */,

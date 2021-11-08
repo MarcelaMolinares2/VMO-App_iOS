@@ -9,12 +9,14 @@
 import SwiftUI
 import RealmSwift
 
-struct MedicListView: View {
+struct DoctorListView: View {
     
     @EnvironmentObject var viewRouter: ViewRouter
     
     @Binding var searchText: String
     @ObservedObject var data = BindableResults(results: try! Realm().objects(Doctor.self).sorted(byKeyPath: "firstName"))
+    @State var menuIsPresented = false
+    @State var panel: Panel & SyncEntity = GenericPanel()
     
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
@@ -42,7 +44,10 @@ struct MedicListView: View {
                                 //($0.specialty?.name ?? "").lowercased().contains(self.searchText.lowercased()) ||
                                 ($0.city?.name ?? "").lowercased().contains(self.searchText.lowercased())
                         }, id: \.id) { element in
-                            PanelItem(panel: element)
+                            PanelItem(panel: element).onTapGesture {
+                                self.panel = element
+                                self.menuIsPresented = true
+                            }
                         }
                     }
                 }
@@ -50,6 +55,9 @@ struct MedicListView: View {
             FAB(image: "ic-plus", foregroundColor: .cPrimary) {
                 FormEntity(id: 0).go(path: "MEDIC-FORM", router: viewRouter)
             }
+        }
+        .partialSheet(isPresented: $menuIsPresented) {
+            PanelMenu(isPresented: self.$menuIsPresented, panel: panel)
         }
     }
 }

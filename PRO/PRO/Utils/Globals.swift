@@ -50,6 +50,7 @@ extension Color {
     static let cTextMedium = Color("colorTextMedium")
     static let cTextDisabled = Color("colorTextDisabled")
     static let cTextLink = Color("colorTextLink")
+    static let cSelected = Color("colorSelected")
     
     static let cPanelActivity = Color("colorPanelActivity")
     static let cPanelClient = Color("colorPanelClient")

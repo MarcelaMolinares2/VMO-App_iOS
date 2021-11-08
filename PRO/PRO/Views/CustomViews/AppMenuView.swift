@@ -520,3 +520,72 @@ struct GlobalMenu: View {
         self.isPresented = false
     }
 }
+
+struct PanelTypeMenu: View {
+    let onPanelSelected: (_ type: String) -> Void
+    
+    @State var panelTypes: [String]
+    @Binding var isPresented: Bool
+    @State private var customGridItems: [GenericGridItem] = []
+    @State var columns: [GridItem] = []
+    
+    var body: some View {
+        VStack {
+            LazyVGrid(columns: columns, spacing: 0) {
+                ForEach(customGridItems, id: \.id) { item in
+                    Button(action: {
+                        onPanelSelected(item.id)
+                    }) {
+                        VStack {
+                            Image(item.icon)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
+                                .foregroundColor(item.color)
+                            Text(NSLocalizedString(item.name, comment: ""))
+                                .foregroundColor(.cPrimary)
+                                .lineLimit(1)
+                                .font(.system(size: CGFloat(15)))
+                        }
+                    }
+                    .padding([.top, .bottom], 10)
+                }
+            }
+        }
+        .padding(.bottom, 2)
+        .onAppear {
+            loadData()
+        }
+    }
+    
+    func loadData() {
+        var card = GenericGridItem(id: "", color: .cPrimary, icon: "none", name: "none")
+        for item in panelTypes {
+            card.id = item
+            switch item {
+                case "M":
+                    card.color = .cPanelMedic
+                    card.icon = "ic-medic"
+                    card.name = "modMedic"
+                case "F":
+                    card.color = .cPanelPharmacy
+                    card.icon = "ic-pharmacy"
+                    card.name = "modPharmacy"
+                case "C":
+                    card.color = .cPanelClient
+                    card.icon = "ic-client"
+                    card.name = "modClient"
+                case "P":
+                    card.color = .cPanelPatient
+                    card.icon = "ic-patient"
+                    card.name = "modPatient"
+                default:
+                    print("default")
+            }
+            customGridItems.append(card)
+            if columns.count < 4 {
+                columns.append(GridItem(.flexible()))
+            }
+        }
+    }
+}

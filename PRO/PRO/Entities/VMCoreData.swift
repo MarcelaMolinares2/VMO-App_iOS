@@ -93,6 +93,7 @@ protocol SyncEntity {
 }
 
 protocol Panel {
+    var id: Int { get set }
     var idNumber: String? { get set }
     var type: String { get set }
     var name: String? { get set }

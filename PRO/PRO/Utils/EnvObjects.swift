@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import SwiftUI
 
 class GenericSelectableItem {
     var id: String = ""
@@ -26,6 +27,27 @@ class GenericSelectableItem {
     }
 }
 
+class GenericSelectablePanelItem {
+    var selected: Bool = false
+    var panel: Panel & SyncEntity
+    
+    init(panel: Panel & SyncEntity) {
+        self.panel = panel
+    }
+}
+
+struct GenericGridItem: Hashable {
+    var id: String
+    var color: Color
+    var icon: String
+    var name: String
+}
+
 class ModalToggle: ObservableObject {
     @Published var status: Bool = false
+}
+
+struct BindingWrapper {
+    let uuid: UUID = UUID()
+    @Binding var binding: [String]
 }

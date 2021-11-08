@@ -35,7 +35,9 @@ struct PanelListView: View {
                         ($0.name ?? "").lowercased().contains(self.searchText.lowercased()) ||
                         ($0.city?.name ?? "").lowercased().contains(self.searchText.lowercased())
                 }, id: \.id) { element in
-                    PanelItem(panel: element)
+                    PanelItem(panel: element).onTapGesture {
+                        
+                    }
                 }
             }
         }
@@ -44,7 +46,6 @@ struct PanelListView: View {
 
 struct PanelItem: View {
     @State var panel: Panel & SyncEntity
-    @State var menuIsPresented = false
     @State var address = ""
     @State var visitsFee = 0
     @State var visitsCycle = 0
@@ -103,12 +104,6 @@ struct PanelItem: View {
         .contentShape(Rectangle())
         .onAppear {
             manage()
-        }
-        .onTapGesture {
-            self.menuIsPresented = true
-        }
-        .partialSheet(isPresented: $menuIsPresented) {
-            PanelMenu(isPresented: self.$menuIsPresented, panel: panel)
         }
     }
     

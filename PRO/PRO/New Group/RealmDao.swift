@@ -18,10 +18,34 @@ class GenericDao {
     }
 }
 
+class ClientDao: GenericDao {
+    
+    func all() -> [Client] {
+        return Array(realm.objects(Client.self).sorted(byKeyPath: "name"))
+    }
+    
+    func by(id: String) -> Client? {
+        return realm.objects(Client.self).filter("id == \(id)").first
+    }
+    
+}
+
 class CycleDao: GenericDao {
     
     func all() -> [Cycle] {
         return Array(realm.objects(Cycle.self).sorted(byKeyPath: "cycle").sorted(byKeyPath: "year"))
+    }
+    
+}
+
+class DoctorDao: GenericDao {
+    
+    func all() -> [Doctor] {
+        return Array(realm.objects(Doctor.self).sorted(byKeyPath: "lastName"))
+    }
+    
+    func by(id: String) -> Doctor? {
+        return realm.objects(Doctor.self).filter("id == \(id)").first
     }
     
 }
@@ -72,6 +96,30 @@ class GenericSelectableDao: GenericDao {
     
     func materials() -> [GenericSelectableItem] {
         MaterialDao(realm: self.realm).all().map { GenericSelectableItem(id: "\($0.id)", label: $0.name ?? "") }
+    }
+    
+}
+
+class PatientDao: GenericDao {
+    
+    func all() -> [Patient] {
+        return Array(realm.objects(Patient.self).sorted(byKeyPath: "lastName"))
+    }
+    
+    func by(id: String) -> Patient? {
+        return realm.objects(Patient.self).filter("id == \(id)").first
+    }
+    
+}
+
+class PharmacyDao: GenericDao {
+    
+    func all() -> [Pharmacy] {
+        return Array(realm.objects(Pharmacy.self).sorted(byKeyPath: "name"))
+    }
+    
+    func by(id: String) -> Pharmacy? {
+        return realm.objects(Pharmacy.self).filter("id == \(id)").first
     }
     
 }

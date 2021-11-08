@@ -99,7 +99,7 @@ struct DashboardPanelView: View {
                 .frame(minWidth: 0, maxWidth: .infinity, minHeight: 44, maxHeight: 44)
                 switch dashboardRouter.currentPage {
                 case "MEDIC":
-                    MedicListView(searchText: self.$searchText)
+                    DoctorListView(searchText: self.$searchText)
                 case "CLIENT":
                     ClientListView(searchText: self.$searchText)
                 case "PHARMACY":

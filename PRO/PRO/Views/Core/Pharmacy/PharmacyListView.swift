@@ -10,8 +10,11 @@ import SwiftUI
 import RealmSwift
 
 struct PharmacyListView: View {
+    
     @Binding var searchText: String
     @ObservedObject var data = BindableResults(results: try! Realm().objects(Pharmacy.self).sorted(byKeyPath: "name"))
+    @State var menuIsPresented = false
+    @State var panel: Panel & SyncEntity = GenericPanel()
     
     var body: some View {
         VStack {
@@ -36,10 +39,16 @@ struct PharmacyListView: View {
                             ($0.name ?? "").lowercased().contains(self.searchText.lowercased()) ||
                             ($0.city?.name ?? "").lowercased().contains(self.searchText.lowercased())
                     }, id: \.id) { element in
-                        PanelItem(panel: element)
+                        PanelItem(panel: element).onTapGesture {
+                            self.panel = element
+                            self.menuIsPresented = true
+                        }
                     }
                 }
             }
+        }
+        .partialSheet(isPresented: $menuIsPresented) {
+            PanelMenu(isPresented: self.$menuIsPresented, panel: panel)
         }
     }
 }
