@@ -255,39 +255,29 @@ struct MaterialDeliveryFormView: View {
                 .onDisappear {
                     selectedMaterials.forEach { id in
                         if let material = MaterialDao(realm: try! Realm()).by(id: id) {
-                            var toogle = false
+                            var exists = false
                             for i in deliveries {
                                 if i.materialId == material.id {
-                                    toogle = true
+                                    exists = true
                                     break
                                 }
                             }
-                            if !toogle {
+                            if !exists {
                                 let delivery = AdvertisingMaterialDelivery()
                                 delivery.materialId = material.id
                                 delivery.material =  material
                                 delivery.date = Utils.currentDate()
                                 delivery.comment = ""
-                                if material.sets.count == 0 {
-                                    let materialSet = AdvertisingMaterialSet()
-                                    materialSet.id = "0"
-                                    materialSet.dueDate = ""
-                                    materialSet.stock = 1001001
+                                material.sets.forEach { set in
                                     let deliverySet = AdvertisingMaterialDeliverySet()
-                                    deliverySet.objectId = materialSet.objectId
-                                    deliverySet.id = materialSet.id
-                                    deliverySet.quantity = 0
-                                    deliverySet.set = materialSet
+                                    deliverySet.id = set.id
+                                    deliverySet.set = set
                                     delivery.sets.append(deliverySet)
-                                } else {
-                                    material.sets.forEach { set in
-                                        let deliverySet = AdvertisingMaterialDeliverySet()
-                                        deliverySet.objectId = set.objectId
-                                        deliverySet.id = set.id
-                                        deliverySet.quantity = 0
-                                        deliverySet.set = set
-                                        delivery.sets.append(deliverySet)
-                                    }
+                                }
+                                if material.sets.isEmpty {
+                                    let deliverySet = AdvertisingMaterialDeliverySet()
+                                    deliverySet.set = AdvertisingMaterialSet()
+                                    delivery.sets.append(deliverySet)
                                 }
                                 deliveries.append(delivery)
                             }
@@ -382,10 +372,16 @@ struct MaterialDeliverySetFormCardView: View {
                 }
                 Spacer()
                 Button(action: {
-                    if set.quantity < set.set.stock {
+                    if set.set.id == "" {
                         tvNumber += 1
                         set.quantity = tvNumber
+                    } else {
+                        if set.quantity < set.set.stock {
+                            tvNumber += 1
+                            set.quantity = tvNumber
+                        }
                     }
+                    
                 }, label: {
                     Text("+")
                         .font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/)
