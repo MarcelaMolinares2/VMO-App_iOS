@@ -130,6 +130,14 @@ class Utils {
         return dateFormat(date: Date(), format: "yyyy-MM-dd HH:mm:ss")
     }
     
+    static func formatStringDate(date: String) -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        let newDate = dateFormatter.date(from: date)
+        dateFormatter.setLocalizedDateFormatFromTemplate("MMMM d, yyyy")
+        return dateFormatter.string(from: newDate!)
+    }
+    
     static func shareText(text: String, fileName: String) {
         let textData = text.data(using: .utf8)
         let textURL = textData?.dataToFile(fileName: "\(fileName).txt")
