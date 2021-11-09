@@ -47,7 +47,7 @@ struct RouteListView: View {
 struct RouteFormView: View {
     @ObservedObject var moduleRouter: ModuleRouter
     @State private var name = ""
-    @State private var items = [Panel & SyncEntity]()
+    @State private var items: [Panel & SyncEntity] = []
     @State private var isValidationOn = false
     @State private var cardShow = false
     @State private var type = ""
@@ -78,9 +78,22 @@ struct RouteFormView: View {
                 }.padding(10)
                 ScrollView {
                     LazyVStack {
+                        
+                        /*
+                        ForEach (selected.$binding, id: \.id) { element in
+                            Text(element)
+                        }
+                        */
+                        ForEach(slDoctors, id: \.self) { i in
+                            Text(i)
+                            
+                        }
+                        /*
                         ForEach(items, id: \.id) { element in
                             PanelItem(panel: element)
                         }
+                        */
+                        
                     }
                 }
             }
@@ -111,10 +124,35 @@ struct RouteFormView: View {
                     PanelDialogPicker(modalToggle: selectPanelModalToggle, selected: selected[self.type]?.$binding ?? $slDefault, type: self.type, multiple: true)
                 }
                 .background(Color.black.opacity(0.45))
+                .onDisappear {
+                    print("____________Disappear____________")
+                    selected[self.type]?.binding.forEach{ it in
+                        print(it)
+                        //items = PharmacyDao(realm: try! Realm()).by(id: String(it))
+                        let jj = DoctorDao(realm: try! Realm()).by(id: it)
+                        items.append(jj)
+                        //print(x)
+                        //items.append(x)
+                        /*
+                        switch self.type {
+                        case "M":
+                            items.append()
+                        case "F":
+                            items.append(PharmacyDao(realm: try! Realm()).by(id: String(it)))
+                        case "C":
+                            ClientDao(realm: try! Realm()).by(id: String(it))
+                        case "P":
+                            PatientDao(realm: try! Realm()).by(id: String(it))
+                        default:
+                            break
+                        }
+                        */
+                        
+                    }
+                }
             }
         }
         .partialSheet(isPresented: self.$cardShow) {
-            // Array(selected.keys)
             PanelTypeMenu(onPanelSelected: onPanelSelected, panelTypes: ["M", "F", "C", "P"], isPresented: self.$cardShow)
         }
     }
@@ -123,6 +161,7 @@ struct RouteFormView: View {
         self.cardShow.toggle()
         self.type = type
         selectPanelModalToggle.status.toggle()
+        print(items)
     }
     
     func validate() -> Bool {
