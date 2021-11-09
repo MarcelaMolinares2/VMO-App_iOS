@@ -159,6 +159,107 @@ struct PanelDialogPicker: View {
     
 }
 
+struct SourceDynamicDialogPicker: View {
+    let onSelectionDone: (_ selected: [String]) -> Void
+    
+    @Binding var selected: [String]
+    var data: String = ""
+    var multiple: Bool = false
+    
+    @ObservedObject var viewModel = ListGenericViewModel()
+    @StateObject var headerRouter = TabRouter()
+    @State var searchText = ""
+    let headerHeight = CGFloat(40)
+    
+    var body: some View {
+        VStack {
+            HStack {
+                SearchBar(headerRouter: self.headerRouter, text: $searchText, placeholder: Text("Buscar"))
+                if multiple {
+                    VStack {
+                        Button(action: {
+                            self.done()
+                        }) {
+                            Image("ic-done")
+                                .resizable()
+                                .foregroundColor(.cTextHigh)
+                                .scaledToFit()
+                                .padding(5)
+                        }
+                    }
+                    .frame(height: headerHeight)
+                    .padding([.leading, .trailing], 10)
+                    .background(Color.white)
+                    .zIndex(1)
+                }
+            }
+            .frame(height: headerHeight)
+            .padding([.leading, .trailing], 10)
+            .background(Color.white)
+            .zIndex(1)
+            Text("\(UIScreen.main.bounds.height)")
+            ForEach(viewModel.items.filter {
+                searchText.isEmpty ? true : $0.label.lowercased().contains(searchText.lowercased())
+            }, id: \.id) { item in
+                Button(action: {
+                    self.onItemSelected(item: item)
+                }) {
+                    ZStack {
+                        if item.selected {
+                            Color
+                                .cSelected
+                                .ignoresSafeArea()
+                                .cornerRadius(15)
+                        }
+                        VStack {
+                            Text("\(item.label)")
+                                .foregroundColor(.cTextHigh)
+                            if !item.complement.isEmpty {
+                                Text("\(item.complement)")
+                                    .foregroundColor(.cTextMedium)
+                                    .lineLimit(2)
+                            }
+                        }
+                    }
+                    .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, idealHeight: 40, maxHeight: 40)
+                }
+            }
+            /*List {
+            }*/
+        }
+        .background(Color.white)
+        .padding(20)
+        .clipped()
+        .cornerRadius(20)
+        .onAppear {
+            loadData()
+        }
+    }
+    
+    func loadData() {
+        var list = [GenericSelectableItem]()
+        let json = Utils.jsonObject(string: data)
+        for item in json {
+            list.append(GenericSelectableItem(id: Utils.castString(value: item["id"]), label: Utils.castString(value: item["label"])))
+        }
+        viewModel.put(list: list)
+    }
+    
+    func onItemSelected(item: GenericSelectableItem) {
+        item.selected = !item.selected
+        viewModel.toggle()
+        if !multiple {
+            done()
+        }
+    }
+    
+    func done() {
+        selected = viewModel.items.filter { item in item.selected }.map { $0.id }
+        onSelectionDone(selected)
+    }
+    
+}
+
 struct CustomDialogPicker: View {
     
     @ObservedObject var modalToggle: ModalToggle

@@ -17,7 +17,7 @@ struct MedicFormView: View {
     var medic: Doctor?
     var plainData = "{}"
     var dynamicData = Dictionary<String, Any>()
-    @State var tabs = [DynamicFormTab]()
+    @State var form = DynamicForm(tabs: [DynamicFormTab]())
     
     init(viewRouter: ViewRouter) {
         if viewRouter.data.id > 0 {
@@ -28,7 +28,7 @@ struct MedicFormView: View {
             medic = Doctor()
             //medic?.id = UUID()
         }
-        dynamicData = Utils.jsonDictionary(string: Config.get(key: "P_MED_FORM").complement ?? "")
+        dynamicData = Utils.jsonDictionary(string: Config.get(key: "P_DOC_DYNAMIC_FORM").complement ?? "")
     }
     
     var body: some View {
@@ -39,10 +39,10 @@ struct MedicFormView: View {
                 PanelLocationView(panel: medic, couldAdd: true)
             default:
                 ZStack(alignment: .bottomTrailing) {
-                    ForEach(tabs, id: \.id) { tab in
+                    ForEach(form.tabs, id: \.id) { tab in
                         if tab.key == tabRouter.current {
-                            if let ix = tabs.firstIndex(where: { $0.key == tabRouter.current }) {
-                                DynamicFormView(tab: $tabs[ix])
+                            if let ix = form.tabs.firstIndex(where: { $0.key == tabRouter.current }) {
+                                DynamicFormView(form: $form, tab: $form.tabs[ix])
                             }
                         }
                     }
@@ -53,13 +53,13 @@ struct MedicFormView: View {
             }
             GeometryReader { geometry in
                 HStack(spacing: 0) {
-                    ForEach(tabs, id: \.id) { tab in
+                    ForEach(form.tabs, id: \.id) { tab in
                         Text(tab.key)
                         Image("ic-home")
                             .resizable()
                             .aspectRatio(contentMode: .fit)
                             .padding(5)
-                            .frame(width: geometry.size.width / CGFloat(tabs.count + 1), alignment: .center)
+                            .frame(width: geometry.size.width / CGFloat(form.tabs.count + 1), alignment: .center)
                             .foregroundColor(tabRouter.current == tab.key ? .cPrimary : .cAccent)
                             .onTapGesture {
                                 tabRouter.current = tab.key
@@ -69,7 +69,7 @@ struct MedicFormView: View {
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .padding(5)
-                        .frame(width: geometry.size.width / CGFloat(tabs.count + 1), alignment: .center)
+                        .frame(width: geometry.size.width / CGFloat(form.tabs.count + 1), alignment: .center)
                         .foregroundColor(tabRouter.current == "LOCATIONS" ? .cPrimary : .cAccent)
                         .onTapGesture {
                             tabRouter.current = "LOCATIONS"
@@ -88,21 +88,21 @@ struct MedicFormView: View {
     func initDynamic(data: Dictionary<String, Any>) {
         data.forEach { (key: String, value: Any) in
             let tab = value as! Dictionary<String, Any>
-            var groups = [DynamicFormTab.DynamicFormGroup]()
+            var groups = [DynamicFormGroup]()
             let groupsData = tab["groups"] as! [Dictionary<String, Any>]
             groupsData.forEach { group in
-                var fields = [DynamicFormTab.DynamicFormGroup.DynamicFormField]()
+                var fields = [DynamicFormField]()
                 let fieldsData = group["fields"] as! [Dictionary<String, Any>]
                 
                 fieldsData.forEach { field in
                     //print(field)
-                    fields.append(try! DynamicFormTab.DynamicFormGroup.DynamicFormField(from: field))
+                    fields.append(try! DynamicFormField(from: field))
                 }
-                groups.append(DynamicFormTab.DynamicFormGroup(title: Utils.castString(value: group["title"]), fields: fields))
+                groups.append(DynamicFormGroup(title: Utils.castString(value: group["title"]), fields: fields))
             }
-            tabs.append(DynamicFormTab(key: key, title: Utils.castString(value: tab["title"]), groups: groups))
+            form.tabs.append(DynamicFormTab(key: key, title: Utils.castString(value: tab["title"]), groups: groups))
         }
-        print(tabs[0])
+        print(form.tabs[0])
     }
     
     func load() {

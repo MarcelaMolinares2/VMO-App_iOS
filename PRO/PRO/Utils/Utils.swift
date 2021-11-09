@@ -103,12 +103,20 @@ class Utils {
     
     static func strToDate(value: String, format: String = "yyyy-MM-dd HH:mm:ss") -> Date {
         let formatter = DateFormatter()
-        formatter.dateFormat = format
         formatter.timeZone = TimeZone.current
+        formatter.dateFormat = format
         guard let date = formatter.date(from: value) else {
-            return Date()
+            formatter.dateFormat = "yyyy-MM-dd"
+            guard let date = formatter.date(from: value) else {
+                return Date()
+            }
+            return date
         }
         return date
+    }
+    
+    static func strDateFormat(value: String, format: String = "dd, MMM yyy") -> String {
+        return dateFormat(date: strToDate(value: value))
     }
     
     static func dateFormat(date: Date, format: String = "yyyy-MM-dd") -> String {
