@@ -47,7 +47,8 @@ struct RouteListView: View {
 struct RouteFormView: View {
     @ObservedObject var moduleRouter: ModuleRouter
     @State private var name = ""
-    @State private var items: [Panel & SyncEntity] = []
+    //@State private var items: [Panel & SyncEntity] = []
+    @State private var items = [Panel & SyncEntity]()
     @State private var isValidationOn = false
     @State private var cardShow = false
     @State private var type = ""
@@ -76,6 +77,13 @@ struct RouteFormView: View {
                      .padding(.horizontal, 5)
                      .background(Color.gray)
                 }.padding(10)
+                List {
+                    ForEach(items, id: \.objectId) { item in
+                        PanelItem(panel: item)
+                    }
+                    .onDelete(perform: self.delete)
+                }
+                /*
                 ScrollView {
                     LazyVStack {
                         
@@ -84,10 +92,11 @@ struct RouteFormView: View {
                             Text(element)
                         }
                         */
-                        ForEach(slDoctors, id: \.self) { i in
-                            Text(i)
+                        ForEach(items, id: \.objectId) { it in
+                            PanelItem(panel: it)
                             
                         }
+                        .onDelete(perform: self.delete)
                         /*
                         ForEach(items, id: \.id) { element in
                             PanelItem(panel: element)
@@ -96,6 +105,7 @@ struct RouteFormView: View {
                         
                     }
                 }
+                */
             }
             VStack {
                 Spacer()
@@ -125,29 +135,21 @@ struct RouteFormView: View {
                 }
                 .background(Color.black.opacity(0.45))
                 .onDisappear {
-                    print("____________Disappear____________")
                     selected[self.type]?.binding.forEach{ it in
-                        print(it)
-                        //items = PharmacyDao(realm: try! Realm()).by(id: String(it))
-                        let jj = DoctorDao(realm: try! Realm()).by(id: it)
-                        //items.append(jj)
-                        //print(x)
-                        //items.append(x)
-                        /*
                         switch self.type {
                         case "M":
-                            items.append()
+                            if let doctor = DoctorDao(realm: try! Realm()).by(id: it){
+                                items.append(doctor)
+                            }
                         case "F":
-                            items.append(PharmacyDao(realm: try! Realm()).by(id: String(it)))
+                            items.append(contentsOf: [PharmacyDao(realm: try! Realm()).by(id: it) ?? Pharmacy()])
                         case "C":
-                            ClientDao(realm: try! Realm()).by(id: String(it))
+                            items.append(contentsOf: [ClientDao(realm: try! Realm()).by(id: it) ?? Client()])
                         case "P":
-                            PatientDao(realm: try! Realm()).by(id: String(it))
+                            items.append(contentsOf: [PatientDao(realm: try! Realm()).by(id: it) ?? Patient()])
                         default:
                             break
                         }
-                        */
-                        
                     }
                 }
             }
@@ -155,6 +157,11 @@ struct RouteFormView: View {
         .partialSheet(isPresented: self.$cardShow) {
             PanelTypeMenu(onPanelSelected: onPanelSelected, panelTypes: ["M", "F", "C", "P"], isPresented: self.$cardShow)
         }
+    }
+    
+    
+    private func delete(at offsets: IndexSet) {
+        self.items.remove(atOffsets: offsets)
     }
     
     func onPanelSelected (_ type: String) {

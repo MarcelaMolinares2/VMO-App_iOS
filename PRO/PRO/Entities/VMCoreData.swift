@@ -63,7 +63,7 @@ class AdvertisingMaterialDelivery: Object, Codable, SyncEntity {
     @Persisted var category: String = ""
     @Persisted var sets = List<AdvertisingMaterialDeliverySet>()
     
-    @Persisted var material: AdvertisingMaterial? = nil
+    var material: AdvertisingMaterial? = nil
     
     private enum CodingKeys: String, CodingKey {
         case id = "id"
