@@ -130,7 +130,7 @@ struct RouteFormView: View {
                         print(it)
                         //items = PharmacyDao(realm: try! Realm()).by(id: String(it))
                         let jj = DoctorDao(realm: try! Realm()).by(id: it)
-                        items.append(jj)
+                        //items.append(jj)
                         //print(x)
                         //items.append(x)
                         /*

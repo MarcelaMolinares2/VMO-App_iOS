@@ -24,10 +24,14 @@ struct MaterialDeliveryView: View {
     }
 }
 
-struct Stock {
-    var name: String
+struct setStock: Hashable {
     var lot: String
     var quantity: Int
+}
+struct Stock {
+    let id = UUID()
+    var name: String
+    var set: [setStock]
     var date: String
 }
 
@@ -86,11 +90,12 @@ struct MaterialDeliveryListView: View {
                 HeaderToggleView(couldSearch: false, title: "modMaterialDelivery", icon: Image("ic-material"), color: Color.cPanelMaterial)
                 Spacer()
                 List {
-                    ForEach(array, id: \.date) { item in
+                    ForEach(array, id: \.id) { item in
                         MaterialDeliveryListCardView(item: item)
                     }
                 }
             }
+            .foregroundColor(.cPrimaryLight)
             VStack {
                 Spacer()
                 HStack {
@@ -107,19 +112,21 @@ struct MaterialDeliveryListView: View {
     }
     
     func loadData() {
-        print("ABRIO")
         for i in deliveries{
-            if let material = MaterialDao(realm: try! Realm()).by(id: String(i.materialId)) {
-                print("LLEGO AQUI")
-                array.append(Stock(name: material.name ?? "", lot: material.sets[0].id, quantity: i.sets[0].quantity, date: i.date))
+            var setstock: [setStock] = []
+            i.sets.forEach{ it in
+                setstock.append(setStock(lot: it.id, quantity: it.quantity))
             }
+            array.append(Stock(name: i.material?.name ?? "", set: setstock, date: i.date))
         }
         let appServer = AppServer()
         appServer.postRequest(data: [String: Any](), path: "vm/material-delivery/filter") { (bool, int, any) in
             let b = any as? Array<String> ?? []
             for i in b{
                 let decoded = try! JSONDecoder().decode(StockApi.self, from: i.data(using: .utf8)!)
-                array.append(Stock(name: decoded.material.nombre, lot: decoded.lote, quantity: decoded.cantidad, date: decoded.fecha))
+                let setstock = [setStock(lot: decoded.lote, quantity: decoded.cantidad)]
+                array.append(Stock(name: decoded.material.nombre, set: setstock, date: decoded.fecha))
+                
             }
         }
     }
@@ -136,36 +143,43 @@ struct MaterialDeliveryListCardView: View {
                 }
                 Spacer()
                 Divider()
-                 .frame(height: 1)
+                    .frame(height: 0.7)
                  .padding(.horizontal, 5)
                  .background(Color.gray)
                 Spacer()
-                HStack{
-                    Text(String(item.lot))
-                    Spacer()
-                    Text(String(format: NSLocalizedString("materialQuantity", comment: ""), String(item.quantity)))
-                        .font(.system(size: 18, weight: .heavy, design: .default))
+                    .frame(height: 15)
+                VStack {
+                    ForEach(item.set, id: \.self) { item in
+                        HStack{
+                            Text(String(item.lot))
+                            Spacer()
+                            Text(String(format: NSLocalizedString("materialQuantity", comment: ""), String(item.quantity)))
+                                .font(.system(size: 18, weight: .heavy, design: .default))
+                        }
+                        Spacer()
+                            .frame(height: 15)
+                    }
                 }
-                Spacer()
                 Divider()
-                 .frame(height: 1)
+                    .frame(height: 0.7)
                  .padding(.horizontal, 5)
                  .background(Color.gray)
                 Spacer()
                 HStack{
                     Spacer()
                     if item.date != "" {
-                        Text(Utils.formatStringDate(date: item.date))
+                        Text(Utils.dateFormat(date: Utils.strToDate(value: item.date), format: "dd, MMM yy"))
                             .font(.system(size: 14))
                     } else {
                         Text("")
                             .font(.system(size: 14))
                     }
                 }
+                
             }
             .padding(7)
         }
-        .background(Color(red: 100, green: 100, blue: 100))
+        .background(Color.white)
         .frame(alignment: Alignment.center)
         .clipped()
         .shadow(color: Color.gray, radius: 4, x: 0, y: 0)
@@ -200,7 +214,7 @@ struct MaterialDeliveryFormView: View {
                         Image("ic-plus-circle")
                             .resizable()
                             .scaledToFit()
-                            .frame(width: 25)
+                            .frame(width: 35)
                     }
                 }
                 .padding(10)
@@ -209,7 +223,6 @@ struct MaterialDeliveryFormView: View {
                 .cornerRadius(8)
                 .clipped()
                 .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
-                .foregroundColor(.cPrimaryLight)
                 List {
                     ForEach(deliveries, id: \.materialId) { item in
                         MaterialDeliveryFormCardView(material: item)
@@ -218,24 +231,13 @@ struct MaterialDeliveryFormView: View {
                 }
                 .buttonStyle(PlainButtonStyle())
             }
+            .foregroundColor(.cPrimaryLight)
             VStack {
                 Spacer()
                 HStack {
                     Spacer()
                     FAB(image: "ic-cloud", foregroundColor: .cPrimary) {
                         if deliveries.count > 0 {
-                            deliveries.forEach{ item in
-                                item.sets.forEach{i in
-                                    print(i.set.dueDate ?? "")
-                                    print(i.set.delivered)
-                                    print(i.set.stock)
-                                    print(i.set.id)
-                                    print(i.set.objectId)
-                                    print("_______")
-                                }
-                                
-                            }
-                            print(deliveries)
                             MaterialDeliveryDao(realm: try! Realm()).store(deliveries: deliveries)
                             moduleRouter.currentPage = "LIST"
                         } else {
@@ -277,6 +279,7 @@ struct MaterialDeliveryFormView: View {
                                 if material.sets.isEmpty {
                                     let deliverySet = AdvertisingMaterialDeliverySet()
                                     deliverySet.set = AdvertisingMaterialSet()
+                                    deliverySet.id = "0"
                                     delivery.sets.append(deliverySet)
                                 }
                                 deliveries.append(delivery)
@@ -310,17 +313,26 @@ struct MaterialDeliveryFormCardView: View {
                     Text(material.material?.name ?? "")
                     Spacer()
                 }
-                Spacer()
                 Divider()
-                 .frame(height: 1)
-                 .padding(.horizontal, 5)
-                 .background(Color.gray)
+                .frame(height: 0.7)
+                .padding(.horizontal, 5)
+                .background(Color.gray)
                 VStack {
                     ForEach(material.sets, id: \.id) { set in
                         MaterialDeliverySetFormCardView(set: set)
+                            .padding(.horizontal, 15)
+                            .padding(.vertical, 10)
+                        Divider()
+                        .frame(height: 0.5)
+                        .padding(.horizontal, 5)
+                        .background(Color.gray)
                     }
                 }
                 TextField(NSLocalizedString("materialObservations", comment: ""), text: bindingComment)
+                    .frame(height: 30)
+                    .padding(.vertical, 10)
+                    .foregroundColor(.black)
+                
                 Divider()
                  .frame(height: 1)
                  .padding(.horizontal, 5)
@@ -328,7 +340,7 @@ struct MaterialDeliveryFormCardView: View {
             }
             .padding(7)
         }
-        .background(Color(red: 100.0, green: 100.0, blue: 100.0))
+        .background(Color.white)
         .frame(alignment: Alignment.center)
         .clipped()
         .shadow(color: Color.gray, radius: 4, x: 0, y: 0)
@@ -343,16 +355,16 @@ struct MaterialDeliverySetFormCardView: View {
     var body: some View {
         
         VStack {
-            HStack {
-                Text(String(set.id))
-                Spacer()
-                if set.set.dueDate ?? "" != ""{
-                    Text(String(format: NSLocalizedString("expDate", comment: ""), Utils.formatStringDate(date: set.set.dueDate ?? "")))
-                } else {
-                    Text(String(format: NSLocalizedString("expDate", comment: ""), set.set.dueDate ?? ""))
+            if set.id != "0" {
+                HStack {
+                    Text(String(set.id))
+                    Spacer()
+                    
+                    Text(String(format: NSLocalizedString("expDate", comment: ""), Utils.dateFormat(date: Utils.strToDate(value: set.set.dueDate ?? ""), format: "dd, MMM yy")))
                 }
+                Spacer()
+                    .frame(height: 15)
             }
-            Spacer()
             HStack {
                 Button(action: {
                     if set.quantity > 0 {
@@ -360,15 +372,24 @@ struct MaterialDeliverySetFormCardView: View {
                         set.quantity = tvNumber
                     }
                 }, label: {
-                    Text("-")
-                        .font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/)
+                    Image("ic-minus-circle")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 32)
                 })
                 .background(Color.white)
                 Spacer()
                 VStack {
                     Text("\(String(tvNumber))")
-                    Text(String(format: NSLocalizedString("materialRemainder", comment: ""),
-                                String((set.set.stock) - (set.set.delivered))))
+                        .frame(height: 15)
+                    if (set.set.stock) - (set.set.delivered) > 0 {
+                        Spacer()
+                        Text(String(format: NSLocalizedString("materialRemainder", comment: ""),
+                                    String((set.set.stock) - (set.set.delivered))))
+                            .foregroundColor(.cBlueDark)
+                    } else {
+                        Spacer()
+                    }
                 }
                 Spacer()
                 Button(action: {
@@ -376,15 +397,17 @@ struct MaterialDeliverySetFormCardView: View {
                         tvNumber += 1
                         set.quantity = tvNumber
                     } else {
-                        if set.quantity < set.set.stock {
+                        if set.quantity < (set.set.stock - set.set.delivered) {
                             tvNumber += 1
                             set.quantity = tvNumber
                         }
                     }
                     
                 }, label: {
-                    Text("+")
-                        .font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/)
+                    Image("ic-plus-circle")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 32)
                 })
                 .background(Color.white)
             }

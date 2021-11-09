@@ -65,5 +65,8 @@ extension Color {
     static let cPanelPharmacy = Color("colorPanelPharmacy")
     static let cPanelPotential = Color("colorPanelPotential")
     static let cPanelRequestDay = Color("colorPanelRequestDay")
+    
+    static let cBlueDark = Color("colorBlueDark")
+    static let cWarning = Color("colorWarning")
 
 }
