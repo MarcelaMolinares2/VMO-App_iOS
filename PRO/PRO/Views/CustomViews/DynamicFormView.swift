@@ -134,7 +134,7 @@ struct DynamicFormList: View {
             }
         }
         .partialSheet(isPresented: $cardShow) {
-            SourceDynamicDialogPicker(onSelectionDone: onSelectionDone, selected: $selected, data: field.source, multiple: field.multiple)
+            SourceDynamicDialogPicker(onSelectionDone: onSelectionDone, selected: $selected, data: field.source, multiple: field.multiple, isSheet: true)
         }
     }
     

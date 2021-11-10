@@ -61,7 +61,7 @@ struct MaterialRequestView: View {
             }
             if selectMaterialsModalToggle.status {
                 GeometryReader {geo in
-                    CustomDialogPicker(modalToggle: selectMaterialsModalToggle, selected: $selectedMaterials, key: "MATERIAL", multiple: true)
+                    CustomDialogPicker(onSelectionDone: onSelectionDone, selected: $selectedMaterials, key: "MATERIAL", multiple: true)
                 }
                 .background(Color.black.opacity(0.45))
                 .onDisappear {
@@ -97,6 +97,10 @@ struct MaterialRequestView: View {
     
     private func delete(at offsets: IndexSet) {
         self.deliveries.remove(atOffsets: offsets)
+    }
+    
+    func onSelectionDone(_ selected: [String]) {
+        selectMaterialsModalToggle.status.toggle()
     }
 }
 

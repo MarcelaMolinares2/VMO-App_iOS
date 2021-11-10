@@ -251,48 +251,50 @@ struct MaterialDeliveryFormView: View {
             }
             if selectMaterialsModalToggle.status {
                 GeometryReader {geo in
-                    CustomDialogPicker(modalToggle: selectMaterialsModalToggle, selected: $selectedMaterials, key: "MATERIAL", multiple: true)
+                    CustomDialogPicker(onSelectionDone: onSelectionDone, selected: $selectedMaterials, key: "MATERIAL", multiple: true)
                 }
                 .background(Color.black.opacity(0.45))
-                .onDisappear {
-                    selectedMaterials.forEach { id in
-                        if let material = MaterialDao(realm: try! Realm()).by(id: id) {
-                            var exists = false
-                            for i in deliveries {
-                                if i.materialId == material.id {
-                                    exists = true
-                                    break
-                                }
-                            }
-                            if !exists {
-                                let delivery = AdvertisingMaterialDelivery()
-                                delivery.materialId = material.id
-                                delivery.material =  material
-                                delivery.date = Utils.currentDate()
-                                delivery.comment = ""
-                                material.sets.forEach { set in
-                                    let deliverySet = AdvertisingMaterialDeliverySet()
-                                    deliverySet.id = set.id
-                                    deliverySet.set = set
-                                    delivery.sets.append(deliverySet)
-                                }
-                                if material.sets.isEmpty {
-                                    let deliverySet = AdvertisingMaterialDeliverySet()
-                                    deliverySet.set = AdvertisingMaterialSet()
-                                    deliverySet.id = "0"
-                                    delivery.sets.append(deliverySet)
-                                }
-                                deliveries.append(delivery)
-                            }
-                        }
-                    }
-                }
             }
         }
     }
     
     private func delete(at offsets: IndexSet) {
         self.deliveries.remove(atOffsets: offsets)
+    }
+    
+    func onSelectionDone(_ selected: [String]) {
+        selectMaterialsModalToggle.status.toggle()
+        selectedMaterials.forEach { id in
+            if let material = MaterialDao(realm: try! Realm()).by(id: id) {
+                var exists = false
+                for i in deliveries {
+                    if i.materialId == material.id {
+                        exists = true
+                        break
+                    }
+                }
+                if !exists {
+                    let delivery = AdvertisingMaterialDelivery()
+                    delivery.materialId = material.id
+                    delivery.material =  material
+                    delivery.date = Utils.currentDate()
+                    delivery.comment = ""
+                    material.sets.forEach { set in
+                        let deliverySet = AdvertisingMaterialDeliverySet()
+                        deliverySet.id = set.id
+                        deliverySet.set = set
+                        delivery.sets.append(deliverySet)
+                    }
+                    if material.sets.isEmpty {
+                        let deliverySet = AdvertisingMaterialDeliverySet()
+                        deliverySet.set = AdvertisingMaterialSet()
+                        deliverySet.id = "0"
+                        delivery.sets.append(deliverySet)
+                    }
+                    deliveries.append(delivery)
+                }
+            }
+        }
     }
 }
 

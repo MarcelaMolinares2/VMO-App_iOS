@@ -101,7 +101,7 @@ struct RequestDayView: View {
             }
             if selectCycleModalToggle.status {
                 GeometryReader {geo in
-                    CustomDialogPicker(modalToggle: selectCycleModalToggle, selected: $selectedCycle, key: "CYCLE")
+                    CustomDialogPicker(onSelectionDone: onSelectionDone, selected: $selectedCycle, key: "CYCLE")
                 }
                 .background(Color.black.opacity(0.45))
             }
@@ -132,6 +132,10 @@ struct RequestDayView: View {
         dayRequest.reason = reasons[selectedReason].content
         dayRequest.dateStart = dateStart
         dayRequest.dateEnd = dateEnd
+    }
+    
+    func onSelectionDone(_ selected: [String]) {
+        selectCycleModalToggle.status.toggle()
     }
 }
 

@@ -159,12 +159,50 @@ struct PanelDialogPicker: View {
     
 }
 
+struct GenericDialogItem: View {
+    var item: GenericSelectableItem
+    var alignment: Alignment
+    let onItemTapped: () -> Void
+    
+    var body: some View {
+        Button(action: {
+            self.onItemTapped()
+        }) {
+            ZStack {
+                if item.selected {
+                    Color
+                        .cSelected
+                        .ignoresSafeArea()
+                        .cornerRadius(15)
+                        .frame(minWidth: 0, maxWidth: .infinity, minHeight: 40, maxHeight: .infinity)
+                }
+                VStack(alignment: .leading) {
+                    Text("\(item.label)")
+                        .foregroundColor(.cTextHigh)
+                    if !item.complement.isEmpty {
+                        Text("\(item.complement)")
+                            .foregroundColor(.cTextMedium)
+                            .lineLimit(2)
+                    }
+                }
+                .frame(minWidth: 0, maxWidth: .infinity, alignment: alignment)
+                .padding([.leading, .trailing], 10)
+                .padding([.top, .bottom], 5)
+            }
+            .fixedSize(horizontal: false, vertical: true)
+            .frame(minWidth: 0, maxWidth: .infinity, minHeight: 40)
+        }
+    }
+    
+}
+
 struct SourceDynamicDialogPicker: View {
     let onSelectionDone: (_ selected: [String]) -> Void
     
     @Binding var selected: [String]
     var data: String = ""
     var multiple: Bool = false
+    var isSheet: Bool = false
     
     @ObservedObject var viewModel = ListGenericViewModel()
     @StateObject var headerRouter = TabRouter()
@@ -174,58 +212,58 @@ struct SourceDynamicDialogPicker: View {
     var body: some View {
         VStack {
             HStack {
-                SearchBar(headerRouter: self.headerRouter, text: $searchText, placeholder: Text("Buscar"))
-                if multiple {
-                    VStack {
-                        Button(action: {
-                            self.done()
-                        }) {
-                            Image("ic-done")
-                                .resizable()
-                                .foregroundColor(.cTextHigh)
-                                .scaledToFit()
-                                .padding(5)
-                        }
+                if !isSheet {
+                    Button(action: {
+                        done()
+                    }) {
+                        Image("ic-left-arrow")
+                            .resizable()
+                            .scaledToFit()
+                            .padding(5)
                     }
-                    .frame(height: headerHeight)
-                    .padding([.leading, .trailing], 10)
-                    .background(Color.white)
-                    .zIndex(1)
                 }
+                SearchBar(headerRouter: self.headerRouter, text: $searchText, placeholder: Text("Buscar"))
             }
             .frame(height: headerHeight)
             .padding([.leading, .trailing], 10)
             .background(Color.white)
             .zIndex(1)
-            Text("\(UIScreen.main.bounds.height)")
-            ForEach(viewModel.items.filter {
-                searchText.isEmpty ? true : $0.label.lowercased().contains(searchText.lowercased())
-            }, id: \.id) { item in
-                Button(action: {
-                    self.onItemSelected(item: item)
-                }) {
-                    ZStack {
-                        if item.selected {
-                            Color
-                                .cSelected
-                                .ignoresSafeArea()
-                                .cornerRadius(15)
-                        }
-                        VStack {
-                            Text("\(item.label)")
-                                .foregroundColor(.cTextHigh)
-                            if !item.complement.isEmpty {
-                                Text("\(item.complement)")
-                                    .foregroundColor(.cTextMedium)
-                                    .lineLimit(2)
-                            }
+            if !isSheet ||  CGFloat(viewModel.items.count * 50) > CGFloat(UIScreen.main.bounds.height - (200 + (multiple ? 50 : 0))) {
+                List {
+                    ForEach(viewModel.items.filter {
+                        searchText.isEmpty ? true : $0.label.lowercased().contains(searchText.lowercased())
+                    }, id: \.id) { item in
+                        GenericDialogItem(item: item, alignment: .leading) {
+                            self.onItemSelected(item: item)
                         }
                     }
-                    .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, idealHeight: 40, maxHeight: 40)
+                }
+            } else {
+                ForEach(viewModel.items.filter {
+                    searchText.isEmpty ? true : $0.label.lowercased().contains(searchText.lowercased())
+                }, id: \.id) { item in
+                    GenericDialogItem(item: item, alignment: .center) {
+                        self.onItemSelected(item: item)
+                    }
                 }
             }
-            /*List {
-            }*/
+            if multiple {
+                VStack {
+                    Button(action: {
+                        self.done()
+                    }) {
+                        Image("ic-done")
+                            .resizable()
+                            .foregroundColor(.cTextHigh)
+                            .scaledToFit()
+                            .padding(5)
+                    }
+                }
+                .frame(height: headerHeight)
+                .padding([.leading, .trailing], 10)
+                .background(Color.white)
+                .zIndex(1)
+            }
         }
         .background(Color.white)
         .padding(20)
@@ -261,11 +299,12 @@ struct SourceDynamicDialogPicker: View {
 }
 
 struct CustomDialogPicker: View {
+    let onSelectionDone: (_ selected: [String]) -> Void
     
-    @ObservedObject var modalToggle: ModalToggle
     @Binding var selected: [String]
     var key: String = ""
     var multiple: Bool = false
+    var isSheet: Bool = false
     
     @ObservedObject var viewModel = ListGenericViewModel()
     @StateObject var headerRouter = TabRouter()
@@ -274,45 +313,39 @@ struct CustomDialogPicker: View {
     
     var body: some View {
         VStack {
-            ZStack(alignment: .top) {
-                HStack {
+            HStack {
+                if !isSheet {
                     Button(action: {
-                        self.modalToggle.status.toggle()
+                        done()
                     }) {
                         Image("ic-left-arrow")
                             .resizable()
                             .scaledToFit()
                             .padding(5)
                     }
-                    SearchBar(headerRouter: self.headerRouter, text: $searchText, placeholder: Text("Buscar"))
                 }
-                .frame(height: headerHeight)
-                .padding([.leading, .trailing], 10)
-                .background(Color.white)
-                .zIndex(1)
+                SearchBar(headerRouter: self.headerRouter, text: $searchText, placeholder: Text("Buscar"))
+            }
+            .frame(height: headerHeight)
+            .padding([.leading, .trailing], 10)
+            .background(Color.white)
+            .zIndex(1)
+            if !isSheet ||  CGFloat(viewModel.items.count * 50) > CGFloat(UIScreen.main.bounds.height - (200 + (multiple ? 50 : 0))) {
                 List {
-                    Color
-                        .clear
-                        .frame(height: 30)
                     ForEach(viewModel.items.filter {
                         searchText.isEmpty ? true : $0.label.lowercased().contains(searchText.lowercased())
                     }, id: \.id) { item in
-                        Button(action: {
+                        GenericDialogItem(item: item, alignment: .leading) {
                             self.onItemSelected(item: item)
-                        }) {
-                            ZStack {
-                                VStack {
-                                    Text("\(item.label)")
-                                        .foregroundColor(.cTextHigh)
-                                    if !item.complement.isEmpty {
-                                        Text("\(item.complement)")
-                                            .foregroundColor(.cTextMedium)
-                                            .lineLimit(2)
-                                    }
-                                }
-                                .background(item.selected ? Color.cPrimaryLight : Color.white)
-                            }
                         }
+                    }
+                }
+            } else {
+                ForEach(viewModel.items.filter {
+                    searchText.isEmpty ? true : $0.label.lowercased().contains(searchText.lowercased())
+                }, id: \.id) { item in
+                    GenericDialogItem(item: item, alignment: .center) {
+                        self.onItemSelected(item: item)
                     }
                 }
             }
@@ -364,6 +397,6 @@ struct CustomDialogPicker: View {
     
     func done() {
         selected = viewModel.items.filter { item in item.selected }.map { $0.id }
-        modalToggle.status.toggle()
+        onSelectionDone(selected)
     }
 }
