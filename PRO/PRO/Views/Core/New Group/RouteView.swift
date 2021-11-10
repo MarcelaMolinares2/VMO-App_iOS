@@ -79,7 +79,37 @@ struct RouteFormView: View {
                 }.padding(10)
                 List {
                     ForEach(items, id: \.objectId) { item in
-                        PanelItem(panel: item)
+                        HStack(alignment: .center, spacing: 10){
+                            switch item.type {
+                                case "M":
+                                    Image("ic-medic")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(height: 27)
+                                        .foregroundColor(Color.cPanelMedic)
+                                case "F":
+                                    Image("ic-pharmacy")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(height: 27)
+                                        .foregroundColor(Color.cPanelPharmacy)
+                                case "C":
+                                    Image("ic-client")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(height: 27)
+                                        .foregroundColor(Color.cPanelClient)
+                                case "P":
+                                    Image("ic-patient")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(height: 27)
+                                        .foregroundColor(Color.cPanelPatient)
+                                default:
+                                    Text("default")
+                            }
+                            PanelItem(panel: item)
+                        }
                     }
                     .onDelete(perform: self.delete)
                 }
@@ -142,15 +172,22 @@ struct RouteFormView: View {
                                 items.append(doctor)
                             }
                         case "F":
-                            items.append(contentsOf: [PharmacyDao(realm: try! Realm()).by(id: it) ?? Pharmacy()])
+                            if let pharmacy = PharmacyDao(realm: try! Realm()).by(id: it){
+                                items.append(pharmacy)
+                            }
                         case "C":
-                            items.append(contentsOf: [ClientDao(realm: try! Realm()).by(id: it) ?? Client()])
+                            if let client = ClientDao(realm: try! Realm()).by(id: it){
+                                items.append(client)
+                            }
                         case "P":
-                            items.append(contentsOf: [PatientDao(realm: try! Realm()).by(id: it) ?? Patient()])
+                            if let patient = PatientDao(realm: try! Realm()).by(id: it){
+                                items.append(patient)
+                            }
                         default:
                             break
                         }
                     }
+                    print(items)
                 }
             }
         }

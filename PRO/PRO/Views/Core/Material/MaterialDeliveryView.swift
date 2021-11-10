@@ -117,7 +117,10 @@ struct MaterialDeliveryListView: View {
             i.sets.forEach{ it in
                 setstock.append(setStock(lot: it.id, quantity: it.quantity))
             }
-            array.append(Stock(name: i.material?.name ?? "", set: setstock, date: i.date))
+            if let material = MaterialDao(realm: try! Realm()).by(id: String(i.materialId)) {
+                print("LLEGO AQUI")
+                array.append(Stock(name: material.name ?? "", set: setstock, date: i.date))
+            }
         }
         let appServer = AppServer()
         appServer.postRequest(data: [String: Any](), path: "vm/material-delivery/filter") { (bool, int, any) in
@@ -229,6 +232,7 @@ struct MaterialDeliveryFormView: View {
                     }
                     .onDelete(perform: self.delete)
                 }
+                
                 .buttonStyle(PlainButtonStyle())
             }
             .foregroundColor(.cPrimaryLight)
@@ -259,7 +263,9 @@ struct MaterialDeliveryFormView: View {
     }
     
     private func delete(at offsets: IndexSet) {
-        self.deliveries.remove(atOffsets: offsets)
+        withAnimation{
+            self.deliveries.remove(atOffsets: offsets)
+        }
     }
     
     func onSelectionDone(_ selected: [String]) {
@@ -299,6 +305,7 @@ struct MaterialDeliveryFormView: View {
 }
 
 
+
 struct MaterialDeliveryFormCardView: View {
     @State var observation: String = ""
     var material: AdvertisingMaterialDelivery
@@ -319,6 +326,7 @@ struct MaterialDeliveryFormCardView: View {
                 .frame(height: 0.7)
                 .padding(.horizontal, 5)
                 .background(Color.gray)
+                Spacer()
                 VStack {
                     ForEach(material.sets, id: \.id) { set in
                         MaterialDeliverySetFormCardView(set: set)
