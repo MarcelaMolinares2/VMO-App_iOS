@@ -8,6 +8,7 @@
 
 import SwiftUI
 import RealmSwift
+import AlertToast
 
 struct RouteView: View {
     @ObservedObject private var moduleRouter = ModuleRouter()
@@ -49,11 +50,12 @@ struct RouteFormView: View {
     @State private var name = ""
     //@State private var items: [Panel & SyncEntity] = []
     @State private var items = [Panel & SyncEntity]()
+    //@State private var items = [Group]()
+    @State private var groups = [Group]()
     @State private var isValidationOn = false
     @State private var cardShow = false
     @State private var type = ""
     @State var searchText = ""
-    @StateObject var headerRouter = TabRouter()
     
     @ObservedObject private var selectPanelModalToggle = ModalToggle()
     @State private var slDefault = [String]()
@@ -61,6 +63,10 @@ struct RouteFormView: View {
     @State private var slPharmacies = [String]()
     @State private var slClients = [String]()
     @State private var slPatients = [String]()
+    @State private var colorWarning = Color.gray
+    
+    @State private var showToast = false
+    @State private var textNoName = false
     
     var body: some View {
         let selected = [
@@ -72,19 +78,24 @@ struct RouteFormView: View {
         ZStack {
             VStack {
                 HeaderToggleView(couldSearch: false, title: "modPeopleRoute", icon: Image("ic-people-route"), color: Color.cPanelRequestDay)
-                VStack{
+                VStack {
                     TextField(NSLocalizedString("envName", comment: ""), text: $name)
                     Divider()
                      .frame(height: 1)
                      .padding(.horizontal, 5)
-                     .background(Color.gray)
+                     .background(colorWarning)
+                    if textNoName {
+                        HStack {
+                            Text(NSLocalizedString("noneNameGroups", comment: ""))
+                                .foregroundColor(colorWarning)
+                            Spacer()
+                        }
+                    }
                 }
                 .padding(.horizontal, 30)
                 .padding(.vertical, 10)
                 List {
-                    ForEach(items.filter{
-                        name.isEmpty ? true : ($0.name ?? "").lowercased().contains(name.lowercased())
-                    }, id: \.objectId) { item in
+                    ForEach(items, id: \.objectId) { item in
                         HStack(alignment: .center, spacing: 10){
                             switch item.type {
                                 case "M":
@@ -117,7 +128,16 @@ struct RouteFormView: View {
                             PanelItem(panel: item)
                         }
                     }
-                    .onDelete(perform: self.delete)
+                    .onDelete { (offsets: IndexSet) in
+                        //self.items.remove(atOffsets: offsets)
+                        
+                        offsets.forEach{ it in
+                            print(items[it])
+                            
+                        }
+                        
+                        //self.items[offsets.first]
+                    }
                 }
             }
             VStack {
@@ -126,10 +146,30 @@ struct RouteFormView: View {
                     Spacer()
                     FAB(image: "ic-cloud", foregroundColor: .cPrimary) {
                         if validate() {
-                            save()
+                            if !name.replacingOccurrences(of: " ", with: "").isEmpty {
+                                //save()
+                                GroupDao(realm: try! Realm()).store(groups: groups)
+                                moduleRouter.currentPage = "LIST"
+                            } else {
+                                colorWarning = Color.cWarning
+                                name = ""
+                                textNoName = true
+                            }
+                        } else {
+                            self.showToast.toggle()
+                            if name.replacingOccurrences(of: " ", with: "").isEmpty{
+                                colorWarning = Color.cWarning
+                                name = ""
+                                textNoName = true
+                            } else {
+                                colorWarning = Color.gray
+                                textNoName = false
+                            }
                         }
-                        moduleRouter.currentPage = "LIST"
                     }
+                }
+                .toast(isPresenting: $showToast){
+                    AlertToast(type: .regular, title: NSLocalizedString("noneGroups", comment: ""))
                 }
             }
             VStack {
@@ -170,7 +210,8 @@ struct RouteFormView: View {
                             break
                         }
                     }
-                    print(items)
+                    //selected.removeAll()
+                    //print(items)
                 }
             }
         }

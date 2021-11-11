@@ -81,52 +81,31 @@ class Group: Object, Codable, SyncEntity {
     @Persisted(primaryKey: true) var objectId: ObjectId
     @Persisted(indexed: true) var id = 0
     
-    @Persisted var transactionStatus: String?
-    @Persisted var transactionPending: String?
-    @Persisted var transactionResponse: String?
+    @Persisted var transactionStatus: String? = ""
+    @Persisted var transactionPending: String? = ""
+    @Persisted var transactionResponse: String? = ""
     
+    @Persisted var name: String? = ""
     @Persisted var groupMemberList = List<GroupMember>()
     
     private enum CodingKeys: String, CodingKey {
         case id = "id"
     }
     
+    /*
     static func primaryCodingKey() -> String {
         let codingKey: CodingKeys
         codingKey = .id
         return codingKey.rawValue
     }
+    */
 }
 
-class GroupMember: Object, Panel {
+class GroupMember: Object {
     @Persisted(primaryKey: true) var objectId: ObjectId
     @Persisted var id: Int = 0
-    
-    var idNumber: String?
-    var type: String = ""
-    var name: String?
-    var email: String?
-    var phone: String?
-    var brickId: Int?
-    var categoryId: Int?
-    var cityId: Int?
-    var countryId: Int?
-    var pricesListId: Int?
-    var zoneId: Int?
-    var isMarked: Int = 0
-    var score: Float?
-    var visitFTF: Int?
-    var visitVirtual: Int?
-    var lastMovement: MovementSimple?
-    var locations: List<PanelLocation> = List<PanelLocation>()
-    var visitingHours: List<VisitingHour> = List<VisitingHour>()
-    var userPanel: List<UserPanel> = List<UserPanel>()
-    var brick: Brick?
-    var category: Category?
-    var city: City?
-    var country: Country?
-    var pricesList: PricesList?
-    var zone: Zone?
+    @Persisted var type: String?
+    @Persisted var idPanel : Int
 }
 
 /*

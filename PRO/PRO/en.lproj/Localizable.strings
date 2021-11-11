@@ -60,10 +60,12 @@
 
 "materialRemainder" = "(Remainder: %@ units)";
 "expDate" = "(Exp.: %@)";
-"noneMaterialDelivery" = "Did not write material";
+"noneMaterialDelivery" = "Please add material";
 "materialQuantity" = "Q: %@";
 "materialObservations" = "Observations";
 "addMaterialDelivery" = "Material and samples";
 
 "envName" = "Name";
 "addRouters" = "Panels";
+"noneGroups" = "Please add panels";
+"noneNameGroups" = "Please enter router name";
