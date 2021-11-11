@@ -100,14 +100,14 @@ class GroupDao: GenericDao {
         return realm.objects(Group.self).filter("id == \(id)").first
     }
     
-    func store(deliveries: [Group]){
+    func store(groups: [Group]){
         if realm.objects(Group.self).count == 0 {
             try! realm.write {
-                realm.add(deliveries)
+                realm.add(groups)
             }
         } else {
             try! realm.write {
-                realm.add(deliveries)
+                realm.add(groups)
             }
         }
     }
