@@ -52,6 +52,8 @@ struct RouteFormView: View {
     @State private var isValidationOn = false
     @State private var cardShow = false
     @State private var type = ""
+    @State var searchText = ""
+    @StateObject var headerRouter = TabRouter()
     
     @ObservedObject private var selectPanelModalToggle = ModalToggle()
     @State private var slDefault = [String]()
@@ -76,9 +78,13 @@ struct RouteFormView: View {
                      .frame(height: 1)
                      .padding(.horizontal, 5)
                      .background(Color.gray)
-                }.padding(10)
+                }
+                .padding(.horizontal, 30)
+                .padding(.vertical, 10)
                 List {
-                    ForEach(items, id: \.objectId) { item in
+                    ForEach(items.filter{
+                        name.isEmpty ? true : ($0.name ?? "").lowercased().contains(name.lowercased())
+                    }, id: \.objectId) { item in
                         HStack(alignment: .center, spacing: 10){
                             switch item.type {
                                 case "M":
@@ -113,29 +119,6 @@ struct RouteFormView: View {
                     }
                     .onDelete(perform: self.delete)
                 }
-                /*
-                ScrollView {
-                    LazyVStack {
-                        
-                        /*
-                        ForEach (selected.$binding, id: \.id) { element in
-                            Text(element)
-                        }
-                        */
-                        ForEach(items, id: \.objectId) { it in
-                            PanelItem(panel: it)
-                            
-                        }
-                        .onDelete(perform: self.delete)
-                        /*
-                        ForEach(items, id: \.id) { element in
-                            PanelItem(panel: element)
-                        }
-                        */
-                        
-                    }
-                }
-                */
             }
             VStack {
                 Spacer()

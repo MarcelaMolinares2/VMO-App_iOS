@@ -88,6 +88,32 @@ class MaterialDeliveryDao: GenericDao {
     
 }
 
+class GroupDao: GenericDao {
+    
+    @Published var updateObject: Group?
+    
+    func all() -> [Group] {
+        return Array(realm.objects(Group.self).sorted(byKeyPath: "objectId"))
+    }
+    
+    func by(id: String) -> Group? {
+        return realm.objects(Group.self).filter("id == \(id)").first
+    }
+    
+    func store(deliveries: [Group]){
+        if realm.objects(Group.self).count == 0 {
+            try! realm.write {
+                realm.add(deliveries)
+            }
+        } else {
+            try! realm.write {
+                realm.add(deliveries)
+            }
+        }
+    }
+    
+}
+
 class GenericSelectableDao: GenericDao {
     
     func cycles() -> [GenericSelectableItem] {
