@@ -26,11 +26,17 @@ struct RouteView: View {
 
 struct RouteListView: View {
     @ObservedObject var moduleRouter: ModuleRouter
+    @State private var groups = GroupDao(realm: try! Realm()).all()
     var body: some View {
         ZStack {
             VStack{
                 HeaderToggleView(couldSearch: true, title: "modPeopleRoute", icon: Image("ic-people-route"), color: Color.cPanelRequestDay)
                 Spacer()
+                List {
+                    ForEach (groups, id: \.self){ item in
+                        RouteListCardView(item: item)
+                    }
+                }
             }
             VStack {
                 Spacer()
@@ -42,16 +48,43 @@ struct RouteListView: View {
                 }
             }
         }
+        .onAppear {
+            loadData()
+        }
+    }
+    func loadData() {
+        print(groups)
+    }
+}
+
+struct RouteListCardView: View {
+    var item: Group
+    var body: some View {
+        VStack{
+            Text(item.name ?? "")
+            List (item.groupMemberList, id: \.self) { it in
+                groupMemberCardView(item: it)
+                Text(it.type ?? "no hay")
+            }
+        }
+        
+    }
+}
+
+struct groupMemberCardView: View {
+    var item: GroupMember
+    var body: some View {
+        VStack{
+            Text(item.type ?? "no hay")
+        }
+        
     }
 }
 
 struct RouteFormView: View {
     @ObservedObject var moduleRouter: ModuleRouter
     @State private var name = ""
-    //@State private var items: [Panel & SyncEntity] = []
     @State private var items = [Panel & SyncEntity]()
-    //@State private var items = [Group]()
-    @State private var groups = [Group]()
     @State private var isValidationOn = false
     @State private var cardShow = false
     @State private var type = ""
@@ -129,14 +162,14 @@ struct RouteFormView: View {
                         }
                     }
                     .onDelete { (offsets: IndexSet) in
-                        //self.items.remove(atOffsets: offsets)
-                        
+                        var its: Int = 0
+                        var type: String = ""
                         offsets.forEach{ it in
-                            print(items[it])
-                            
+                            type = items[it].type
+                            its = items[it].id
                         }
-                        
-                        //self.items[offsets.first]
+                        selected[type]?.binding.removeAll(where: { $0 == String(its) })
+                        self.items.remove(atOffsets: offsets)
                     }
                 }
             }
@@ -145,6 +178,26 @@ struct RouteFormView: View {
                 HStack {
                     Spacer()
                     FAB(image: "ic-cloud", foregroundColor: .cPrimary) {
+                        if !name.replacingOccurrences(of: " ", with: "").isEmpty {
+                            //save()
+                            var groups = [Group]()
+                            let gr = Group()
+                            gr.name = name
+                            for i in items {
+                                let grM = GroupMember()
+                                grM.type = i.type
+                                grM.idPanel = i.id
+                                gr.groupMemberList.append(grM)
+                            }
+                            groups.append(gr)
+                            GroupDao(realm: try! Realm()).store(groups: groups)
+                            moduleRouter.currentPage = "LIST"
+                        } else {
+                            colorWarning = Color.cWarning
+                            name = ""
+                            textNoName = true
+                        }
+                        /*
                         if validate() {
                             if !name.replacingOccurrences(of: " ", with: "").isEmpty {
                                 //save()
@@ -166,6 +219,7 @@ struct RouteFormView: View {
                                 textNoName = false
                             }
                         }
+                        */
                     }
                 }
                 .toast(isPresenting: $showToast){
@@ -188,30 +242,61 @@ struct RouteFormView: View {
                 }
                 .background(Color.black.opacity(0.45))
                 .onDisappear {
+                    var exists = false
                     selected[self.type]?.binding.forEach{ it in
                         switch self.type {
                         case "M":
                             if let doctor = DoctorDao(realm: try! Realm()).by(id: it){
-                                items.append(doctor)
+                                for i in items {
+                                    if String(i.id) == it {
+                                        exists = true
+                                    }
+                                }
+                                if !exists {
+                                    items.append(doctor)
+                                }
+                                exists = false
                             }
                         case "F":
                             if let pharmacy = PharmacyDao(realm: try! Realm()).by(id: it){
-                                items.append(pharmacy)
+                                for i in items {
+                                    if String(i.id) == it {
+                                        exists = true
+                                    }
+                                }
+                                if !exists {
+                                    items.append(pharmacy)
+                                }
+                                exists = false
                             }
                         case "C":
                             if let client = ClientDao(realm: try! Realm()).by(id: it){
-                                items.append(client)
+                                for i in items {
+                                    if String(i.id) == it {
+                                        exists = true
+                                    }
+                                }
+                                if !exists {
+                                    items.append(client)
+                                }
+                                exists = false
                             }
                         case "P":
                             if let patient = PatientDao(realm: try! Realm()).by(id: it){
-                                items.append(patient)
+                                for i in items {
+                                    if String(i.id) == it {
+                                        exists = true
+                                    }
+                                }
+                                if !exists {
+                                    items.append(patient)
+                                }
+                                exists = false
                             }
                         default:
                             break
                         }
                     }
-                    //selected.removeAll()
-                    //print(items)
                 }
             }
         }
@@ -219,7 +304,6 @@ struct RouteFormView: View {
             PanelTypeMenu(onPanelSelected: onPanelSelected, panelTypes: ["M", "F", "C", "P"], isPresented: self.$cardShow)
         }
     }
-    
     
     private func delete(at offsets: IndexSet) {
         self.items.remove(atOffsets: offsets)
@@ -229,7 +313,7 @@ struct RouteFormView: View {
         self.cardShow.toggle()
         self.type = type
         selectPanelModalToggle.status.toggle()
-        print(items)
+        //print(items)
     }
     
     func validate() -> Bool {

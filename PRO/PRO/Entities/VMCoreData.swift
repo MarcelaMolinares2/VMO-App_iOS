@@ -92,20 +92,14 @@ class Group: Object, Codable, SyncEntity {
         case id = "id"
     }
     
-    /*
-    static func primaryCodingKey() -> String {
-        let codingKey: CodingKeys
-        codingKey = .id
-        return codingKey.rawValue
-    }
-    */
 }
 
 class GroupMember: Object {
     @Persisted(primaryKey: true) var objectId: ObjectId
     @Persisted var id: Int = 0
     @Persisted var type: String?
-    @Persisted var idPanel : Int
+    @Persisted var idPanel: Int
+    
 }
 
 /*
