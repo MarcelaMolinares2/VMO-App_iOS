@@ -38,6 +38,7 @@
 		AC5B9767256CB12E0007500D /* AppMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC5B9766256CB12E0007500D /* AppMenuView.swift */; };
 		AC62C2D925A7D0E600FA5868 /* DynamicFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC62C2D825A7D0E600FA5868 /* DynamicFormView.swift */; };
 		AC62C2DE25A7D12700FA5868 /* DynamicForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC62C2DD25A7D12700FA5868 /* DynamicForm.swift */; };
+		AC657ECF2742E82A009BE0D8 /* BottomSheet in Frameworks */ = {isa = PBXBuildFile; productRef = AC657ECE2742E82A009BE0D8 /* BottomSheet */; };
 		AC6F1F2324FF2978005E57DC /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC6F1F2224FF2978005E57DC /* AppDelegate.swift */; };
 		AC6F1F2524FF2978005E57DC /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC6F1F2424FF2978005E57DC /* SceneDelegate.swift */; };
 		AC6F1F2724FF2978005E57DC /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC6F1F2624FF2978005E57DC /* ContentView.swift */; };
@@ -193,6 +194,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				AC5B9762256CAE0F0007500D /* PartialSheet in Frameworks */,
+				AC657ECF2742E82A009BE0D8 /* BottomSheet in Frameworks */,
 				9361B02F5E1F9A41BF4AD835 /* Pods_PRO.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -586,6 +588,7 @@
 			name = PRO;
 			packageProductDependencies = (
 				AC5B9761256CAE0F0007500D /* PartialSheet */,
+				AC657ECE2742E82A009BE0D8 /* BottomSheet */,
 			);
 			productName = PRO;
 			productReference = AC6F1F1F24FF2978005E57DC /* PRO.app */;
@@ -665,6 +668,7 @@
 			mainGroup = AC6F1F1624FF2978005E57DC;
 			packageReferences = (
 				AC5B9760256CAE0F0007500D /* XCRemoteSwiftPackageReference "PartialSheet" */,
+				AC657ECD2742E82A009BE0D8 /* XCRemoteSwiftPackageReference "BottomSheet" */,
 			);
 			productRefGroup = AC6F1F2024FF2978005E57DC /* Products */;
 			projectDirPath = "";
@@ -1264,6 +1268,14 @@
 				minimumVersion = 2.1.11;
 			};
 		};
+		AC657ECD2742E82A009BE0D8 /* XCRemoteSwiftPackageReference "BottomSheet" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/danielsaidi/BottomSheet.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.1.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -1271,6 +1283,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = AC5B9760256CAE0F0007500D /* XCRemoteSwiftPackageReference "PartialSheet" */;
 			productName = PartialSheet;
+		};
+		AC657ECE2742E82A009BE0D8 /* BottomSheet */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AC657ECD2742E82A009BE0D8 /* XCRemoteSwiftPackageReference "BottomSheet" */;
+			productName = BottomSheet;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

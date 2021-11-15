@@ -42,7 +42,7 @@ struct MedicFormView: View {
                     ForEach(form.tabs, id: \.id) { tab in
                         if tab.key == tabRouter.current {
                             if let ix = form.tabs.firstIndex(where: { $0.key == tabRouter.current }) {
-                                DynamicFormView(form: $form, tab: $form.tabs[ix])
+                                DynamicFormView(form: $form, tab: $form.tabs[ix], options: DynamicFormFieldOptions(table: "doctor", op: viewRouter.data.id > 0 ? "update" : "create"))
                             }
                         }
                     }

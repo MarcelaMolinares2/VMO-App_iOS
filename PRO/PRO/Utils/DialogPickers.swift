@@ -202,6 +202,7 @@ struct SourceDynamicDialogPicker: View {
     @Binding var selected: [String]
     var data: String = ""
     var multiple: Bool = false
+    var title: String = ""
     var isSheet: Bool = false
     
     @ObservedObject var viewModel = ListGenericViewModel()
@@ -222,7 +223,11 @@ struct SourceDynamicDialogPicker: View {
                             .padding(5)
                     }
                 }
-                SearchBar(headerRouter: self.headerRouter, text: $searchText, placeholder: Text("Buscar"))
+                if !isSheet ||  CGFloat(viewModel.items.count * 50) > CGFloat(UIScreen.main.bounds.height - (200 + (multiple ? 50 : 0))) {
+                    SearchBar(headerRouter: self.headerRouter, text: $searchText, placeholder: Text("envSearch"))
+                } else {
+                    Text(title)
+                }
             }
             .frame(height: headerHeight)
             .padding([.leading, .trailing], 10)
@@ -275,12 +280,7 @@ struct SourceDynamicDialogPicker: View {
     }
     
     func loadData() {
-        var list = [GenericSelectableItem]()
-        let json = Utils.jsonObject(string: data)
-        for item in json {
-            list.append(GenericSelectableItem(id: Utils.castString(value: item["id"]), label: Utils.castString(value: item["label"])))
-        }
-        viewModel.put(list: list)
+        viewModel.put(list: Utils.genericList(data: data))
     }
     
     func onItemSelected(item: GenericSelectableItem) {
@@ -304,6 +304,7 @@ struct CustomDialogPicker: View {
     @Binding var selected: [String]
     var key: String = ""
     var multiple: Bool = false
+    var title: String = ""
     var isSheet: Bool = false
     
     @ObservedObject var viewModel = ListGenericViewModel()
@@ -324,7 +325,11 @@ struct CustomDialogPicker: View {
                             .padding(5)
                     }
                 }
-                SearchBar(headerRouter: self.headerRouter, text: $searchText, placeholder: Text("Buscar"))
+                if !isSheet ||  CGFloat(viewModel.items.count * 50) > CGFloat(UIScreen.main.bounds.height - (200 + (multiple ? 50 : 0))) {
+                    SearchBar(headerRouter: self.headerRouter, text: $searchText, placeholder: Text("envSearch"))
+                } else {
+                    Text(title)
+                }
             }
             .frame(height: headerHeight)
             .padding([.leading, .trailing], 10)
@@ -377,11 +382,34 @@ struct CustomDialogPicker: View {
     }
     
     func loadData() {
-        switch key {
+        print(key)
+        switch key.uppercased() {
+        case "BRICK":
+            viewModel.put(list: GenericSelectableDao(realm: try! Realm()).bricks())
+        case "CATEGORY":
+            viewModel.put(list: GenericSelectableDao(realm: try! Realm()).categories())
+        case "CITY":
+            viewModel.put(list: GenericSelectableDao(realm: try! Realm()).cities())
+        case "COLLEGE":
+            viewModel.put(list: GenericSelectableDao(realm: try! Realm()).colleges())
+        case "COUNTRY":
+            viewModel.put(list: GenericSelectableDao(realm: try! Realm()).countries())
         case "CYCLE":
             viewModel.put(list: GenericSelectableDao(realm: try! Realm()).cycles())
+        case "LINE":
+            viewModel.put(list: GenericSelectableDao(realm: try! Realm()).lines())
         case "MATERIAL":
             viewModel.put(list: GenericSelectableDao(realm: try! Realm()).materials())
+        case "PRICES-LIST":
+            viewModel.put(list: GenericSelectableDao(realm: try! Realm()).pricesLists())
+        case "SPECIALTY":
+            viewModel.put(list: GenericSelectableDao(realm: try! Realm()).specialties())
+        case "SECOND-SPECIALTY":
+            viewModel.put(list: GenericSelectableDao(realm: try! Realm()).specialties(tp: "S"))
+        case "STYLE":
+            viewModel.put(list: GenericSelectableDao(realm: try! Realm()).styles())
+        case "ZONE":
+            viewModel.put(list: GenericSelectableDao(realm: try! Realm()).zones())
         default:
             break
         }
@@ -399,4 +427,33 @@ struct CustomDialogPicker: View {
         selected = viewModel.items.filter { item in item.selected }.map { $0.id }
         onSelectionDone(selected)
     }
+}
+
+struct DayMonthDialogPicker: View {
+    
+    @State var month: Int = 1
+    @State var day: Int = 1
+    
+    var body: some View {
+        VStack {
+            HStack {
+                Picker("", selection: $month) {
+                    ForEach(1...12, id: \.self) {
+                        Text("\($0)")
+                    }
+                }
+                .layoutPriority(.greatestFiniteMagnitude)
+                Picker("", selection: $day) {
+                    ForEach(1...31, id: \.self) {
+                        Text("\($0)")
+                    }
+                }
+                .layoutPriority(.greatestFiniteMagnitude)
+            }
+            .layoutPriority(.greatestFiniteMagnitude)
+        }
+        .layoutPriority(.greatestFiniteMagnitude)
+        .zIndex(100000)
+    }
+    
 }
