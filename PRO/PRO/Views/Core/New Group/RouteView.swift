@@ -37,6 +37,7 @@ struct RouteListView: View {
                         RouteListCardView(item: item)
                     }
                 }
+                .buttonStyle(PlainButtonStyle())
             }
             VStack {
                 Spacer()
@@ -48,36 +49,137 @@ struct RouteListView: View {
                 }
             }
         }
-        .onAppear {
-            loadData()
-        }
-    }
-    func loadData() {
-        print(groups)
     }
 }
 
 struct RouteListCardView: View {
     var item: Group
+    
+    @State private var type = ""
+    @ObservedObject private var selectPanelModalToggle = ModalToggle()
+    
+    @State private var cardShow = false
+    @State private var medics: Int = 0
+    @State private var pharmacys: Int = 0
+    @State private var clients: Int = 0
+    @State private var patinents: Int = 0
     var body: some View {
         VStack{
-            Text(item.name ?? "")
-            List (item.groupMemberList, id: \.self) { it in
-                groupMemberCardView(item: it)
-                Text(it.type ?? "no hay")
+            Button(action: {
+                cardShow.toggle()
+                print("ajjaja")
+            }) {
+                VStack{
+                    Spacer()
+                        .frame(height: 10)
+                    HStack{
+                        Text(item.name ?? "")
+                            .foregroundColor(.black)
+                        Spacer()
+                    }
+                    Spacer()
+                    HStack{
+                        HStack{
+                            if medics == 0 {
+                                Image("ic-medic")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(height: 27)
+                                    .foregroundColor(Color.cPrimaryLight)
+                            } else {
+                                Image("ic-medic")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(height: 27)
+                                    .foregroundColor(Color.cPanelMedic)
+                            }
+                            Text(String(medics))
+                            Spacer()
+                            if pharmacys == 0{
+                                Image("ic-pharmacy")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(height: 27)
+                                    .foregroundColor(Color.cPrimaryLight)
+                            } else {
+                                Image("ic-pharmacy")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(height: 27)
+                                    .foregroundColor(Color.cPanelPharmacy)
+                            }
+                            Text(String(pharmacys))
+                            Spacer()
+                        }
+                        HStack{
+                            if clients == 0 {
+                                Image("ic-client")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(height: 27)
+                                    .foregroundColor(Color.cPrimaryLight)
+                            } else {
+                                Image("ic-client")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(height: 27)
+                                    .foregroundColor(Color.cPanelClient)
+                            }
+                            Text(String(clients))
+                            Spacer()
+                            if patinents == 0 {
+                                Image("ic-patient")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(height: 27)
+                                    .foregroundColor(Color.cPrimaryLight)
+                            } else {
+                                Image("ic-patient")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(height: 27)
+                                    .foregroundColor(Color.cPanelPatient)
+                            }
+                            Text(String(patinents))
+                            Spacer()
+                        }
+                    }
+                    Spacer()
+                        .frame(height: 10)
+                }
+            }
+            .partialSheet(isPresented: self.$cardShow) {
+                PanelTypeMenu(onPanelSelected: onPanelSelected, panelTypes: ["M", "F", "C", "P"], isPresented: self.$cardShow)
             }
         }
-        
-    }
-}
-
-struct groupMemberCardView: View {
-    var item: GroupMember
-    var body: some View {
-        VStack{
-            Text(item.type ?? "no hay")
+        .foregroundColor(.cPrimaryLight)
+        .onAppear {
+            loadData()
         }
-        
+    }
+    
+    func onPanelSelected (_ type: String) {
+        self.cardShow.toggle()
+        self.type = type
+        selectPanelModalToggle.status.toggle()
+        //print(items)
+    }
+    
+    func loadData() {
+        item.groupMemberList.forEach{ it in
+            switch it.type {
+                case "M":
+                    medics += 1
+                case "F":
+                    pharmacys += 1
+                case "C":
+                    clients += 1
+                case "P":
+                    patinents += 1
+                default:
+                    print("...")
+            }
+        }
     }
 }
 
@@ -179,7 +281,6 @@ struct RouteFormView: View {
                     Spacer()
                     FAB(image: "ic-cloud", foregroundColor: .cPrimary) {
                         if !name.replacingOccurrences(of: " ", with: "").isEmpty {
-                            //save()
                             var groups = [Group]()
                             let gr = Group()
                             gr.name = name
@@ -197,29 +298,6 @@ struct RouteFormView: View {
                             name = ""
                             textNoName = true
                         }
-                        /*
-                        if validate() {
-                            if !name.replacingOccurrences(of: " ", with: "").isEmpty {
-                                //save()
-                                GroupDao(realm: try! Realm()).store(groups: groups)
-                                moduleRouter.currentPage = "LIST"
-                            } else {
-                                colorWarning = Color.cWarning
-                                name = ""
-                                textNoName = true
-                            }
-                        } else {
-                            self.showToast.toggle()
-                            if name.replacingOccurrences(of: " ", with: "").isEmpty{
-                                colorWarning = Color.cWarning
-                                name = ""
-                                textNoName = true
-                            } else {
-                                colorWarning = Color.gray
-                                textNoName = false
-                            }
-                        }
-                        */
                     }
                 }
                 .toast(isPresenting: $showToast){
