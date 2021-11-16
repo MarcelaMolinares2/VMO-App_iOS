@@ -430,30 +430,139 @@ struct CustomDialogPicker: View {
 }
 
 struct DayMonthDialogPicker: View {
+    let onSelectionDone: (_ selected: [String]) -> Void
     
+    @Binding var selected: [String]
     @State var month: Int = 1
     @State var day: Int = 1
+    @State var maxDays = 31
     
     var body: some View {
         VStack {
             HStack {
-                Picker("", selection: $month) {
+                Picker("envMonth", selection: $month.onChange(monthChange)) {
                     ForEach(1...12, id: \.self) {
+                        Text(Utils.castString(value: CommonUtils.months[$0 - 1]["name"]))
+                    }
+                }
+                .pickerStyle(WheelPickerStyle())
+                .fixedSize(horizontal: true, vertical: true)
+                .frame(width: (UIScreen.main.bounds.width / 2) - 20)
+                .compositingGroup()
+                .clipped(antialiased: true)
+                Picker("envDay", selection: $day) {
+                    ForEach(1...maxDays, id: \.self) {
                         Text("\($0)")
                     }
                 }
-                .layoutPriority(.greatestFiniteMagnitude)
-                Picker("", selection: $day) {
-                    ForEach(1...31, id: \.self) {
-                        Text("\($0)")
-                    }
-                }
-                .layoutPriority(.greatestFiniteMagnitude)
+                .pickerStyle(WheelPickerStyle())
+                .fixedSize(horizontal: true, vertical: true)
+                .frame(width: (UIScreen.main.bounds.width / 2) - 20)
+                .compositingGroup()
+                .clipped(antialiased: true)
             }
-            .layoutPriority(.greatestFiniteMagnitude)
+            .padding([.leading, .trailing], 20)
+            VStack {
+                Button(action: {
+                    self.done()
+                }) {
+                    Image("ic-done")
+                        .resizable()
+                        .foregroundColor(.cTextHigh)
+                        .scaledToFit()
+                        .padding(5)
+                }
+            }
+            .frame(height: 50)
+            .padding([.leading, .trailing], 10)
+            .background(Color.white)
+            .zIndex(1)
         }
-        .layoutPriority(.greatestFiniteMagnitude)
-        .zIndex(100000)
+        .onAppear {
+            load()
+        }
     }
     
+    func load() {
+        if selected.count < 2 {
+            selected = ["1", "1"]
+        } else {
+            month = Utils.castInt(value: selected[0])
+            day = Utils.castInt(value: selected[1])
+        }
+    }
+    
+    func monthChange(_ month: Int) {
+        maxDays = Utils.castInt(value: CommonUtils.months[month - 1]["days"])
+    }
+    
+    func done() {
+        selected = [String(month), String(day)]
+        onSelectionDone(selected)
+    }
+    
+}
+
+struct Drawing {
+    var points: [CGPoint] = [CGPoint]()
+}
+
+struct CanvasDrawerDialog: View {
+    @State private var currentDrawing: Drawing = Drawing()
+    @State private var drawings: [Drawing] = [Drawing]()
+    @State private var color: Color = Color.black
+    @State private var lineWidth: CGFloat = 3.0
+    
+    var body: some View {
+        
+        GeometryReader { geometry in
+            Path { path in
+                for drawing in self.drawings {
+                    self.add(drawing: drawing, toPath: &path)
+                }
+                self.add(drawing: self.currentDrawing, toPath: &path)
+            }
+            .stroke(self.color, lineWidth: self.lineWidth)
+                .background(Color(white: 0.95))
+                .gesture(
+                    DragGesture(minimumDistance: 0.1)
+                        .onChanged({ (value) in
+                            let currentPoint = value.location
+                            if currentPoint.y >= 0
+                                && currentPoint.y < geometry.size.height {
+                                self.currentDrawing.points.append(currentPoint)
+                            }
+                        })
+                        .onEnded({ (value) in
+                            self.drawings.append(self.currentDrawing)
+                            self.currentDrawing = Drawing()
+                        })
+            )
+        }
+        .frame(maxHeight: .infinity)
+    }
+    
+    private func add(drawing: Drawing, toPath path: inout Path) {
+        let points = drawing.points
+        if points.count > 1 {
+            for i in 0..<points.count-1 {
+                let current = points[i]
+                let next = points[i+1]
+                path.move(to: current)
+                path.addLine(to: next)
+            }
+        }
+    }
+    
+}
+
+extension Binding {
+    func onChange(_ handler: @escaping (Value) -> Void) -> Binding<Value> {
+        return Binding(
+            get: { self.wrappedValue },
+            set: { selection in
+                self.wrappedValue = selection
+                handler(selection)
+        })
+    }
 }

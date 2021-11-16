@@ -7,7 +7,6 @@
 //
 
 import SwiftUI
-import BottomSheet
 
 struct DynamicFormView: View {
     
@@ -60,6 +59,16 @@ struct DynamicFieldView: View {
                 DynamicFormList(field: $field)
             case "day-month":
                 DynamicFormDayMonth(field: $field)
+            case "date":
+                DynamicFormDate(field: $field)
+            case "time":
+                DynamicFormTime(field: $field)
+            case "checkbox":
+                DynamicFormCheckbox(field: $field)
+            case "canvas":
+                DynamicFormCanvas(field: $field)
+            case "image":
+                DynamicFormImage(field: $field)
             default:
                 Text("A")
             }
@@ -249,12 +258,193 @@ struct DynamicFormTextField: View {
         VStack {
             Text(NSLocalizedString("env\(field.label.capitalized)", comment: field.label))
                 .frame(maxWidth: .infinity, alignment: .leading)
+                .foregroundColor((field.localRequired && field.value.isEmpty) ? Color.cDanger : .cTextMedium)
             TextField("env\(field.label.capitalized)", text: $field.value)
-                .border((field.localRequired && field.value.isEmpty) ? Color.cDanger : Color.cFieldBorder)
                 .cornerRadius(CGFloat(4))
                 .textFieldStyle(RoundedBorderTextFieldStyle())
         }
     }
+}
+
+struct DynamicFormDate: View {
+    
+    @Binding var field: DynamicFormField
+
+    @State private var date = Date()
+
+    var body: some View {
+        VStack {
+            Text(NSLocalizedString("env\(field.label.capitalized)", comment: field.label))
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .foregroundColor((field.localRequired && field.value.isEmpty) ? Color.cDanger : .cTextMedium)
+            DatePicker("", selection: $date.onChange(dateChanged), displayedComponents: .date)
+                .labelsHidden()
+                .clipped()
+        }
+        .onAppear {
+            load()
+        }
+    }
+    
+    func load() {
+        date = Utils.strToDate(value: field.value)
+    }
+    
+    func dateChanged(_ date: Date) {
+        field.value = Utils.dateFormat(date: date)
+    }
+    
+}
+
+struct DynamicFormTime: View {
+    
+    @Binding var field: DynamicFormField
+
+    @State private var date = Date()
+
+    var body: some View {
+        VStack {
+            Text(NSLocalizedString("env\(field.label.capitalized)", comment: field.label))
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .foregroundColor((field.localRequired && field.value.isEmpty) ? Color.cDanger : .cTextMedium)
+            DatePicker("", selection: $date.onChange(dateChanged), displayedComponents: .hourAndMinute)
+                .labelsHidden()
+                .clipped()
+        }
+        .onAppear {
+            load()
+        }
+    }
+    
+    func load() {
+        date = Utils.strToDate(value: "2021-01-01 \(field.value):00")
+    }
+    
+    func dateChanged(_ date: Date) {
+        field.value = Utils.dateFormat(date: date, format: "HH:mm")
+    }
+    
+}
+
+struct DynamicFormCheckbox: View {
+    
+    @Binding var field: DynamicFormField
+    @State private var checked = true
+    
+    var body: some View {
+        VStack {
+            Toggle(NSLocalizedString("env\(field.label.capitalized)", comment: field.label), isOn: $checked.onChange(valueChanged))
+                .foregroundColor((field.localRequired && field.value.isEmpty) ? Color.cDanger : .cTextMedium)
+        }
+        .onAppear {
+            load()
+        }
+    }
+    
+    func load() {
+        if field.value == "Y" {
+            checked = true
+        } else {
+            checked = false
+        }
+    }
+    
+    func valueChanged(_ value: Bool) {
+        field.value = value ? "Y" : "N"
+    }
+    
+}
+
+struct DynamicFormImage: View {
+    
+    @Binding var field: DynamicFormField
+    
+    @State private var showActionSheet = false
+    @State private var shouldPresentImagePicker = false
+    @State private var sourceType: UIImagePickerController.SourceType = .camera
+    
+    @State private var uiImage: UIImage?
+    
+    var body: some View {
+        VStack {
+            Button(action: {
+                showActionSheet = true
+            }) {
+                VStack {
+                    Text(NSLocalizedString("env\(field.label.capitalized)", comment: field.label))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+            }
+            if field.value == "Y" {
+                Button(action: {
+                    
+                }) {
+                    Text("envPreviewResource")
+                }
+            }
+        }
+        .sheet(isPresented: $shouldPresentImagePicker) {
+            CustomImagePickerView(sourceType: sourceType, uiImage: self.$uiImage, onSelectionDone: onSelectionDone)
+        }
+        .actionSheet(isPresented: self.$showActionSheet) {
+            ActionSheet(title: Text("envSelect"), message: Text(""), buttons: [
+                .default(Text("envCamera"), action: {
+                    self.sourceType = .camera
+                    self.shouldPresentImagePicker = true
+                }),
+                .default(Text("envGallery"), action: {
+                    self.sourceType = .photoLibrary
+                    self.shouldPresentImagePicker = true
+                }),
+                .cancel()
+            ])
+        }
+    }
+    
+    func onSelectionDone(_ done: Bool) {
+        self.shouldPresentImagePicker = false
+        field.value = done ? "Y" : field.value
+        if done {
+        }
+    }
+    
+}
+
+struct DynamicFormCanvas: View {
+    
+    @Binding var field: DynamicFormField
+
+    @State private var drawDialog = false
+    
+    var body: some View {
+        VStack {
+            Button(action: {
+                drawDialog = true
+            }) {
+                VStack {
+                    Text(NSLocalizedString("env\(field.label.capitalized)", comment: field.label))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+            }
+            if field.value == "Y" {
+                Button(action: {
+                    
+                }) {
+                    Text("envPreviewResource")
+                }
+            }
+        }
+        .onAppear {
+            load()
+        }
+        .sheet(isPresented: $drawDialog, content: {
+            CanvasDrawerDialog()
+        })
+    }
+    
+    func load() {
+    }
+    
 }
 
 struct DynamicFormDayMonth: View {
@@ -262,6 +452,7 @@ struct DynamicFormDayMonth: View {
     @Binding var field: DynamicFormField
     @State var selected = [String]()
     @State private var selectDialog = false
+    @State var selectedLabel: String = ""
     
     var body: some View {
         Button(action: {
@@ -273,7 +464,7 @@ struct DynamicFormDayMonth: View {
                         .font(selected.isEmpty ? .none : .system(size: 14.0))
                         .foregroundColor((field.localRequired && field.value.isEmpty) ? Color.cDanger : (selected.isEmpty ? .cTextMedium : .cTextHigh))
                     if !selected.isEmpty {
-                        Text("")
+                        Text(selectedLabel)
                             .foregroundColor(.cTextHigh)
                     }
                 }
@@ -285,9 +476,15 @@ struct DynamicFormDayMonth: View {
                     .foregroundColor(.cAccent)
             }
         }
-        .partialSheet(isPresented: $selectDialog) {
-            DayMonthDialogPicker()
-                .layoutPriority(.greatestFiniteMagnitude)
+        .sheet(isPresented: $selectDialog, content: {
+            DayMonthDialogPicker(onSelectionDone: onSelectionDone, selected: $selected)
+        })
+    }
+    
+    func onSelectionDone(_ : [String]) {
+        selectDialog = false
+        if selected.count > 1 {
+            selectedLabel = "\(Utils.castString(value: CommonUtils.months[Utils.castInt(value: selected[0]) - 1]["name"])) \(selected[1])"
         }
     }
     
@@ -302,7 +499,8 @@ struct DynamicFormList: View {
     @State var selectedLabel: String = ""
     
     @State private var selectSourceDynamic = false
-    @State private var selectSourceTable = false
+    @State private var selectSourceTableAuto = false
+    @State private var selectSourceTableFull = false
     @State private var selectSourceServer = false
     
     var body: some View {
@@ -311,7 +509,11 @@ struct DynamicFormList: View {
             case "json":
                 selectSourceDynamic.toggle()
             case "table":
-                selectSourceTable.toggle()
+                if true {
+                    selectSourceTableFull.toggle()
+                } else {
+                    selectSourceTableAuto.toggle()
+                }
             default:
                 selectSourceServer.toggle()
             }
@@ -337,9 +539,12 @@ struct DynamicFormList: View {
         .partialSheet(isPresented: $selectSourceDynamic) {
             SourceDynamicDialogPicker(onSelectionDone: onSelectionDone, selected: $selected, data: field.source, multiple: field.multiple, title: NSLocalizedString("env\(field.label.capitalized)", comment: field.label), isSheet: true)
         }
-        .partialSheet(isPresented: $selectSourceTable) {
+        .partialSheet(isPresented: $selectSourceTableAuto) {
             CustomDialogPicker(onSelectionDone: onSelectionDone, selected: $selected, key: field.source, multiple: field.multiple, title: NSLocalizedString("env\(field.label.capitalized)", comment: field.label), isSheet: true)
         }
+        .sheet(isPresented: $selectSourceTableFull, content: {
+            CustomDialogPicker(onSelectionDone: onSelectionDone, selected: $selected, key: field.source, multiple: field.multiple, title: NSLocalizedString("env\(field.label.capitalized)", comment: field.label), isSheet: true)
+        })
     }
     
     func onSelectionDone(_ : [String]) {
@@ -365,7 +570,8 @@ struct DynamicFormList: View {
             }
         }
         selectSourceDynamic = false
-        selectSourceTable = false
+        selectSourceTableFull = false
+        selectSourceTableAuto = false
         selectSourceServer = false
     }
     

@@ -241,3 +241,48 @@ struct FAB: View {
         .padding(.bottom, Globals.UI_FAB_BOTTOM)
     }
 }
+
+struct CustomImagePickerView: UIViewControllerRepresentable {
+    var sourceType: UIImagePickerController.SourceType = .photoLibrary
+    @Binding var uiImage: UIImage?
+    let onSelectionDone: (_ done: Bool) -> Void
+    
+    func makeCoordinator() -> ImagePickerViewCoordinator {
+        return ImagePickerViewCoordinator(uiImage: $uiImage) { done in
+            onSelectionDone(done)
+        }
+    }
+    
+    func makeUIViewController(context: Context) -> some UIViewController {
+        let pickerController = UIImagePickerController()
+        pickerController.sourceType = sourceType
+        pickerController.delegate = context.coordinator
+        return pickerController
+    }
+    
+    func updateUIViewController(_ uiViewController: UIViewControllerType, context: Context) {
+    }
+}
+
+class ImagePickerViewCoordinator: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
+    @Binding var uiImage: UIImage?
+    let onSelectionDone: (_ done: Bool) -> Void
+
+    init(uiImage: Binding<UIImage?>, onSelectionDone: @escaping (_ done: Bool) -> Void) {
+        self._uiImage = uiImage
+        self.onSelectionDone = onSelectionDone
+    }
+    
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        if let image = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
+            self.uiImage = image
+            self.onSelectionDone(true)
+        } else {
+            self.onSelectionDone(false)
+        }
+    }
+    
+    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        self.onSelectionDone(false)
+    }
+}

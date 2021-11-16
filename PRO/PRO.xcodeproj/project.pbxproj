@@ -38,7 +38,6 @@
 		AC5B9767256CB12E0007500D /* AppMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC5B9766256CB12E0007500D /* AppMenuView.swift */; };
 		AC62C2D925A7D0E600FA5868 /* DynamicFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC62C2D825A7D0E600FA5868 /* DynamicFormView.swift */; };
 		AC62C2DE25A7D12700FA5868 /* DynamicForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC62C2DD25A7D12700FA5868 /* DynamicForm.swift */; };
-		AC657ECF2742E82A009BE0D8 /* BottomSheet in Frameworks */ = {isa = PBXBuildFile; productRef = AC657ECE2742E82A009BE0D8 /* BottomSheet */; };
 		AC6F1F2324FF2978005E57DC /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC6F1F2224FF2978005E57DC /* AppDelegate.swift */; };
 		AC6F1F2524FF2978005E57DC /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC6F1F2424FF2978005E57DC /* SceneDelegate.swift */; };
 		AC6F1F2724FF2978005E57DC /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC6F1F2624FF2978005E57DC /* ContentView.swift */; };
@@ -67,6 +66,8 @@
 		ACA106F52575F77800FDD7E4 /* RealmMVVM.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACA106F42575F77800FDD7E4 /* RealmMVVM.swift */; };
 		ACA15F462591AB2300E92FF2 /* PanelLocationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACA15F452591AB2300E92FF2 /* PanelLocationView.swift */; };
 		ACA15F4C25923BF700E92FF2 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACA15F4B25923BF700E92FF2 /* LocationManager.swift */; };
+		ACB50CC6274321C800F9D6B7 /* CommonUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACB50CC5274321C800F9D6B7 /* CommonUtils.swift */; };
+		ACB50CCB2743563700F9D6B7 /* FileUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACB50CCA2743563700F9D6B7 /* FileUtils.swift */; };
 		ACC05338255057C600B9753A /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACC05337255057C600B9753A /* Extensions.swift */; };
 		ACC053402550629500B9753A /* MediaServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACC0533D2550628900B9753A /* MediaServer.swift */; };
 		ACC053412550629500B9753A /* NetworkService.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACC0533E2550628F00B9753A /* NetworkService.swift */; };
@@ -171,6 +172,8 @@
 		ACA106F42575F77800FDD7E4 /* RealmMVVM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmMVVM.swift; sourceTree = "<group>"; };
 		ACA15F452591AB2300E92FF2 /* PanelLocationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PanelLocationView.swift; sourceTree = "<group>"; };
 		ACA15F4B25923BF700E92FF2 /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LocationManager.swift; path = PRO/Views/Core/Panel/LocationManager.swift; sourceTree = SOURCE_ROOT; };
+		ACB50CC5274321C800F9D6B7 /* CommonUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommonUtils.swift; sourceTree = "<group>"; };
+		ACB50CCA2743563700F9D6B7 /* FileUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileUtils.swift; sourceTree = "<group>"; };
 		ACC05337255057C600B9753A /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		ACC0533D2550628900B9753A /* MediaServer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MediaServer.swift; sourceTree = "<group>"; };
 		ACC0533E2550628F00B9753A /* NetworkService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetworkService.swift; sourceTree = "<group>"; };
@@ -194,7 +197,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				AC5B9762256CAE0F0007500D /* PartialSheet in Frameworks */,
-				AC657ECF2742E82A009BE0D8 /* BottomSheet in Frameworks */,
 				9361B02F5E1F9A41BF4AD835 /* Pods_PRO.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -459,6 +461,8 @@
 				AC34452F2563880F00C0D668 /* DashboardRouter.swift */,
 				AC78D2E626D54A2D00674A4F /* EnvObjects.swift */,
 				AC78D2EB26D54FA900674A4F /* DialogPickers.swift */,
+				ACB50CC5274321C800F9D6B7 /* CommonUtils.swift */,
+				ACB50CCA2743563700F9D6B7 /* FileUtils.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -588,7 +592,6 @@
 			name = PRO;
 			packageProductDependencies = (
 				AC5B9761256CAE0F0007500D /* PartialSheet */,
-				AC657ECE2742E82A009BE0D8 /* BottomSheet */,
 			);
 			productName = PRO;
 			productReference = AC6F1F1F24FF2978005E57DC /* PRO.app */;
@@ -668,7 +671,6 @@
 			mainGroup = AC6F1F1624FF2978005E57DC;
 			packageReferences = (
 				AC5B9760256CAE0F0007500D /* XCRemoteSwiftPackageReference "PartialSheet" */,
-				AC657ECD2742E82A009BE0D8 /* XCRemoteSwiftPackageReference "BottomSheet" */,
 			);
 			productRefGroup = AC6F1F2024FF2978005E57DC /* Products */;
 			projectDirPath = "";
@@ -911,8 +913,10 @@
 				ACC053412550629500B9753A /* NetworkService.swift in Sources */,
 				AC3444DD2562CCE200C0D668 /* SyncService.swift in Sources */,
 				ACC1963925A4CAA200C5EE3E /* RouteListView.swift in Sources */,
+				ACB50CCB2743563700F9D6B7 /* FileUtils.swift in Sources */,
 				AC62C2D925A7D0E600FA5868 /* DynamicFormView.swift in Sources */,
 				AC893F932549C1EF009E1C43 /* Utils.swift in Sources */,
+				ACB50CC6274321C800F9D6B7 /* CommonUtils.swift in Sources */,
 				AC5B9767256CB12E0007500D /* AppMenuView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1268,14 +1272,6 @@
 				minimumVersion = 2.1.11;
 			};
 		};
-		AC657ECD2742E82A009BE0D8 /* XCRemoteSwiftPackageReference "BottomSheet" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/danielsaidi/BottomSheet.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.1.0;
-			};
-		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -1283,11 +1279,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = AC5B9760256CAE0F0007500D /* XCRemoteSwiftPackageReference "PartialSheet" */;
 			productName = PartialSheet;
-		};
-		AC657ECE2742E82A009BE0D8 /* BottomSheet */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = AC657ECD2742E82A009BE0D8 /* XCRemoteSwiftPackageReference "BottomSheet" */;
-			productName = BottomSheet;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
