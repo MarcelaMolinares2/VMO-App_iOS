@@ -77,6 +77,21 @@ class AdvertisingMaterialDeliverySet: Object {
     var set: AdvertisingMaterialSet = AdvertisingMaterialSet()
 }
 
+class AdvertisingMaterialRequest: Object, Codable, SyncEntity {
+    @Persisted(primaryKey: true) var objectId: ObjectId
+    @Persisted(indexed: true) var id = 0
+    @Persisted var materials: String = "" //Materials IDs Separated by commas
+    @Persisted var date: String = ""
+    @Persisted var comment: String = ""
+    @Persisted var transactionStatus: String? = ""
+    @Persisted var transactionPending: String? = ""
+    @Persisted var transactionResponse: String? = ""
+    
+    private enum CodingKeys: String, CodingKey {
+        case id = "id"
+    }
+}
+
 class Group: Object, Codable, SyncEntity {
     @Persisted(primaryKey: true) var objectId: ObjectId
     @Persisted(indexed: true) var id = 0
