@@ -53,6 +53,9 @@ struct DynamicFormField: Identifiable, Decodable {
     var minValue: String?
     var maxValue: String?
     var value = ""
+    var localEditable: Bool = true
+    var localRequired: Bool = false
+    var localVisible: Bool = true
     
     private enum CodingKeys: String, CodingKey {
         case key, label, description, controlType, dataType, requiredUserTypes, visible, editable, multiple, maxLength, multiline, mask, acceptedValues, acceptOtherValue, defaultValue, source, sourceType, condition, countries, cities, options, minValue, maxValue

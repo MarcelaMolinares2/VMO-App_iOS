@@ -2,6 +2,15 @@
   "object": {
     "pins": [
       {
+        "package": "BottomSheet",
+        "repositoryURL": "https://github.com/danielsaidi/BottomSheet.git",
+        "state": {
+          "branch": null,
+          "revision": "940d2ebde76d6546931d455ae9dc267b704fb4b9",
+          "version": "0.1.0"
+        }
+      },
+      {
         "package": "PartialSheet",
         "repositoryURL": "https://github.com/AndreaMiotto/PartialSheet.git",
         "state": {
