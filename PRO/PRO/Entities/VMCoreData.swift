@@ -92,38 +92,6 @@ class AdvertisingMaterialRequest: Object, Codable, SyncEntity {
     }
 }
 
-class Group: Object, Codable, SyncEntity {
-    @Persisted(primaryKey: true) var objectId: ObjectId
-    @Persisted(indexed: true) var id = 0
-    
-    @Persisted var transactionStatus: String? = ""
-    @Persisted var transactionPending: String? = ""
-    @Persisted var transactionResponse: String? = ""
-    
-    @Persisted var name: String? = ""
-    @Persisted var groupMemberList = List<GroupMember>()
-    
-    private enum CodingKeys: String, CodingKey {
-        case id = "id"
-    }
-    
-}
-
-class GroupMember: Object {
-    @Persisted(primaryKey: true) var objectId: ObjectId
-    @Persisted var id: Int = 0
-    @Persisted var type: String?
-    @Persisted var idPanel: Int
-    
-}
-
-/*
-var neighborhood: String? { get set }
-var institution: String? { get set }
-var specialty: Specialty? { get set }
-var contacts: List<Contact> { get set }
-*/
-
 protocol SyncEntity {
     var objectId: ObjectId { get set }
     var id: Int { get set }
@@ -488,7 +456,44 @@ class Doctor: Object, Codable, Panel, SyncEntity {
     }
 }
 
+class Group: Object, Codable, SyncEntity {
+    @Persisted(primaryKey: true) var objectId: ObjectId
+    @Persisted(indexed: true) var id = 0
+    
+    @Persisted var transactionStatus: String? = ""
+    @Persisted var transactionPending: String? = ""
+    @Persisted var transactionResponse: String? = ""
+    
+    @Persisted var name: String? = ""
+    @Persisted var groupMemberList = List<GroupMember>()
+    
+    private enum CodingKeys: String, CodingKey {
+        case id = "id"
+    }
+    
+}
 
+class GroupMember: Object {
+    @Persisted(primaryKey: true) var objectId: ObjectId
+    @Persisted var id: Int = 0
+    @Persisted var type: String?
+    @Persisted var idPanel: Int
+    
+}
+
+class MediaItem: Object, Decodable, SyncEntity {
+    @Persisted(primaryKey: true) var objectId: ObjectId
+    @Persisted(indexed: true) var id = 0
+    @Persisted var transactionStatus: String? = "PENDING"
+    @Persisted var transactionPending: String? = ""
+    @Persisted var transactionResponse: String? = ""
+    
+    @Persisted var table: String = ""
+    @Persisted var field: String = ""
+    @Persisted var item: Int = 0
+    @Persisted var date: String = ""
+    @Persisted var ext: String = ""
+}
 
 class MovementSimple: Object, Decodable, SyncEntity {
     @Persisted(primaryKey: true) var objectId: ObjectId

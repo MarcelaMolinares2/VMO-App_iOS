@@ -68,7 +68,7 @@ struct DynamicFieldView: View {
             case "canvas":
                 DynamicFormCanvas(field: $field)
             case "image":
-                DynamicFormImage(field: $field)
+                DynamicFormImage(field: $field, options: options)
             default:
                 Text("A")
             }
@@ -358,9 +358,11 @@ struct DynamicFormCheckbox: View {
 struct DynamicFormImage: View {
     
     @Binding var field: DynamicFormField
+    var options: DynamicFormFieldOptions
     
     @State private var showActionSheet = false
     @State private var shouldPresentImagePicker = false
+    @State private var shouldPresentImageViewer = false
     @State private var sourceType: UIImagePickerController.SourceType = .camera
     
     @State private var uiImage: UIImage?
@@ -373,31 +375,39 @@ struct DynamicFormImage: View {
                 VStack {
                     Text(NSLocalizedString("env\(field.label.capitalized)", comment: field.label))
                         .frame(maxWidth: .infinity, alignment: .leading)
+                        .foregroundColor((field.localRequired && field.value.isEmpty) ? Color.cDanger : .cTextMedium)
                 }
+                .frame(height: 44)
+            }
+            .buttonStyle(BorderlessButtonStyle())
+            .actionSheet(isPresented: self.$showActionSheet) {
+                ActionSheet(title: Text("envSelect"), message: Text(""), buttons: [
+                    .default(Text("envCamera"), action: {
+                        self.sourceType = .camera
+                        self.shouldPresentImagePicker = true
+                    }),
+                    .default(Text("envGallery"), action: {
+                        self.sourceType = .photoLibrary
+                        self.shouldPresentImagePicker = true
+                    }),
+                    .cancel()
+                ])
             }
             if field.value == "Y" {
                 Button(action: {
-                    
+                    shouldPresentImageViewer = true
                 }) {
                     Text("envPreviewResource")
+                }
+                .frame(height: 40)
+                .buttonStyle(BorderlessButtonStyle())
+                .popover(isPresented: $shouldPresentImageViewer) {
+                    ImageViewerDialog(table: options.table, field: field.key, id: options.item)
                 }
             }
         }
         .sheet(isPresented: $shouldPresentImagePicker) {
             CustomImagePickerView(sourceType: sourceType, uiImage: self.$uiImage, onSelectionDone: onSelectionDone)
-        }
-        .actionSheet(isPresented: self.$showActionSheet) {
-            ActionSheet(title: Text("envSelect"), message: Text(""), buttons: [
-                .default(Text("envCamera"), action: {
-                    self.sourceType = .camera
-                    self.shouldPresentImagePicker = true
-                }),
-                .default(Text("envGallery"), action: {
-                    self.sourceType = .photoLibrary
-                    self.shouldPresentImagePicker = true
-                }),
-                .cancel()
-            ])
         }
     }
     
@@ -405,6 +415,7 @@ struct DynamicFormImage: View {
         self.shouldPresentImagePicker = false
         field.value = done ? "Y" : field.value
         if done {
+            MediaUtils.store(uiImage: uiImage, table: options.table, field: field.key, id: options.item)
         }
     }
     

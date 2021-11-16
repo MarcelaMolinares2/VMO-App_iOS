@@ -16,6 +16,14 @@ class GenericDao {
     init(realm: Realm) {
         self.realm = realm
     }
+    
+    func next<T: Object>(from: T.Type, key: String = "id") -> Int {
+        var value = 0
+        if let max: Int = realm.objects(from.self).max(ofProperty: key) {
+            value = max
+        }
+        return value < 1000000 ? 1000000 : value + 1
+    }
 }
 
 class BrickDao: GenericDao {
@@ -138,13 +146,7 @@ class GroupDao: GenericDao {
         }
     }
     
-    func delete(group: Group){
-        try! realm.write {
-            realm.delete(group)
-        }
-    }
-    
-    func update(group: Group){
+    func delete(group: Group) {
         try! realm.write {
             realm.delete(group)
         }
@@ -254,6 +256,26 @@ class MaterialDeliveryDao: GenericDao {
         } else {
             try! realm.write {
                 realm.add(deliveries)
+            }
+        }
+    }
+    
+}
+
+class MediaItemDao: GenericDao {
+    
+    func store(mediaItem: MediaItem) {
+        if let exists = realm.objects(MediaItem.self)
+            .filter("table == '\(mediaItem.table)'")
+            .filter("field == '\(mediaItem.field)'")
+            .filter("item == \(mediaItem.item)")
+            .first {
+            try! realm.write {
+                exists.date = Utils.currentDateTime()
+            }
+        } else {
+            try! realm.write {
+                realm.add(mediaItem)
             }
         }
     }

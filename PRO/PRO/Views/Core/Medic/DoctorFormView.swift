@@ -9,40 +9,44 @@
 import SwiftUI
 import RealmSwift
 
-struct MedicFormView: View {
+struct DoctorFormView: View {
     
     @EnvironmentObject var viewRouter: ViewRouter
     @StateObject var tabRouter = TabRouter()
     
-    var medic: Doctor?
+    var doctor: Doctor?
     var plainData = "{}"
     var dynamicData = Dictionary<String, Any>()
     @State var form = DynamicForm(tabs: [DynamicFormTab]())
+    @State var options = DynamicFormFieldOptions(table: "doctor", op: "")
     
     init(viewRouter: ViewRouter) {
         if viewRouter.data.id > 0 {
-            medic = try! Realm().object(ofType: Doctor.self, forPrimaryKey: viewRouter.data.id)
-            plainData = try! Utils.objToJSON(medic)
+            doctor = try! Realm().object(ofType: Doctor.self, forPrimaryKey: viewRouter.data.id)
+            plainData = try! Utils.objToJSON(doctor)
             print(plainData)
         } else {
-            medic = Doctor()
-            //medic?.id = UUID()
+            doctor = Doctor()
+            doctor?.id = GenericDao(realm: try! Realm()).next(from: Doctor.self)
         }
+        print(doctor?.id ?? -1)
+        options.op = viewRouter.data.id > 0 ? "update" : "create"
+        options.item = doctor?.id ?? 0
         dynamicData = Utils.jsonDictionary(string: Config.get(key: "P_DOC_DYNAMIC_FORM").complement ?? "")
     }
     
     var body: some View {
         VStack {
-            HeaderToggleView(couldSearch: false, title: medic?.name ?? "modMedic", icon: Image("ic-medic"), color: Color.cPanelMedic)
+            HeaderToggleView(couldSearch: false, title: doctor?.name ?? "modMedic", icon: Image("ic-medic"), color: Color.cPanelMedic)
             switch tabRouter.current {
             case "LOCATIONS":
-                PanelLocationView(panel: medic, couldAdd: true)
+                PanelLocationView(panel: doctor, couldAdd: true)
             default:
                 ZStack(alignment: .bottomTrailing) {
                     ForEach(form.tabs, id: \.id) { tab in
                         if tab.key == tabRouter.current {
                             if let ix = form.tabs.firstIndex(where: { $0.key == tabRouter.current }) {
-                                DynamicFormView(form: $form, tab: $form.tabs[ix], options: DynamicFormFieldOptions(table: "doctor", op: viewRouter.data.id > 0 ? "update" : "create"))
+                                DynamicFormView(form: $form, tab: $form.tabs[ix], options: options)
                             }
                         }
                     }

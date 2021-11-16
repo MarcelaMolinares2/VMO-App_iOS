@@ -150,6 +150,7 @@ class DynamicConditionRow: Decodable {
 class DynamicFormFieldOptions {
     var table: String = ""
     var op: String = ""
+    var item: Int = 0
     
     init(table: String, op: String) {
         self.table = table
