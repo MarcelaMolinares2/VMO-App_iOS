@@ -23,7 +23,6 @@
 
 #include <functional>
 #include <memory>
-#include <vector>
 
 namespace realm {
 class Realm;
@@ -54,9 +53,7 @@ public:
 
 private:
     std::shared_ptr<_impl::RealmCoordinator> m_coordinator;
-    std::shared_ptr<SyncSession> m_session;
-    std::vector<uint64_t> m_registered_callbacks;
-    mutable std::mutex m_mutex;
+    util::AtomicSharedPtr<SyncSession> m_session;
 };
 
 } // namespace realm

@@ -32,13 +32,11 @@
     return self;
 }
 
-std::function<void(realm::util::Optional<realm::app::AppError>)>
-RLMWrapCompletion(RLMProviderClientOptionalErrorBlock completion) {
-    return [completion](realm::util::Optional<realm::app::AppError> error) {
-        if (error && error->error_code) {
-            return completion(RLMAppErrorToNSError(*error));
-        }
-        completion(nil);
-    };
+- (void)handleResponse:(realm::util::Optional<realm::app::AppError>)error
+            completion:(RLMProviderClientOptionalErrorBlock)completion {
+    if (error && error->error_code) {
+        return completion(RLMAppErrorToNSError(*error));
+    }
+    completion(nil);
 }
 @end

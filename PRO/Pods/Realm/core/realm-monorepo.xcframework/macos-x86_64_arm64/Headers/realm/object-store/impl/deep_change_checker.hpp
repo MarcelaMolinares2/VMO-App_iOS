@@ -42,14 +42,14 @@ class RealmCoordinator;
 
 struct ListChangeInfo {
     TableKey table_key;
-    ObjKey obj_key;
-    ColKey col_key;
+    int64_t row_key;
+    int64_t col_key;
     CollectionChangeBuilder* changes;
 };
 
 struct TransactionChangeInfo {
     std::vector<ListChangeInfo> lists;
-    std::unordered_map<TableKey, ObjectChangeSet> tables;
+    std::unordered_map<TableKeyType, ObjectChangeSet> tables;
     bool track_all;
     bool schema_changed;
 };
@@ -85,11 +85,7 @@ public:
      *
      * @return True if the object was changed, false otherwise.
      */
-    bool operator()(ObjKey object_key);
-    bool operator()(int64_t i)
-    {
-        return operator()(ObjKey(i));
-    }
+    bool operator()(ObjKeyType object_key);
 
     /**
      * Search for related tables within the specified `table`.
@@ -151,7 +147,7 @@ protected:
 private:
     RelatedTables const& m_related_tables;
 
-    std::unordered_map<TableKey, std::unordered_set<ObjKey>> m_not_modified;
+    std::unordered_map<TableKeyType, std::unordered_set<ObjKeyType>> m_not_modified;
 
     struct Path {
         ObjKey obj_key;
@@ -161,17 +157,17 @@ private:
     std::array<Path, 4> m_current_path;
 
     /**
-     * Checks if a specific object, identified by it's `ObjKey` in a given `Table` was changed.
+     * Checks if a specific object, identified by it's `ObjKeyType` in a given `Table` was changed.
      *
-     * @param table The `Table` that contains the `ObjKey` that will be checked.
-     * @param object_key The `ObjKey` identifying the object to be checked for changes.
+     * @param table The `Table` that contains the `ObjKeyType` that will be checked.
+     * @param object_key The `ObjKeyType` identifying the object to be checked for changes.
      * @param filtered_columns A `std::vector` of all `ColKey`s filtered in any of the `NotificationCallbacks`.
      * @param depth Determines how deep the search will be continued if the change could not be found
      *              on the first level.
      *
      * @return True if the object was changed, false otherwise.
      */
-    bool check_row(Table const& table, ObjKey object_key, const std::vector<ColKey>& filtered_columns,
+    bool check_row(Table const& table, ObjKeyType object_key, const std::vector<ColKey>& filtered_columns,
                    size_t depth = 0);
 
     /**
@@ -216,7 +212,7 @@ public:
      *
      * @return True if the `Object` was changed, false otherwise.
      */
-    bool operator()(ObjKey object_key);
+    bool operator()(int64_t object_key);
 
 private:
     friend class ObjectKeyPathChangeChecker;
@@ -231,8 +227,8 @@ private:
      * @param table The `TableKey` for the current depth.
      * @param object_key_value The `ObjKeyType` that is to be checked for changes.
      */
-    void find_changed_columns(std::vector<ColKey>& changed_columns, const KeyPath& key_path, size_t depth,
-                              const Table& table, const ObjKey& object_key_value);
+    void find_changed_columns(std::vector<int64_t>& changed_columns, const KeyPath& key_path, size_t depth,
+                              const Table& table, const ObjKeyType& object_key_value);
 };
 
 /**
@@ -257,7 +253,7 @@ public:
      *
      * @return A list of columns changed in the root `Object`.
      */
-    std::vector<ColKey> operator()(ObjKey object_key);
+    std::vector<int64_t> operator()(int64_t object_key);
 };
 
 

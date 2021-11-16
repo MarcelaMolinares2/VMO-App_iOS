@@ -610,8 +610,6 @@ util::Optional<typename util::RemoveOptional<T>::type> bptree_min_max(const BPlu
 {
     AggType agg;
     if (tree.size() == 0) {
-        if (return_ndx)
-            *return_ndx = not_found;
         return util::none;
     }
 

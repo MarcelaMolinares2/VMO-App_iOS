@@ -95,25 +95,6 @@ public final class List<Element: RealmCollectionValue>: RLMSwiftCollectionBase {
         return notFoundToNil(index: rlmArray.indexOfObject(with: predicate))
     }
 
-    /**
-     Returns the index of the first object in the list matching the query, or `nil` if no objects match.
-
-     - Note: This should only be used with classes using the `@Persistable` property declaration.
-
-     - Usage:
-     ```
-     obj.index(matching: { $0.fooCol < 456 })
-     ```
-
-     - Note: See ``Query`` for more information on what query operations are available.
-
-     - parameter isIncluded: The query closure with which to filter the objects.
-    */
-    public func index(matching isIncluded: ((Query<Element>) -> Query<Element>)) -> Int? {
-        let isPrimitive = rlmArray.type != .object
-        return index(matching: isIncluded(Query<Element>(isPrimitive: isPrimitive)).predicate)
-    }
-
     // MARK: Object Retrieval
 
     /**
@@ -200,26 +181,6 @@ public final class List<Element: RealmCollectionValue>: RLMSwiftCollectionBase {
      */
     public func filter(_ predicate: NSPredicate) -> Results<Element> {
         return Results<Element>(_rlmCollection.objects(with: predicate))
-    }
-
-    /**
-     Returns a `Results` containing all objects matching the given query in the list.
-
-     - Note: This should only be used with classes using the `@Persistable` property declaration.
-
-     - Usage:
-     ```
-     myList.where {
-        ($0.fooCol > 5) && ($0.barCol == "foobar")
-     }
-     ```
-
-     - Note: See ``Query`` for more information on what query operations are available.
-
-     - parameter isIncluded: The query with which to filter the objects.
-     */
-    public func `where`(_ isIncluded: ((Query<Element>) -> Query<Element>)) -> Results<Element> {
-        return filter(isIncluded(Query()).predicate)
     }
 
     // MARK: Sorting

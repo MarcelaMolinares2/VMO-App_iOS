@@ -589,3 +589,69 @@ struct PanelTypeMenu: View {
         }
     }
 }
+
+struct RouteTypeMenu: View {
+    let onRouteTypeSelected: (_ type: String) -> Void
+    
+    @State var nameRoute: String
+    @Binding var isPresented: Bool
+    @State private var customGridItems: [GenericGridItem] = []
+    @State var columns: [GridItem] = []
+    
+    var body: some View {
+        VStack {
+            HStack {
+                Text(nameRoute)
+                Spacer()
+            }
+            .padding(10)
+            .foregroundColor(.white)
+            .background(Color.cPrimaryLight.opacity(1))
+            HStack {
+                Spacer()
+                Button(action: {
+                    onRouteTypeSelected("U")
+                }) {
+                    VStack {
+                        Image("ic-edit")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
+                            .foregroundColor(.cPrimaryLight)
+                        Text(NSLocalizedString("envEdit", comment: ""))
+                            .foregroundColor(.cPrimary)
+                            .lineLimit(1)
+                            .font(.system(size: CGFloat(15)))
+                    }
+                }
+                .padding([.top, .bottom], 10)
+                Spacer()
+                Button(action: {
+                    onRouteTypeSelected("D")
+                }) {
+                    VStack {
+                        Image("ic-trash")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
+                            .foregroundColor(.cPrimaryLight)
+                        Text(NSLocalizedString("Delete", comment: ""))
+                            .foregroundColor(.cPrimary)
+                            .lineLimit(1)
+                            .font(.system(size: CGFloat(15)))
+                    }
+                }
+                .padding([.top, .bottom], 10)
+                Spacer()
+            }
+            .padding(.bottom, 2)
+            .onAppear {
+                //loadData()
+            }
+        }
+    }
+    
+    func loadData() {
+        print(nameRoute)
+    }
+}

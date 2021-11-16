@@ -114,11 +114,11 @@ public:
         operator++();
         return tmp;
     }
-    bool operator!=(const iterator& rhs) const
+    bool operator!=(const iterator& rhs)
     {
         return m_ndx != rhs.m_ndx;
     }
-    bool operator==(const iterator& rhs) const
+    bool operator==(const iterator& rhs)
     {
         return m_ndx == rhs.m_ndx;
     }

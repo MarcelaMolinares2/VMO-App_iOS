@@ -106,8 +106,7 @@ public:
         return m_obj.is_valid();
     }
 
-    // Freeze a copy of this object in the context of the frozen Realm.
-    // Equivalent to producing a thread-safe reference and resolving it in the frozen realm.
+    // Returns a frozen copy of this object.
     Object freeze(std::shared_ptr<Realm> frozen_realm) const;
 
     // Returns whether or not this Object is frozen.

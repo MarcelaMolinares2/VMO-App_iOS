@@ -69,3 +69,5 @@
 "addRouters" = "Panels";
 "noneGroups" = "Please add panels";
 "noneNameGroups" = "Please enter router name";
+
+"envDelete" = "Delete";

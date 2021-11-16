@@ -122,7 +122,7 @@ class GroupDao: GenericDao {
         return Array(realm.objects(Group.self).sorted(byKeyPath: "objectId"))
     }
     
-    func by(id: String) -> Group? {
+    func by(id: Int) -> Group? {
         return realm.objects(Group.self).filter("id == \(id)").first
     }
     
@@ -135,6 +135,18 @@ class GroupDao: GenericDao {
             try! realm.write {
                 realm.add(groups)
             }
+        }
+    }
+    
+    func delete(group: Group){
+        try! realm.write {
+            realm.delete(group)
+        }
+    }
+    
+    func update(group: Group){
+        try! realm.write {
+            realm.delete(group)
         }
     }
     

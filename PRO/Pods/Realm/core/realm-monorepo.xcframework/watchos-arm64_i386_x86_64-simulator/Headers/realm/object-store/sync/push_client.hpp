@@ -19,16 +19,14 @@
 #ifndef PUSH_CLIENT_HPP
 #define PUSH_CLIENT_HPP
 
+#include <realm/object-store/sync/auth_request_client.hpp>
+#include <realm/object-store/sync/app_service_client.hpp>
 #include <realm/util/optional.hpp>
-
-#include <memory>
 #include <string>
+#include <map>
 
 namespace realm {
-class SyncUser;
 namespace app {
-class AuthRequestClient;
-struct AppError;
 
 class PushClient {
 public:
@@ -37,11 +35,11 @@ public:
         : m_service_name(service_name)
         , m_app_id(app_id)
         , m_timeout_ms(timeout_ms)
-        , m_auth_request_client(std::move(auth_request_client))
+        , m_auth_request_client(auth_request_client)
     {
     }
 
-    ~PushClient();
+    ~PushClient() = default;
     PushClient(const PushClient&) = default;
     PushClient(PushClient&&) = default;
     PushClient& operator=(const PushClient&) = default;
@@ -64,6 +62,8 @@ public:
                            std::function<void(util::Optional<AppError>)> completion_block);
 
 private:
+    friend class App;
+
     std::string m_service_name;
     std::string m_app_id;
     uint64_t m_timeout_ms;

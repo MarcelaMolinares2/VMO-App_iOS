@@ -29,9 +29,9 @@ namespace realm {
 
 class DictionaryClusterTree;
 
-class Dictionary final : public CollectionBaseImpl<CollectionBase, Dictionary> {
+class Dictionary final : public CollectionBaseImpl<CollectionBase> {
 public:
-    using Base = CollectionBaseImpl<CollectionBase, Dictionary>;
+    using Base = CollectionBaseImpl<CollectionBase>;
     class Iterator;
 
     Dictionary() {}
@@ -46,7 +46,10 @@ public:
     }
     Dictionary& operator=(const Dictionary& other);
 
-    using Base::operator==;
+    bool operator==(const Dictionary& other) const noexcept
+    {
+        return CollectionBaseImpl<CollectionBase>::operator==(other);
+    }
 
     DataType get_key_data_type() const;
     DataType get_value_data_type() const;
@@ -71,6 +74,8 @@ public:
     void distinct(std::vector<size_t>& indices, util::Optional<bool> sort_order = util::none) const final;
     void sort_keys(std::vector<size_t>& indices, bool ascending = true) const;
     void distinct_keys(std::vector<size_t>& indices, util::Optional<bool> sort_order = util::none) const;
+
+    void create();
 
     // first points to inserted/updated element.
     // second is true if the element was inserted
@@ -111,7 +116,7 @@ public:
     template <class T>
     void for_all_values(T&& f)
     {
-        if (update()) {
+        if (m_clusters) {
             ArrayMixed leaf(m_obj.get_alloc());
             // Iterate through cluster and call f on each value
             auto trv_func = [&leaf, &f](const Cluster* cluster) {
@@ -130,7 +135,7 @@ public:
     template <class T, class Func>
     void for_all_keys(Func&& f)
     {
-        if (update()) {
+        if (m_clusters) {
             typename ColumnTypeTraits<T>::cluster_leaf_type leaf(m_obj.get_alloc());
             ColKey col = m_clusters->get_keys_column_key();
             // Iterate through cluster and call f on each value
@@ -174,8 +179,6 @@ private:
     template <typename T, typename Op>
     friend class CollectionColumnAggregate;
     friend class DictionaryLinkValues;
-    friend struct CollectionIterator<Dictionary>;
-
     mutable std::unique_ptr<DictionaryClusterTree> m_clusters;
     DataType m_key_type = type_String;
 
@@ -185,7 +188,7 @@ private:
     static constexpr uint64_t s_hash_mask = 0x7FFFFFFFFFFFFFFFULL;
 #endif
 
-    bool init_from_parent(bool allow_create) const;
+    bool init_from_parent() const final;
     Mixed do_get(const ClusterNode::State&) const;
     Mixed do_get_key(const ClusterNode::State&) const;
     std::pair<Mixed, Mixed> do_get_pair(const ClusterNode::State&) const;
@@ -194,12 +197,7 @@ private:
     void swap_content(Array& fields1, Array& fields2, size_t index1, size_t index2);
     ObjKey handle_collision_in_erase(const Mixed& key, ObjKey k, ClusterNode::State& state);
 
-    UpdateStatus update_if_needed() const final;
-    UpdateStatus ensure_created() final;
-    inline bool update() const
-    {
-        return update_if_needed() != UpdateStatus::Detached;
-    }
+    friend struct CollectionIterator<Dictionary>;
 };
 
 class Dictionary::Iterator : public ClusterTree::Iterator {
@@ -318,9 +316,13 @@ public:
     }
 
     // Overrides of ObjCollectionBase:
-    UpdateStatus do_update_if_needed() const final
+    bool do_update_if_needed() const final
     {
         return m_source.update_if_needed();
+    }
+    bool do_init_from_parent() const final
+    {
+        return m_source.init_from_parent();
     }
     BPlusTree<ObjKey>* get_mutable_tree() const
     {

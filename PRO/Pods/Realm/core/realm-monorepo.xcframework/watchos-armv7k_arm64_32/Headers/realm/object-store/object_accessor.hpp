@@ -1,3 +1,4 @@
+
 ////////////////////////////////////////////////////////////////////////////
 //
 // Copyright 2016 Realm Inc.
@@ -43,12 +44,6 @@ void Object::set_property_value(ContextType& ctx, StringData prop_name, ValueTyp
 {
     auto& property = property_for_name(prop_name);
     validate_property_for_setter(property);
-    set_property_value_impl(ctx, property, value, policy, false);
-}
-
-template <typename ValueType, typename ContextType>
-void Object::set_property_value(ContextType& ctx, const Property& property, ValueType value, CreatePolicy policy)
-{
     set_property_value_impl(ctx, property, value, policy, false);
 }
 

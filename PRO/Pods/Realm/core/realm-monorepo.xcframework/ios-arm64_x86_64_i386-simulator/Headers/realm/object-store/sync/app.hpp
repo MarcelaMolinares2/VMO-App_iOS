@@ -56,7 +56,7 @@ class App : public std::enable_shared_from_this<App>,
 public:
     struct Config {
         std::string app_id;
-        std::shared_ptr<GenericNetworkTransport> transport;
+        GenericNetworkTransport::NetworkTransportFactory transport_generator;
         util::Optional<std::string> base_url;
         util::Optional<std::string> local_app_name;
         util::Optional<std::string> local_app_version;

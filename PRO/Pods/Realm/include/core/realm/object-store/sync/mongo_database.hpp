@@ -16,10 +16,10 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-#ifndef REALM_OS_MONGO_DATABASE_HPP
-#define REALM_OS_MONGO_DATABASE_HPP
+#ifndef MONGO_DATABASE_HPP
+#define MONGO_DATABASE_HPP
 
-#include <memory>
+#include <external/json/json.hpp>
 #include <string>
 
 namespace realm {
@@ -74,4 +74,4 @@ private:
 } // namespace app
 } // namespace realm
 
-#endif /* REALM_OS_MONGO_DATABASE_HPP */
+#endif /* mongo_database_h */

@@ -25,7 +25,7 @@ namespace realm {
 
 class DescriptorOrdering;
 class Table;
-class TableView;
+class ConstTableView;
 
 class ObjList {
 public:
@@ -97,7 +97,7 @@ public:
     }
 
     template <class T>
-    TableView find_all(ColKey column_key, T value) const;
+    ConstTableView find_all(ColKey column_key, T value) const;
 };
 }
 

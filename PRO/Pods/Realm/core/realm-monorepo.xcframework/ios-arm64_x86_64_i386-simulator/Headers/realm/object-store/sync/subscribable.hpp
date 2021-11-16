@@ -19,10 +19,9 @@
 #ifndef REALM_SUBSCRIBABLE_HPP
 #define REALM_SUBSCRIBABLE_HPP
 
-#include <atomic>
 #include <cstdint>
-#include <mutex>
 #include <unordered_map>
+#include <mutex>
 
 namespace realm {
 

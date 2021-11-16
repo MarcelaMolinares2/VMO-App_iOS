@@ -14,7 +14,7 @@ struct ChangesetEncoder : InstructionHandler {
 
     Buffer release() noexcept;
     void reset() noexcept;
-    Buffer& buffer() noexcept;
+    const Buffer& buffer() const noexcept;
     InternString intern_string(StringData);
 
     void set_intern_string(uint32_t index, StringBufferRange) override;
@@ -73,9 +73,13 @@ private:
     StringData m_string_range;
 };
 
+template <class Allocator>
+void encode_changeset(const Changeset&, util::AppendBuffer<char, Allocator>& out_buffer);
+
+
 // Implementation
 
-inline auto ChangesetEncoder::buffer() noexcept -> Buffer&
+inline auto ChangesetEncoder::buffer() const noexcept -> const Buffer&
 {
     return m_buffer;
 }
@@ -98,12 +102,13 @@ inline StringData ChangesetEncoder::get_string(StringBufferRange range) const no
     return StringData{data, size};
 }
 
-inline void encode_changeset(const Changeset& changeset, ChangesetEncoder::Buffer& out_buffer)
+template <class Allocator>
+void encode_changeset(const Changeset& changeset, util::AppendBuffer<char, Allocator>& out_buffer)
 {
     ChangesetEncoder encoder;
-    swap(encoder.buffer(), out_buffer);
     encoder.encode_single(changeset); // Throws
-    swap(encoder.buffer(), out_buffer);
+    auto& buffer = encoder.buffer();
+    out_buffer.append(buffer.data(), buffer.size()); // Throws
 }
 
 } // namespace sync

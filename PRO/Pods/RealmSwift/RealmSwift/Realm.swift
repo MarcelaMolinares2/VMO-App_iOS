@@ -1039,13 +1039,16 @@ extension Realm {
      - parameter configuration: A configuration object to use when opening the Realm.
      - parameter downloadBeforeOpen: When opening the Realm should first download
      all data from the server.
+     - parameter queue: An optional dispatch queue to confine the Realm to. If
+     given, this Realm instance can be used from within
+     blocks dispatched to the given queue rather than on the
+     current thread.
      - throws: An `NSError` if the Realm could not be initialized.
      - returns: An open Realm.
      */
-    @MainActor
     public init(configuration: Realm.Configuration = .defaultConfiguration,
-                downloadBeforeOpen: OpenBehavior = .never) async throws {
-        var rlmRealm: RLMRealm?
+                downloadBeforeOpen: OpenBehavior = .never,
+                queue: DispatchQueue? = nil) async throws {
         switch downloadBeforeOpen {
         case .never:
             break
@@ -1054,20 +1057,17 @@ extension Realm {
                 fallthrough
             }
         case .always:
-            rlmRealm = try await withCheckedThrowingContinuation { continuation in
-                RLMRealm.asyncOpen(with: configuration.rlmConfiguration, callbackQueue: .main) { (realm, error) in
+            try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Swift.Error>) in
+                RLMRealm.asyncOpen(with: configuration.rlmConfiguration, callback: { error in
                     if let error = error {
                         continuation.resume(with: .failure(error))
                     } else {
-                        continuation.resume(with: .success(realm!))
+                        continuation.resume()
                     }
-                }
+                })
             }
         }
-        if rlmRealm == nil {
-            rlmRealm = try RLMRealm(configuration: configuration.rlmConfiguration)
-        }
-        self.init(rlmRealm!)
+        try self.init(RLMRealm(configuration: configuration.rlmConfiguration, queue: queue))
     }
 }
 #endif // swift(>=5.5)

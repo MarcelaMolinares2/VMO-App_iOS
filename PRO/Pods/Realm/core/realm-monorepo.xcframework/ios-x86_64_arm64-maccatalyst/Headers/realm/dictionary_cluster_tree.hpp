@@ -38,7 +38,7 @@ public:
     DictionaryClusterTree(ArrayParent* owner, DataType, Allocator& alloc, size_t ndx);
     ~DictionaryClusterTree() override;
 
-    bool init_from_parent();
+    void init_from_parent();
 
     void destroy()
     {

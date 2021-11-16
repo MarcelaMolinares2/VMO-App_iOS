@@ -34,6 +34,7 @@ struct RouteListView: View {
                 Spacer()
                 List {
                     ForEach (groups, id: \.self){ item in
+                        //RouteListCardView(item: item)
                         RouteListCardView(item: item)
                     }
                 }
@@ -55,7 +56,6 @@ struct RouteListView: View {
 struct RouteListCardView: View {
     var item: Group
     
-    @State private var type = ""
     @ObservedObject private var selectPanelModalToggle = ModalToggle()
     
     @State private var cardShow = false
@@ -67,7 +67,6 @@ struct RouteListCardView: View {
         VStack{
             Button(action: {
                 cardShow.toggle()
-                print("ajjaja")
             }) {
                 VStack{
                     Spacer()
@@ -149,7 +148,7 @@ struct RouteListCardView: View {
                 }
             }
             .partialSheet(isPresented: self.$cardShow) {
-                PanelTypeMenu(onPanelSelected: onPanelSelected, panelTypes: ["M", "F", "C", "P"], isPresented: self.$cardShow)
+                RouteTypeMenu(onRouteTypeSelected: onRouteTypeSelected, nameRoute: item.name ?? "", isPresented: self.$cardShow)
             }
         }
         .foregroundColor(.cPrimaryLight)
@@ -158,11 +157,29 @@ struct RouteListCardView: View {
         }
     }
     
-    func onPanelSelected (_ type: String) {
+    func onRouteTypeSelected (_ type: String) {
+        print(type)
+        print(item.name ?? "")
+        print(item.objectId)
+        print("______________________ ")
         self.cardShow.toggle()
-        self.type = type
         selectPanelModalToggle.status.toggle()
-        //print(items)
+        print(item)
+        if type == "D" {
+            GroupDao(realm: try! Realm()).delete(group: item)
+        } else {
+            
+        }
+        
+        print("LLEGO BIEN")
+        
+        /*
+        if let doctor = GroupDao(realm: try! Realm()).by(id: item.id){
+            print(doctor)
+            realm.delete(doctor)
+        }
+        */
+        
     }
     
     func loadData() {

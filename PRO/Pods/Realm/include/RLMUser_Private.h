@@ -40,8 +40,6 @@ typedef void(^RLMUserNotificationBlock)(RLMUser *);
 /// Unsubscribe to notifications for this RLMUser.
 - (void)unsubscribe:(RLMUserSubscriptionToken *)token;
 
-- (void)logOut;
-
 @end
 
 NS_ASSUME_NONNULL_END

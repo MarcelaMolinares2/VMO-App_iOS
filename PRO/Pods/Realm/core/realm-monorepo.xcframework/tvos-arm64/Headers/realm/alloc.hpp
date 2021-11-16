@@ -328,7 +328,7 @@ private:
     friend class Group;
     friend class WrappedAllocator;
     friend class Obj;
-    template <class, class>
+    template <class>
     friend class CollectionBaseImpl;
     friend class Dictionary;
 };

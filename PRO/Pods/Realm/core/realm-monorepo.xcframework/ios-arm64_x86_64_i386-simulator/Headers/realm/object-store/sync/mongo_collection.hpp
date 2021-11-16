@@ -19,8 +19,11 @@
 #ifndef MONGO_COLLECTION_HPP
 #define MONGO_COLLECTION_HPP
 
+#include <realm/object-store/sync/app_service_client.hpp>
+#include <realm/object-store/sync/generic_network_transport.hpp>
 #include <realm/object-store/util/bson/bson.hpp>
 
+#include <external/json/json.hpp>
 #include <realm/util/optional.hpp>
 #include <string>
 #include <vector>
@@ -29,8 +32,6 @@ namespace realm {
 class SyncUser;
 
 namespace app {
-class AppServiceClient;
-struct AppError;
 
 class MongoCollection {
 public:
@@ -469,7 +470,7 @@ private:
     void advance_buffer_state();
 
     State m_state = NEED_DATA;
-    std::unique_ptr<app::AppError> m_error;
+    util::Optional<app::AppError> m_error;
     bson::BsonDocument m_next_event;
 
     // Used by feed_buffer to construct lines
