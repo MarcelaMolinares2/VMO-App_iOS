@@ -10,83 +10,133 @@ import SwiftUI
 import RealmSwift
 import AlertToast
 
+struct Materials: Hashable{
+    var id: String
+    var name: String
+}
+
 struct MaterialRequestView: View {
-    
     
     @ObservedObject private var selectMaterialsModalToggle = ModalToggle()
     @EnvironmentObject var viewRouter: ViewRouter
     
     @State private var selectedMaterials = [String]()
-    @State private var deliveries = [AdvertisingMaterialDelivery]()
+    @State private var materialRequest = AdvertisingMaterialRequest()
+    @State private var dateStart = Date()
+    @State var materials: [Materials] = []
     
     var realm = try? Realm()
+    
+    let date = Date()
+    
+    @State var obs = ""
     
     @State private var showToast = false
     
     var body: some View {
+        let bindingComment = Binding<String>(get: {
+            materialRequest.comment
+        }, set: {
+            materialRequest.comment = $0
+        })
         ZStack {
             VStack {
                 HeaderToggleView(couldSearch: false, title: "modMaterialDelivery", icon: Image("ic-material"), color: Color.cPanelMaterial)
-                ZStack(alignment: .bottomTrailing) {
-                    Button(action: {
-                        selectMaterialsModalToggle.status.toggle()
-                    }) {
-                        Text("modMaterialDelivery")
+                
+                HStack {
+                    VStack{
+                        Text(NSLocalizedString("envDate", comment: ""))
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .foregroundColor(.cTextHigh)
+                        HStack{
+                            DatePicker("", selection: $dateStart, displayedComponents: .date)
+                                .labelsHidden()
+                                .clipped()
+                                .accentColor(.cTextHigh)
+                                .background(Color.white)
+                            Spacer()
+                        }
                     }
+                    
+                    Spacer()
+                    Image("ic-day-request")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(height: 30)
+                        .foregroundColor(Color.cPrimaryLight)
                 }
+                .padding(15)
+                
+                TextField(NSLocalizedString("materialObservations", comment: ""), text: bindingComment)
+                    .frame(height: 30)
+                    .padding([.leading, .trailing], 10)
+                    .foregroundColor(.black)
+                Divider()
+                    .frame(width: UIScreen.main.bounds.size.width * 0.95, height: 1)
+                    .background(Color.gray)
                 List {
-                    ForEach(deliveries, id: \.materialId) { item in
-                        CardDelivery2(item: item)
+                    ForEach(materials, id: \.self) { item in
+                        HStack{
+                            Text(item.name)
+                                .padding([.leading, .trailing], 15)
+                                .padding([.top, .bottom], 10)
+                            Spacer()
+                        }
+                        .background(Color.white)
+                        .frame(alignment: Alignment.center)
+                        .clipped()
+                        .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
                     }
                     .onDelete(perform: self.delete)
                 }
                 .buttonStyle(PlainButtonStyle())
             }
+            
+            VStack {
+                Spacer()
+                HStack {
+                    FAB(image: "ic-plus", foregroundColor: .cPrimary) {
+                        selectMaterialsModalToggle.status.toggle()
+                    }
+                    .padding(.horizontal, 20)
+                    Spacer()
+                }
+            }
+            
             VStack {
                 Spacer()
                 HStack {
                     Spacer()
-                    FAB(image: "ic-cloud", foregroundColor: .cPrimaryLight) {
-                        if deliveries.count > 0 {
-                            MaterialDeliveryDao(realm: try! Realm()).store(deliveries: deliveries)
-                            self.goTo(page: "MATERIAL-DELIVERY")
+                    FAB(image: "ic-cloud", foregroundColor: .cPrimary) {
+                        let formatter = DateFormatter()
+                        formatter.dateStyle = .short
+                        formatter.timeStyle = .none
+                        let datetime = formatter.string(from: dateStart)
+                        if materials.count > 0 {
+                            materialRequest.date = datetime
+                            
+                            materials.forEach{ it in
+                                materialRequest.materials = it.id + "," + materialRequest.materials
+                            }
+                            if materialRequest.materials.last == ","{
+                                materialRequest.materials.removeLast()
+                            }
+                            AdvertisingMaterialRequestDao(realm: try! Realm()).store(group: materialRequest)
                         } else {
                             self.showToast.toggle()
                         }
                     }
                 }
                 .toast(isPresenting: $showToast){
-                            AlertToast(type: .regular, title: NSLocalizedString("noneMaterialDelivery", comment: ""))
-                        }
+                    AlertToast(type: .regular, title: NSLocalizedString("noneMaterialDelivery", comment: ""))
+                }
             }
+            
             if selectMaterialsModalToggle.status {
                 GeometryReader {geo in
                     CustomDialogPicker(onSelectionDone: onSelectionDone, selected: $selectedMaterials, key: "MATERIAL", multiple: true)
                 }
                 .background(Color.black.opacity(0.45))
-                .onDisappear {
-                    selectedMaterials.forEach { id in
-                        if let material = MaterialDao(realm: try! Realm()).by(id: id) {
-                            let delivery = AdvertisingMaterialDelivery()
-                            let dateDescription = String(Date().description)
-                            let date = dateDescription.components(separatedBy: " ")[0]
-                            
-                            var verif = false
-                            for i in deliveries {
-                                if i.materialId == material.id {
-                                    verif = true
-                                    break
-                                }
-                            }
-                            if !verif {
-                                delivery.materialId = material.id
-                                delivery.material =  material
-                                delivery.date = date
-                                deliveries.append(delivery)
-                            }
-                        }
-                    }
-                }
             }
         }
     }
@@ -96,92 +146,27 @@ struct MaterialRequestView: View {
     }
     
     private func delete(at offsets: IndexSet) {
-        self.deliveries.remove(atOffsets: offsets)
+        self.materials.remove(atOffsets: offsets)
     }
     
     func onSelectionDone(_ selected: [String]) {
         selectMaterialsModalToggle.status.toggle()
-    }
-}
-
-struct CardDelivery2: View {
-    @State var observacion: String = ""
-    @State var tvNumber: Int = 0
-    var deliverieSet = AdvertisingMaterialDeliverySet()
-    var item: AdvertisingMaterialDelivery
-    var body: some View {
-        let binding = Binding<String>(get: {
-            self.item.comment
-        }, set: {
-            self.item.comment = $0
-        })
         
-        VStack{
-            HStack {
-                Text(item.material?.name ?? "")
-            }
-            Spacer()
-            VStack{
-                HStack {
-                    Text(String(item.material?.sets[0].id ?? ""))
-                    Spacer()
-                    Text(String(format: NSLocalizedString("expDate", comment: ""), formatStringDate(date: String(item.material?.sets[0].dueDate ?? ""))))
-                }
-                Spacer()
-                HStack {
-                    Button(action: {
-                        tvNumber -= 1
-                        if tvNumber <= 0 {tvNumber = 0}
-                        deliverieSet.id = String(item.materialId)
-                        deliverieSet.objectId = item.objectId
-                        deliverieSet.quantity = tvNumber
-                        
-                        item.sets.removeAll()
-                        item.sets.insert(deliverieSet, at: 0)
-                    }, label: {
-                        Text("-")
-                            .font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/)
-                    })
-                    .background(Color.white)
-                    Spacer()
-                    VStack {
-                        Text("\(String(tvNumber))")
-                        Text(String(format: NSLocalizedString("materialRemainder", comment: ""),
-                        String((item.material?.sets[0].stock ?? 0) - (item.material?.sets[0].delivered ?? 0))))
+        selectedMaterials.forEach { id in
+            if let material = MaterialDao(realm: try! Realm()).by(id: id) {
+                var exists = false
+                for i in materials {
+                    if i.name == material.name {
+                        exists = true
+                        break
                     }
-                    Spacer()
-                    Button(action: {
-                        tvNumber += 1
-                        deliverieSet.id = String(item.materialId)
-                        deliverieSet.objectId = item.objectId
-                        deliverieSet.quantity = tvNumber
-                        
-                        item.sets.removeAll()
-                        item.sets.insert(deliverieSet, at: 0)
-                    }, label: {
-                        Text("+")
-                            .font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/)
-                    })
-                    .background(Color.white)
                 }
-                TextField("Observaciones...", text: binding)
+                if !exists {
+                    materials.append(Materials(id: id, name: material.name ?? "" ))
+                }
             }
-            
-            Divider()
-             .frame(height: 1)
-             .padding(.horizontal, 5)
-             .background(Color.gray)
         }
     }
-    
-    func formatStringDate(date: String) -> String {
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateFormat = "yyyy-MM-dd"
-            let newDate = dateFormatter.date(from: date)
-            dateFormatter.setLocalizedDateFormatFromTemplate("MMMM d, yyyy")
-            return dateFormatter.string(from: newDate!)
-    }
-    
 }
 
 struct MaterialRequestView_Previews: PreviewProvider {

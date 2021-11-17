@@ -206,9 +206,6 @@ struct MaterialDeliveryFormView: View {
         ZStack {
             VStack {
                 HeaderToggleView(couldSearch: false, title: "modMaterialDelivery", icon: Image("ic-material"), color: Color.cPanelMaterial)
-                ZStack(alignment: .bottomTrailing) {
-                    
-                }
                 Button(action: {
                     selectMaterialsModalToggle.status.toggle()
                 }) {
@@ -232,7 +229,6 @@ struct MaterialDeliveryFormView: View {
                     }
                     .onDelete(perform: self.delete)
                 }
-                
                 .buttonStyle(PlainButtonStyle())
             }
             .foregroundColor(.cPrimaryLight)
