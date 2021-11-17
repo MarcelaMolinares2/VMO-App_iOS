@@ -270,7 +270,7 @@ class MediaItemDao: GenericDao {
         if let exists = realm.objects(MediaItem.self)
             .filter("table == '\(mediaItem.table)'")
             .filter("field == '\(mediaItem.field)'")
-            .filter("item == \(mediaItem.item)")
+            .filter("localItem == '\(mediaItem.localItem)'")
             .first {
             try! realm.write {
                 exists.date = Utils.currentDateTime()

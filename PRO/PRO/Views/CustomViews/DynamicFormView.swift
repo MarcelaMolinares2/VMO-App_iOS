@@ -402,7 +402,7 @@ struct DynamicFormImage: View {
                 .frame(height: 40)
                 .buttonStyle(BorderlessButtonStyle())
                 .popover(isPresented: $shouldPresentImageViewer) {
-                    ImageViewerDialog(table: options.table, field: field.key, id: options.item)
+                    ImageViewerDialog(table: options.table, field: field.key, id: options.item, localId: options.objectId?.stringValue ?? "")
                 }
             }
         }
@@ -415,7 +415,7 @@ struct DynamicFormImage: View {
         self.shouldPresentImagePicker = false
         field.value = done ? "Y" : field.value
         if done {
-            MediaUtils.store(uiImage: uiImage, table: options.table, field: field.key, id: options.item)
+            MediaUtils.store(uiImage: uiImage, table: options.table, field: field.key, id: options.item, localId: options.objectId?.stringValue ?? "")
         }
     }
     

@@ -436,6 +436,58 @@ class Doctor: Object, Codable, Panel, SyncEntity {
         case id = "id_medico", idNumber = "dni", email = "email", phone = "telefono_consulta", brickId = "id_brick", categoryId = "id_categoria", cityId = "id_ciudad", countryId = "id_pais", pricesListId = "id_lista_precios", zoneId = "id_zona", score = "puntaje", visitFTF = "visit_ftf", visitVirtual = "visit_virtual", documentType = "tipo_documento", firstName = "nombres", lastName = "apellidos", code = "codigo", neighborhood = "barrio", institution = "institucion", emailVerified = "email_verificado", hasNoEmail = "no_email", habeasData = "habeas_data", gender = "sexo", hq = "sede", mobilePhone = "telefono_movil", secretary = "nombre_secretaria", birthDate = "md_cumpleanos", birthDateSecretary = "md_cumpleanos_secretaria", joinDate = "fecha_ingreso", prepaidEntities = "entidades_prepagadas", relatedTo = "asoc", formulation = "formulacion", photo = "foto", lines = "lineas", collegeId = "id_universidad", clientId = "id_cliente", specialtyId = "id_especialidad", secondSpecialtyId = "id_especialidad_secundaria", styleId = "id_estilo", isMarked, cdi
     }
     
+    override init() {
+            super.init()
+    }
+    
+    required init(from decoder: Decoder) throws {
+        super.init()
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        self.id = try DynamicUtils.intTypeDecoding(container: container, key: .id)
+        self.brickId = try DynamicUtils.intTypeDecoding(container: container, key: .brickId)
+        self.categoryId = try DynamicUtils.intTypeDecoding(container: container, key: .categoryId)
+        self.cityId = try DynamicUtils.intTypeDecoding(container: container, key: .cityId)
+        self.countryId = try DynamicUtils.intTypeDecoding(container: container, key: .countryId)
+        self.pricesListId = try DynamicUtils.intTypeDecoding(container: container, key: .pricesListId)
+        self.zoneId = try DynamicUtils.intTypeDecoding(container: container, key: .zoneId)
+        self.visitFTF = try DynamicUtils.intTypeDecoding(container: container, key: .visitFTF)
+        self.visitVirtual = try DynamicUtils.intTypeDecoding(container: container, key: .visitVirtual)
+        self.emailVerified = try DynamicUtils.intTypeDecoding(container: container, key: .emailVerified)
+        self.hasNoEmail = try DynamicUtils.intTypeDecoding(container: container, key: .hasNoEmail)
+        self.collegeId = try DynamicUtils.intTypeDecoding(container: container, key: .collegeId)
+        self.clientId = try DynamicUtils.intTypeDecoding(container: container, key: .clientId)
+        self.specialtyId = try DynamicUtils.intTypeDecoding(container: container, key: .specialtyId)
+        self.secondSpecialtyId = try DynamicUtils.intTypeDecoding(container: container, key: .secondSpecialtyId)
+        self.styleId = try DynamicUtils.intTypeDecoding(container: container, key: .styleId)
+        self.isMarked = try DynamicUtils.intTypeDecoding(container: container, key: .isMarked)
+        
+        self.score = try DynamicUtils.floatTypeDecoding(container: container, key: .score)
+        
+        self.idNumber = try container.decode(String.self, forKey: .idNumber)
+        self.email = try container.decode(String.self, forKey: .email)
+        self.phone = try container.decode(String.self, forKey: .phone)
+        self.documentType = try container.decode(String.self, forKey: .documentType)
+        self.firstName = try container.decode(String.self, forKey: .firstName)
+        self.lastName = try container.decode(String.self, forKey: .lastName)
+        self.code = try container.decode(String.self, forKey: .code)
+        self.neighborhood = try container.decode(String.self, forKey: .neighborhood)
+        self.institution = try container.decode(String.self, forKey: .institution)
+        self.habeasData = try container.decode(String.self, forKey: .habeasData)
+        self.gender = try container.decode(String.self, forKey: .gender)
+        self.hq = try container.decode(String.self, forKey: .hq)
+        self.mobilePhone = try container.decode(String.self, forKey: .mobilePhone)
+        self.secretary = try container.decode(String.self, forKey: .secretary)
+        self.birthDate = try container.decode(String.self, forKey: .birthDate)
+        self.birthDateSecretary = try container.decode(String.self, forKey: .birthDateSecretary)
+        self.joinDate = try container.decode(String.self, forKey: .joinDate)
+        self.prepaidEntities = try container.decode(String.self, forKey: .prepaidEntities)
+        self.relatedTo = try container.decode(String.self, forKey: .relatedTo)
+        self.formulation = try container.decode(String.self, forKey: .formulation)
+        self.photo = try container.decode(String.self, forKey: .photo)
+        self.lines = try container.decode(String.self, forKey: .lines)
+    }
+    
     private enum EncodingKeys: String, CodingKey {
         case id = "id_medico"
     }
@@ -493,6 +545,7 @@ class MediaItem: Object, Decodable, SyncEntity {
     @Persisted var item: Int = 0
     @Persisted var date: String = ""
     @Persisted var ext: String = ""
+    @Persisted var localItem: String = ""
 }
 
 class MovementSimple: Object, Decodable, SyncEntity {

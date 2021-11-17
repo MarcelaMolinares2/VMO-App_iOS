@@ -9,6 +9,7 @@
 import SwiftUI
 import RealmSwift
 import GoogleMaps
+import SwiftTryCatch
 
 class Utils {
     
@@ -64,7 +65,7 @@ class Utils {
         return result
     }
     
-    static func json(from object:Any) -> String? {
+    static func json(from object: Any) -> String? {
         guard let data = try? JSONSerialization.data(withJSONObject: object, options: []) else {
             return nil
         }
@@ -434,6 +435,91 @@ class DynamicUtils {
             }
         }
         return "--"
+    }
+    
+    static func initForm(data: Dictionary<String, Any>) -> [DynamicFormTab] {
+        var tabs = [DynamicFormTab]()
+        data.forEach { (key: String, value: Any) in
+            let tab = value as! Dictionary<String, Any>
+            var groups = [DynamicFormGroup]()
+            let groupsData = tab["groups"] as! [Dictionary<String, Any>]
+            groupsData.forEach { group in
+                var fields = [DynamicFormField]()
+                let fieldsData = group["fields"] as! [Dictionary<String, Any>]
+                
+                fieldsData.forEach { field in
+                    //print(field)
+                    fields.append(try! DynamicFormField(from: field))
+                }
+                groups.append(DynamicFormGroup(title: Utils.castString(value: group["title"]), fields: fields))
+            }
+            tabs.append(DynamicFormTab(key: key, title: Utils.castString(value: tab["title"]), groups: groups))
+        }
+        return tabs
+    }
+    
+    static func validate(form: DynamicForm) -> Bool {
+        var valid = true
+        form.tabs.forEach { tab in
+            tab.groups.forEach { group in
+                group.fields.forEach { field in
+                    if field.localRequired && field.value.isEmpty {
+                        valid = false
+                    }
+                }
+            }
+        }
+        return valid
+    }
+    
+    static func toJSON(form: DynamicForm) -> String {
+        var data = [String: Any]()
+        form.tabs.forEach { tab in
+            tab.groups.forEach { group in
+                group.fields.forEach { field in
+                    data[field.key] = field.value
+                }
+            }
+        }
+        return (Utils.json(from: data) ?? "{}")
+    }
+    
+    static func intTypeDecoding<T: CodingKey>(container: KeyedDecodingContainer<T>, key: KeyedDecodingContainer<T>.Key) throws -> Int {
+        do {
+            return try container.decode(Int.self, forKey: key)
+        } catch DecodingError.keyNotFound {
+            return 0
+        } catch DecodingError.typeMismatch {
+            let value = try container.decode(String.self, forKey: key)
+            return Utils.castInt(value: value)
+        }
+    }
+    
+    static func floatTypeDecoding<T: CodingKey>(container: KeyedDecodingContainer<T>, key: KeyedDecodingContainer<T>.Key) throws -> Float {
+        do {
+            return try container.decode(Float.self, forKey: key)
+        } catch DecodingError.keyNotFound {
+            return 0
+        } catch DecodingError.typeMismatch {
+            let value = try container.decode(String.self, forKey: key)
+            return Utils.castFloat(value: value)
+        }
+    }
+    
+    static func cloneObject<T: Object>(main: T?, temporal: T, skipped: [String]) {
+        for (_, attr) in Mirror(reflecting: temporal).children.enumerated() {
+            if let propertyName = attr.label as String? {
+                let property = propertyName.replacingOccurrences(of: "_", with: "")
+                if !skipped.contains(property) {
+                    SwiftTryCatch.try({
+                        main?.setValue(temporal.value(forKey: property), forUndefinedKey: property)
+                    }, catch: { (error) in
+                        print(String(describing: error?.description))
+                    }, finally: {
+                    })
+                }
+            }
+        }
     }
     
 }

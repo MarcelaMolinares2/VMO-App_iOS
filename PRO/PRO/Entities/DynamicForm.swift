@@ -67,13 +67,13 @@ struct DynamicFormField: Identifiable, Decodable {
             self.multiple = try container.decode(Bool.self, forKey: .multiple)
         } catch DecodingError.typeMismatch {
             let value = try container.decode(Int.self, forKey: .multiple)
-            self.multiple = value == 1;
+            self.multiple = value == 1
         }
         do {
             self.multiline = try container.decode(Bool.self, forKey: .multiline)
         } catch DecodingError.typeMismatch {
             let value = try container.decode(Int.self, forKey: .multiline)
-            self.multiline = value == 1;
+            self.multiline = value == 1
         }
         do {
             self.minValue = try container.decode(String?.self, forKey: .minValue)

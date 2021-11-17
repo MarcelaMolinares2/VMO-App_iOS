@@ -8,6 +8,7 @@
 
 import Foundation
 import SwiftUI
+import RealmSwift
 
 class GenericSelectableItem {
     var id: String = ""
@@ -151,6 +152,7 @@ class DynamicFormFieldOptions {
     var table: String = ""
     var op: String = ""
     var item: Int = 0
+    var objectId: ObjectId?
     
     init(table: String, op: String) {
         self.table = table

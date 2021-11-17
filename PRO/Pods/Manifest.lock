@@ -114,6 +114,7 @@ PODS:
   - Realm/Headers (10.15.1)
   - RealmSwift (10.15.1):
     - Realm (= 10.15.1)
+  - SwiftTryCatch (0.0.1)
   - SwiftUIPager (2.3.1)
   - URLImage (2.2.5):
     - URLImage/Common (= 2.2.5)
@@ -143,6 +144,7 @@ DEPENDENCIES:
   - GoogleMaps
   - GooglePlaces
   - RealmSwift
+  - SwiftTryCatch
   - SwiftUIPager
   - URLImage
 
@@ -165,6 +167,7 @@ SPEC REPOS:
     - PromisesObjC
     - Realm
     - RealmSwift
+    - SwiftTryCatch
     - SwiftUIPager
     - URLImage
 
@@ -186,9 +189,10 @@ SPEC CHECKSUMS:
   PromisesObjC: 68159ce6952d93e17b2dfe273b8c40907db5ba58
   Realm: fbcbde2620d51623cc5b18e28f5b165c39abef52
   RealmSwift: e4bea8e42efad3d543aea23b56504069c6faaea2
+  SwiftTryCatch: fb6d2b34abe48efd69578dac919293a44f95b481
   SwiftUIPager: 273cbaec55a03784d5fbec30f57d8b8974e60450
   URLImage: 36a66c03ba2a9ccbbf06bc83431f2cef171008e8
 
-PODFILE CHECKSUM: a9c68f6e016d7c36d5eda387aca6b27addbb31f1
+PODFILE CHECKSUM: f366b81de0e9631ce27c83ce421df1b77f957093
 
 COCOAPODS: 1.11.2

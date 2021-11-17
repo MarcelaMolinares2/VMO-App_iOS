@@ -12,26 +12,27 @@ import RealmSwift
 
 class MediaUtils {
     
-    static func store(file: String, table: String, field: String, id: Int) {
-        let media = item(table: table, field: field, id: id)
+    static func store(file: String, table: String, field: String, id: Int, localId: String) {
+        let media = item(table: table, field: field, id: id, localId: localId)
         media.date = Utils.currentDateTime()
     }
     
-    static func item(table: String, field: String, id: Int) -> MediaItem {
+    static func item(table: String, field: String, id: Int, localId: String) -> MediaItem {
         let media = MediaItem()
         media.table = table
         media.field = field
         media.item = id
+        media.localItem = localId
         return media
     }
     
-    static func store(uiImage: UIImage?, table: String, field: String, id: Int) {
-        let media = item(table: table, field: field, id: id)
+    static func store(uiImage: UIImage?, table: String, field: String, id: Int, localId: String) {
+        let media = item(table: table, field: field, id: id, localId: localId)
         media.date = Utils.currentDateTime()
         media.ext = "jpg"
         
         if let data = uiImage?.jpegData(compressionQuality: 0.9) {
-            FileUtils.create(path: "media/\(media.table)/\(media.item)/\(media.field)")
+            FileUtils.create(path: "media/\(media.table)/\(media.localItem)/\(media.field)")
             try? data.write(to: mediaURL(media: media))
             MediaItemDao(realm: try! Realm()).store(mediaItem: media)
         }
@@ -49,7 +50,7 @@ class MediaUtils {
         if let pathComponent = url
             .appendingPathComponent("media")?
             .appendingPathComponent("\(media.table)")
-            .appendingPathComponent("\(media.item)")
+            .appendingPathComponent("\(media.localItem)")
             .appendingPathComponent("\(media.field)") {
             return pathComponent
         }

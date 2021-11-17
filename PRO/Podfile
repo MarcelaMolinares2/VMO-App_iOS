@@ -15,6 +15,7 @@ target 'PRO' do
   pod 'GoogleMaps'
   pod 'GooglePlaces'
   pod 'SwiftUIPager'
+  pod 'SwiftTryCatch'
 
   target 'PROTests' do
     inherit! :search_paths

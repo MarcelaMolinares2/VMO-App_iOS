@@ -25,5 +25,4 @@ class CommonUtils {
         ["name": "envDecember", "days": 31]
     ]
     
-    
 }

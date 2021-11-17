@@ -14,6 +14,7 @@ struct ImageViewerDialog: View {
     var table: String
     var field: String
     var id: Int
+    var localId: String
     
     @State private var image: Image? = Image("ic-gallery")
     
@@ -30,7 +31,7 @@ struct ImageViewerDialog: View {
     }
     
     func load() {
-        let media = MediaUtils.item(table: table, field: field, id: id)
+        let media = MediaUtils.item(table: table, field: field, id: id, localId: localId)
         media.ext = "jpg"
         if FileUtils.exists(media: media) {
             image = Image(uiImage: UIImage(contentsOfFile: MediaUtils.mediaURL(media: media).path) ?? UIImage())
