@@ -26,6 +26,16 @@ class GenericDao {
     }
 }
 
+class AdvertisingMaterialRequestDao: GenericDao {
+    
+    func store(group: AdvertisingMaterialRequest) {
+        try! realm.write {
+            realm.add(group, update: .all)
+        }
+    }
+    
+}
+
 class BrickDao: GenericDao {
     
     func all() -> [Brick] {
@@ -124,8 +134,6 @@ class DoctorDao: GenericDao {
 
 class GroupDao: GenericDao {
     
-    @Published var updateObject: Group?
-    
     func all() -> [Group] {
         return Array(realm.objects(Group.self).sorted(byKeyPath: "objectId"))
     }
@@ -134,21 +142,15 @@ class GroupDao: GenericDao {
         return realm.objects(Group.self).filter("id == \(id)").first
     }
     
-    func store(groups: [Group]){
-        if realm.objects(Group.self).count == 0 {
-            try! realm.write {
-                realm.add(groups)
-            }
-        } else {
-            try! realm.write {
-                realm.add(groups)
-            }
+    func store(group: Group){
+        try! realm.write {
+            realm.add(group, update: .all)
         }
     }
     
     func delete(group: Group) {
-        try! realm.write {
-            realm.delete(group)
+        try! self.realm.write {
+            self.realm.delete(self.realm.object(ofType: Group.self, forPrimaryKey: group.objectId)!)
         }
     }
     

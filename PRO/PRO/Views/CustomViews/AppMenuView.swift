@@ -590,18 +590,18 @@ struct PanelTypeMenu: View {
     }
 }
 
-struct RouteTypeMenu: View {
-    let onRouteTypeSelected: (_ type: String) -> Void
+struct RouteBottomMenu: View {
+    let onEdit: (_ group: Group) -> Void
+    let onDelete: (_ group: Group) -> Void
     
-    @State var nameRoute: String
-    @Binding var isPresented: Bool
+    @State var group: Group
     @State private var customGridItems: [GenericGridItem] = []
     @State var columns: [GridItem] = []
     
     var body: some View {
         VStack {
             HStack {
-                Text(nameRoute)
+                Text(group.name ?? "")
                 Spacer()
             }
             .padding(10)
@@ -610,7 +610,7 @@ struct RouteTypeMenu: View {
             HStack {
                 Spacer()
                 Button(action: {
-                    onRouteTypeSelected("U")
+                    onEdit(group)
                 }) {
                     VStack {
                         Image("ic-edit")
@@ -627,7 +627,7 @@ struct RouteTypeMenu: View {
                 .padding([.top, .bottom], 10)
                 Spacer()
                 Button(action: {
-                    onRouteTypeSelected("D")
+                    onDelete(group)
                 }) {
                     VStack {
                         Image("ic-trash")
@@ -645,13 +645,6 @@ struct RouteTypeMenu: View {
                 Spacer()
             }
             .padding(.bottom, 2)
-            .onAppear {
-                //loadData()
-            }
         }
-    }
-    
-    func loadData() {
-        print(nameRoute)
     }
 }

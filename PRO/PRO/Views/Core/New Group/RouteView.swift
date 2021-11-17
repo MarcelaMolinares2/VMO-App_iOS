@@ -26,16 +26,25 @@ struct RouteView: View {
 
 struct RouteListView: View {
     @ObservedObject var moduleRouter: ModuleRouter
-    @State private var groups = GroupDao(realm: try! Realm()).all()
+    
+    @ObservedResults(Group.self) var groups
+    
+    @State private var optionsModal = false
+    @State private var groupSelected: Group = Group()
+    
     var body: some View {
         ZStack {
             VStack{
                 HeaderToggleView(couldSearch: true, title: "modPeopleRoute", icon: Image("ic-people-route"), color: Color.cPanelRequestDay)
                 Spacer()
                 List {
-                    ForEach (groups, id: \.self){ item in
-                        //RouteListCardView(item: item)
-                        RouteListCardView(item: item)
+                    ForEach (groups, id: \.objectId){ item in
+                        VStack {
+                            RouteListCardView(item: item).onTapGesture {
+                                self.groupSelected = item
+                                self.optionsModal = true
+                            }
+                        }
                     }
                 }
                 .buttonStyle(PlainButtonStyle())
@@ -50,136 +59,113 @@ struct RouteListView: View {
                 }
             }
         }
+        .partialSheet(isPresented: $optionsModal) {
+            RouteBottomMenu(onEdit: onEdit, onDelete: onDelete, group: groupSelected)
+        }
+        .onAppear {
+            load()
+        }
     }
+    
+    func load() {
+    }
+    
+    func onEdit(_ group: Group) {
+        self.optionsModal = false
+        GroupDao(realm: try! Realm()).store(group: group)
+    }
+    
+    func onDelete(_ group: Group) {
+        self.optionsModal = false
+        GroupDao(realm: try! Realm()).delete(group: group)
+    }
+    
 }
 
 struct RouteListCardView: View {
+    
     var item: Group
     
-    @ObservedObject private var selectPanelModalToggle = ModalToggle()
-    
-    @State private var cardShow = false
     @State private var medics: Int = 0
-    @State private var pharmacys: Int = 0
+    @State private var pharmacies: Int = 0
     @State private var clients: Int = 0
-    @State private var patinents: Int = 0
+    @State private var patients: Int = 0
+    
     var body: some View {
-        VStack{
-            Button(action: {
-                cardShow.toggle()
-            }) {
-                VStack{
-                    Spacer()
-                        .frame(height: 10)
-                    HStack{
-                        Text(item.name ?? "")
-                            .foregroundColor(.black)
-                        Spacer()
+        VStack {
+            Spacer()
+                .frame(height: 10)
+            HStack{
+                Text(item.name ?? "")
+                    .foregroundColor(.black)
+                Spacer()
+            }
+            Spacer()
+            HStack{
+                HStack{
+                    if medics == 0 {
+                        Image("ic-medic")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(height: 27)
+                            .foregroundColor(Color.cPrimaryLight)
+                    } else {
+                        Image("ic-medic")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(height: 27)
+                            .foregroundColor(Color.cPanelMedic)
                     }
+                    Text(String(medics))
                     Spacer()
-                    HStack{
-                        HStack{
-                            if medics == 0 {
-                                Image("ic-medic")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(height: 27)
-                                    .foregroundColor(Color.cPrimaryLight)
-                            } else {
-                                Image("ic-medic")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(height: 27)
-                                    .foregroundColor(Color.cPanelMedic)
-                            }
-                            Text(String(medics))
-                            Spacer()
-                            if pharmacys == 0{
-                                Image("ic-pharmacy")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(height: 27)
-                                    .foregroundColor(Color.cPrimaryLight)
-                            } else {
-                                Image("ic-pharmacy")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(height: 27)
-                                    .foregroundColor(Color.cPanelPharmacy)
-                            }
-                            Text(String(pharmacys))
-                            Spacer()
-                        }
-                        HStack{
-                            if clients == 0 {
-                                Image("ic-client")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(height: 27)
-                                    .foregroundColor(Color.cPrimaryLight)
-                            } else {
-                                Image("ic-client")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(height: 27)
-                                    .foregroundColor(Color.cPanelClient)
-                            }
-                            Text(String(clients))
-                            Spacer()
-                            if patinents == 0 {
-                                Image("ic-patient")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(height: 27)
-                                    .foregroundColor(Color.cPrimaryLight)
-                            } else {
-                                Image("ic-patient")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(height: 27)
-                                    .foregroundColor(Color.cPanelPatient)
-                            }
-                            Text(String(patinents))
-                            Spacer()
-                        }
+                    if pharmacies == 0{
+                        Image("ic-pharmacy")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(height: 27)
+                            .foregroundColor(Color.cPrimaryLight)
+                    } else {
+                        Image("ic-pharmacy")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(height: 27)
+                            .foregroundColor(Color.cPanelPharmacy)
                     }
+                    Text(String(pharmacies))
                     Spacer()
-                        .frame(height: 10)
+                }
+                HStack{
+                    if clients == 0 {
+                        Image("ic-client")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(height: 27)
+                            .foregroundColor(Color.cPrimaryLight)
+                    } else {
+                        Image("ic-client")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(height: 27)
+                            .foregroundColor(Color.cPanelClient)
+                    }
+                    Text(String(clients))
+                    Spacer()
+                    Image("ic-patient")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(height: 27)
+                        .foregroundColor(patients == 0 ? Color.cPrimaryLight: Color.cPanelPatient)
+                    Text(String(patients))
+                    Spacer()
                 }
             }
-            .partialSheet(isPresented: self.$cardShow) {
-                RouteTypeMenu(onRouteTypeSelected: onRouteTypeSelected, nameRoute: item.name ?? "", isPresented: self.$cardShow)
-            }
+            Spacer()
+                .frame(height: 10)
         }
         .foregroundColor(.cPrimaryLight)
         .onAppear {
             loadData()
         }
-    }
-    
-    func onRouteTypeSelected (_ type: String) {
-        print(type)
-        print(item.name ?? "")
-        print(item.objectId)
-        print("______________________ ")
-        self.cardShow.toggle()
-        selectPanelModalToggle.status.toggle()
-        print(item)
-        if type == "D" {
-            GroupDao(realm: try! Realm()).delete(group: item)
-        } else {
-            
-        }
-        
-        print("LLEGO BIEN")
-        
-        /*
-        if let doctor = GroupDao(realm: try! Realm()).by(id: item.id){
-            print(doctor)
-            realm.delete(doctor)
-        }
-        */
-        
     }
     
     func loadData() {
@@ -188,11 +174,11 @@ struct RouteListCardView: View {
                 case "M":
                     medics += 1
                 case "F":
-                    pharmacys += 1
+                    pharmacies += 1
                 case "C":
                     clients += 1
                 case "P":
-                    patinents += 1
+                    patients += 1
                 default:
                     print("...")
             }
@@ -298,7 +284,6 @@ struct RouteFormView: View {
                     Spacer()
                     FAB(image: "ic-cloud", foregroundColor: .cPrimary) {
                         if !name.replacingOccurrences(of: " ", with: "").isEmpty {
-                            var groups = [Group]()
                             let gr = Group()
                             gr.name = name
                             for i in items {
@@ -307,8 +292,7 @@ struct RouteFormView: View {
                                 grM.idPanel = i.id
                                 gr.groupMemberList.append(grM)
                             }
-                            groups.append(gr)
-                            GroupDao(realm: try! Realm()).store(groups: groups)
+                            GroupDao(realm: try! Realm()).store(group: gr)
                             moduleRouter.currentPage = "LIST"
                         } else {
                             colorWarning = Color.cWarning

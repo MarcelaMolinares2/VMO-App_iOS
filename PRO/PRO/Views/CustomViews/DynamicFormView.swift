@@ -66,7 +66,7 @@ struct DynamicFieldView: View {
             case "checkbox":
                 DynamicFormCheckbox(field: $field)
             case "canvas":
-                DynamicFormCanvas(field: $field)
+                DynamicFormCanvas(field: $field, options: options)
             case "image":
                 DynamicFormImage(field: $field, options: options)
             default:
@@ -424,8 +424,12 @@ struct DynamicFormImage: View {
 struct DynamicFormCanvas: View {
     
     @Binding var field: DynamicFormField
+    var options: DynamicFormFieldOptions
 
     @State private var drawDialog = false
+    @State private var shouldPresentImageViewer = false
+    
+    @State private var uiImage: UIImage?
     
     var body: some View {
         VStack {

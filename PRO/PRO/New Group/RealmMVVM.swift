@@ -21,6 +21,7 @@ class BindableResults<Element>: ObservableObject where Element: RealmSwift.Realm
 
     func lateInit() {
         token = results.observe { [weak self] _ in
+            print("-- updated --")
             self?.objectWillChange.send()
         }
     }

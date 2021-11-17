@@ -456,7 +456,7 @@ class Doctor: Object, Codable, Panel, SyncEntity {
     }
 }
 
-class Group: Object, Codable, SyncEntity {
+class Group: Object, Codable, SyncEntity, ObjectKeyIdentifiable {
     @Persisted(primaryKey: true) var objectId: ObjectId
     @Persisted(indexed: true) var id = 0
     
