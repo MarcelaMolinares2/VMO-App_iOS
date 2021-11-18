@@ -260,7 +260,7 @@ class PanelUtils {
                 "D": "ic-home"
             ],
             [
-                "M": "MEDIC-FORM",
+                "M": "DOCTOR-FORM",
                 "F": "PHARMACY-FORM",
                 "C": "CLIENT-FORM",
                 "P": "PATIENT-FORM",

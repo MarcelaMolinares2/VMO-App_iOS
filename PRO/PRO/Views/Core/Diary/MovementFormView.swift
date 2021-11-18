@@ -19,13 +19,6 @@ struct MovementFormView: View {
     var panel: Panel?
     var visitType = "NORMAL"
     
-    init(viewRouter: ViewRouter) {
-        if viewRouter.data.id > 0 {
-            panel = PanelUtils.panelByType(id: viewRouter.data.id, type: viewRouter.data.type)
-            visitType = Utils.castString(value: viewRouter.data.options["visitType"])
-        }
-    }
-    
     var body: some View {
         VStack {
             HeaderToggleView(couldSearch: false, title: title, icon: Image(icon), color: color)

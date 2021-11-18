@@ -15,26 +15,12 @@ struct DoctorFormView: View {
     @EnvironmentObject var viewRouter: ViewRouter
     @StateObject var tabRouter = TabRouter()
     
-    var doctor: Doctor?
-    var plainData = ""
-    var dynamicData = Dictionary<String, Any>()
+    @State var doctor: Doctor?
+    @State var plainData = ""
+    @State var dynamicData = Dictionary<String, Any>()
     @State private var form = DynamicForm(tabs: [DynamicFormTab]())
     @State private var options = DynamicFormFieldOptions(table: "doctor", op: "")
     @State private var showValidationError = false
-    
-    init(viewRouter: ViewRouter) {
-        if viewRouter.data.id > 0 {
-            doctor = try! Realm().object(ofType: Doctor.self, forPrimaryKey: viewRouter.data.id)
-            plainData = try! Utils.objToJSON(doctor)
-            print(plainData)
-        } else {
-            doctor = Doctor()
-        }
-        options.objectId = doctor?.objectId
-        options.item = doctor?.id ?? 0
-        options.op = viewRouter.data.id > 0 ? "update" : "create"
-        dynamicData = Utils.jsonDictionary(string: Config.get(key: "P_DOC_DYNAMIC_FORM").complement ?? "")
-    }
     
     var body: some View {
         VStack {
@@ -86,11 +72,29 @@ struct DoctorFormView: View {
         }
         .onAppear {
             tabRouter.current = "BASIC"
-            initDynamic(data: dynamicData)
+            initForm()
         }
         .toast(isPresenting: $showValidationError) {
             AlertToast(type: .regular, title: NSLocalizedString("errFormValidation", comment: ""))
         }
+    }
+    
+    func initForm() {
+        if viewRouter.data.objectId.isEmpty {
+            doctor = Doctor()
+            options.op = "create"
+        } else {
+            doctor = try! DoctorDao(realm: try! Realm()).by(objectId: ObjectId(string: viewRouter.data.objectId))
+            plainData = try! Utils.objToJSON(doctor)
+            print(plainData)
+            options.op = "update"
+        }
+        options.objectId = doctor?.objectId
+        options.item = doctor?.id ?? 0
+        options.op = viewRouter.data.objectId.isEmpty ? "create" : "update"
+        dynamicData = Utils.jsonDictionary(string: Config.get(key: "P_DOC_DYNAMIC_FORM").complement ?? "")
+        
+        initDynamic(data: dynamicData)
     }
     
     func initDynamic(data: Dictionary<String, Any>) {
@@ -101,14 +105,12 @@ struct DoctorFormView: View {
     }
     
     func save() {
-        if DynamicUtils.validate(form: form) {
-            print(doctor)
+        if DynamicUtils.validate(form: form) && doctor != nil {
             DynamicUtils.cloneObject(main: doctor, temporal: try! JSONDecoder().decode(Doctor.self, from: DynamicUtils.toJSON(form: form).data(using: .utf8)!), skipped: ["objectId", "id", "type"])
-            print(doctor)
-            //DoctorDao(realm: try! Realm()).store()
+            DoctorDao(realm: try! Realm()).store(doctor: doctor!)
+            viewRouter.currentPage = "MASTER"
         } else {
             showValidationError = true
-            
         }
     }
     

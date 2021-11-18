@@ -7,15 +7,15 @@
 //
 
 import Foundation
-
+import RealmSwift
 
 class FormEntity {
-    var id = 0
+    var objectId = ""
     var type = ""
     var options = [String: Any]()
     
-    init(id: Int, type: String = "", options: [String: Any] = [String: Any]() ) {
-        self.id = id
+    init(objectId: String, type: String = "", options: [String: Any] = [String: Any]() ) {
+        self.objectId = objectId
         self.type = type
         self.options = options
     }

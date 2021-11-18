@@ -53,22 +53,24 @@ struct DynamicFieldView: View {
     var body: some View {
         VStack {
             switch(field.controlType) {
-            case "text-field":
-                DynamicFormTextField(field: $field)
-            case "list":
-                DynamicFormList(field: $field)
-            case "day-month":
-                DynamicFormDayMonth(field: $field)
-            case "date":
-                DynamicFormDate(field: $field)
-            case "time":
-                DynamicFormTime(field: $field)
-            case "checkbox":
-                DynamicFormCheckbox(field: $field)
-            case "canvas":
-                DynamicFormCanvas(field: $field, options: options)
-            case "image":
-                DynamicFormImage(field: $field, options: options)
+                case "canvas":
+                    DynamicFormCanvas(field: $field, options: options)
+                case "checkbox":
+                    DynamicFormCheckbox(field: $field)
+                case "day-month":
+                    DynamicFormDayMonth(field: $field)
+                case "date":
+                    DynamicFormDate(field: $field)
+                case "habeas-data":
+                    DynamicFormHabeasData(field: $field, options: options)
+                case "image":
+                    DynamicFormImage(field: $field, options: options)
+                case "list":
+                    DynamicFormList(field: $field)
+                case "text-field":
+                    DynamicFormTextField(field: $field)
+                case "time":
+                    DynamicFormTime(field: $field)
             default:
                 Text("A")
             }
@@ -264,6 +266,7 @@ struct DynamicFormTextField: View {
                 .textFieldStyle(RoundedBorderTextFieldStyle())
         }
     }
+    
 }
 
 struct DynamicFormDate: View {
@@ -361,9 +364,89 @@ struct DynamicFormImage: View {
     var options: DynamicFormFieldOptions
     
     @State private var showActionSheet = false
-    @State private var shouldPresentImagePicker = false
-    @State private var shouldPresentImageViewer = false
+    @State private var shouldPresentSheet = false
     @State private var sourceType: UIImagePickerController.SourceType = .camera
+    @State private var sheetLayout: SheetLayout = .picker
+    
+    @State private var uiImage: UIImage?
+    
+    var body: some View {
+        VStack {
+            Button(action: {
+                showActionSheet = true
+            }) {
+                VStack {
+                    Text(NSLocalizedString("env\(field.label.capitalized)", comment: field.label))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .foregroundColor((field.localRequired && field.value.isEmpty) ? Color.cDanger : .cTextMedium)
+                }
+            }
+            .frame(height: 44)
+            .buttonStyle(BorderlessButtonStyle())
+            .actionSheet(isPresented: self.$showActionSheet) {
+                ActionSheet(title: Text("envSelect"), message: Text(""), buttons: [
+                    .default(Text("envCamera"), action: {
+                        self.sourceType = .camera
+                        sheetLayout = .picker
+                        shouldPresentSheet = true
+                    }),
+                    .default(Text("envGallery"), action: {
+                        self.sourceType = .photoLibrary
+                        sheetLayout = .picker
+                        shouldPresentSheet = true
+                    }),
+                    .cancel()
+                ])
+            }
+            if field.value == "Y" {
+                Button(action: {
+                    sheetLayout = .viewer
+                    shouldPresentSheet = true
+                }) {
+                    Text("envPreviewResource")
+                }
+                .frame(height: 40)
+                .buttonStyle(BorderlessButtonStyle())
+            }
+        }
+        .sheet(isPresented: $shouldPresentSheet) {
+            switch sheetLayout {
+                case .picker:
+                    CustomImagePickerView(sourceType: sourceType, uiImage: self.$uiImage, onSelectionDone: onSelectionDone)
+                case .viewer:
+                    ImageViewerDialog(table: options.table, field: field.key, id: options.item, localId: options.objectId?.stringValue ?? "")
+            }
+        }
+    }
+    
+    func onSelectionDone(_ done: Bool) {
+        self.shouldPresentSheet = false
+        field.value = done ? "Y" : field.value
+        if done {
+            MediaUtils.store(uiImage: uiImage, table: options.table, field: field.key, id: options.item, localId: options.objectId?.stringValue ?? "")
+        }
+    }
+    
+}
+
+enum MediaSource {
+    case canvas, gallery, camera
+}
+
+enum SheetLayout {
+    case picker, viewer
+}
+
+struct DynamicFormHabeasData: View {
+    
+    @Binding var field: DynamicFormField
+    var options: DynamicFormFieldOptions
+    
+    @State private var showActionSheet = false
+    @State private var shouldPresentSheet = false
+    @State private var sourceType: UIImagePickerController.SourceType = .camera
+    @State private var source: MediaSource = .canvas
+    @State private var sheetLayout: SheetLayout = .picker
     
     @State private var uiImage: UIImage?
     
@@ -382,37 +465,54 @@ struct DynamicFormImage: View {
             .buttonStyle(BorderlessButtonStyle())
             .actionSheet(isPresented: self.$showActionSheet) {
                 ActionSheet(title: Text("envSelect"), message: Text(""), buttons: [
+                    .default(Text("envDraw"), action: {
+                        self.source = .canvas
+                        self.sheetLayout = .picker
+                        self.shouldPresentSheet = true
+                    }),
                     .default(Text("envCamera"), action: {
                         self.sourceType = .camera
-                        self.shouldPresentImagePicker = true
+                        self.source = .camera
+                        self.sheetLayout = .picker
+                        self.shouldPresentSheet = true
                     }),
                     .default(Text("envGallery"), action: {
                         self.sourceType = .photoLibrary
-                        self.shouldPresentImagePicker = true
+                        self.source = .gallery
+                        self.sheetLayout = .picker
+                        self.shouldPresentSheet = true
                     }),
                     .cancel()
                 ])
             }
             if field.value == "Y" {
                 Button(action: {
-                    shouldPresentImageViewer = true
+                    sheetLayout = .viewer
+                    shouldPresentSheet = true
                 }) {
                     Text("envPreviewResource")
                 }
                 .frame(height: 40)
                 .buttonStyle(BorderlessButtonStyle())
-                .popover(isPresented: $shouldPresentImageViewer) {
-                    ImageViewerDialog(table: options.table, field: field.key, id: options.item, localId: options.objectId?.stringValue ?? "")
-                }
             }
         }
-        .sheet(isPresented: $shouldPresentImagePicker) {
-            CustomImagePickerView(sourceType: sourceType, uiImage: self.$uiImage, onSelectionDone: onSelectionDone)
+        .sheet(isPresented: $shouldPresentSheet) {
+            switch sheetLayout {
+                case .picker:
+                    switch source {
+                        case .canvas:
+                            CanvasDrawerDialog(uiImage: self.$uiImage, title: NSLocalizedString("env\(field.label.capitalized)", comment: field.label), onSelectionDone: onSelectionDone)
+                        default:
+                            CustomImagePickerView(sourceType: sourceType, uiImage: self.$uiImage, onSelectionDone: onSelectionDone)
+                    }
+                case .viewer:
+                    ImageViewerDialog(table: options.table, field: field.key, id: options.item, localId: options.objectId?.stringValue ?? "")
+            }
         }
     }
     
     func onSelectionDone(_ done: Bool) {
-        self.shouldPresentImagePicker = false
+        self.shouldPresentSheet = false
         field.value = done ? "Y" : field.value
         if done {
             MediaUtils.store(uiImage: uiImage, table: options.table, field: field.key, id: options.item, localId: options.objectId?.stringValue ?? "")
@@ -433,31 +533,39 @@ struct DynamicFormCanvas: View {
     
     var body: some View {
         VStack {
-            Button(action: {
+            VStack {
+                Text(NSLocalizedString("env\(field.label.capitalized)", comment: field.label))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .foregroundColor((field.localRequired && field.value.isEmpty) ? Color.cDanger : .cTextMedium)
+            }
+            .frame(height: 44)
+            .onTapGesture {
                 drawDialog = true
-            }) {
-                VStack {
-                    Text(NSLocalizedString("env\(field.label.capitalized)", comment: field.label))
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
             }
             if field.value == "Y" {
                 Button(action: {
-                    
+                    shouldPresentImageViewer = true
                 }) {
                     Text("envPreviewResource")
                 }
+                .frame(height: 40)
+                .buttonStyle(BorderlessButtonStyle())
+                .popover(isPresented: $shouldPresentImageViewer) {
+                    ImageViewerDialog(table: options.table, field: field.key, id: options.item, localId: options.objectId?.stringValue ?? "")
+                }
             }
         }
-        .onAppear {
-            load()
-        }
         .sheet(isPresented: $drawDialog, content: {
-            CanvasDrawerDialog()
+            CanvasDrawerDialog(uiImage: self.$uiImage, title: NSLocalizedString("env\(field.label.capitalized)", comment: field.label), onSelectionDone: onSelectionDone)
         })
     }
     
-    func load() {
+    func onSelectionDone(_ done: Bool) {
+        self.drawDialog = false
+        field.value = done ? "Y" : field.value
+        if done {
+            MediaUtils.store(uiImage: uiImage, table: options.table, field: field.key, id: options.item, localId: options.objectId?.stringValue ?? "")
+        }
     }
     
 }
@@ -491,14 +599,26 @@ struct DynamicFormDayMonth: View {
                     .foregroundColor(.cAccent)
             }
         }
+        .onAppear {
+            load()
+        }
         .sheet(isPresented: $selectDialog, content: {
             DayMonthDialogPicker(onSelectionDone: onSelectionDone, selected: $selected)
         })
     }
     
+    func load() {
+        let value = field.value.components(separatedBy: "-")
+        if value.count > 1 {
+            selected = value
+            onSelectionDone([])
+        }
+    }
+    
     func onSelectionDone(_ : [String]) {
         selectDialog = false
         if selected.count > 1 {
+            field.value = "\(selected[0])-\(selected[1])"
             selectedLabel = "\(Utils.castString(value: CommonUtils.months[Utils.castInt(value: selected[0]) - 1]["name"])) \(selected[1])"
         }
     }
@@ -551,6 +671,9 @@ struct DynamicFormList: View {
                     .foregroundColor(.cAccent)
             }
         }
+        .onAppear {
+            load()
+        }
         .partialSheet(isPresented: $selectSourceDynamic) {
             SourceDynamicDialogPicker(onSelectionDone: onSelectionDone, selected: $selected, data: field.source, multiple: field.multiple, title: NSLocalizedString("env\(field.label.capitalized)", comment: field.label), isSheet: true)
         }
@@ -560,6 +683,13 @@ struct DynamicFormList: View {
         .sheet(isPresented: $selectSourceTableFull, content: {
             CustomDialogPicker(onSelectionDone: onSelectionDone, selected: $selected, key: field.source, multiple: field.multiple, title: NSLocalizedString("env\(field.label.capitalized)", comment: field.label), isSheet: true)
         })
+    }
+    
+    func load() {
+        if !field.value.isEmpty {
+            selected = field.value.components(separatedBy: ",")
+            onSelectionDone([])
+        }
     }
     
     func onSelectionDone(_ : [String]) {

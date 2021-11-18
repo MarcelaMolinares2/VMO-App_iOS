@@ -67,7 +67,7 @@ struct PanelMenu: View {
                 }
                 Button(action: {
                     self.isPresented = false
-                    FormEntity(id: panel.id, type: panel.type, options: [ "tab": "CARD" ]).go(path: "PANEL-CARD", router: viewRouter)
+                    FormEntity(objectId: panel.objectId.stringValue, type: panel.type, options: [ "tab": "CARD" ]).go(path: "PANEL-CARD", router: viewRouter)
                 }) {
                     VStack {
                         Image("ic-summary")
@@ -83,7 +83,7 @@ struct PanelMenu: View {
                 }
                 Button(action: {
                     self.isPresented = false
-                    FormEntity(id: panel.id, type: panel.type, options: [ "visitType": "NORMAL" ]).go(path: "MOVEMENT-FORM", router: viewRouter)
+                    FormEntity(objectId: panel.objectId.stringValue, type: panel.type, options: [ "visitType": "NORMAL" ]).go(path: "MOVEMENT-FORM", router: viewRouter)
                 }) {
                     VStack {
                         Image("ic-visit")
@@ -116,7 +116,7 @@ struct PanelMenu: View {
                 }
                 Button(action: {
                     self.isPresented = false
-                    FormEntity(id: panel.id, type: panel.type, options: [ "tab": "RECORD" ]).go(path: "PANEL-CARD", router: viewRouter)
+                    FormEntity(objectId: panel.objectId.stringValue, type: panel.type, options: [ "tab": "RECORD" ]).go(path: "PANEL-CARD", router: viewRouter)
                 }) {
                     VStack {
                         Image("ic-medical-history")
@@ -133,7 +133,7 @@ struct PanelMenu: View {
                 if panel.type != "M" {
                     Button(action: {
                         self.isPresented = false
-                        FormEntity(id: panel.id, type: panel.type, options: [ "tab": "CONTACTS" ]).go(path: "PANEL-CARD", router: viewRouter)
+                        FormEntity(objectId: panel.objectId.stringValue, type: panel.type, options: [ "tab": "CONTACTS" ]).go(path: "PANEL-CARD", router: viewRouter)
                     }) {
                         VStack {
                             Image("ic-client")
@@ -150,7 +150,7 @@ struct PanelMenu: View {
                 }
                 Button(action: {
                     self.isPresented = false
-                    FormEntity(id: panel.id, type: panel.type, options: [ "tab": "BASIC" ])
+                    FormEntity(objectId: panel.objectId.stringValue, type: panel.type, options: [ "tab": "BASIC" ])
                         .go(path: PanelUtils.formByPanelType(panel: panel), router: viewRouter)
                 }) {
                     VStack {

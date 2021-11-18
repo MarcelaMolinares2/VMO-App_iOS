@@ -72,7 +72,8 @@ struct RouteListView: View {
     
     func onEdit(_ group: Group) {
         self.optionsModal = false
-        GroupDao(realm: try! Realm()).store(group: group)
+        self.moduleRouter.id = group.id
+        self.moduleRouter.currentPage = "FORM"
     }
     
     func onDelete(_ group: Group) {
@@ -134,7 +135,7 @@ struct RouteListCardView: View {
                     Text(String(pharmacies))
                     Spacer()
                 }
-                HStack{
+                HStack {
                     if clients == 0 {
                         Image("ic-client")
                             .resizable()
@@ -381,6 +382,15 @@ struct RouteFormView: View {
         }
         .partialSheet(isPresented: self.$cardShow) {
             PanelTypeMenu(onPanelSelected: onPanelSelected, panelTypes: ["M", "F", "C", "P"], isPresented: self.$cardShow)
+        }
+        .onAppear {
+            load()
+        }
+    }
+    
+    func load() {
+        if moduleRouter.id > 0 {
+            let g = GroupDao(realm: try! Realm()).by(id: moduleRouter.id)
         }
     }
     

@@ -19,6 +19,13 @@ class ModuleRouter: ObservableObject {
             }
         }
     }
+    var id: Int = 0 {
+        didSet {
+            withAnimation() {
+                objectWillChange.send(self)
+            }
+        }
+    }
 }
 
 class ViewRouter: ObservableObject {
@@ -30,7 +37,7 @@ class ViewRouter: ObservableObject {
             }
         }
     }
-    var data: FormEntity = FormEntity(id: 0) {
+    var data: FormEntity = FormEntity(objectId: "") {
         didSet {
             withAnimation() {
                 objectWillChange.send(self)
@@ -39,9 +46,11 @@ class ViewRouter: ObservableObject {
     }
     
     func panel() -> Panel & SyncEntity {
+        /*
+         case "C":
+         return try! Realm().object(ofType: Client.self, forPrimaryKey: data.id) ?? Client()
+         */
         switch data.type {
-        case "C":
-            return try! Realm().object(ofType: Client.self, forPrimaryKey: data.id) ?? Client()
         default:
             return GenericPanel()
         }

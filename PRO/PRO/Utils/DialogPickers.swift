@@ -507,23 +507,81 @@ struct Drawing {
     var points: [CGPoint] = [CGPoint]()
 }
 
+struct CanvasShape: Shape {
+    @Binding var drawings: [Drawing]
+    @Binding var currentDrawing: Drawing
+    
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        drawings.forEach { drawing in
+            let points = drawing.points
+            if !points.isEmpty {
+                path.move(to: CGPoint(x: points[0].x, y: points[0].y))
+            }
+            for point in points {
+                path.addLine(to: CGPoint(x: point.x, y: point.y))
+            }
+        }
+        let points = currentDrawing.points
+        if !points.isEmpty {
+            path.move(to: CGPoint(x: points[0].x, y: points[0].y))
+        }
+        for point in points {
+            path.addLine(to: CGPoint(x: point.x, y: point.y))
+        }
+        return path
+    }
+    
+}
+
 struct CanvasDrawerDialog: View {
+    @Binding var uiImage: UIImage?
+    var title: String = ""
+    let onSelectionDone: (_ done: Bool) -> Void
+    
     @State private var currentDrawing: Drawing = Drawing()
     @State private var drawings: [Drawing] = [Drawing]()
     @State private var color: Color = Color.black
     @State private var lineWidth: CGFloat = 3.0
+    @State private var rect: CGRect = .zero
+    
+    var canvas: some View {
+        CanvasShape(drawings: $drawings, currentDrawing: $currentDrawing)
+        .stroke(self.color, lineWidth: self.lineWidth)
+            .background(Color.init(white: 1))
+    }
     
     var body: some View {
-        
-        GeometryReader { geometry in
-            Path { path in
-                for drawing in self.drawings {
-                    self.add(drawing: drawing, toPath: &path)
+        VStack {
+            HStack {
+                Button(action: {
+                    drawings = []
+                }) {
+                    Image("ic-clean")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 40, height: 32, alignment: .center)
+                        .foregroundColor(.cPrimary)
                 }
-                self.add(drawing: self.currentDrawing, toPath: &path)
+                Spacer()
+                Text(title)
+                    .foregroundColor(.cPrimary)
+                Spacer()
+                Button(action: {
+                    self.uiImage = canvas.asImage(size: CGSize(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height - (50)))
+                    onSelectionDone(true)
+                }) {
+                    Image("ic-disk")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 40, height: 32, alignment: .center)
+                        .foregroundColor(.cPrimary)
+                }
             }
-            .stroke(self.color, lineWidth: self.lineWidth)
-                .background(Color(white: 0.95))
+            .padding([.leading, .trailing], 20)
+            .padding([.top], 10)
+            GeometryReader { geometry in
+                canvas
                 .gesture(
                     DragGesture(minimumDistance: 0.1)
                         .onChanged({ (value) in
@@ -537,19 +595,16 @@ struct CanvasDrawerDialog: View {
                             self.drawings.append(self.currentDrawing)
                             self.currentDrawing = Drawing()
                         })
-            )
-        }
-        .frame(maxHeight: .infinity)
-    }
-    
-    private func add(drawing: Drawing, toPath path: inout Path) {
-        let points = drawing.points
-        if points.count > 1 {
-            for i in 0..<points.count-1 {
-                let current = points[i]
-                let next = points[i+1]
-                path.move(to: current)
-                path.addLine(to: next)
+                )
+            }
+            .frame(maxHeight: .infinity)
+            .background(RectGetter(rect: $rect))
+            HStack {
+                Button(action: {
+                    onSelectionDone(false)
+                }) {
+                    Text("envCancel")
+                }
             }
         }
     }
@@ -564,5 +619,63 @@ extension Binding {
                 self.wrappedValue = selection
                 handler(selection)
         })
+    }
+}
+
+struct RectGetter: View {
+    @Binding var rect: CGRect
+    
+    var body: some View {
+        GeometryReader { proxy in
+            self.createView(proxy: proxy)
+        }
+    }
+    
+    func createView(proxy: GeometryProxy) -> some View {
+        DispatchQueue.main.async {
+            self.rect = proxy.frame(in: .global)
+        }
+        
+        return Rectangle().fill(Color.clear)
+    }
+}
+
+extension View {
+    func snapshot() -> UIImage {
+        let controller = UIHostingController(rootView: self)
+        let view = controller.view
+        
+        let targetSize = controller.view.intrinsicContentSize
+        view?.bounds = CGRect(origin: .zero, size: targetSize)
+        view?.backgroundColor = .clear
+        
+        let renderer = UIGraphicsImageRenderer(size: targetSize)
+        
+        return renderer.image { _ in
+            view?.drawHierarchy(in: controller.view.bounds, afterScreenUpdates: true)
+        }
+    }
+}
+
+extension UIView {
+    func asImage() -> UIImage {
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = 1
+        return UIGraphicsImageRenderer(size: self.layer.frame.size, format: format).image { context in
+            self.drawHierarchy(in: self.layer.bounds, afterScreenUpdates: true)
+            //layer.render(in: context.cgContext)
+            
+        }
+    }
+}
+
+extension View {
+    func asImage(size: CGSize) -> UIImage {
+        let controller = UIHostingController(rootView: self)
+        controller.view.bounds = CGRect(origin: .zero, size: size)
+        //UIApplication.shared.windows.first!.rootViewController?.view.addSubview(controller.view)
+        let image = controller.view.asImage()
+        //controller.view.removeFromSuperview()
+        return image
     }
 }

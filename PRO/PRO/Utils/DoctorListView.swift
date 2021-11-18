@@ -53,7 +53,7 @@ struct DoctorListView: View {
                 }
             }
             FAB(image: "ic-plus", foregroundColor: .cPrimary) {
-                FormEntity(id: 0).go(path: "MEDIC-FORM", router: viewRouter)
+                FormEntity(objectId: "").go(path: "DOCTOR-FORM", router: viewRouter)
             }
         }
         .partialSheet(isPresented: $menuIsPresented) {

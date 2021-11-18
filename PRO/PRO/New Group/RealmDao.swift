@@ -130,6 +130,16 @@ class DoctorDao: GenericDao {
         return realm.objects(Doctor.self).filter("id == \(id)").first
     }
     
+    func by(objectId: ObjectId) -> Doctor? {
+        return realm.object(ofType: Doctor.self, forPrimaryKey: objectId)
+    }
+    
+    func store(doctor: Doctor) {
+        try! realm.write {
+            realm.add(doctor, update: .all)
+        }
+    }
+    
 }
 
 class GroupDao: GenericDao {

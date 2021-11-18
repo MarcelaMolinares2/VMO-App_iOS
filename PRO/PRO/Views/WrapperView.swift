@@ -12,32 +12,32 @@ struct WrapperView: View {
     @EnvironmentObject var viewRouter: ViewRouter
     var body: some View {
         switch viewRouter.currentPage {
-        case "CLIENT-FORM":
-            ClientFormView()
-        case "MATERIAL-DELIVERY":
-            MaterialDeliveryView()
-        case "MATERIAL-REQUEST":
-            MaterialRequestView()
-        case "MEDIC-FORM":
-            DoctorFormView(viewRouter: viewRouter)
-        case "MOVEMENT-FORM":
-            MovementFormView(viewRouter: viewRouter)
-        case "PANEL-CARD":
-            PanelCardView(panel: viewRouter.panel(), defaultTab: viewRouter.option(key: "tab", default: "CARD"))
-        case "REQUEST-DAY":
-            RequestDayView()
-        case "REQUEST-MATERIAL":
-            MaterialRequestView()
-        case "ROUTE-VIEW":
-            RouteView()
-        /*
-        case "ROUTE-FORM":
-            RouteFormView()
-        */
-        case "SUPPORT":
-            SupportView()
-        default:
-            Text("")
+            case "CLIENT-FORM":
+                ClientFormView()
+            case "DOCTOR-FORM":
+                DoctorFormView()
+            case "MATERIAL-DELIVERY":
+                MaterialDeliveryView()
+            case "MATERIAL-REQUEST":
+                MaterialRequestView()
+            case "MOVEMENT-FORM":
+                MovementFormView()
+            case "PANEL-CARD":
+                PanelCardView(panel: viewRouter.panel(), defaultTab: viewRouter.option(key: "tab", default: "CARD"))
+            case "REQUEST-DAY":
+                RequestDayView()
+            case "REQUEST-MATERIAL":
+                MaterialRequestView()
+            case "ROUTE-VIEW":
+                RouteView()
+            /*
+            case "ROUTE-FORM":
+                RouteFormView()
+            */
+            case "SUPPORT":
+                SupportView()
+            default:
+                Text("")
         }
     }
 }
