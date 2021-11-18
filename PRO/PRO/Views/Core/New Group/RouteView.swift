@@ -10,6 +10,7 @@ import SwiftUI
 import RealmSwift
 import AlertToast
 
+
 struct RouteView: View {
     @ObservedObject private var moduleRouter = ModuleRouter()
     var body: some View {
@@ -167,10 +168,10 @@ struct RouteFormView: View {
     @ObservedObject var moduleRouter: ModuleRouter
     @State private var name = ""
     @State private var items = [Panel & SyncEntity]()
-    @State private var isValidationOn = false
+    @State private var saveGroup: Group = Group()
+    @State private var contentItems: Bool = false
     @State private var cardShow = false
     @State private var type = ""
-    @State var searchText = ""
     
     @ObservedObject private var selectPanelModalToggle = ModalToggle()
     @State private var slDefault = [String]()
@@ -261,16 +262,7 @@ struct RouteFormView: View {
                     Spacer()
                     FAB(image: "ic-cloud", foregroundColor: .cPrimary) {
                         if !name.replacingOccurrences(of: " ", with: "").isEmpty {
-                            let gr = Group()
-                            gr.name = name
-                            for i in items {
-                                let grM = GroupMember()
-                                grM.type = i.type
-                                grM.idPanel = i.id
-                                gr.groupMemberList.append(grM)
-                            }
-                            GroupDao(realm: try! Realm()).store(group: gr)
-                            moduleRouter.currentPage = "LIST"
+                            save()
                         } else {
                             colorWarning = Color.cWarning
                             name = ""
@@ -298,60 +290,8 @@ struct RouteFormView: View {
                 }
                 .background(Color.black.opacity(0.45))
                 .onDisappear {
-                    var exists = false
                     selected[self.type]?.binding.forEach{ it in
-                        switch self.type {
-                        case "M":
-                            if let doctor = DoctorDao(realm: try! Realm()).by(id: it){
-                                for i in items {
-                                    if String(i.id) == it {
-                                        exists = true
-                                    }
-                                }
-                                if !exists {
-                                    items.append(doctor)
-                                }
-                                exists = false
-                            }
-                        case "F":
-                            if let pharmacy = PharmacyDao(realm: try! Realm()).by(id: it){
-                                for i in items {
-                                    if String(i.id) == it {
-                                        exists = true
-                                    }
-                                }
-                                if !exists {
-                                    items.append(pharmacy)
-                                }
-                                exists = false
-                            }
-                        case "C":
-                            if let client = ClientDao(realm: try! Realm()).by(id: it){
-                                for i in items {
-                                    if String(i.id) == it {
-                                        exists = true
-                                    }
-                                }
-                                if !exists {
-                                    items.append(client)
-                                }
-                                exists = false
-                            }
-                        case "P":
-                            if let patient = PatientDao(realm: try! Realm()).by(id: it){
-                                for i in items {
-                                    if String(i.id) == it {
-                                        exists = true
-                                    }
-                                }
-                                if !exists {
-                                    items.append(patient)
-                                }
-                                exists = false
-                            }
-                        default:
-                            break
-                        }
+                        addPanelItems(type: self.type, it: it)
                     }
                 }
             }
@@ -365,36 +305,92 @@ struct RouteFormView: View {
     }
     
     func load() {
-        if moduleRouter.objectId.isEmpty {
-            if let g = try? GroupDao(realm: try! Realm()).by(objectId: ObjectId(string: moduleRouter.objectId)) {
-                print("_______g_______")
-                print(g)
+        if !moduleRouter.objectId.isEmpty {
+            contentItems = true
+            if let group = try? GroupDao(realm: try! Realm()).by(objectId: ObjectId(string: moduleRouter.objectId)) {
+                saveGroup = group
+                name = group.name ?? ""
+                group.groupMemberList.forEach { i in
+                    addPanelItems(type: i.type ?? "", it: String(i.idPanel))
+                }
             }
-        } else {
         }
     }
     
-    private func delete(at offsets: IndexSet) {
-        self.items.remove(atOffsets: offsets)
+    func addPanelItems(type: String, it: String){
+        switch type {
+        case "M":
+            if let doctor = DoctorDao(realm: try! Realm()).by(id: it){
+                if !validate(items: items, it: it) {
+                    items.append(doctor)
+                }
+            }
+        case "F":
+            if let pharmacy = PharmacyDao(realm: try! Realm()).by(id: it){
+                if !validate(items: items, it: it) {
+                    items.append(pharmacy)
+                }
+            }
+        case "C":
+            if let client = ClientDao(realm: try! Realm()).by(id: it){
+                if !validate(items: items, it: it) {
+                    items.append(client)
+                }
+            }
+        case "P":
+            if let patient = PatientDao(realm: try! Realm()).by(id: it){
+                if !validate(items: items, it: it) {
+                    items.append(patient)
+                }
+            }
+        default:
+            break
+        }
     }
     
-    func onPanelSelected (_ type: String) {
+    func save(){
+        if saveGroup != Group() {
+            let gr = Group()
+            gr.objectId = saveGroup.objectId
+            gr.name = name
+            items.forEach{ i in
+                gr.groupMemberList.append(addGroupMemberList(i: i))
+            }
+            GroupDao(realm: try! Realm()).store(group: gr)
+            moduleRouter.objectId = ""
+            moduleRouter.currentPage = "LIST"
+        } else {
+            saveGroup.name = name
+            items.forEach{ i in
+                saveGroup.groupMemberList.append(addGroupMemberList(i: i))
+            }
+            GroupDao(realm: try! Realm()).store(group: saveGroup)
+            moduleRouter.currentPage = "LIST"
+            
+        }
+    }
+    
+    func addGroupMemberList(i: Panel & SyncEntity) -> GroupMember{
+        let grM = GroupMember()
+        grM.type = i.type
+        grM.idPanel = i.id
+        return grM
+    }
+    
+    func validate(items: [Panel & SyncEntity], it: String) -> Bool {
+        var exists: Bool = false
+        items.forEach{ i in
+            if String(i.id) == it {
+                exists = true
+            }
+        }
+        return exists
+    }
+    
+    func onPanelSelected(_ type: String) {
         self.cardShow.toggle()
         self.type = type
         selectPanelModalToggle.status.toggle()
-        //print(items)
-    }
-    
-    func validate() -> Bool {
-        isValidationOn = true
-        if items.isEmpty {
-            return false
-        }
-        return true
-    }
-    
-    func save() {
-        
     }
     
 }
