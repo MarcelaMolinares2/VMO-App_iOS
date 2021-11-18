@@ -159,3 +159,7 @@ class DynamicFormFieldOptions {
         self.op = op
     }
 }
+
+class CustomAdditionalField: Codable {
+    var data: String
+}

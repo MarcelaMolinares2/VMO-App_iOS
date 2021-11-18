@@ -520,6 +520,17 @@ class DynamicUtils {
         }
     }
     
+    static func adFieldsTypeDecoding<T: CodingKey>(container: KeyedDecodingContainer<T>, key: KeyedDecodingContainer<T>.Key) throws -> String {
+        do {
+            let obj = try container.decode(CustomAdditionalField.self, forKey: key)
+            return obj.data
+        } catch DecodingError.keyNotFound {
+            return "{}"
+        } catch DecodingError.valueNotFound {
+            return "{}"
+        }
+    }
+    
     static func cloneObject<T: Object>(main: T?, temporal: T, skipped: [String]) {
         for (_, attr) in Mirror(reflecting: temporal).children.enumerated() {
             if let propertyName = attr.label as String? {

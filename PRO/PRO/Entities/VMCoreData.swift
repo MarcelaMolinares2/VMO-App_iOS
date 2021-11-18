@@ -490,7 +490,7 @@ class Doctor: Object, Codable, Panel, SyncEntity {
         self.formulation = try DynamicUtils.stringTypeDecoding(container: container, key: .formulation)
         self.photo = try DynamicUtils.stringTypeDecoding(container: container, key: .photo)
         self.lines = try DynamicUtils.stringTypeDecoding(container: container, key: .lines)
-        self.additionalFields = try DynamicUtils.stringTypeDecoding(container: container, key: .additionalFields)
+        self.additionalFields = try DynamicUtils.adFieldsTypeDecoding(container: container, key: .additionalFields)
     }
     
     private enum EncodingKeys: String, CodingKey {
