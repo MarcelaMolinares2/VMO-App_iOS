@@ -492,6 +492,8 @@ class DynamicUtils {
         } catch DecodingError.typeMismatch {
             let value = try container.decode(String.self, forKey: key)
             return Utils.castInt(value: value)
+        } catch DecodingError.valueNotFound {
+            return 0
         }
     }
     
@@ -503,6 +505,18 @@ class DynamicUtils {
         } catch DecodingError.typeMismatch {
             let value = try container.decode(String.self, forKey: key)
             return Utils.castFloat(value: value)
+        } catch DecodingError.valueNotFound {
+            return 0
+        }
+    }
+    
+    static func stringTypeDecoding<T: CodingKey>(container: KeyedDecodingContainer<T>, key: KeyedDecodingContainer<T>.Key) throws -> String {
+        do {
+            return try container.decode(String.self, forKey: key)
+        } catch DecodingError.keyNotFound {
+            return ""
+        } catch DecodingError.valueNotFound {
+            return ""
         }
     }
     

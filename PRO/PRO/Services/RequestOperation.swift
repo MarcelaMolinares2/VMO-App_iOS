@@ -121,7 +121,7 @@ class RequestOperation: Operation {
                 }
                 self.end()
             } catch let error as NSError {
-                print(error)
+                print("E -> \(error)")
                 self.end(path: path, code: -10, message: error.localizedDescription)
             }
         } else {

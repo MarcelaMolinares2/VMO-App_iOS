@@ -107,6 +107,7 @@ protocol Panel {
     var name: String? { get set }
     var email: String? { get set }
     var phone: String? { get set }
+    var additionalFields: String? { get set }
     
     var brickId: Int? { get set }
     var categoryId: Int? { get set }
@@ -140,6 +141,7 @@ class GenericPanel: Panel, SyncEntity {
     var name: String?
     var email: String?
     var phone: String?
+    var additionalFields: String?
     var brickId: Int?
     var categoryId: Int?
     var cityId: Int?
@@ -190,6 +192,7 @@ class Client: Object, Codable, Panel, SyncEntity {
     @Persisted var score: Float?
     @Persisted var visitFTF: Int?
     @Persisted var visitVirtual: Int?
+    @Persisted var additionalFields: String?
     @Persisted var lastMovement: MovementSimple?
     @Persisted var locations: List<PanelLocation>
     @Persisted var visitingHours: List<VisitingHour>
@@ -382,7 +385,7 @@ class Doctor: Object, Codable, Panel, SyncEntity {
     @Persisted var email: String?
     @Persisted var phone: String?
     @Persisted var brickId: Int?
-    @Persisted var categoryId: Int?
+    @Persisted var categoryId: Int? = 0
     @Persisted var cityId: Int?
     @Persisted var countryId: Int?
     @Persisted var pricesListId: Int?
@@ -391,6 +394,7 @@ class Doctor: Object, Codable, Panel, SyncEntity {
     @Persisted var score: Float?
     @Persisted var visitFTF: Int?
     @Persisted var visitVirtual: Int?
+    @Persisted var additionalFields: String?
     @Persisted var lastMovement: MovementSimple?
     @Persisted var locations: List<PanelLocation>
     @Persisted var visitingHours: List<VisitingHour>
@@ -433,7 +437,7 @@ class Doctor: Object, Codable, Panel, SyncEntity {
     var zone: Zone?
     
     private enum CodingKeys: String, CodingKey {
-        case id = "id_medico", idNumber = "dni", email = "email", phone = "telefono_consulta", brickId = "id_brick", categoryId = "id_categoria", cityId = "id_ciudad", countryId = "id_pais", pricesListId = "id_lista_precios", zoneId = "id_zona", score = "puntaje", visitFTF = "visit_ftf", visitVirtual = "visit_virtual", documentType = "tipo_documento", firstName = "nombres", lastName = "apellidos", code = "codigo", neighborhood = "barrio", institution = "institucion", emailVerified = "email_verificado", hasNoEmail = "no_email", habeasData = "habeas_data", gender = "sexo", hq = "sede", mobilePhone = "telefono_movil", secretary = "nombre_secretaria", birthDate = "md_cumpleanos", birthDateSecretary = "md_cumpleanos_secretaria", joinDate = "fecha_ingreso", prepaidEntities = "entidades_prepagadas", relatedTo = "asoc", formulation = "formulacion", photo = "foto", lines = "lineas", collegeId = "id_universidad", clientId = "id_cliente", specialtyId = "id_especialidad", secondSpecialtyId = "id_especialidad_secundaria", styleId = "id_estilo", isMarked, cdi
+        case id = "id_medico", idNumber = "dni", email = "email", phone = "telefono_consulta", brickId = "id_brick", categoryId = "id_categoria", cityId = "id_ciudad", countryId = "id_pais", pricesListId = "id_lista_precios", zoneId = "id_zona", score = "puntaje", visitFTF = "visit_ftf", visitVirtual = "visit_virtual", additionalFields = "fields", documentType = "tipo_documento", firstName = "nombres", lastName = "apellidos", code = "codigo", neighborhood = "barrio", institution = "institucion", emailVerified = "email_verificado", hasNoEmail = "no_email", habeasData = "habeas_data", gender = "sexo", hq = "sede", mobilePhone = "telefono_movil", secretary = "nombre_secretaria", birthDate = "md_cumpleanos", birthDateSecretary = "md_cumpleanos_secretaria", joinDate = "fecha_ingreso", prepaidEntities = "entidades_prepagadas", relatedTo = "asoc", formulation = "formulacion", photo = "foto", lines = "lineas", collegeId = "id_universidad", clientId = "id_cliente", specialtyId = "id_especialidad", secondSpecialtyId = "id_especialidad_secundaria", styleId = "id_estilo", isMarked, cdi
     }
     
     override init() {
@@ -464,28 +468,29 @@ class Doctor: Object, Codable, Panel, SyncEntity {
         
         self.score = try DynamicUtils.floatTypeDecoding(container: container, key: .score)
         
-        self.idNumber = try container.decode(String.self, forKey: .idNumber)
-        self.email = try container.decode(String.self, forKey: .email)
-        self.phone = try container.decode(String.self, forKey: .phone)
-        self.documentType = try container.decode(String.self, forKey: .documentType)
-        self.firstName = try container.decode(String.self, forKey: .firstName)
-        self.lastName = try container.decode(String.self, forKey: .lastName)
-        self.code = try container.decode(String.self, forKey: .code)
-        self.neighborhood = try container.decode(String.self, forKey: .neighborhood)
-        self.institution = try container.decode(String.self, forKey: .institution)
-        self.habeasData = try container.decode(String.self, forKey: .habeasData)
-        self.gender = try container.decode(String.self, forKey: .gender)
-        self.hq = try container.decode(String.self, forKey: .hq)
-        self.mobilePhone = try container.decode(String.self, forKey: .mobilePhone)
-        self.secretary = try container.decode(String.self, forKey: .secretary)
-        self.birthDate = try container.decode(String.self, forKey: .birthDate)
-        self.birthDateSecretary = try container.decode(String.self, forKey: .birthDateSecretary)
-        self.joinDate = try container.decode(String.self, forKey: .joinDate)
-        self.prepaidEntities = try container.decode(String.self, forKey: .prepaidEntities)
-        self.relatedTo = try container.decode(String.self, forKey: .relatedTo)
-        self.formulation = try container.decode(String.self, forKey: .formulation)
-        self.photo = try container.decode(String.self, forKey: .photo)
-        self.lines = try container.decode(String.self, forKey: .lines)
+        self.idNumber = try DynamicUtils.stringTypeDecoding(container: container, key: .idNumber)
+        self.email = try DynamicUtils.stringTypeDecoding(container: container, key: .email)
+        self.phone = try DynamicUtils.stringTypeDecoding(container: container, key: .phone)
+        self.documentType = try DynamicUtils.stringTypeDecoding(container: container, key: .documentType)
+        self.firstName = try DynamicUtils.stringTypeDecoding(container: container, key: .firstName)
+        self.lastName = try DynamicUtils.stringTypeDecoding(container: container, key: .lastName)
+        self.code = try DynamicUtils.stringTypeDecoding(container: container, key: .code)
+        self.neighborhood = try DynamicUtils.stringTypeDecoding(container: container, key: .neighborhood)
+        self.institution = try DynamicUtils.stringTypeDecoding(container: container, key: .institution)
+        self.habeasData = try DynamicUtils.stringTypeDecoding(container: container, key: .habeasData)
+        self.gender = try DynamicUtils.stringTypeDecoding(container: container, key: .gender)
+        self.hq = try DynamicUtils.stringTypeDecoding(container: container, key: .hq)
+        self.mobilePhone = try DynamicUtils.stringTypeDecoding(container: container, key: .mobilePhone)
+        self.secretary = try DynamicUtils.stringTypeDecoding(container: container, key: .secretary)
+        self.birthDate = try DynamicUtils.stringTypeDecoding(container: container, key: .birthDate)
+        self.birthDateSecretary = try DynamicUtils.stringTypeDecoding(container: container, key: .birthDateSecretary)
+        self.joinDate = try DynamicUtils.stringTypeDecoding(container: container, key: .joinDate)
+        self.prepaidEntities = try DynamicUtils.stringTypeDecoding(container: container, key: .prepaidEntities)
+        self.relatedTo = try DynamicUtils.stringTypeDecoding(container: container, key: .relatedTo)
+        self.formulation = try DynamicUtils.stringTypeDecoding(container: container, key: .formulation)
+        self.photo = try DynamicUtils.stringTypeDecoding(container: container, key: .photo)
+        self.lines = try DynamicUtils.stringTypeDecoding(container: container, key: .lines)
+        self.additionalFields = try DynamicUtils.stringTypeDecoding(container: container, key: .additionalFields)
     }
     
     private enum EncodingKeys: String, CodingKey {
@@ -617,6 +622,7 @@ class Patient: Object, Codable, Panel, SyncEntity {
     @Persisted var score: Float?
     @Persisted var visitFTF: Int?
     @Persisted var visitVirtual: Int?
+    @Persisted var additionalFields: String?
     @Persisted var lastMovement: MovementSimple?
     @Persisted var locations: List<PanelLocation>
     @Persisted var visitingHours: List<VisitingHour>
@@ -674,6 +680,7 @@ class Pharmacy: Object, Codable, Panel, SyncEntity {
     @Persisted var score: Float?
     @Persisted var visitFTF: Int?
     @Persisted var visitVirtual: Int?
+    @Persisted var additionalFields: String?
     @Persisted var lastMovement: MovementSimple?
     @Persisted var locations: List<PanelLocation>
     @Persisted var visitingHours: List<VisitingHour>
@@ -736,6 +743,7 @@ class PotentialProfessional: Object, Codable, Panel, SyncEntity {
     @Persisted var score: Float?
     @Persisted var visitFTF: Int?
     @Persisted var visitVirtual: Int?
+    @Persisted var additionalFields: String?
     @Persisted var lastMovement: MovementSimple?
     @Persisted var locations: List<PanelLocation>
     @Persisted var visitingHours: List<VisitingHour>
