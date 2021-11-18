@@ -88,7 +88,7 @@ struct RouteListCardView: View {
     var item: Group
     
     @State private var medics: Int = 0
-    @State private var pharmacies: Int = 0
+    @State private var pharmacys: Int = 0
     @State private var clients: Int = 0
     @State private var patients: Int = 0
     
@@ -104,51 +104,27 @@ struct RouteListCardView: View {
             Spacer()
             HStack{
                 HStack{
-                    if medics == 0 {
-                        Image("ic-medic")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(height: 27)
-                            .foregroundColor(Color.cPrimaryLight)
-                    } else {
-                        Image("ic-medic")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(height: 27)
-                            .foregroundColor(Color.cPanelMedic)
-                    }
+                    Image("ic-medic")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(height: 27)
+                        .foregroundColor(medics == 0 ? Color.cPrimaryLight: Color.cPanelMedic)
                     Text(String(medics))
                     Spacer()
-                    if pharmacies == 0{
-                        Image("ic-pharmacy")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(height: 27)
-                            .foregroundColor(Color.cPrimaryLight)
-                    } else {
-                        Image("ic-pharmacy")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(height: 27)
-                            .foregroundColor(Color.cPanelPharmacy)
-                    }
-                    Text(String(pharmacies))
+                    Image("ic-pharmacy")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(height: 27)
+                        .foregroundColor(pharmacys == 0 ? Color.cPrimaryLight: Color.cPanelPharmacy)
+                    Text(String(pharmacys))
                     Spacer()
                 }
                 HStack {
-                    if clients == 0 {
-                        Image("ic-client")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(height: 27)
-                            .foregroundColor(Color.cPrimaryLight)
-                    } else {
-                        Image("ic-client")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(height: 27)
-                            .foregroundColor(Color.cPanelClient)
-                    }
+                    Image("ic-client")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(height: 27)
+                        .foregroundColor(clients == 0 ? Color.cPrimaryLight: Color.cPanelClient)
                     Text(String(clients))
                     Spacer()
                     Image("ic-patient")
@@ -175,7 +151,7 @@ struct RouteListCardView: View {
                 case "M":
                     medics += 1
                 case "F":
-                    pharmacies += 1
+                    pharmacys += 1
                 case "C":
                     clients += 1
                 case "P":
@@ -390,7 +366,17 @@ struct RouteFormView: View {
     
     func load() {
         if moduleRouter.id > 0 {
-            let g = GroupDao(realm: try! Realm()).by(id: moduleRouter.id)
+            if let g = GroupDao(realm: try! Realm()).by(id: moduleRouter.id) {
+                print("_______g_______")
+                print(g)
+            } else {
+                print("NADA")
+            }
+        } else {
+            print("NADA DE NADA")
+            print(moduleRouter.currentPage)
+            print(moduleRouter.id)
+            
         }
     }
     

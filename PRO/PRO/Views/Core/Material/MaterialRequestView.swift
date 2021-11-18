@@ -115,15 +115,8 @@ struct MaterialRequestView: View {
                         if materials.count > 0 {
                             materialRequest.date = datetime
                             materialRequest.materials = materials.map { $0.id }.joined(separator: ",")
-                            /*
-                            materials.forEach{ it in
-                                materialRequest.materials = it.id + "," + materialRequest.materials
-                            }
-                            if materialRequest.materials.last == ","{
-                                materialRequest.materials.removeLast()
-                            }
-                            */
                             AdvertisingMaterialRequestDao(realm: try! Realm()).store(advertisingMaterialRequest: materialRequest)
+                            goTo(page: "MASTER")
                         } else {
                             self.showToast.toggle()
                         }
