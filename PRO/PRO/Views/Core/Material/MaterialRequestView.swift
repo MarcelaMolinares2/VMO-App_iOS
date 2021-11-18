@@ -114,20 +114,22 @@ struct MaterialRequestView: View {
                         let datetime = formatter.string(from: dateStart)
                         if materials.count > 0 {
                             materialRequest.date = datetime
-                            
+                            materialRequest.materials = materials.map { $0.id }.joined(separator: ",")
+                            /*
                             materials.forEach{ it in
                                 materialRequest.materials = it.id + "," + materialRequest.materials
                             }
                             if materialRequest.materials.last == ","{
                                 materialRequest.materials.removeLast()
                             }
-                            AdvertisingMaterialRequestDao(realm: try! Realm()).store(group: materialRequest)
+                            */
+                            AdvertisingMaterialRequestDao(realm: try! Realm()).store(advertisingMaterialRequest: materialRequest)
                         } else {
                             self.showToast.toggle()
                         }
                     }
                 }
-                .toast(isPresenting: $showToast){
+                .toast(isPresenting: $showToast) {
                     AlertToast(type: .regular, title: NSLocalizedString("noneMaterialDelivery", comment: ""))
                 }
             }

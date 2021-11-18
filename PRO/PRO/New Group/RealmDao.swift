@@ -28,9 +28,9 @@ class GenericDao {
 
 class AdvertisingMaterialRequestDao: GenericDao {
     
-    func store(group: AdvertisingMaterialRequest) {
+    func store(advertisingMaterialRequest: AdvertisingMaterialRequest) {
         try! realm.write {
-            realm.add(group, update: .all)
+            realm.add(advertisingMaterialRequest, update: .all)
         }
     }
     
