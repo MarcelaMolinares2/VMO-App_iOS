@@ -72,7 +72,7 @@ struct RouteListView: View {
     
     func onEdit(_ group: Group) {
         self.optionsModal = false
-        self.moduleRouter.id = group.id
+        self.moduleRouter.objectId = group.objectId.stringValue
         self.moduleRouter.currentPage = "FORM"
     }
     
@@ -365,18 +365,12 @@ struct RouteFormView: View {
     }
     
     func load() {
-        if moduleRouter.id > 0 {
-            if let g = GroupDao(realm: try! Realm()).by(id: moduleRouter.id) {
+        if moduleRouter.objectId.isEmpty {
+            if let g = try? GroupDao(realm: try! Realm()).by(objectId: ObjectId(string: moduleRouter.objectId)) {
                 print("_______g_______")
                 print(g)
-            } else {
-                print("NADA")
             }
         } else {
-            print("NADA DE NADA")
-            print(moduleRouter.currentPage)
-            print(moduleRouter.id)
-            
         }
     }
     

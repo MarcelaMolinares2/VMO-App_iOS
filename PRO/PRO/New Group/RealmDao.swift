@@ -152,6 +152,10 @@ class GroupDao: GenericDao {
         return realm.objects(Group.self).filter("id == \(id)").first
     }
     
+    func by(objectId: ObjectId) -> Group? {
+        return realm.object(ofType: Group.self, forPrimaryKey: objectId)
+    }
+    
     func store(group: Group){
         try! realm.write {
             realm.add(group, update: .all)

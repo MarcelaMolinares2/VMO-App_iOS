@@ -19,7 +19,7 @@ class ModuleRouter: ObservableObject {
             }
         }
     }
-    var id: Int = 0 {
+    var objectId: String = "" {
         didSet {
             withAnimation() {
                 objectWillChange.send(self)
