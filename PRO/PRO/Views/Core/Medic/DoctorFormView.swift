@@ -17,6 +17,7 @@ struct DoctorFormView: View {
     
     @State var doctor: Doctor?
     @State var plainData = ""
+    @State var additionalData = ""
     @State var dynamicData = Dictionary<String, Any>()
     @State private var form = DynamicForm(tabs: [DynamicFormTab]())
     @State private var options = DynamicFormFieldOptions(table: "doctor", op: "")
@@ -42,33 +43,7 @@ struct DoctorFormView: View {
                     }
                 }
             }
-            GeometryReader { geometry in
-                HStack(spacing: 0) {
-                    ForEach(form.tabs, id: \.id) { tab in
-                        Text(tab.key)
-                        Image("ic-home")
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .padding(5)
-                            .frame(width: geometry.size.width / CGFloat(form.tabs.count + 1), alignment: .center)
-                            .foregroundColor(tabRouter.current == tab.key ? .cPrimary : .cAccent)
-                            .onTapGesture {
-                                tabRouter.current = tab.key
-                            }
-                    }
-                    Image("ic-map")
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .padding(5)
-                        .frame(width: geometry.size.width / CGFloat(form.tabs.count + 1), alignment: .center)
-                        .foregroundColor(tabRouter.current == "LOCATIONS" ? .cPrimary : .cAccent)
-                        .onTapGesture {
-                            tabRouter.current = "LOCATIONS"
-                        }
-                }
-                .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
-            }
-            .frame(minWidth: 0, maxWidth: .infinity, minHeight: 46, maxHeight: 46)
+            BottomNavigationBarDynamic(onTabSelected: onTabSelected, currentTab: $tabRouter.current, tabs: $form.tabs, staticTabs: ["LOCATIONS"])
         }
         .onAppear {
             tabRouter.current = "BASIC"
@@ -82,12 +57,10 @@ struct DoctorFormView: View {
     func initForm() {
         if viewRouter.data.objectId.isEmpty {
             doctor = Doctor()
-            options.op = "create"
         } else {
-            doctor = try! DoctorDao(realm: try! Realm()).by(objectId: ObjectId(string: viewRouter.data.objectId))
+            doctor = Doctor(value: try! DoctorDao(realm: try! Realm()).by(objectId: ObjectId(string: viewRouter.data.objectId)) ?? Doctor())
             plainData = try! Utils.objToJSON(doctor)
-            print(plainData)
-            options.op = "update"
+            additionalData = doctor?.additionalFields ?? "{}"
         }
         options.objectId = doctor?.objectId
         options.item = doctor?.id ?? 0
@@ -100,13 +73,14 @@ struct DoctorFormView: View {
     func initDynamic(data: Dictionary<String, Any>) {
         form.tabs = DynamicUtils.initForm(data: data).sorted(by: { $0.key > $1.key })
         if !plainData.isEmpty {
-            print("FILL!!")
+            DynamicUtils.fillForm(form: &form, base: plainData, additional: additionalData)
         }
     }
     
     func save() {
         if DynamicUtils.validate(form: form) && doctor != nil {
             DynamicUtils.cloneObject(main: doctor, temporal: try! JSONDecoder().decode(Doctor.self, from: DynamicUtils.toJSON(form: form).data(using: .utf8)!), skipped: ["objectId", "id", "type"])
+            doctor?.additionalFields = DynamicUtils.generateAdditional(form: form)
             DoctorDao(realm: try! Realm()).store(doctor: doctor!)
             viewRouter.currentPage = "MASTER"
         } else {
@@ -114,49 +88,8 @@ struct DoctorFormView: View {
         }
     }
     
-}
-
-extension Decodable {
-  init(from: Any) throws {
-    let data = try JSONSerialization.data(withJSONObject: from, options: .prettyPrinted)
-    let decoder = JSONDecoder()
-    self = try decoder.decode(Self.self, from: data)
-  }
-}
-
-    /*
-    var dataSave = Doctor()
-    print(doctor?.objectId)
-    dataSave.objectId = (doctor?.objectId)!
-    print(dataSave.objectId)
-    dataSave.id = doctor?.id ?? 0
-    print(dataSave)
-    print(DynamicUtils.toJSON(form: form))
-    dataSave = try! JSONDecoder().decode(Doctor.self, from: DynamicUtils.toJSON(form: form).data(using: .utf8)!)
-    print(dataSave)
-     SwiftTryCatch.try({
-              // try something
-          }, catch: { (error) in
-              print("\(error.description)")
-          }, finally: {
-              // close resources
-     })
-    print(doctor)
-    var dataSave = Doctor(value: doctor ?? Doctor())
-    dataSave = try! JSONDecoder().decode(Doctor.self, from: DynamicUtils.toJSON(form: form).data(using: .utf8)!)
-    print(dataSave)
-     */
-    /*for (index, attr) in Mirror(reflecting: tmp).children.enumerated() {
-        if let propertyName = attr.label as String? {
-            let property = propertyName.replacingOccurrences(of: "_", with: "")
-            if !["objectId", "id", "type"].contains(property) {
-                SwiftTryCatch.try({
-                    doctor?.setValue(tmp.value(forKey: property), forUndefinedKey: property)
-                }, catch: { (error) in
-                    print(String(describing: error?.description))
-                }, finally: {
-                })
-            }
-        }
+    func onTabSelected(_ tab: String) {
+        tabRouter.current = tab
     }
-    */
+    
+}

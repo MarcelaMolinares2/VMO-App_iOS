@@ -170,7 +170,7 @@ class GenericPanel: Panel, SyncEntity {
     
 }
 
-class Client: Object, Codable, Panel, SyncEntity {
+class Client: Object, Codable, Panel, SyncEntity, Identifiable {
     @Persisted(primaryKey: true) var objectId: ObjectId
     @Persisted(indexed: true) var id = 0
     @Persisted var transactionStatus: String? = ""
@@ -371,7 +371,7 @@ class Diary: Object, Codable, SyncEntity {
     }
 }
 
-class Doctor: Object, Codable, Panel, SyncEntity {
+class Doctor: Object, Codable, Panel, SyncEntity, Identifiable {
     @Persisted(primaryKey: true) var objectId: ObjectId
     @Persisted(indexed: true) var id = 0
     @Persisted var transactionStatus: String? = ""
@@ -494,16 +494,54 @@ class Doctor: Object, Codable, Panel, SyncEntity {
     }
     
     private enum EncodingKeys: String, CodingKey {
-        case id = "id_medico"
+        case id = "id_medico", idNumber = "dni", email = "email", phone = "telefono_consulta", brickId = "id_brick", categoryId = "id_categoria", cityId = "id_ciudad", countryId = "id_pais", pricesListId = "id_lista_precios", zoneId = "id_zona", score = "puntaje", visitFTF = "visit_ftf", visitVirtual = "visit_virtual", additionalFields = "fields", documentType = "tipo_documento", firstName = "nombres", lastName = "apellidos", code = "codigo", neighborhood = "barrio", institution = "institucion", emailVerified = "email_verificado", hasNoEmail = "no_email", habeasData = "habeas_data", gender = "sexo", hq = "sede", mobilePhone = "telefono_movil", secretary = "nombre_secretaria", birthDate = "md_cumpleanos", birthDateSecretary = "md_cumpleanos_secretaria", joinDate = "fecha_ingreso", prepaidEntities = "entidades_prepagadas", relatedTo = "asoc", formulation = "formulacion", photo = "foto", lines = "lineas", collegeId = "id_universidad", clientId = "id_cliente", specialtyId = "id_especialidad", secondSpecialtyId = "id_especialidad_secundaria", styleId = "id_estilo", isMarked, cdi
     }
     
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: EncodingKeys.self)
+        
         try container.encode(id, forKey: .id)
-        /*
-         visitingHours = "visiting_hours"
-         locations
-         */
+        try container.encode(brickId, forKey: .brickId)
+        try container.encode(categoryId, forKey: .categoryId)
+        try container.encode(cityId, forKey: .cityId)
+        try container.encode(countryId, forKey: .countryId)
+        try container.encode(pricesListId, forKey: .pricesListId)
+        try container.encode(zoneId, forKey: .zoneId)
+        try container.encode(visitFTF, forKey: .visitFTF)
+        try container.encode(visitVirtual, forKey: .visitVirtual)
+        try container.encode(emailVerified, forKey: .emailVerified)
+        try container.encode(hasNoEmail, forKey: .hasNoEmail)
+        try container.encode(collegeId, forKey: .collegeId)
+        try container.encode(clientId, forKey: .clientId)
+        try container.encode(specialtyId, forKey: .specialtyId)
+        try container.encode(secondSpecialtyId, forKey: .secondSpecialtyId)
+        try container.encode(styleId, forKey: .styleId)
+        try container.encode(isMarked, forKey: .isMarked)
+        
+        try container.encode(score, forKey: .score)
+        
+        try container.encode(idNumber, forKey: .idNumber)
+        try container.encode(email, forKey: .email)
+        try container.encode(phone, forKey: .phone)
+        try container.encode(documentType, forKey: .documentType)
+        try container.encode(firstName, forKey: .firstName)
+        try container.encode(lastName, forKey: .lastName)
+        try container.encode(code, forKey: .code)
+        try container.encode(neighborhood, forKey: .neighborhood)
+        try container.encode(institution, forKey: .institution)
+        try container.encode(habeasData, forKey: .habeasData)
+        try container.encode(gender, forKey: .gender)
+        try container.encode(hq, forKey: .hq)
+        try container.encode(mobilePhone, forKey: .mobilePhone)
+        try container.encode(secretary, forKey: .secretary)
+        try container.encode(birthDate, forKey: .birthDate)
+        try container.encode(birthDateSecretary, forKey: .birthDateSecretary)
+        try container.encode(joinDate, forKey: .joinDate)
+        try container.encode(prepaidEntities, forKey: .prepaidEntities)
+        try container.encode(relatedTo, forKey: .relatedTo)
+        try container.encode(formulation, forKey: .formulation)
+        try container.encode(photo, forKey: .photo)
+        try container.encode(lines, forKey: .lines)
     }
     
     static func primaryCodingKey() -> String {
@@ -599,7 +637,7 @@ class PanelLocation: Object, Decodable, SyncEntity {
     }
 }
 
-class Patient: Object, Codable, Panel, SyncEntity {
+class Patient: Object, Codable, Panel, SyncEntity, Identifiable {
     @Persisted(primaryKey: true) var objectId: ObjectId
     @Persisted(indexed: true) var id = 0
     @Persisted var transactionStatus: String? = ""
@@ -658,7 +696,7 @@ class Patient: Object, Codable, Panel, SyncEntity {
     }
 }
 
-class Pharmacy: Object, Codable, Panel, SyncEntity {
+class Pharmacy: Object, Codable, Panel, SyncEntity, Identifiable {
     @Persisted(primaryKey: true) var objectId: ObjectId
     @Persisted(indexed: true) var id = 0
     @Persisted var transactionStatus: String? = ""
@@ -721,7 +759,7 @@ class Pharmacy: Object, Codable, Panel, SyncEntity {
     
 }
 
-class PotentialProfessional: Object, Codable, Panel, SyncEntity {
+class PotentialProfessional: Object, Codable, Panel, SyncEntity, Identifiable {
     @Persisted(primaryKey: true) var objectId: ObjectId
     @Persisted(indexed: true) var id = 0
     @Persisted var transactionStatus: String? = ""

@@ -37,6 +37,12 @@
 		AC59E9A7257B425F00121387 /* ClientFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC59E9A6257B425F00121387 /* ClientFormView.swift */; };
 		AC5B9762256CAE0F0007500D /* PartialSheet in Frameworks */ = {isa = PBXBuildFile; productRef = AC5B9761256CAE0F0007500D /* PartialSheet */; };
 		AC5B9767256CB12E0007500D /* AppMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC5B9766256CB12E0007500D /* AppMenuView.swift */; };
+		AC60C1E6274745B200294834 /* PatientListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC60C1E5274745B200294834 /* PatientListView.swift */; };
+		AC60C1EB2747495F00294834 /* PotentialListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC60C1EA2747495F00294834 /* PotentialListView.swift */; };
+		AC60C1F0274749C400294834 /* PotentialFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC60C1EF274749C400294834 /* PotentialFormView.swift */; };
+		AC60C1F527474A0800294834 /* PatientFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC60C1F427474A0800294834 /* PatientFormView.swift */; };
+		AC60C1FA27474A4100294834 /* PharmacyFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC60C1F927474A4100294834 /* PharmacyFormView.swift */; };
+		AC60C1FF274750E200294834 /* PanelGenericViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC60C1FE274750E200294834 /* PanelGenericViews.swift */; };
 		AC62C2D925A7D0E600FA5868 /* DynamicFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC62C2D825A7D0E600FA5868 /* DynamicFormView.swift */; };
 		AC62C2DE25A7D12700FA5868 /* DynamicForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC62C2DD25A7D12700FA5868 /* DynamicForm.swift */; };
 		AC6F1F2324FF2978005E57DC /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC6F1F2224FF2978005E57DC /* AppDelegate.swift */; };
@@ -137,6 +143,12 @@
 		AC59E9A1257B424000121387 /* PanelCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PanelCardView.swift; sourceTree = "<group>"; };
 		AC59E9A6257B425F00121387 /* ClientFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClientFormView.swift; sourceTree = "<group>"; };
 		AC5B9766256CB12E0007500D /* AppMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppMenuView.swift; sourceTree = "<group>"; };
+		AC60C1E5274745B200294834 /* PatientListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatientListView.swift; sourceTree = "<group>"; };
+		AC60C1EA2747495F00294834 /* PotentialListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PotentialListView.swift; sourceTree = "<group>"; };
+		AC60C1EF274749C400294834 /* PotentialFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PotentialFormView.swift; sourceTree = "<group>"; };
+		AC60C1F427474A0800294834 /* PatientFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatientFormView.swift; sourceTree = "<group>"; };
+		AC60C1F927474A4100294834 /* PharmacyFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PharmacyFormView.swift; sourceTree = "<group>"; };
+		AC60C1FE274750E200294834 /* PanelGenericViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PanelGenericViews.swift; sourceTree = "<group>"; };
 		AC62C2D825A7D0E600FA5868 /* DynamicFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DynamicFormView.swift; sourceTree = "<group>"; };
 		AC62C2DD25A7D12700FA5868 /* DynamicForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DynamicForm.swift; sourceTree = "<group>"; };
 		AC6F1F1F24FF2978005E57DC /* PRO.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PRO.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -323,17 +335,18 @@
 		AC34453D256389E000C0D668 /* Core */ = {
 			isa = PBXGroup;
 			children = (
-				AC78D2F526D5632F00674A4F /* Material */,
-				AC13263A25B737BF007CF049 /* Movement */,
-				AC13263925B737B9007CF049 /* Diary */,
-				ACC1283A2583D82F00595078 /* Route */,
-				ACC128272581127C00595078 /* Panel */,
-				ACA106CE2575906500FDD7E4 /* Others */,
-				ACA106CD25758F8800FDD7E4 /* Potential */,
+				AC60C1E12747457500294834 /* Patient */,
 				AC34454625638AD800C0D668 /* Activity */,
-				AC34454525638AC800C0D668 /* Pharmacy */,
 				AC34454425638ABE00C0D668 /* Client */,
+				AC13263925B737B9007CF049 /* Diary */,
+				AC78D2F526D5632F00674A4F /* Material */,
 				AC34453E25638A1500C0D668 /* Medic */,
+				AC13263A25B737BF007CF049 /* Movement */,
+				ACA106CE2575906500FDD7E4 /* Others */,
+				ACC128272581127C00595078 /* Panel */,
+				AC34454525638AC800C0D668 /* Pharmacy */,
+				ACA106CD25758F8800FDD7E4 /* Potential */,
+				ACC1283A2583D82F00595078 /* Route */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -360,6 +373,7 @@
 			isa = PBXGroup;
 			children = (
 				AC34454C25638B5C00C0D668 /* PharmacyListView.swift */,
+				AC60C1F927474A4100294834 /* PharmacyFormView.swift */,
 			);
 			path = Pharmacy;
 			sourceTree = "<group>";
@@ -370,6 +384,15 @@
 				AC34454725638B3D00C0D668 /* ActivityListView.swift */,
 			);
 			path = Activity;
+			sourceTree = "<group>";
+		};
+		AC60C1E12747457500294834 /* Patient */ = {
+			isa = PBXGroup;
+			children = (
+				AC60C1E5274745B200294834 /* PatientListView.swift */,
+				AC60C1F427474A0800294834 /* PatientFormView.swift */,
+			);
+			path = Patient;
 			sourceTree = "<group>";
 		};
 		AC6F1F1624FF2978005E57DC = {
@@ -487,6 +510,8 @@
 		ACA106CD25758F8800FDD7E4 /* Potential */ = {
 			isa = PBXGroup;
 			children = (
+				AC60C1EA2747495F00294834 /* PotentialListView.swift */,
+				AC60C1EF274749C400294834 /* PotentialFormView.swift */,
 			);
 			path = Potential;
 			sourceTree = "<group>";
@@ -559,6 +584,7 @@
 				ACC128302581184E00595078 /* MovementListView.swift */,
 				ACA15F452591AB2300E92FF2 /* PanelLocationView.swift */,
 				AC82D63926D3E3D100701D3D /* ContactListView.swift */,
+				AC60C1FE274750E200294834 /* PanelGenericViews.swift */,
 			);
 			path = Panel;
 			sourceTree = "<group>";
@@ -858,9 +884,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				AC344536256389A800C0D668 /* DiaryListTabView.swift in Sources */,
+				AC60C1FA27474A4100294834 /* PharmacyFormView.swift in Sources */,
 				AC6F1F2324FF2978005E57DC /* AppDelegate.swift in Sources */,
 				AC3444CA2562C72400C0D668 /* SyncRecurrentService.swift in Sources */,
 				AC78D2F726D563ED00674A4F /* MaterialDeliveryView.swift in Sources */,
+				AC60C1E6274745B200294834 /* PatientListView.swift in Sources */,
 				AC13263C25B737E5007CF049 /* MovementFormView.swift in Sources */,
 				AC59E9A2257B424000121387 /* PanelCardView.swift in Sources */,
 				AC893FD6254B1435009E1C43 /* EnvironmentRouters.swift in Sources */,
@@ -869,6 +897,7 @@
 				AC3E5C1B25AB78CE00C70FC2 /* DoctorFormView.swift in Sources */,
 				ACC053402550629500B9753A /* MediaServer.swift in Sources */,
 				ACA15F462591AB2300E92FF2 /* PanelLocationView.swift in Sources */,
+				AC60C1F0274749C400294834 /* PotentialFormView.swift in Sources */,
 				AC78D2EC26D54FA900674A4F /* DialogPickers.swift in Sources */,
 				ACC1963E25A4D51700C5EE3E /* RouteFormView.swift in Sources */,
 				AC59E9A7257B425F00121387 /* ClientFormView.swift in Sources */,
@@ -885,9 +914,12 @@
 				AC344510256373BE00C0D668 /* GMSView.swift in Sources */,
 				AC34452125637F4C00C0D668 /* BirthdayTabView.swift in Sources */,
 				AC6F1F2524FF2978005E57DC /* SceneDelegate.swift in Sources */,
+				AC60C1FF274750E200294834 /* PanelGenericViews.swift in Sources */,
 				AC34452B25637F7000C0D668 /* NotificationTabView.swift in Sources */,
 				ACC053942550DA1800B9753A /* VMCoreData.swift in Sources */,
+				AC60C1F527474A0800294834 /* PatientFormView.swift in Sources */,
 				ACA106D02575907900FDD7E4 /* RequestDayView.swift in Sources */,
+				AC60C1EB2747495F00294834 /* PotentialListView.swift in Sources */,
 				AC34452625637F5F00C0D668 /* MessageTabView.swift in Sources */,
 				AC6F1F2724FF2978005E57DC /* ContentView.swift in Sources */,
 				AC78D2F126D5551D00674A4F /* RealmDao.swift in Sources */,

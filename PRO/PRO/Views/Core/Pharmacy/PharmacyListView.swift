@@ -11,40 +11,47 @@ import RealmSwift
 
 struct PharmacyListView: View {
     
+    @EnvironmentObject var viewRouter: ViewRouter
+    
+    @ObservedResults(Pharmacy.self, sortDescriptor: SortDescriptor(keyPath: "name", ascending: true)) var pharmacies
     @Binding var searchText: String
-    @ObservedObject var data = BindableResults(results: try! Realm().objects(Pharmacy.self).sorted(byKeyPath: "name"))
     @State var menuIsPresented = false
     @State var panel: Panel & SyncEntity = GenericPanel()
     
     var body: some View {
-        VStack {
-            ZStack(alignment: .trailing) {
-                Text("Total en panel: \(data.results.count)")
-                    .foregroundColor(.cTextMedium)
-                    .font(.system(size: 12))
-                    .frame(minWidth: 0, maxWidth: .infinity, alignment: .center)
-                Button(action: {
-                    
-                }) {
-                    Text("Filtros")
-                        .font(.system(size: 13))
-                        .foregroundColor(.cTextLink)
-                        .padding(.horizontal, 10)
+        ZStack(alignment: .bottomTrailing) {
+            VStack {
+                ZStack(alignment: .trailing) {
+                    Text(String(format: NSLocalizedString("envTotalPanel", comment: ""), String(pharmacies.count)))
+                        .foregroundColor(.cTextMedium)
+                        .font(.system(size: 12))
+                        .frame(minWidth: 0, maxWidth: .infinity, alignment: .center)
+                    Button(action: {
+                        
+                    }) {
+                        Text("envFilters")
+                            .font(.system(size: 13))
+                            .foregroundColor(.cTextLink)
+                            .padding(.horizontal, 10)
+                    }
                 }
-            }
-            ScrollView {
-                LazyVStack {
-                    ForEach(data.results.filter {
-                        self.searchText.isEmpty ? true :
-                            ($0.name ?? "").lowercased().contains(self.searchText.lowercased()) ||
-                            ($0.city?.name ?? "").lowercased().contains(self.searchText.lowercased())
-                    }, id: \.id) { element in
-                        PanelItem(panel: element).onTapGesture {
-                            self.panel = element
-                            self.menuIsPresented = true
+                ScrollView {
+                    LazyVStack {
+                        ForEach(pharmacies.filter {
+                            self.searchText.isEmpty ? true :
+                                ($0.name ?? "").lowercased().contains(self.searchText.lowercased()) ||
+                                ($0.city?.name ?? "").lowercased().contains(self.searchText.lowercased())
+                        }, id: \.objectId) { element in
+                            PanelItem(panel: element).onTapGesture {
+                                self.panel = element
+                                self.menuIsPresented = true
+                            }
                         }
                     }
                 }
+            }
+            FAB(image: "ic-plus", foregroundColor: .cPrimary) {
+                FormEntity(objectId: "").go(path: PanelUtils.formByPanelType(type: "F"), router: viewRouter)
             }
         }
         .partialSheet(isPresented: $menuIsPresented) {

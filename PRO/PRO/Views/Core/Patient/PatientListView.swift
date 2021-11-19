@@ -1,35 +1,37 @@
 //
-//  ClientListView.swift
+//  PatientListView.swift
 //  PRO
 //
-//  Created by VMO on 16/11/20.
-//  Copyright © 2020 VMO. All rights reserved.
+//  Created by VMO on 18/11/21.
+//  Copyright © 2021 VMO. All rights reserved.
 //
 
 import SwiftUI
 import RealmSwift
 
-struct ClientListView: View {
+
+struct PatientListView: View {
     
     @EnvironmentObject var viewRouter: ViewRouter
     
-    @Binding var searchText: String
-    @ObservedResults(Client.self, sortDescriptor: SortDescriptor(keyPath: "name", ascending: true)) var clients
+    @ObservedResults(Patient.self) var patients
+    @State var searchText: String = ""
     @State var menuIsPresented = false
     @State var panel: Panel & SyncEntity = GenericPanel()
     
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
             VStack {
+                HeaderToggleView(couldSearch: true, title: "modPatient", icon: Image("ic-patient"), color: Color.cPanelPatient)
                 ZStack(alignment: .trailing) {
-                    Text(String(format: NSLocalizedString("envTotalPanel", comment: ""), String(clients.count)))
+                    Text(String(format: NSLocalizedString("envTotalPanel", comment: ""), String(patients.count)))
                         .foregroundColor(.cTextMedium)
                         .font(.system(size: 12))
                         .frame(minWidth: 0, maxWidth: .infinity, alignment: .center)
                     Button(action: {
                         
                     }) {
-                        Text("envFilters")
+                        Text("Filtros")
                             .font(.system(size: 13))
                             .foregroundColor(.cTextLink)
                             .padding(.horizontal, 10)
@@ -37,10 +39,9 @@ struct ClientListView: View {
                 }
                 ScrollView {
                     LazyVStack {
-                        ForEach(clients.filter {
+                        ForEach(patients.filter {
                             self.searchText.isEmpty ? true :
-                                ($0.name ?? "").lowercased().contains(self.searchText.lowercased()) ||
-                                ($0.city?.name ?? "").lowercased().contains(self.searchText.lowercased())
+                                ($0.name ?? "").lowercased().contains(self.searchText.lowercased())
                         }, id: \.objectId) { element in
                             PanelItem(panel: element).onTapGesture {
                                 self.panel = element
@@ -51,11 +52,12 @@ struct ClientListView: View {
                 }
             }
             FAB(image: "ic-plus", foregroundColor: .cPrimary) {
-                FormEntity(objectId: "").go(path: PanelUtils.formByPanelType(type: "C"), router: viewRouter)
+                FormEntity(objectId: "").go(path: PanelUtils.formByPanelType(type: "P"), router: viewRouter)
             }
         }
         .partialSheet(isPresented: $menuIsPresented) {
             PanelMenu(isPresented: self.$menuIsPresented, panel: panel)
         }
     }
+    
 }

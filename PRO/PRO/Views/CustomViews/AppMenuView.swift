@@ -329,7 +329,7 @@ struct GlobalMenu: View {
                 }
                 Spacer()
                 Button(action: {
-                    
+                    self.goTo(page: "PATIENT-LIST")
                 }) {
                     VStack {
                         Image("ic-patient")
@@ -378,6 +378,7 @@ struct GlobalMenu: View {
                     .padding(.horizontal, 10)
                     .padding(.vertical, 2)
                     Button(action: {
+                        self.goTo(page: "POTENTIAL-LIST")
                     }) {
                         HStack {
                             Image("ic-medic")

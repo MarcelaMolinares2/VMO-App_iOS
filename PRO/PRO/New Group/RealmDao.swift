@@ -82,6 +82,16 @@ class ClientDao: GenericDao {
         return realm.objects(Client.self).filter("id == \(id)").first
     }
     
+    func by(objectId: ObjectId) -> Client? {
+        return realm.object(ofType: Client.self, forPrimaryKey: objectId)
+    }
+    
+    func store(doctor: Client) {
+        try! realm.write {
+            realm.add(doctor, update: .all)
+        }
+    }
+    
 }
 
 class CollegeDao: GenericDao {
@@ -308,6 +318,16 @@ class PatientDao: GenericDao {
         return realm.objects(Patient.self).filter("id == \(id)").first
     }
     
+    func by(objectId: ObjectId) -> Patient? {
+        return realm.object(ofType: Patient.self, forPrimaryKey: objectId)
+    }
+    
+    func store(doctor: Patient) {
+        try! realm.write {
+            realm.add(doctor, update: .all)
+        }
+    }
+    
 }
 
 class PharmacyDao: GenericDao {
@@ -318,6 +338,28 @@ class PharmacyDao: GenericDao {
     
     func by(id: String) -> Pharmacy? {
         return realm.objects(Pharmacy.self).filter("id == \(id)").first
+    }
+    
+}
+
+class PotentialDao: GenericDao {
+    
+    func all() -> [PotentialProfessional] {
+        return Array(realm.objects(PotentialProfessional.self).sorted(byKeyPath: "name"))
+    }
+    
+    func by(id: String) -> PotentialProfessional? {
+        return realm.objects(PotentialProfessional.self).filter("id == \(id)").first
+    }
+    
+    func by(objectId: ObjectId) -> PotentialProfessional? {
+        return realm.object(ofType: PotentialProfessional.self, forPrimaryKey: objectId)
+    }
+    
+    func store(doctor: PotentialProfessional) {
+        try! realm.write {
+            realm.add(doctor, update: .all)
+        }
     }
     
 }

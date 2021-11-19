@@ -14,7 +14,8 @@ struct DoctorListView: View {
     @EnvironmentObject var viewRouter: ViewRouter
     
     @Binding var searchText: String
-    @ObservedObject var data = BindableResults(results: try! Realm().objects(Doctor.self).sorted(byKeyPath: "firstName"))
+    //@ObservedObject var data = BindableResults(results: try! Realm().objects(Doctor.self).sorted(byKeyPath: "firstName"))
+    @ObservedResults(Doctor.self, sortDescriptor: SortDescriptor(keyPath: "firstName", ascending: true)) var doctors
     @State var menuIsPresented = false
     @State var panel: Panel & SyncEntity = GenericPanel()
     
@@ -22,14 +23,14 @@ struct DoctorListView: View {
         ZStack(alignment: .bottomTrailing) {
             VStack {
                 ZStack(alignment: .trailing) {
-                    Text("Total en panel: \(data.results.count)")
+                    Text(String(format: NSLocalizedString("envTotalPanel", comment: ""), String(doctors.count)))
                         .foregroundColor(.cTextMedium)
                         .font(.system(size: 12))
                         .frame(minWidth: 0, maxWidth: .infinity, alignment: .center)
                     Button(action: {
                         
                     }) {
-                        Text("Filtros")
+                        Text("envFilters")
                             .font(.system(size: 13))
                             .foregroundColor(.cTextLink)
                             .padding(.horizontal, 10)
@@ -37,13 +38,13 @@ struct DoctorListView: View {
                 }
                 ScrollView {
                     LazyVStack {
-                        ForEach(data.results.filter {
+                        ForEach(doctors.filter {
                             self.searchText.isEmpty ? true :
                                 ($0.name ?? "").lowercased().contains(self.searchText.lowercased()) ||
                                 ($0.institution ?? "").lowercased().contains(self.searchText.lowercased()) ||
                                 //($0.specialty?.name ?? "").lowercased().contains(self.searchText.lowercased()) ||
                                 ($0.city?.name ?? "").lowercased().contains(self.searchText.lowercased())
-                        }, id: \.id) { element in
+                        }, id: \.objectId) { element in
                             PanelItem(panel: element).onTapGesture {
                                 self.panel = element
                                 self.menuIsPresented = true
@@ -53,7 +54,7 @@ struct DoctorListView: View {
                 }
             }
             FAB(image: "ic-plus", foregroundColor: .cPrimary) {
-                FormEntity(objectId: "").go(path: "DOCTOR-FORM", router: viewRouter)
+                FormEntity(objectId: "").go(path: PanelUtils.formByPanelType(type: "M"), router: viewRouter)
             }
         }
         .partialSheet(isPresented: $menuIsPresented) {

@@ -53,12 +53,13 @@ struct DynamicFormField: Identifiable, Decodable {
     var minValue: String?
     var maxValue: String?
     var value = ""
+    var isAdditional: Bool = false
     var localEditable: Bool = true
     var localRequired: Bool = false
     var localVisible: Bool = true
     
     private enum CodingKeys: String, CodingKey {
-        case key, label, description, controlType, dataType, requiredUserTypes, visible, editable, multiple, maxLength, multiline, mask, acceptedValues, acceptOtherValue, defaultValue, source, sourceType, condition, countries, cities, options, minValue, maxValue
+        case key, label, description, controlType, dataType, requiredUserTypes, visible, editable, multiple, maxLength, multiline, mask, acceptedValues, acceptOtherValue, defaultValue, source, sourceType, condition, countries, cities, options, minValue, maxValue, isAdditional
     }
     
     init(from decoder: Decoder) throws {
@@ -90,6 +91,16 @@ struct DynamicFormField: Identifiable, Decodable {
         } catch DecodingError.typeMismatch {
             self.condition = ""
         }
+        do {
+            self.isAdditional = try container.decode(Bool.self, forKey: .isAdditional)
+        } catch DecodingError.typeMismatch {
+            do {
+                let value = try container.decode(Int.self, forKey: .isAdditional)
+                self.isAdditional = value == 1
+            } catch DecodingError.typeMismatch {
+                self.isAdditional = false
+            }
+        }
         
         self.key = try container.decode(String.self, forKey: .key)
         self.label = try container.decode(String.self, forKey: .label)
@@ -111,6 +122,10 @@ struct DynamicFormField: Identifiable, Decodable {
         self.countries = try container.decode(String.self, forKey: .countries)
         self.cities = try container.decode(String.self, forKey: .cities)
         self.options = try container.decode(String.self, forKey: .options)
+    }
+    
+    mutating func setValue(value: String) {
+        self.value = value
     }
 }
 

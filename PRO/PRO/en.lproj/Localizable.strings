@@ -26,6 +26,8 @@
 "envSearch" = "Search";
 "envSLAID" = "SLAID";
 "envVisit" = "Visit";
+"envTotalPanel" = "Total in panel: %@";
+"envFilters" = "Filters";
 
 
 "errLaboratoryNotFound" = "Laboratory not found";

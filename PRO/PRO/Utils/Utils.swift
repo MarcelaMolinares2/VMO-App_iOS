@@ -50,6 +50,17 @@ class Utils {
         return defaultValue
     }
     
+    static func anyToString(value: Any?) -> String {
+        if let new = value as? String {
+            return new
+        } else {
+            if let new = value as? NSNumber {
+                return new.stringValue
+            }
+        }
+        return "\(String(describing: value))"
+    }
+    
     static func dictionaryToJSON(data: Any) -> String {
         let jsonData = try! JSONSerialization.data(withJSONObject: data, options: [])
         return String(data: jsonData, encoding: .utf8)!
@@ -232,18 +243,22 @@ class JWTUtils {
 class PanelUtils {
     
     static func colorByPanelType(panel: Panel) -> Color {
-        return valueByPanelType(by: .color, panel: panel) as! Color
+        return valueByPanelType(by: .color, panelType: panel.type) as! Color
     }
     
     static func imageByPanelType(panel: Panel) -> String {
-        return valueByPanelType(by: .icon, panel: panel) as! String
+        return valueByPanelType(by: .icon, panelType: panel.type) as! String
     }
     
     static func formByPanelType(panel: Panel) -> String {
-        return valueByPanelType(by: .form, panel: panel) as! String
+        return valueByPanelType(by: .form, panelType: panel.type) as! String
     }
     
-    static func valueByPanelType(by type: PanelValueType, panel: Panel) -> Any {
+    static func formByPanelType(type: String) -> String {
+        return valueByPanelType(by: .form, panelType: type) as! String
+    }
+    
+    static func valueByPanelType(by type: PanelValueType, panelType: String) -> Any {
         let data = [
             [
                 "M": Color.cPanelMedic,
@@ -264,6 +279,7 @@ class PanelUtils {
                 "F": "PHARMACY-FORM",
                 "C": "CLIENT-FORM",
                 "P": "PATIENT-FORM",
+                "T": "POTENTIAL-FORM",
                 "D": "MASTER"
             ],
             [
@@ -286,7 +302,7 @@ class PanelUtils {
             index = 3
         }
         
-        if let val = data[index][panel.type] {
+        if let val = data[index][panelType] {
             return val
         } else {
             return data[index]["D"] as Any
@@ -451,6 +467,7 @@ class DynamicUtils {
                     //print(field)
                     fields.append(try! DynamicFormField(from: field))
                 }
+                //print(fields)
                 groups.append(DynamicFormGroup(title: Utils.castString(value: group["title"]), fields: fields))
             }
             tabs.append(DynamicFormTab(key: key, title: Utils.castString(value: tab["title"]), groups: groups))
@@ -542,6 +559,37 @@ class DynamicUtils {
                         print(String(describing: error?.description))
                     }, finally: {
                     })
+                }
+            }
+        }
+    }
+    
+    static func generateAdditional(form: DynamicForm) -> String {
+        var data = [String: Any]()
+        form.tabs.forEach { tab in
+            tab.groups.forEach { group in
+                group.fields.forEach { field in
+                    if field.isAdditional {
+                        data[field.key] = field.value
+                    }
+                }
+            }
+        }
+        return Utils.json(from: data) ?? "{}"
+    }
+    
+    static func fillForm(form: inout DynamicForm, base: String, additional: String = "{}") {
+        let baseDict = Utils.jsonDictionary(string: base)
+        let additionalDict = Utils.jsonDictionary(string: additional)
+        for i in form.tabs.indices {
+            for j in form.tabs[i].groups.indices {
+                for k in form.tabs[i].groups[j].fields.indices {
+                    let key = form.tabs[i].groups[j].fields[k].key
+                    if let val = baseDict[key] {
+                        form.tabs[i].groups[j].fields[k].value = Utils.anyToString(value: val)
+                    } else if let val = additionalDict[key] {
+                        form.tabs[i].groups[j].fields[k].value = Utils.anyToString(value: val)
+                    }
                 }
             }
         }

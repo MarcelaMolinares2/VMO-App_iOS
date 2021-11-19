@@ -12,9 +12,9 @@ struct WrapperView: View {
     @EnvironmentObject var viewRouter: ViewRouter
     var body: some View {
         switch viewRouter.currentPage {
-            case "CLIENT-FORM":
+            case PanelUtils.formByPanelType(type: "C"):
                 ClientFormView()
-            case "DOCTOR-FORM":
+            case PanelUtils.formByPanelType(type: "M"):
                 DoctorFormView()
             case "MATERIAL-DELIVERY":
                 MaterialDeliveryView()
@@ -24,6 +24,16 @@ struct WrapperView: View {
                 MovementFormView()
             case "PANEL-CARD":
                 PanelCardView(panel: viewRouter.panel(), defaultTab: viewRouter.option(key: "tab", default: "CARD"))
+            case "PATIENT-LIST":
+                PatientListView()
+            case PanelUtils.formByPanelType(type: "F"):
+                PharmacyFormView()
+            case PanelUtils.formByPanelType(type: "P"):
+                PatientFormView()
+            case "POTENTIAL-LIST":
+                PotentialListView()
+            case PanelUtils.formByPanelType(type: "T"):
+                PotentialFormView()
             case "REQUEST-DAY":
                 RequestDayView()
             case "REQUEST-MATERIAL":
