@@ -308,7 +308,7 @@ struct RouteFormView: View {
         if !moduleRouter.objectId.isEmpty {
             contentItems = true
             if let group = try? GroupDao(realm: try! Realm()).by(objectId: ObjectId(string: moduleRouter.objectId)) {
-                saveGroup = group
+                saveGroup = Group(value: group)
                 name = group.name ?? ""
                 group.groupMemberList.forEach { i in
                     addPanelItems(type: i.type ?? "", it: String(i.idPanel))
@@ -321,25 +321,25 @@ struct RouteFormView: View {
         switch type {
         case "M":
             if let doctor = DoctorDao(realm: try! Realm()).by(id: it){
-                if !validate(items: items, it: it) {
+                if !validate(items: items, it: it, type: type) {
                     items.append(doctor)
                 }
             }
         case "F":
             if let pharmacy = PharmacyDao(realm: try! Realm()).by(id: it){
-                if !validate(items: items, it: it) {
+                if !validate(items: items, it: it, type: type) {
                     items.append(pharmacy)
                 }
             }
         case "C":
             if let client = ClientDao(realm: try! Realm()).by(id: it){
-                if !validate(items: items, it: it) {
+                if !validate(items: items, it: it, type: type) {
                     items.append(client)
                 }
             }
         case "P":
             if let patient = PatientDao(realm: try! Realm()).by(id: it){
-                if !validate(items: items, it: it) {
+                if !validate(items: items, it: it, type: type) {
                     items.append(patient)
                 }
             }
@@ -349,25 +349,14 @@ struct RouteFormView: View {
     }
     
     func save(){
-        if saveGroup != Group() {
-            let gr = Group()
-            gr.objectId = saveGroup.objectId
-            gr.name = name
-            items.forEach{ i in
-                gr.groupMemberList.append(addGroupMemberList(i: i))
-            }
-            GroupDao(realm: try! Realm()).store(group: gr)
-            moduleRouter.objectId = ""
-            moduleRouter.currentPage = "LIST"
-        } else {
-            saveGroup.name = name
-            items.forEach{ i in
-                saveGroup.groupMemberList.append(addGroupMemberList(i: i))
-            }
-            GroupDao(realm: try! Realm()).store(group: saveGroup)
-            moduleRouter.currentPage = "LIST"
-            
+        saveGroup.name = name
+        saveGroup.groupMemberList.removeAll()
+        items.forEach{ i in
+            saveGroup.groupMemberList.append(addGroupMemberList(i: i))
         }
+        GroupDao(realm: try! Realm()).store(group: saveGroup)
+        moduleRouter.objectId = ""
+        moduleRouter.currentPage = "LIST"
     }
     
     func addGroupMemberList(i: Panel & SyncEntity) -> GroupMember{
@@ -377,10 +366,10 @@ struct RouteFormView: View {
         return grM
     }
     
-    func validate(items: [Panel & SyncEntity], it: String) -> Bool {
+    func validate(items: [Panel & SyncEntity], it: String, type: String) -> Bool {
         var exists: Bool = false
         items.forEach{ i in
-            if String(i.id) == it {
+            if String(i.id) == it && i.type == type{
                 exists = true
             }
         }

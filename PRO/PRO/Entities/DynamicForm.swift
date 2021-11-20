@@ -92,6 +92,11 @@ struct DynamicFormField: Identifiable, Decodable {
             self.condition = ""
         }
         do {
+            self.acceptedValues = try container.decode(String?.self, forKey: .acceptedValues)
+        } catch DecodingError.keyNotFound {
+            self.acceptedValues = ""
+        }
+        do {
             self.isAdditional = try container.decode(Bool.self, forKey: .isAdditional)
         } catch DecodingError.typeMismatch {
             do {
@@ -114,7 +119,6 @@ struct DynamicFormField: Identifiable, Decodable {
         
         self.maxLength = try container.decode(Int.self, forKey: .maxLength)
         self.mask = try container.decode(String.self, forKey: .mask)
-        self.acceptedValues = try container.decode(String?.self, forKey: .acceptedValues)
         self.acceptOtherValue = try container.decode(Bool.self, forKey: .acceptOtherValue)
         self.defaultValue = try container.decode(String?.self, forKey: .defaultValue)
         self.source = try container.decode(String.self, forKey: .source)

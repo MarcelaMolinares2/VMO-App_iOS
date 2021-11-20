@@ -684,9 +684,44 @@ class Patient: Object, Codable, Panel, SyncEntity, Identifiable {
         case id = "id_paciente", email = "email", phone = "telefono", cityId = "id_ciudad", countryId = "id_pais", firstName = "nombres", lastName = "apellidos", habeasData = "habeas_data", joinDate = "fecha_ingreso", clientId = "id_cliente"
     }
     
+    override init() {
+            super.init()
+    }
+    
+    required init(from decoder: Decoder) throws {
+        super.init()
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        self.id = try DynamicUtils.intTypeDecoding(container: container, key: .id)
+        self.cityId = try DynamicUtils.intTypeDecoding(container: container, key: .cityId)
+        self.countryId = try DynamicUtils.intTypeDecoding(container: container, key: .countryId)
+        self.clientId = try DynamicUtils.intTypeDecoding(container: container, key: .clientId)
+        
+        self.email = try DynamicUtils.stringTypeDecoding(container: container, key: .email)
+        self.phone = try DynamicUtils.stringTypeDecoding(container: container, key: .phone)
+        self.firstName = try DynamicUtils.stringTypeDecoding(container: container, key: .firstName)
+        self.lastName = try DynamicUtils.stringTypeDecoding(container: container, key: .lastName)
+        self.habeasData = try DynamicUtils.stringTypeDecoding(container: container, key: .habeasData)
+        self.joinDate = try DynamicUtils.stringTypeDecoding(container: container, key: .joinDate)
+    }
+    
+    private enum EncodingKeys: String, CodingKey {
+        case id = "id_paciente", email = "email", phone = "telefono", cityId = "id_ciudad", countryId = "id_pais", firstName = "nombres", lastName = "apellidos", habeasData = "habeas_data", joinDate = "fecha_ingreso", clientId = "id_cliente"
+    }
+    
     func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
+        var container = encoder.container(keyedBy: EncodingKeys.self)
+        
         try container.encode(id, forKey: .id)
+        try container.encode(cityId, forKey: .cityId)
+        try container.encode(countryId, forKey: .countryId)
+        try container.encode(clientId, forKey: .clientId)
+        try container.encode(email, forKey: .email)
+        try container.encode(phone, forKey: .phone)
+        try container.encode(firstName, forKey: .firstName)
+        try container.encode(lastName, forKey: .lastName)
+        try container.encode(habeasData, forKey: .habeasData)
+        try container.encode(joinDate, forKey: .joinDate)
     }
     
     static func primaryCodingKey() -> String {
