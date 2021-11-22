@@ -13,14 +13,15 @@ import AlertToast
 struct PatientFormView: View {
     
     @EnvironmentObject var viewRouter: ViewRouter
+    @StateObject var tabRouter = TabRouter()
     
     @State var patient: Patient?
     @State var plainData = ""
     @State var additionalData = ""
     @State var dynamicData = Dictionary<String, Any>()
-    @StateObject var tabRouter = TabRouter()
     @State private var form = DynamicForm(tabs: [DynamicFormTab]())
     @State private var options = DynamicFormFieldOptions(table: "patient", op: "")
+    @State private var showValidationError = false
     
     var body: some View {
         VStack {
@@ -49,10 +50,11 @@ struct PatientFormView: View {
             BottomNavigationBarDynamic(onTabSelected: onTabSelected, currentTab: $tabRouter.current, tabs: $form.tabs, staticTabs: ["LOCATIONS"])
         }
         .onAppear {
-            print("_________")
-            print(options)
             tabRouter.current = "BASIC"
             initForm()
+        }
+        .toast(isPresenting: $showValidationError) {
+            AlertToast(type: .regular, title: NSLocalizedString("errFormValidation", comment: ""))
         }
     }
     
@@ -76,14 +78,7 @@ struct PatientFormView: View {
     
     func initDynamic(data: Dictionary<String, Any>) {
         
-        print("__________DATA__________")
-        print(data)
-        
         form.tabs = DynamicUtils.initForm(data: data).sorted(by: { $0.key > $1.key })
-        
-        print(form)
-        print(form.id)
-        print(form.tabs)
         
         if !plainData.isEmpty {
             DynamicUtils.fillForm(form: &form, base: plainData, additional: additionalData)
@@ -91,7 +86,14 @@ struct PatientFormView: View {
     }
     
     func save(){
-        print("ajjaja")
+        if DynamicUtils.validate(form: form) && patient != nil {
+            DynamicUtils.cloneObject(main: patient, temporal: try! JSONDecoder().decode(Patient.self, from: DynamicUtils.toJSON(form: form).data(using: .utf8)!), skipped: ["objectId", "id", "type"])
+            patient?.additionalFields = DynamicUtils.generateAdditional(form: form)
+            PatientDao(realm: try! Realm()).store(doctor: patient!)
+            viewRouter.currentPage = "MASTER"
+        } else {
+            showValidationError = true
+        }
     }
     
     func onTabSelected(_ tab: String) {
