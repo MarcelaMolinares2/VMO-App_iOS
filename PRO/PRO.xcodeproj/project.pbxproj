@@ -88,6 +88,8 @@
 		ACC128312581184E00595078 /* MovementListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACC128302581184E00595078 /* MovementListView.swift */; };
 		ACC1963925A4CAA200C5EE3E /* RouteListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACC1963825A4CAA200C5EE3E /* RouteListView.swift */; };
 		ACC1963E25A4D51700C5EE3E /* RouteFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACC1963D25A4D51700C5EE3E /* RouteFormView.swift */; };
+		ACDD64B7274C0FDA00D2C340 /* PanelStockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACDD64B6274C0FDA00D2C340 /* PanelStockView.swift */; };
+		ACDD64BC274C104D00D2C340 /* PanelContactView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACDD64BB274C104D00D2C340 /* PanelContactView.swift */; };
 		DE5C2AFE2583C9F24FB5368E /* Pods_PRO_PROUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 111062A72C0958CDA6E9F9B2 /* Pods_PRO_PROUITests.framework */; };
 /* End PBXBuildFile section */
 
@@ -201,6 +203,8 @@
 		ACC128302581184E00595078 /* MovementListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovementListView.swift; sourceTree = "<group>"; };
 		ACC1963825A4CAA200C5EE3E /* RouteListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouteListView.swift; sourceTree = "<group>"; };
 		ACC1963D25A4D51700C5EE3E /* RouteFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouteFormView.swift; sourceTree = "<group>"; };
+		ACDD64B6274C0FDA00D2C340 /* PanelStockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PanelStockView.swift; sourceTree = "<group>"; };
+		ACDD64BB274C104D00D2C340 /* PanelContactView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PanelContactView.swift; sourceTree = "<group>"; };
 		D8B0E4CE3E091B974EB09FF5 /* Pods-PROTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PROTests.debug.xcconfig"; path = "Target Support Files/Pods-PROTests/Pods-PROTests.debug.xcconfig"; sourceTree = "<group>"; };
 		E23C400A0EFB661616774F5E /* Pods_PROTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_PROTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -581,10 +585,12 @@
 		ACC128272581127C00595078 /* Panel */ = {
 			isa = PBXGroup;
 			children = (
+				ACDD64BB274C104D00D2C340 /* PanelContactView.swift */,
 				ACC128302581184E00595078 /* MovementListView.swift */,
 				ACA15F452591AB2300E92FF2 /* PanelLocationView.swift */,
 				AC82D63926D3E3D100701D3D /* ContactListView.swift */,
 				AC60C1FE274750E200294834 /* PanelGenericViews.swift */,
+				ACDD64B6274C0FDA00D2C340 /* PanelStockView.swift */,
 			);
 			path = Panel;
 			sourceTree = "<group>";
@@ -889,6 +895,7 @@
 				AC3444CA2562C72400C0D668 /* SyncRecurrentService.swift in Sources */,
 				AC78D2F726D563ED00674A4F /* MaterialDeliveryView.swift in Sources */,
 				AC60C1E6274745B200294834 /* PatientListView.swift in Sources */,
+				ACDD64B7274C0FDA00D2C340 /* PanelStockView.swift in Sources */,
 				AC13263C25B737E5007CF049 /* MovementFormView.swift in Sources */,
 				AC59E9A2257B424000121387 /* PanelCardView.swift in Sources */,
 				AC893FD6254B1435009E1C43 /* EnvironmentRouters.swift in Sources */,
@@ -901,6 +908,7 @@
 				AC78D2EC26D54FA900674A4F /* DialogPickers.swift in Sources */,
 				ACC1963E25A4D51700C5EE3E /* RouteFormView.swift in Sources */,
 				AC59E9A7257B425F00121387 /* ClientFormView.swift in Sources */,
+				ACDD64BC274C104D00D2C340 /* PanelContactView.swift in Sources */,
 				AC59E99D257B400800121387 /* AppManage.swift in Sources */,
 				AC3444C42562C66900C0D668 /* RequestOperation.swift in Sources */,
 				AC59E95C2576B82F00121387 /* GenericViews.swift in Sources */,

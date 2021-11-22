@@ -8,6 +8,30 @@
 
 import SwiftUI
 
+struct PanelListHeader: View {
+    
+    @State var total: Int
+    let onFiltersTapped: () -> Void
+    
+    var body: some View {
+        ZStack(alignment: .trailing) {
+            Text(String(format: NSLocalizedString("envTotalPanel", comment: ""), String(total)))
+                .foregroundColor(.cTextMedium)
+                .font(.system(size: 12))
+                .frame(minWidth: 0, maxWidth: .infinity, alignment: .center)
+            Button(action: {
+                onFiltersTapped()
+            }) {
+                Text("envFilters")
+                    .font(.system(size: 13))
+                    .foregroundColor(.cTextLink)
+                    .padding(.horizontal, 10)
+            }
+        }
+    }
+    
+}
+
 struct BottomNavigationBarDynamic: View {
     let onTabSelected: (_ tab: String) -> Void
     

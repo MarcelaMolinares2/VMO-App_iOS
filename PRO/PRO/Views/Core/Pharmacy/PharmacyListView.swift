@@ -21,19 +21,8 @@ struct PharmacyListView: View {
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
             VStack {
-                ZStack(alignment: .trailing) {
-                    Text(String(format: NSLocalizedString("envTotalPanel", comment: ""), String(pharmacies.count)))
-                        .foregroundColor(.cTextMedium)
-                        .font(.system(size: 12))
-                        .frame(minWidth: 0, maxWidth: .infinity, alignment: .center)
-                    Button(action: {
-                        
-                    }) {
-                        Text("envFilters")
-                            .font(.system(size: 13))
-                            .foregroundColor(.cTextLink)
-                            .padding(.horizontal, 10)
-                    }
+                PanelListHeader(total: pharmacies.count) {
+                    
                 }
                 ScrollView {
                     LazyVStack {

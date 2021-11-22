@@ -221,80 +221,12 @@ class Client: Object, Codable, Panel, SyncEntity, Identifiable {
     }
     
 }
-/*
-class ClientOld: Object, Codable, Panel {
-    @Persisted var type = "C"
-    @Persisted var neighborhood: String?
-    @Persisted var institution: String?
-    
-    @Persisted(primaryKey: true) var objectId: ObjectId
-    @Persisted var id = 0
-    @Persisted var name: String?
-    @Persisted var abbreviation: String?
-    @Persisted var nit: String?
-    @Persisted var phone: String?
-    @Persisted var email: String?
-    @Persisted var comment: String?
-    @Persisted var isMarked = 0
-    @Persisted var shouldVisitFTF = 0
-    @Persisted var shouldVisitVirtual = 0
-    @Persisted var purchasingManager: String?
-    @Persisted var financialManager: String?
-    @Persisted var paymentDayStart = 0
-    @Persisted var paymentDayEnd = 0
-    @Persisted var orderDayStart = 0
-    @Persisted var orderDayEnd = 0
-    //@Persisted var dataStock: String?
-    @Persisted var transaction = ""
-    @Persisted var lastUpdate = ""
-    
-    var brick: Brick?
-    var category: Category?
-    var city: City?
-    var country: Country?
-    var lastMovement: MovementSimple?
-    var pricesList: PricesList?
-    var specialty: Specialty?
-    var zone_: Zone?
-    var locations = List<PanelLocation>()
-    var contacts = List<Contact>()
-    var userPanel = List<UserPanel>()
-    var visitingHours = List<VisitingHour>()
-    
-    private enum CodingKeys: String, CodingKey {
-        case id = "id_cliente", name = "nombre", abbreviation = "abreviatura", nit = "nit", phone = "telefono", email = "email", comment = "observaciones", shouldVisitFTF = "visit_ftf", shouldVisitVirtual = "visit_virtual", purchasingManager = "gerente_compras", financialManager = "gerente_financiero", paymentDayStart = "fecha_pago_i", paymentDayEnd = "fecha_pago_f", orderDayStart = "fecha_pedido_i", orderDayEnd = "fecha_pedido_f", lastMovement = "last_movement", pricesList = "prices_list", userPanel = "panel_user", visitingHours = "visiting_hours", zone_ = "zone", isMarked, locations, contacts
-    }
-    
-    func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(id, forKey: .id)
-        try container.encode(name, forKey: .name)
-        try container.encode(abbreviation, forKey: .abbreviation)
-        try container.encode(nit, forKey: .nit)
-        try container.encode(phone, forKey: .phone)
-        try container.encode(email, forKey: .email)
-        try container.encode(comment, forKey: .comment)
-        try container.encode(shouldVisitFTF, forKey: .shouldVisitFTF)
-        try container.encode(shouldVisitVirtual, forKey: .shouldVisitVirtual)
-        //try container.encode(dataStock, forKey: .dataStock)
-        try container.encode(brick?.id, forKey: Client.CodingKeys(rawValue: "brick")!)
-        try container.encode(city?.id, forKey: Client.CodingKeys(rawValue: "id_ciudad")!)
-        try container.encode(country?.id, forKey: Client.CodingKeys(rawValue: "id_pais")!)
-        try container.encode(zone_?.id, forKey: Client.CodingKeys(rawValue: "zona")!)
-    }
-    
-    static func primaryCodingKey() -> String {
-        let codingKey: CodingKeys
-        codingKey = .id
-        return codingKey.rawValue
-    }
-    
-}
-*/
 
-class Contact: Object, Decodable, SyncEntity {
+class Contact: Object, Codable, Panel, SyncEntity, Identifiable {
     @Persisted(primaryKey: true) var objectId: ObjectId
     @Persisted(indexed: true) var id = 0
+    @Persisted var idNumber: String?
+    @Persisted var type: String = "CT"
     @Persisted var transactionStatus: String? = ""
     @Persisted var transactionPending: String? = ""
     @Persisted var transactionResponse: String? = ""
@@ -309,15 +241,37 @@ class Contact: Object, Decodable, SyncEntity {
     @Persisted var birthDay = 0
     @Persisted var specialty: String?
     @Persisted var hd: String?
-    @Persisted var type: String?
+    @Persisted var panelType: String?
     @Persisted var transaction = ""
     @Persisted var lastUpdate = ""
-    @Persisted var cityId = 0
-    @Persisted var countryId = 0
+    @Persisted var cityId: Int?
+    @Persisted var countryId: Int?
+    
+    var additionalFields: String?
+    var brickId: Int?
+    var categoryId: Int?
+    var pricesListId: Int?
+    var zoneId: Int?
+    var isMarked: Int = 0
+    var score: Float?
+    var visitFTF: Int?
+    var visitVirtual: Int?
+    
+    
+    var locations = List<PanelLocation>()
+    var visitingHours = List<VisitingHour>()
+    var userPanel = List<UserPanel>()
+    
+    var brick: Brick?
+    var category: Category?
     var city: City?
+    var country: Country?
+    var lastMovement: MovementSimple?
+    var pricesList: PricesList?
+    var zone: Zone?
     
     private enum CodingKeys: String, CodingKey {
-        case id = "id_contacto", name = "nombres", position = "cargo", address = "direccion", phone = "telefono", mobilePhone = "celular", email = "correo_electronico", birthMonth = "mes_cumpleanos", birthDay = "dia_cumpleanos", specialty = "especialidad", hd = "habeas_data", type = "tipo", cityId = "ciudad"
+        case id = "id_contacto", name = "nombres", position = "cargo", address = "direccion", phone = "telefono", mobilePhone = "celular", email = "correo_electronico", birthMonth = "mes_cumpleanos", birthDay = "dia_cumpleanos", specialty = "especialidad", hd = "habeas_data", panelType = "tipo", cityId = "ciudad"
     }
     
     static func primaryCodingKey() -> String {

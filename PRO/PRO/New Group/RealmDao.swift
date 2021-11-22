@@ -106,6 +106,28 @@ class CollegeDao: GenericDao {
     
 }
 
+class ContactDao: GenericDao {
+    
+    func all() -> [Contact] {
+        return Array(realm.objects(Contact.self).sorted(byKeyPath: "name"))
+    }
+    
+    func by(id: String) -> Contact? {
+        return realm.objects(Contact.self).filter("id == \(id)").first
+    }
+    
+    func by(objectId: ObjectId) -> Contact? {
+        return realm.object(ofType: Contact.self, forPrimaryKey: objectId)
+    }
+    
+    func store(contact: Contact) {
+        try! realm.write {
+            realm.add(contact, update: .all)
+        }
+    }
+    
+}
+
 class CountryDao: GenericDao {
     
     func all() -> [Country] {
@@ -338,6 +360,16 @@ class PharmacyDao: GenericDao {
     
     func by(id: String) -> Pharmacy? {
         return realm.objects(Pharmacy.self).filter("id == \(id)").first
+    }
+    
+    func by(objectId: ObjectId) -> Pharmacy? {
+        return realm.object(ofType: Pharmacy.self, forPrimaryKey: objectId)
+    }
+    
+    func store(pharmacy: Pharmacy) {
+        try! realm.write {
+            realm.add(pharmacy, update: .all)
+        }
     }
     
 }
