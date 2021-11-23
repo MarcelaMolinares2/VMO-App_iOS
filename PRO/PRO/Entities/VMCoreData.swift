@@ -310,7 +310,6 @@ class Contact: Object, Codable, Panel, SyncEntity, Identifiable {
     var visitFTF: Int?
     var visitVirtual: Int?
     
-    
     var locations = List<PanelLocation>()
     var visitingHours = List<VisitingHour>()
     var userPanel = List<UserPanel>()
@@ -325,6 +324,51 @@ class Contact: Object, Codable, Panel, SyncEntity, Identifiable {
     
     private enum CodingKeys: String, CodingKey {
         case id = "id_contacto", name = "nombres", position = "cargo", address = "direccion", phone = "telefono", mobilePhone = "celular", email = "correo_electronico", birthMonth = "mes_cumpleanos", birthDay = "dia_cumpleanos", specialty = "especialidad", hd = "habeas_data", panelType = "tipo", cityId = "ciudad"
+    }
+    
+    override init() {
+        super.init()
+    }
+    
+    required init(from decoder: Decoder) throws {
+        super.init()
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        self.id = try DynamicUtils.intTypeDecoding(container: container, key: .id)
+        self.name = try DynamicUtils.stringTypeDecoding(container: container, key: .name)
+        self.position = try DynamicUtils.stringTypeDecoding(container: container, key: .position)
+        self.address = try DynamicUtils.stringTypeDecoding(container: container, key: .address)
+        self.phone = try DynamicUtils.stringTypeDecoding(container: container, key: .phone)
+        self.mobilePhone = try DynamicUtils.stringTypeDecoding(container: container, key: .mobilePhone)
+        self.email = try DynamicUtils.stringTypeDecoding(container: container, key: .email)
+        self.birthMonth = try DynamicUtils.intTypeDecoding(container: container, key: .birthMonth)
+        self.birthDay = try DynamicUtils.intTypeDecoding(container: container, key: .birthDay)
+        self.specialty = try DynamicUtils.stringTypeDecoding(container: container, key: .specialty)
+        self.hd = try DynamicUtils.stringTypeDecoding(container: container, key: .hd)
+        self.panelType = try DynamicUtils.stringTypeDecoding(container: container, key: .panelType)
+        self.cityId = try DynamicUtils.intTypeDecoding(container: container, key: .cityId)
+    }
+    
+    private enum EncodingKeys: String, CodingKey {
+        case id = "id_contacto", name = "nombres", position = "cargo", address = "direccion", phone = "telefono", mobilePhone = "celular", email = "correo_electronico", birthMonth = "mes_cumpleanos", birthDay = "dia_cumpleanos", specialty = "especialidad", hd = "habeas_data", panelType = "tipo", cityId = "ciudad"
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: EncodingKeys.self)
+        
+        try container.encode(id, forKey: .id)
+        try container.encode(name, forKey: .name)
+        try container.encode(position, forKey: .position)
+        try container.encode(address, forKey: .address)
+        try container.encode(phone, forKey: .phone)
+        try container.encode(mobilePhone, forKey: .mobilePhone)
+        try container.encode(email, forKey: .email)
+        try container.encode(birthMonth, forKey: .birthMonth)
+        try container.encode(birthDay, forKey: .birthDay)
+        try container.encode(specialty, forKey: .specialty)
+        try container.encode(hd, forKey: .hd)
+        try container.encode(panelType, forKey: .panelType)
+        try container.encode(cityId, forKey: .cityId)
     }
     
     static func primaryCodingKey() -> String {
