@@ -10,7 +10,7 @@ import BackgroundTasks
 import RealmSwift
 
 enum RequestServices {
-    case brick, category, city, college, config, country, cycle, day_request_reason, pharmacy_chain, prices_list, specialty, style, user, zone,//Tertiary
+    case brick, category, city, college, config, country, cycle, day_request_reason, pharmacy_chain, pharmacy_type, prices_list, specialty, style, user, zone,//Tertiary
          material, product, line,//Secondary
          activity, client, doctor, patient, pharmacy, potential//Primary
 }
@@ -192,18 +192,20 @@ class RequestOperation: Operation {
                             "user_ids" : JWTUtils.sub()
                         ], primaryKey: PotentialProfessional.primaryCodingKey()
                 )
-            case .category:
-                getRQ(from: Category.self, path: "panel-category", primaryKey: Category.primaryCodingKey())
-            case .college:
-                getRQ(from: College.self, path: "college", primaryKey: College.primaryCodingKey())
-            case .pharmacy_chain:
-                getRQ(from: PharmacyChain.self, path: "pharmacy-chain", primaryKey: PharmacyChain.primaryCodingKey())
-            case .prices_list:
-                getRQ(from: PricesList.self, path: "prices-list", primaryKey: PricesList.primaryCodingKey())
-            case .specialty:
-                getRQ(from: Specialty.self, path: "specialty", primaryKey: Specialty.primaryCodingKey())
-            case .style:
-                getRQ(from: Style.self, path: "style", primaryKey: Style.primaryCodingKey())
+                case .category:
+                    getRQ(from: Category.self, path: "panel-category", primaryKey: Category.primaryCodingKey())
+                case .college:
+                    getRQ(from: College.self, path: "college", primaryKey: College.primaryCodingKey())
+                case .pharmacy_chain:
+                    getRQ(from: PharmacyChain.self, path: "pharmacy-chain", primaryKey: PharmacyChain.primaryCodingKey())
+                case .pharmacy_type:
+                    getRQ(from: PharmacyType.self, path: "pharmacy-type", primaryKey: PharmacyType.primaryCodingKey())
+                case .prices_list:
+                    getRQ(from: PricesList.self, path: "prices-list", primaryKey: PricesList.primaryCodingKey())
+                case .specialty:
+                    getRQ(from: Specialty.self, path: "specialty", primaryKey: Specialty.primaryCodingKey())
+                case .style:
+                    getRQ(from: Style.self, path: "style", primaryKey: Style.primaryCodingKey())
             }
         } else {
             debugPrint("Sync Process End")

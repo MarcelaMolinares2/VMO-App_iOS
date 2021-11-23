@@ -86,7 +86,7 @@ struct PotentialFormView: View {
         if DynamicUtils.validate(form: form) && potential != nil {
             DynamicUtils.cloneObject(main: potential, temporal: try! JSONDecoder().decode(PotentialProfessional.self, from: DynamicUtils.toJSON(form: form).data(using: .utf8)!), skipped: ["objectId", "id", "type"])
             potential?.additionalFields = DynamicUtils.generateAdditional(form: form)
-            PotentialDao(realm: try! Realm()).store(doctor: potential!)
+            PotentialDao(realm: try! Realm()).store(potential: potential!)
             viewRouter.currentPage = "POTENTIAL-LIST"
         } else {
             showValidationError = true

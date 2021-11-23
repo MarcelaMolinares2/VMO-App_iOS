@@ -86,9 +86,9 @@ class ClientDao: GenericDao {
         return realm.object(ofType: Client.self, forPrimaryKey: objectId)
     }
     
-    func store(doctor: Client) {
+    func store(client: Client) {
         try! realm.write {
-            realm.add(doctor, update: .all)
+            realm.add(client, update: .all)
         }
     }
     
@@ -236,6 +236,14 @@ class GenericSelectableDao: GenericDao {
         MaterialDao(realm: self.realm).all().map { GenericSelectableItem(id: "\($0.id)", label: $0.name ?? "") }
     }
     
+    func pharmacyChains() -> [GenericSelectableItem] {
+        PharmacyChainDao(realm: self.realm).all().map { GenericSelectableItem(id: "\($0.id)", label: $0.name ?? "") }
+    }
+    
+    func pharmacyTypes() -> [GenericSelectableItem] {
+        PharmacyTypeDao(realm: self.realm).all().map { GenericSelectableItem(id: "\($0.id)", label: $0.name ?? "") }
+    }
+    
     func pricesLists() -> [GenericSelectableItem] {
         PricesListDao(realm: self.realm).all().map { GenericSelectableItem(id: "\($0.id)", label: $0.name ?? "") }
     }
@@ -344,9 +352,9 @@ class PatientDao: GenericDao {
         return realm.object(ofType: Patient.self, forPrimaryKey: objectId)
     }
     
-    func store(doctor: Patient) {
+    func store(patient: Patient) {
         try! realm.write {
-            realm.add(doctor, update: .all)
+            realm.add(patient, update: .all)
         }
     }
     
@@ -374,6 +382,30 @@ class PharmacyDao: GenericDao {
     
 }
 
+class PharmacyChainDao: GenericDao {
+    
+    func all() -> [PharmacyChain] {
+        return Array(realm.objects(PharmacyChain.self).sorted(byKeyPath: "name"))
+    }
+    
+    func by(id: String) -> PharmacyChain? {
+        return realm.objects(PharmacyChain.self).filter("id == \(id)").first
+    }
+    
+}
+
+class PharmacyTypeDao: GenericDao {
+    
+    func all() -> [PharmacyType] {
+        return Array(realm.objects(PharmacyType.self).sorted(byKeyPath: "name"))
+    }
+    
+    func by(id: String) -> PharmacyType? {
+        return realm.objects(PharmacyType.self).filter("id == \(id)").first
+    }
+    
+}
+
 class PotentialDao: GenericDao {
     
     func all() -> [PotentialProfessional] {
@@ -388,9 +420,9 @@ class PotentialDao: GenericDao {
         return realm.object(ofType: PotentialProfessional.self, forPrimaryKey: objectId)
     }
     
-    func store(doctor: PotentialProfessional) {
+    func store(potential: PotentialProfessional) {
         try! realm.write {
-            realm.add(doctor, update: .all)
+            realm.add(potential, update: .all)
         }
     }
     

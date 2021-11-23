@@ -384,34 +384,38 @@ struct CustomDialogPicker: View {
     func loadData() {
         print(key)
         switch key.uppercased() {
-        case "BRICK":
-            viewModel.put(list: GenericSelectableDao(realm: try! Realm()).bricks())
-        case "CATEGORY":
-            viewModel.put(list: GenericSelectableDao(realm: try! Realm()).categories())
-        case "CITY":
-            viewModel.put(list: GenericSelectableDao(realm: try! Realm()).cities())
-        case "COLLEGE":
-            viewModel.put(list: GenericSelectableDao(realm: try! Realm()).colleges())
-        case "COUNTRY":
-            viewModel.put(list: GenericSelectableDao(realm: try! Realm()).countries())
-        case "CYCLE":
-            viewModel.put(list: GenericSelectableDao(realm: try! Realm()).cycles())
-        case "LINE":
-            viewModel.put(list: GenericSelectableDao(realm: try! Realm()).lines())
-        case "MATERIAL":
-            viewModel.put(list: GenericSelectableDao(realm: try! Realm()).materials())
-        case "PRICES-LIST":
-            viewModel.put(list: GenericSelectableDao(realm: try! Realm()).pricesLists())
-        case "SPECIALTY":
-            viewModel.put(list: GenericSelectableDao(realm: try! Realm()).specialties())
-        case "SECOND-SPECIALTY":
-            viewModel.put(list: GenericSelectableDao(realm: try! Realm()).specialties(tp: "S"))
-        case "STYLE":
-            viewModel.put(list: GenericSelectableDao(realm: try! Realm()).styles())
-        case "ZONE":
-            viewModel.put(list: GenericSelectableDao(realm: try! Realm()).zones())
-        default:
-            break
+            case "BRICK":
+                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).bricks())
+            case "CATEGORY":
+                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).categories())
+            case "CITY":
+                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).cities())
+            case "COLLEGE":
+                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).colleges())
+            case "COUNTRY":
+                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).countries())
+            case "CYCLE":
+                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).cycles())
+            case "LINE":
+                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).lines())
+            case "MATERIAL":
+                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).materials())
+            case "PHARMACY-CHAIN":
+                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).pharmacyChains())
+            case "PHARMACY-TYPE":
+                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).pharmacyTypes())
+            case "PRICES-LIST":
+                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).pricesLists())
+            case "SPECIALTY":
+                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).specialties())
+            case "SECOND-SPECIALTY":
+                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).specialties(tp: "S"))
+            case "STYLE":
+                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).styles())
+            case "ZONE":
+                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).zones())
+            default:
+                break
         }
     }
     

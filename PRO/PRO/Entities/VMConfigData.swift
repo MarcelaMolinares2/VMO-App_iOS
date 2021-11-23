@@ -241,6 +241,22 @@ class PharmacyChain: Object, Codable {
     }
 }
 
+class PharmacyType: Object, Codable {
+    @Persisted(primaryKey: true) var objectId: ObjectId
+    @Persisted var id = 0
+    @Persisted var name: String?
+    
+    private enum CodingKeys: String, CodingKey {
+        case id = "pharmacy_type_id", name = "name_"
+    }
+    
+    static func primaryCodingKey() -> String {
+        let codingKey: CodingKeys
+        codingKey = .id
+        return codingKey.rawValue
+    }
+}
+
 class PricesList: Object, Codable {
     @Persisted(primaryKey: true) var objectId: ObjectId
     @Persisted var id = 0

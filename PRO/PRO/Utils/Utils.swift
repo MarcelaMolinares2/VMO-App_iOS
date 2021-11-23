@@ -420,34 +420,38 @@ class DynamicUtils {
     static func tableValue(key: String, selected: [String]) -> String? {
         if !selected.isEmpty {
             switch key.uppercased() {
-            case "BRICK":
-                return BrickDao(realm: try! Realm()).by(id: selected[0])?.name
-            case "CATEGORY":
-                return CategoryDao(realm: try! Realm()).by(id: selected[0])?.name
-            case "CITY":
-                return CityDao(realm: try! Realm()).by(id: selected[0])?.name
-            case "COLLEGE":
-                return CollegeDao(realm: try! Realm()).by(id: selected[0])?.name
-            case "COUNTRY":
-                return CountryDao(realm: try! Realm()).by(id: selected[0])?.name
-            case "CYCLE":
-                return CycleDao(realm: try! Realm()).by(id: selected[0])?.displayName
-            case "LINE":
-                return LineDao(realm: try! Realm()).by(id: selected[0])?.name
-            case "MATERIAL":
-                return MaterialDao(realm: try! Realm()).by(id: selected[0])?.name
-            case "PRICES-LIST":
-                return PricesListDao(realm: try! Realm()).by(id: selected[0])?.name
-            case "SPECIALTY":
-                return SpecialtyDao(realm: try! Realm()).by(id: selected[0])?.name
-            case "SECOND-SPECIALTY":
-                return SpecialtyDao(realm: try! Realm()).by(id: selected[0])?.name
-            case "STYLE":
-                return StyleDao(realm: try! Realm()).by(id: selected[0])?.name
-            case "ZONE":
-                return ZoneDao(realm: try! Realm()).by(id: selected[0])?.name
-            default:
-                break
+                case "BRICK":
+                    return BrickDao(realm: try! Realm()).by(id: selected[0])?.name
+                case "CATEGORY":
+                    return CategoryDao(realm: try! Realm()).by(id: selected[0])?.name
+                case "CITY":
+                    return CityDao(realm: try! Realm()).by(id: selected[0])?.name
+                case "COLLEGE":
+                    return CollegeDao(realm: try! Realm()).by(id: selected[0])?.name
+                case "COUNTRY":
+                    return CountryDao(realm: try! Realm()).by(id: selected[0])?.name
+                case "CYCLE":
+                    return CycleDao(realm: try! Realm()).by(id: selected[0])?.displayName
+                case "LINE":
+                    return LineDao(realm: try! Realm()).by(id: selected[0])?.name
+                case "MATERIAL":
+                    return MaterialDao(realm: try! Realm()).by(id: selected[0])?.name
+                case "PHARMACY-CHAIN":
+                    return PharmacyChainDao(realm: try! Realm()).by(id: selected[0])?.name
+                case "PHARMACY-TYPE":
+                    return PharmacyTypeDao(realm: try! Realm()).by(id: selected[0])?.name
+                case "PRICES-LIST":
+                    return PricesListDao(realm: try! Realm()).by(id: selected[0])?.name
+                case "SPECIALTY":
+                    return SpecialtyDao(realm: try! Realm()).by(id: selected[0])?.name
+                case "SECOND-SPECIALTY":
+                    return SpecialtyDao(realm: try! Realm()).by(id: selected[0])?.name
+                case "STYLE":
+                    return StyleDao(realm: try! Realm()).by(id: selected[0])?.name
+                case "ZONE":
+                    return ZoneDao(realm: try! Realm()).by(id: selected[0])?.name
+                default:
+                    break
             }
         }
         return "--"

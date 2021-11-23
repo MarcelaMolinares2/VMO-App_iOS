@@ -63,7 +63,7 @@ struct ClientFormView: View {
         if viewRouter.data.objectId.isEmpty {
             client = Client()
         } else {
-            client = Client(value: try! PharmacyDao(realm: try! Realm()).by(objectId: ObjectId(string: viewRouter.data.objectId)) ?? Client())
+            client = Client(value: try! ClientDao(realm: try! Realm()).by(objectId: ObjectId(string: viewRouter.data.objectId)) ?? Client())
             plainData = try! Utils.objToJSON(client)
             additionalData = client?.additionalFields ?? "{}"
         }
@@ -85,10 +85,10 @@ struct ClientFormView: View {
     
     func save() {
         if DynamicUtils.validate(form: form) && client != nil {
-            DynamicUtils.cloneObject(main: client, temporal: try! JSONDecoder().decode(Pharmacy.self, from: DynamicUtils.toJSON(form: form).data(using: .utf8)!), skipped: ["objectId", "id", "type"])
+            DynamicUtils.cloneObject(main: client, temporal: try! JSONDecoder().decode(Client.self, from: DynamicUtils.toJSON(form: form).data(using: .utf8)!), skipped: ["objectId", "id", "type"])
             client?.additionalFields = DynamicUtils.generateAdditional(form: form)
             print(client)
-            ClientDao(realm: try! Realm()).store(doctor: client!)
+            ClientDao(realm: try! Realm()).store(client: client!)
             viewRouter.currentPage = "MASTER"
         } else {
             showValidationError = true

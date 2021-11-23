@@ -48,7 +48,7 @@ class SyncTertiaryService: RequestOperation {
         self.prefix = "vm/config"
         
         step = 0
-        services = [.brick, .category, .city, .college, .config, .country, .cycle, .day_request_reason, .pharmacy_chain, .prices_list, .specialty, .style, .user, .zone]
+        services = [.brick, .category, .city, .college, .config, .country, .cycle, .day_request_reason, .pharmacy_chain, .pharmacy_type, .prices_list, .specialty, .style, .user, .zone]
         get()
     }
     
