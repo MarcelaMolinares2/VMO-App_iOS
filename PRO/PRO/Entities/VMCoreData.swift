@@ -237,10 +237,12 @@ class Client: Object, Codable, Panel, SyncEntity, Identifiable {
         self.visitFTF = try DynamicUtils.intTypeDecoding(container: container, key: .visitFTF)
         self.visitVirtual = try DynamicUtils.intTypeDecoding(container: container, key: .visitVirtual)
         self.observations = try DynamicUtils.stringTypeDecoding(container: container, key: .observations)
+        self.alias = try DynamicUtils.stringTypeDecoding(container: container, key: .alias)
+        self.joinDate = try DynamicUtils.stringTypeDecoding(container: container, key: .joinDate)
     }
     
     private enum EncodingKeys: String, CodingKey {
-        case id = "id_cliente", idNumber = "nit", name = "nombre", email = "email", phone = "telefono", brickId = "id_brick", categoryId = "id_categoria", cityId = "id_ciudad", countryId = "id_pais", pricesListId = "id_lista_precios", zoneId = "id_zona", score = "puntaje", visitFTF = "visit_ftf", visitVirtual = "visit_virtual", observations = "observ"
+        case id = "id_cliente", idNumber = "nit", name = "nombre", email = "email", phone = "telefono", brickId = "id_brick", categoryId = "id_categoria", cityId = "id_ciudad", countryId = "id_pais", pricesListId = "id_lista_precios", zoneId = "id_zona", score = "puntaje", visitFTF = "visit_ftf", visitVirtual = "visit_virtual", observations = "observ", alias = "alias_cl", joinDate = "fecha_ingreso"
     }
     
     func encode(to encoder: Encoder) throws {
@@ -261,6 +263,8 @@ class Client: Object, Codable, Panel, SyncEntity, Identifiable {
         try container.encode(visitFTF, forKey: .visitFTF)
         try container.encode(visitVirtual, forKey: .visitVirtual)
         try container.encode(observations, forKey: .observations)
+        try container.encode(alias, forKey: .alias)
+        try container.encode(joinDate, forKey: .joinDate)
     }
     
     static func primaryCodingKey() -> String {
