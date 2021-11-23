@@ -90,7 +90,7 @@ struct PatientFormView: View {
             DynamicUtils.cloneObject(main: patient, temporal: try! JSONDecoder().decode(Patient.self, from: DynamicUtils.toJSON(form: form).data(using: .utf8)!), skipped: ["objectId", "id", "type"])
             patient?.additionalFields = DynamicUtils.generateAdditional(form: form)
             PatientDao(realm: try! Realm()).store(doctor: patient!)
-            viewRouter.currentPage = "MASTER"
+            viewRouter.currentPage = "PATIENT-LIST"
         } else {
             showValidationError = true
         }

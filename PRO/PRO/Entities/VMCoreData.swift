@@ -211,7 +211,7 @@ class Client: Object, Codable, Panel, SyncEntity, Identifiable {
     var zone: Zone?
     
     private enum CodingKeys: String, CodingKey {
-        case id = "id_cliente", name = "nombre"
+        case id = "id_cliente", idNumber = "nit", name = "nombre", email = "email", phone = "telefono", brickId = "id_brick", categoryId = "id_categoria", cityId = "id_ciudad", countryId = "id_pais", pricesListId = "id_lista_precios", zoneId = "id_zona", score = "puntaje", visitFTF = "visit_ftf", visitVirtual = "visit_virtual", observations = "observ", alias = "alias_cl", joinDate = "fecha_ingreso"
     }
     
     override init() {
@@ -223,18 +223,44 @@ class Client: Object, Codable, Panel, SyncEntity, Identifiable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
         self.id = try DynamicUtils.intTypeDecoding(container: container, key: .id)
+        self.idNumber = try DynamicUtils.stringTypeDecoding(container: container, key: .idNumber)
         self.name = try DynamicUtils.stringTypeDecoding(container: container, key: .name)
+        self.email = try DynamicUtils.stringTypeDecoding(container: container, key: .email)
+        self.phone = try DynamicUtils.stringTypeDecoding(container: container, key: .phone)
+        self.brickId = try DynamicUtils.intTypeDecoding(container: container, key: .brickId)
+        self.categoryId = try DynamicUtils.intTypeDecoding(container: container, key: .categoryId)
+        self.cityId = try DynamicUtils.intTypeDecoding(container: container, key: .cityId)
+        self.countryId = try DynamicUtils.intTypeDecoding(container: container, key: .countryId)
+        self.pricesListId = try DynamicUtils.intTypeDecoding(container: container, key: .pricesListId)
+        self.zoneId = try DynamicUtils.intTypeDecoding(container: container, key: .zoneId)
+        self.score = try DynamicUtils.floatTypeDecoding(container: container, key: .score)
+        self.visitFTF = try DynamicUtils.intTypeDecoding(container: container, key: .visitFTF)
+        self.visitVirtual = try DynamicUtils.intTypeDecoding(container: container, key: .visitVirtual)
+        self.observations = try DynamicUtils.stringTypeDecoding(container: container, key: .observations)
     }
     
     private enum EncodingKeys: String, CodingKey {
-        case id = "id_cliente", name = "nombre"
+        case id = "id_cliente", idNumber = "nit", name = "nombre", email = "email", phone = "telefono", brickId = "id_brick", categoryId = "id_categoria", cityId = "id_ciudad", countryId = "id_pais", pricesListId = "id_lista_precios", zoneId = "id_zona", score = "puntaje", visitFTF = "visit_ftf", visitVirtual = "visit_virtual", observations = "observ"
     }
     
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: EncodingKeys.self)
         
         try container.encode(id, forKey: .id)
+        try container.encode(idNumber, forKey: .idNumber)
         try container.encode(name, forKey: .name)
+        try container.encode(email, forKey: .email)
+        try container.encode(phone, forKey: .phone)
+        try container.encode(brickId, forKey: .brickId)
+        try container.encode(categoryId, forKey: .categoryId)
+        try container.encode(cityId, forKey: .cityId)
+        try container.encode(countryId, forKey: .countryId)
+        try container.encode(pricesListId, forKey: .pricesListId)
+        try container.encode(zoneId, forKey: .zoneId)
+        try container.encode(score, forKey: .score)
+        try container.encode(visitFTF, forKey: .visitFTF)
+        try container.encode(visitVirtual, forKey: .visitVirtual)
+        try container.encode(observations, forKey: .observations)
     }
     
     static func primaryCodingKey() -> String {

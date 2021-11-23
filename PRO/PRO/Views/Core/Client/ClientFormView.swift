@@ -76,6 +76,7 @@ struct ClientFormView: View {
     }
     
     func initDynamic(data: Dictionary<String, Any>) {
+        print(data)
         form.tabs = DynamicUtils.initForm(data: data).sorted(by: { $0.key > $1.key })
         if !plainData.isEmpty {
             DynamicUtils.fillForm(form: &form, base: plainData, additional: additionalData)
@@ -86,6 +87,7 @@ struct ClientFormView: View {
         if DynamicUtils.validate(form: form) && client != nil {
             DynamicUtils.cloneObject(main: client, temporal: try! JSONDecoder().decode(Pharmacy.self, from: DynamicUtils.toJSON(form: form).data(using: .utf8)!), skipped: ["objectId", "id", "type"])
             client?.additionalFields = DynamicUtils.generateAdditional(form: form)
+            print(client)
             ClientDao(realm: try! Realm()).store(doctor: client!)
             viewRouter.currentPage = "MASTER"
         } else {
