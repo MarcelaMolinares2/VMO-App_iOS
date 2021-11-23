@@ -215,9 +215,8 @@ class Client: Object, Codable, Panel, SyncEntity, Identifiable {
     }
     
     override init() {
-            super.init()
+        super.init()
     }
-    
     
     required init(from decoder: Decoder) throws {
         super.init()

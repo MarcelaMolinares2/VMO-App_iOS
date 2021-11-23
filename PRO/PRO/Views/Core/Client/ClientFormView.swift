@@ -25,7 +25,38 @@ struct ClientFormView: View {
     @State private var showValidationError = false
     
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        VStack{
+            HeaderToggleView(couldSearch: false, title: client?.name ?? "modClient", icon: Image("ic-client"), color: Color.cPanelPharmacy)
+            switch tabRouter.current {
+                case "CONTACTS":
+                    PanelContactView(panel: client, couldAdd: true)
+                case "LOCATIONS":
+                    PanelLocationView(panel: client, couldAdd: true)
+                case "STOCK":
+                    PanelStockView(panel: client, couldAdd: true)
+                default:
+                    ZStack(alignment: .bottomTrailing) {
+                        ForEach(form.tabs, id: \.id) { tab in
+                            if tab.key == tabRouter.current {
+                                if let ix = form.tabs.firstIndex(where: { $0.key == tabRouter.current }) {
+                                    DynamicFormView(form: $form, tab: $form.tabs[ix], options: options)
+                                }
+                            }
+                        }
+                        FAB(image: "ic-cloud", foregroundColor: .cPrimary) {
+                            self.save()
+                        }
+                    }
+            }
+            BottomNavigationBarDynamic(onTabSelected: onTabSelected, currentTab: $tabRouter.current, tabs: $form.tabs, staticTabs: [viewRouter.data.objectId.isEmpty ? "" : "CONTACTS", "LOCATIONS", "STOCK"])
+        }
+        .onAppear {
+            tabRouter.current = "BASIC"
+            initForm()
+        }
+        .toast(isPresenting: $showValidationError) {
+            AlertToast(type: .regular, title: NSLocalizedString("errFormValidation", comment: ""))
+        }
     }
     
     func initForm() {
