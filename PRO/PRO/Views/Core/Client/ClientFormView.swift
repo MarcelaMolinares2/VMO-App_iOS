@@ -87,7 +87,6 @@ struct ClientFormView: View {
         if DynamicUtils.validate(form: form) && client != nil {
             DynamicUtils.cloneObject(main: client, temporal: try! JSONDecoder().decode(Client.self, from: DynamicUtils.toJSON(form: form).data(using: .utf8)!), skipped: ["objectId", "id", "type"])
             client?.additionalFields = DynamicUtils.generateAdditional(form: form)
-            print(client)
             ClientDao(realm: try! Realm()).store(client: client!)
             viewRouter.currentPage = "MASTER"
         } else {
