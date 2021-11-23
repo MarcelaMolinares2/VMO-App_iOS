@@ -214,6 +214,30 @@ class Client: Object, Codable, Panel, SyncEntity, Identifiable {
         case id = "id_cliente", name = "nombre"
     }
     
+    override init() {
+            super.init()
+    }
+    
+    
+    required init(from decoder: Decoder) throws {
+        super.init()
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        self.id = try DynamicUtils.intTypeDecoding(container: container, key: .id)
+        self.name = try DynamicUtils.stringTypeDecoding(container: container, key: .name)
+    }
+    
+    private enum EncodingKeys: String, CodingKey {
+        case id = "id_cliente", name = "nombre"
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: EncodingKeys.self)
+        
+        try container.encode(id, forKey: .id)
+        try container.encode(name, forKey: .name)
+    }
+    
     static func primaryCodingKey() -> String {
         let codingKey: CodingKeys
         codingKey = .id
