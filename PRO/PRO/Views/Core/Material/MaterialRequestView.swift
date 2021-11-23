@@ -49,7 +49,7 @@ struct MaterialRequestView: View {
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .foregroundColor(.cTextHigh)
                         HStack{
-                            DatePicker("", selection: $dateStart, displayedComponents: .date)
+                            DatePicker("", selection: $dateStart, in: Date()..., displayedComponents: .date)
                                 .labelsHidden()
                                 .clipped()
                                 .accentColor(.cTextHigh)

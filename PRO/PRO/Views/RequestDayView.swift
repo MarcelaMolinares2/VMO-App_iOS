@@ -26,7 +26,6 @@ struct RequestDayView: View {
     @ObservedObject var selectCycleModalToggle = ModalToggle()
     
     init() {
-        //UITableView.appearance().backgroundColor = .clear
         UITableView.appearance().tableHeaderView = UIView(frame: CGRect(x: 0, y: 0, width: 0, height: Double.leastNonzeroMagnitude))
     }
     
@@ -58,10 +57,18 @@ struct RequestDayView: View {
                                     .foregroundColor(.cAccent)
                             }
                         }
-                        DatePicker("envDateStart", selection: $dateStart, displayedComponents: .date)
+                        DatePicker("envDateStart", selection: $dateStart, in: Date()..., displayedComponents: .date)
                             .foregroundColor(.cTextHigh)
-                        DatePicker("envDateEnd", selection: $dateEnd, displayedComponents: .date)
+                            
+                            .onChange(of: dateStart, perform: { value in
+                                noDays = String(Calendar.current.dateComponents([.day], from: dateStart, to: dateEnd).day! + 1)
+                            });
+                        DatePicker("envDateEnd", selection: $dateEnd, in: Date()..., displayedComponents: .date)
+                            
                             .foregroundColor(.cTextHigh)
+                            .onChange(of: dateEnd, perform: { value in
+                                noDays = String(Calendar.current.dateComponents([.day], from: dateStart, to: dateEnd).day! + 1)
+                            });
                         VStack {
                             Text("envNoRequestedDays")
                                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -71,6 +78,7 @@ struct RequestDayView: View {
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
                                 .keyboardType(.numberPad)
                                 .autocapitalization(.none)
+                                .disabled(true)
                         }
                         VStack {
                             Text(NSLocalizedString("envRequestedDayPercentage", comment: "") + " (\(Int(percentageValue * 25))%)")
@@ -85,11 +93,21 @@ struct RequestDayView: View {
                         }
                         .foregroundColor(isValidationOn && selectedReason == -1 ? .cDanger : .cTextHigh)
                         VStack {
+                            TextField(NSLocalizedString("envComment", comment: ""), text: $comment)
+                                .frame(height: 30)
+                                .padding([.leading, .trailing], 10)
+                                .foregroundColor(.black)
+                            Divider()
+                                .frame(width: UIScreen.main.bounds.size.width * 0.95, height: 1)
+                                .background(Color.gray)
+                            
+                            /*
                             Text("envComment")
                                 .frame(maxWidth: .infinity, alignment: .leading)
                             TextEditor(text: $comment)
                                 .border(Color.cAccent, width: 1)
                                 .cornerRadius(4)
+                            */
                         }
                     }
                     FAB(image: "ic-cloud", foregroundColor: .cPrimary) {
