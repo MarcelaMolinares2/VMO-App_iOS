@@ -16,20 +16,58 @@ struct MovementFormView: View {
     var title = ""
     var icon = "ic-home"
     var color = Color.cPrimary
-    var panel: Panel?
     var visitType = "NORMAL"
+    
+    //@State var movement: Movement
+    @State var promotedProducts = [String]()
+    @State var deliveredMaterials = [AdvertisingMaterialDelivery]()
     
     var body: some View {
         VStack {
             HeaderToggleView(couldSearch: false, title: title, icon: Image(icon), color: color)
-            ScrollView {
-                VStack {
-                    Text("\(tabRouter.current)")
-                }
+            switch tabRouter.current {
+                case "MATERIAL":
+                    MovementFormTabMaterialView(selected: $deliveredMaterials)
+                case "PROMOTED":
+                    MovementFormTabPromotedView(selected: $promotedProducts)
+                case "SHOPPING":
+                    MovementFormTabShoppingView()
+                case "STOCK":
+                    MovementFormTabStockView()
+                case "TRANSFERENCE":
+                    MovementFormTabTransferenceView()
+                default:
+                    MovementFormTabBasicView()
             }
-            MovementBottomNavigationView(tabRouter: tabRouter, panel: panel)
+            MovementBottomNavigationView(tabRouter: tabRouter)
         }
     }
+}
+
+struct MovementFormTabBasicView: View {
+    
+    var body: some View {
+        ScrollView {
+            VStack {
+                Text("BASIC!!!!")
+            }
+        }
+    }
+    
+}
+
+struct MovementFormTabMaterialView: View {
+    
+    @Binding var selected: [AdvertisingMaterialDelivery]
+    
+    var body: some View {
+        ScrollView {
+            VStack {
+                Text("MATERIAL!!!!")
+            }
+        }
+    }
+    
 }
 
 struct MovementBottomNavigationView: View {
@@ -37,7 +75,6 @@ struct MovementBottomNavigationView: View {
     @EnvironmentObject var viewRouter: ViewRouter
     
     @StateObject var tabRouter: TabRouter
-    var panel: Panel?
     
     @State var mainTabs = [[String: Any]]()
     @State var moreTabs = [[String: Any]]()
@@ -109,11 +146,15 @@ struct MovementBottomNavigationView: View {
         }
         .frame(minWidth: 0, maxWidth: .infinity, minHeight: 46, maxHeight: 46)
         .onAppear {
-            let tabs = MovementUtils.initTabs(data: MovementUtils.tabs(panel: panel!, visitType: Utils.castString(value: viewRouter.data.options["visitType"]).lowercased()))
-            mainTabs = tabs[0]
-            moreTabs = tabs[1]
-            tabRouter.current = "BASIC"
+            load()
         }
+    }
+    
+    func load() {
+        let tabs = MovementUtils.initTabs(data: MovementUtils.tabs(panelType: viewRouter.data.type, visitType: Utils.castString(value: viewRouter.data.options["visitType"]).lowercased()))
+        mainTabs = tabs[0]
+        moreTabs = tabs[1]
+        tabRouter.current = "BASIC"
     }
     
     

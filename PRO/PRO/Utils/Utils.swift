@@ -355,20 +355,20 @@ class GMSUtils {
 
 class MovementUtils {
     
-    static func tabs(panel: Panel, visitType: String) -> [String: [String: Any]] {
+    static func tabs(panelType: String, visitType: String) -> [String: [String: Any]] {
         let jsonString = Config.get(key: "MOV_TABS").complement ?? ""
         let data = Utils.jsonDictionary(string: jsonString)
         
         var tabs = [String: [String: Any]]()
-        data.forEach { (key: String, value: Any) in
-            print(key)
-            let panelOpts = value as! Dictionary<String,Any>
-            let visitTypes = panelOpts[panel.type] as! Dictionary<String,Any>
-            let opts = visitTypes[visitType] as! Dictionary<String,Any>
-            if let visible = opts["visible"] as? Int {
+        let visitTypes = data[panelType] as! Dictionary<String,Any>
+        let opts = visitTypes[visitType] as! Dictionary<String,Any>
+        
+        opts.forEach { (key: String, value: Any) in
+            let tabOpts = value as! Dictionary<String,Any>
+            if let visible = tabOpts["visible"] as? Int {
                 if visible == 1 {
                     tabs[key] = [
-                        "required": Utils.castInt(value: opts["required"]) == 1,
+                        "required": Utils.castInt(value: tabOpts["required"]) == 1,
                         "index": jsonString.index(of: key)
                     ]
                 }

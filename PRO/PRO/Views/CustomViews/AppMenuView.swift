@@ -83,7 +83,7 @@ struct PanelMenu: View {
                 }
                 Button(action: {
                     self.isPresented = false
-                    FormEntity(objectId: panel.objectId.stringValue, type: panel.type, options: [ "visitType": "NORMAL" ]).go(path: "MOVEMENT-FORM", router: viewRouter)
+                    FormEntity(objectId: panel.objectId.stringValue, type: panel.type, options: [ "visitType": "normal" ]).go(path: "MOVEMENT-FORM", router: viewRouter)
                 }) {
                     VStack {
                         Image("ic-visit")

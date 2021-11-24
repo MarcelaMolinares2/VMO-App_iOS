@@ -12,6 +12,7 @@
 		800E6B2EBCFA6468011700A3 /* Pods_PRO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 76E8D4B122EC70EB565D4096 /* Pods_PRO.framework */; };
 		AC13263C25B737E5007CF049 /* MovementFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC13263B25B737E5007CF049 /* MovementFormView.swift */; };
 		AC17AD86274426DB002A376B /* ViewerDialogs.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC17AD85274426DA002A376B /* ViewerDialogs.swift */; };
+		AC1AF8C4274DEC67002658B6 /* MovementFormTabsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC1AF8C3274DEC67002658B6 /* MovementFormTabsView.swift */; };
 		AC3444C42562C66900C0D668 /* RequestOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC3444C32562C66900C0D668 /* RequestOperation.swift */; };
 		AC3444CA2562C72400C0D668 /* SyncRecurrentService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC3444C92562C72400C0D668 /* SyncRecurrentService.swift */; };
 		AC3444D72562CA4E00C0D668 /* SyncDataService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC3444D62562CA4E00C0D668 /* SyncDataService.swift */; };
@@ -121,6 +122,7 @@
 		A876D75356C033F235BDC546 /* Pods-PRO-PROUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PRO-PROUITests.release.xcconfig"; path = "Target Support Files/Pods-PRO-PROUITests/Pods-PRO-PROUITests.release.xcconfig"; sourceTree = "<group>"; };
 		AC13263B25B737E5007CF049 /* MovementFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovementFormView.swift; sourceTree = "<group>"; };
 		AC17AD85274426DA002A376B /* ViewerDialogs.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewerDialogs.swift; sourceTree = "<group>"; };
+		AC1AF8C3274DEC67002658B6 /* MovementFormTabsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovementFormTabsView.swift; sourceTree = "<group>"; };
 		AC3444C32562C66900C0D668 /* RequestOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestOperation.swift; sourceTree = "<group>"; };
 		AC3444C92562C72400C0D668 /* SyncRecurrentService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncRecurrentService.swift; sourceTree = "<group>"; };
 		AC3444D62562CA4E00C0D668 /* SyncDataService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncDataService.swift; sourceTree = "<group>"; };
@@ -264,7 +266,6 @@
 		AC13263925B737B9007CF049 /* Diary */ = {
 			isa = PBXGroup;
 			children = (
-				AC13263B25B737E5007CF049 /* MovementFormView.swift */,
 			);
 			path = Diary;
 			sourceTree = "<group>";
@@ -272,6 +273,8 @@
 		AC13263A25B737BF007CF049 /* Movement */ = {
 			isa = PBXGroup;
 			children = (
+				AC13263B25B737E5007CF049 /* MovementFormView.swift */,
+				AC1AF8C3274DEC67002658B6 /* MovementFormTabsView.swift */,
 			);
 			path = Movement;
 			sourceTree = "<group>";
@@ -912,6 +915,7 @@
 				AC59E99D257B400800121387 /* AppManage.swift in Sources */,
 				AC3444C42562C66900C0D668 /* RequestOperation.swift in Sources */,
 				AC59E95C2576B82F00121387 /* GenericViews.swift in Sources */,
+				AC1AF8C4274DEC67002658B6 /* MovementFormTabsView.swift in Sources */,
 				ACC0539C2550DA2300B9753A /* VMConfigData.swift in Sources */,
 				AC3444E32563683F00C0D668 /* SLAIDPanelView.swift in Sources */,
 				AC34454D25638B5C00C0D668 /* PharmacyListView.swift in Sources */,
