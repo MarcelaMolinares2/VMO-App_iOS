@@ -248,6 +248,27 @@ class GenericSelectableDao: GenericDao {
         PricesListDao(realm: self.realm).all().map { GenericSelectableItem(id: "\($0.id)", label: $0.name ?? "") }
     }
     
+    func products() -> [GenericSelectableItem] {
+        ProductDao(realm: self.realm).all().map { GenericSelectableItem(id: "\($0.id)", label: $0.name ?? "") }
+    }
+    
+    func productBrands() -> [GenericSelectableItem] {
+        let all = ProductDao(realm: self.realm).all().map { GenericSelectableItem(id: "\($0.id)", label: $0.brand ?? "") }
+        var results = [GenericSelectableItem]()
+        all.forEach { item in
+            if !results.contains(where: { it in
+                return it.label == item.label
+            }) {
+                results.append(item)
+            }
+        }
+        return results
+    }
+    
+    func productsWithCompetitors() -> [GenericSelectableItem] {
+        ProductDao(realm: self.realm).competitors().map { GenericSelectableItem(id: "\($0.id)", label: $0.name ?? "") }
+    }
+    
     func specialties(tp: String = "P") -> [GenericSelectableItem] {
         let items: [Specialty]
         if tp == "P" {
@@ -436,6 +457,24 @@ class PricesListDao: GenericDao {
     
     func by(id: String) -> PricesList? {
         return realm.objects(PricesList.self).filter("id == \(id)").first
+    }
+    
+}
+
+class ProductDao: GenericDao {
+    
+    func all() -> [Product] {
+        return Array(realm.objects(Product.self).sorted(byKeyPath: "name"))
+    }
+    
+    func by(id: String) -> Product? {
+        return realm.objects(Product.self).filter("id == \(id)").first
+    }
+    
+    func competitors() -> [Product] {
+        return Array(realm.objects(Product.self).where {
+            ($0.competitors != nil) && ($0.competitors != "")
+        })
     }
     
 }

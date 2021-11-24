@@ -406,6 +406,12 @@ struct CustomDialogPicker: View {
                 viewModel.put(list: GenericSelectableDao(realm: try! Realm()).pharmacyTypes())
             case "PRICES-LIST":
                 viewModel.put(list: GenericSelectableDao(realm: try! Realm()).pricesLists())
+            case "PRODUCT-PROMOTED", "PRODUCT-TRANSFERENCE":
+                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).products())
+            case "PRODUCT-BY-BRAND":
+                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).productBrands())
+            case "PRODUCT-SHOPPING":
+                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).productsWithCompetitors())
             case "SPECIALTY":
                 viewModel.put(list: GenericSelectableDao(realm: try! Realm()).specialties())
             case "SECOND-SPECIALTY":

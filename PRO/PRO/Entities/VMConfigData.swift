@@ -282,7 +282,7 @@ class Product: Object, Codable {
     @Persisted var code: String?
     @Persisted var name: String?
     @Persisted var competitors: String?
-    @Persisted var hasToVerifyStock = 0
+    @Persisted var brand: String?
     @Persisted var lineId: Int?
     @Persisted var countryId: Int?
     
@@ -290,7 +290,7 @@ class Product: Object, Codable {
     var country: Country?
     
     private enum CodingKeys: String, CodingKey {
-        case id = "id_producto", code = "codigo", name = "producto", hasToVerifyStock = "verificar_existencia", lineId = "id_linea", countryId = "id_pais", competitors
+        case id = "id_producto", code = "codigo", name = "producto", lineId = "id_linea", countryId = "id_pais", competitors = "competidores", brand = "marca"
     }
     
     static func primaryCodingKey() -> String {

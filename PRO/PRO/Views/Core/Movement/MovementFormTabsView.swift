@@ -7,6 +7,7 @@
 //
 
 import SwiftUI
+import RealmSwift
 
 
 struct MovementFormTabPromotedView: View {
@@ -26,6 +27,8 @@ struct MovementFormTabPromotedView: View {
 
 struct MovementFormTabStockView: View {
     
+    @Binding var selected: RealmSwift.List<MovementProductStock>
+    
     var body: some View {
         ScrollView {
             VStack {
@@ -39,6 +42,8 @@ struct MovementFormTabStockView: View {
 
 struct MovementFormTabShoppingView: View {
     
+    @Binding var selected: RealmSwift.List<MovementProductShopping>
+    
     var body: some View {
         ScrollView {
             VStack {
@@ -51,6 +56,8 @@ struct MovementFormTabShoppingView: View {
 
 
 struct MovementFormTabTransferenceView: View {
+    
+    @Binding var selected: RealmSwift.List<MovementProductTransference>
     
     var body: some View {
         ScrollView {

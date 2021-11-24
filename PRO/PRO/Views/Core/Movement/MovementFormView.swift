@@ -7,6 +7,7 @@
 //
 
 import SwiftUI
+import RealmSwift
 
 struct MovementFormView: View {
     
@@ -18,26 +19,30 @@ struct MovementFormView: View {
     var color = Color.cPrimary
     var visitType = "NORMAL"
     
-    //@State var movement: Movement
+    @State var movement: Movement = Movement()
     @State var promotedProducts = [String]()
-    @State var deliveredMaterials = [AdvertisingMaterialDelivery]()
     
     var body: some View {
         VStack {
             HeaderToggleView(couldSearch: false, title: title, icon: Image(icon), color: color)
+            Button(action: {
+                print(movement)
+            }) {
+                Text("Test")
+            }
             switch tabRouter.current {
                 case "MATERIAL":
-                    MovementFormTabMaterialView(selected: $deliveredMaterials)
+                    MovementFormTabMaterialView(selected: $movement.dataMaterial)
                 case "PROMOTED":
                     MovementFormTabPromotedView(selected: $promotedProducts)
                 case "SHOPPING":
-                    MovementFormTabShoppingView()
+                    MovementFormTabShoppingView(selected: $movement.dataShopping)
                 case "STOCK":
-                    MovementFormTabStockView()
+                    MovementFormTabStockView(selected: $movement.dataStock)
                 case "TRANSFERENCE":
-                    MovementFormTabTransferenceView()
+                    MovementFormTabTransferenceView(selected: $movement.dataTransference)
                 default:
-                    MovementFormTabBasicView()
+                    MovementFormTabBasicView(movement: $movement)
             }
             MovementBottomNavigationView(tabRouter: tabRouter)
         }
@@ -45,6 +50,8 @@ struct MovementFormView: View {
 }
 
 struct MovementFormTabBasicView: View {
+    
+    @Binding var movement: Movement
     
     var body: some View {
         ScrollView {
@@ -56,9 +63,10 @@ struct MovementFormTabBasicView: View {
     
 }
 
+
 struct MovementFormTabMaterialView: View {
     
-    @Binding var selected: [AdvertisingMaterialDelivery]
+    @Binding var selected: RealmSwift.List<MovementMaterial>
     
     var body: some View {
         ScrollView {

@@ -642,6 +642,76 @@ class MediaItem: Object, Decodable, SyncEntity {
     @Persisted var localItem: String = ""
 }
 
+class Movement: Object, Codable, SyncEntity {
+    @Persisted(primaryKey: true) var objectId: ObjectId
+    @Persisted(indexed: true) var id = 0
+    @Persisted var transactionStatus: String? = ""
+    @Persisted var transactionPending: String? = ""
+    @Persisted var transactionResponse: String? = ""
+    
+    @Persisted var panelId: Int = 0
+    @Persisted var panelType: String = ""
+    @Persisted var date: String = ""
+    @Persisted var realDate: String = ""
+    @Persisted var hour: String = ""
+    @Persisted var comment: String? = ""
+    @Persisted var target: String? = ""
+    @Persisted var duration: Float?
+    @Persisted var executed: String = ""
+    @Persisted var latitude: Float?
+    @Persisted var longitude: Float?
+    @Persisted var companionId: Int?
+    @Persisted var wasScheduled: String = ""
+    @Persisted var rqAssistance: Int = 0
+    @Persisted var isOpen: Bool = false
+    @Persisted var openLastNotification: String?
+    @Persisted var openAt: String?
+    @Persisted var closedAt: String?
+    @Persisted var contactType: String = ""
+    @Persisted var contactedBy: String?
+    var assocPanelLocation: Bool = false
+    @Persisted var dataContacts: String?
+    @Persisted var additionalFields: String?
+    @Persisted var cycleId: Int = 0
+    @Persisted var dataPromoted: String = ""
+    @Persisted var dataMaterial = List<MovementMaterial>()
+    @Persisted var dataStock = List<MovementProductStock>()
+    @Persisted var dataShopping = List<MovementProductShopping>()
+    @Persisted var dataTransference = List<MovementProductTransference>()
+    
+    private enum CodingKeys: String, CodingKey {
+        case id = "id_movimiento", panelId = "id_medico", panelType = "tipo", date = "fecha_visita", realDate = "fecha_real", hour = "hora_visita", comment = "comentario", target = "objetivo_proxima", duration = "duracion", executed = "no_efect", latitude = "latitud", longitude = "longitud", companionId = "id_acompanante", wasScheduled = "agendado", rqAssistance = "asistencia", openAt = "fecha_inicio", closedAt = "fecha_fin", contactType = "tipo_contacto", contactedBy = "contactado_por", dataContacts = "contacto", additionalFields = "fields", cycleId = "ciclo", dataPromoted = "productos_prom", dataMaterial = "rl_material_deliveries", dataStock = "rl_product_stock", dataShopping = "rl_shopping", dataTransference = "rl_product_transference"
+    }
+    
+    override init() {
+        super.init()
+    }
+    
+    required init(from decoder: Decoder) throws {
+        super.init()
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        self.additionalFields = try DynamicUtils.adFieldsTypeDecoding(container: container, key: .additionalFields)
+    }
+    
+}
+
+class MovementMaterial: Object, Codable {
+    @Persisted(primaryKey: true) var objectId: ObjectId
+}
+
+class MovementProductStock: Object, Codable {
+    @Persisted(primaryKey: true) var objectId: ObjectId
+}
+
+class MovementProductShopping: Object, Codable {
+    @Persisted(primaryKey: true) var objectId: ObjectId
+}
+
+class MovementProductTransference: Object, Codable {
+    @Persisted(primaryKey: true) var objectId: ObjectId
+}
+
 class MovementSimple: Object, Decodable, SyncEntity {
     @Persisted(primaryKey: true) var objectId: ObjectId
     @Persisted(indexed: true) var id = 0
