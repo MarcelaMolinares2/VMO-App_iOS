@@ -15,10 +15,8 @@ struct DynamicFormView: View {
     var options: DynamicFormFieldOptions
     
     var body: some View {
-        Form {
-            ForEach(tab.groups.indices) { index in
-                DynamicFormSection(form: $form, group: $tab.groups[index], options: options)
-            }
+        ForEach(tab.groups.indices) { index in
+            DynamicFormSection(form: $form, group: $tab.groups[index], options: options)
         }
     }
 }

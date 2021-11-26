@@ -650,6 +650,7 @@ class Movement: Object, Codable, SyncEntity {
     @Persisted var transactionResponse: String? = ""
     
     @Persisted var panelId: Int = 0
+    @Persisted var panelObjectId: String = ""
     @Persisted var panelType: String = ""
     @Persisted var date: String = ""
     @Persisted var realDate: String = ""

@@ -21,15 +21,6 @@ struct MasterView: View {
         PageViewController(viewControllers: subviews, currentPageIndex: $currentPageIndex)
             .background(Color.blue)
             .edgesIgnoringSafeArea(.all)
-            .onAppear {
-                load()
-            }
-    }
-    
-    func load() {
-        let operationQueue = OperationQueue()
-        let syncOperation = SyncOperation()
-        operationQueue.addOperations([syncOperation], waitUntilFinished: false)
     }
 }
 

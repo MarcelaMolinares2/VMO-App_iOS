@@ -242,6 +242,26 @@ class JWTUtils {
 
 class PanelUtils {
     
+    static func panel(type: String, objectId: String) -> Panel? {
+        switch type {
+            case "M":
+                return try? DoctorDao(realm: try! Realm()).by(objectId: ObjectId(string: objectId))
+            case "F":
+                return try? PharmacyDao(realm: try! Realm()).by(objectId: ObjectId(string: objectId))
+            case "C":
+                return try? ClientDao(realm: try! Realm()).by(objectId: ObjectId(string: objectId))
+            case "P":
+                return try? PatientDao(realm: try! Realm()).by(objectId: ObjectId(string: objectId))
+            case "T":
+                return try? PotentialDao(realm: try! Realm()).by(objectId: ObjectId(string: objectId))
+            case "CT":
+                return try? ContactDao(realm: try! Realm()).by(objectId: ObjectId(string: objectId))
+            default:
+                break
+        }
+        return nil
+    }
+    
     static func colorByPanelType(panel: Panel) -> Color {
         return valueByPanelType(by: .color, panelType: panel.type) as! Color
     }

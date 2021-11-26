@@ -63,7 +63,7 @@ struct PanelMenu: View {
                     }
                 }
                 .sheet(isPresented: $infoIsPresented) {
-                    KeyInfoView(panel: panel, headerColor: headerColor, headerIcon: headerIcon)
+                    //KeyInfoView(panel: panel, headerColor: headerColor, headerIcon: headerIcon)
                 }
                 Button(action: {
                     self.isPresented = false

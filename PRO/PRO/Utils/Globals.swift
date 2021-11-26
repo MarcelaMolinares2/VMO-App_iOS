@@ -52,6 +52,7 @@ extension Color {
     static let cTextLink = Color("colorTextLink")
     static let cSelected = Color("colorSelected")
     static let cFieldBorder = Color("colorFieldBorder")
+    static let cToggleActive = Color("colorToggleActive")
     
     static let cPanelActivity = Color("colorPanelActivity")
     static let cPanelClient = Color("colorPanelClient")
@@ -68,5 +69,6 @@ extension Color {
     
     static let cBlueDark = Color("colorBlueDark")
     static let cWarning = Color("colorWarning")
+    static let cInfo = Color("colorInfo")
 
 }

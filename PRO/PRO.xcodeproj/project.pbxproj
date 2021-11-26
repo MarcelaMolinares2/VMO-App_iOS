@@ -94,6 +94,7 @@
 		ACC128312581184E00595078 /* MovementListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACC128302581184E00595078 /* MovementListView.swift */; };
 		ACC1963925A4CAA200C5EE3E /* RouteListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACC1963825A4CAA200C5EE3E /* RouteListView.swift */; };
 		ACC1963E25A4D51700C5EE3E /* RouteFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACC1963D25A4D51700C5EE3E /* RouteFormView.swift */; };
+		ACC49D1B2750881E0078F7CA /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACC49D1A2750881E0078F7CA /* LocationService.swift */; };
 		ACDD64B7274C0FDA00D2C340 /* PanelStockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACDD64B6274C0FDA00D2C340 /* PanelStockView.swift */; };
 		ACDD64BC274C104D00D2C340 /* PanelContactView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACDD64BB274C104D00D2C340 /* PanelContactView.swift */; };
 		BDFA1EC1EA0C8934704614E0 /* awsconfiguration.json in Resources */ = {isa = PBXBuildFile; fileRef = 01C38C1E1CEFD504B2BF9AED /* awsconfiguration.json */; };
@@ -118,7 +119,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		01C38C1E1CEFD504B2BF9AED /* awsconfiguration.json */ = {isa = PBXFileReference; explicitFileType = text.json; lastKnownFileType = text.json; name = awsconfiguration.json; path = awsconfiguration.json; sourceTree = "<group>"; };
+		01C38C1E1CEFD504B2BF9AED /* awsconfiguration.json */ = {isa = PBXFileReference; explicitFileType = text.json; path = awsconfiguration.json; sourceTree = "<group>"; };
 		17BFEE9ABBECEB9FD0B729EF /* Pods-PRO-PROUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PRO-PROUITests.release.xcconfig"; path = "Target Support Files/Pods-PRO-PROUITests/Pods-PRO-PROUITests.release.xcconfig"; sourceTree = "<group>"; };
 		218E12F5D43CB48EAC5B1675 /* Pods-PROTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PROTests.release.xcconfig"; path = "Target Support Files/Pods-PROTests/Pods-PROTests.release.xcconfig"; sourceTree = "<group>"; };
 		2A6115E031EE597B881A86AA /* Pods_PRO_PROUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_PRO_PROUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -126,7 +127,7 @@
 		2E5431D3272B540E00B99B2A /* RouteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouteView.swift; sourceTree = "<group>"; };
 		42A954514421AEF90E2A731C /* Pods_PRO.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_PRO.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		5D9BE38349937D1120A8746E /* Pods-PRO.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PRO.debug.xcconfig"; path = "Target Support Files/Pods-PRO/Pods-PRO.debug.xcconfig"; sourceTree = "<group>"; };
-		727D1891CD0D9128FF9FFABA /* amplifyconfiguration.json */ = {isa = PBXFileReference; explicitFileType = text.json; lastKnownFileType = text.json; name = amplifyconfiguration.json; path = amplifyconfiguration.json; sourceTree = "<group>"; };
+		727D1891CD0D9128FF9FFABA /* amplifyconfiguration.json */ = {isa = PBXFileReference; explicitFileType = text.json; path = amplifyconfiguration.json; sourceTree = "<group>"; };
 		AC13263B25B737E5007CF049 /* MovementFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovementFormView.swift; sourceTree = "<group>"; };
 		AC17AD85274426DA002A376B /* ViewerDialogs.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewerDialogs.swift; sourceTree = "<group>"; };
 		AC1AF8C3274DEC67002658B6 /* MovementFormTabsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovementFormTabsView.swift; sourceTree = "<group>"; };
@@ -212,6 +213,7 @@
 		ACC128302581184E00595078 /* MovementListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovementListView.swift; sourceTree = "<group>"; };
 		ACC1963825A4CAA200C5EE3E /* RouteListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouteListView.swift; sourceTree = "<group>"; };
 		ACC1963D25A4D51700C5EE3E /* RouteFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouteFormView.swift; sourceTree = "<group>"; };
+		ACC49D1A2750881E0078F7CA /* LocationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationService.swift; sourceTree = "<group>"; };
 		ACDD64B6274C0FDA00D2C340 /* PanelStockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PanelStockView.swift; sourceTree = "<group>"; };
 		ACDD64BB274C104D00D2C340 /* PanelContactView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PanelContactView.swift; sourceTree = "<group>"; };
 		F406AC3B8DA4ABD95D2B3874 /* Pods_PROTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_PROTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -592,6 +594,7 @@
 				ACC053572550981E00B9753A /* AuthService.swift */,
 				AC3444C32562C66900C0D668 /* RequestOperation.swift */,
 				AC3444DC2562CCE200C0D668 /* SyncService.swift */,
+				ACC49D1A2750881E0078F7CA /* LocationService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -1004,6 +1007,7 @@
 				ACC053582550981E00B9753A /* AuthService.swift in Sources */,
 				AC3444F02563691B00C0D668 /* NotificationPanelView.swift in Sources */,
 				ACC053412550629500B9753A /* NetworkService.swift in Sources */,
+				ACC49D1B2750881E0078F7CA /* LocationService.swift in Sources */,
 				AC3444DD2562CCE200C0D668 /* SyncService.swift in Sources */,
 				ACC1963925A4CAA200C5EE3E /* RouteListView.swift in Sources */,
 				ACB50CCB2743563700F9D6B7 /* FileUtils.swift in Sources */,

@@ -31,6 +31,17 @@ struct ContentView: View {
             }
         }
         .addPartialSheet()
+        .onAppear {
+            load()
+        }
+    }
+    
+    func load() {
+        if userSettings.loggedIn && userSettings.initStatus {
+            let operationQueue = OperationQueue()
+            let syncOperation = SyncOperation()
+            operationQueue.addOperations([syncOperation], waitUntilFinished: false)
+        }
     }
 }
 

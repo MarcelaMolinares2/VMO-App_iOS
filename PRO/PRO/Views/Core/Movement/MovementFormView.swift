@@ -8,53 +8,81 @@
 
 import SwiftUI
 import RealmSwift
+import CoreLocation
 
 struct MovementFormView: View {
     
     @EnvironmentObject var viewRouter: ViewRouter
     @StateObject var tabRouter = TabRouter()
+    @ObservedObject var locationService = LocationService()
     
     var title = ""
     var icon = "ic-home"
     var color = Color.cPrimary
     var visitType = "NORMAL"
     
-    @State var movement: Movement = Movement()
-    @State var promotedProducts = [String]()
+    @State private var locationRequired = Config.get(key: "MOV_LOCATION_REQUIRED").value == 1
+    
+    @State private var movement: Movement = Movement()
+    @State private var panel: Panel?
+    @State private var promotedProducts = [String]()
     
     var body: some View {
         VStack {
             HeaderToggleView(couldSearch: false, title: title, icon: Image(icon), color: color)
             Button(action: {
                 print(movement)
+                print(locationService.location ?? "")
             }) {
                 Text("Test")
             }
-            switch tabRouter.current {
-                case "MATERIAL":
-                    MovementFormTabMaterialView(selected: $movement.dataMaterial)
-                case "PROMOTED":
-                    MovementFormTabPromotedView(selected: $promotedProducts)
-                case "SHOPPING":
-                    MovementFormTabShoppingView(selected: $movement.dataShopping)
-                case "STOCK":
-                    MovementFormTabStockView(selected: $movement.dataStock)
-                case "TRANSFERENCE":
-                    MovementFormTabTransferenceView(selected: $movement.dataTransference)
-                default:
-                    MovementFormTabBasicView(movement: $movement, op: viewRouter.data.objectId.isEmpty ? "create" : "update", panelType: "M", visitType: visitType)
+            if locationRequired && locationService.location == nil {
+                Spacer()
+                VStack {
+                    Text("envMovementLocationRequired")
+                }
+                Spacer()
+            } else {
+                if panel == nil {
+                    Spacer()
+                    VStack {
+                        Text("envPanelNotFound")
+                    }
+                    Spacer()
+                } else {
+                    switch tabRouter.current {
+                        case "MATERIAL":
+                            MovementFormTabMaterialView(selected: $movement.dataMaterial)
+                        case "PROMOTED":
+                            MovementFormTabPromotedView(selected: $promotedProducts)
+                        case "SHOPPING":
+                            MovementFormTabShoppingView(selected: $movement.dataShopping)
+                        case "STOCK":
+                            MovementFormTabStockView(selected: $movement.dataStock)
+                        case "TRANSFERENCE":
+                            MovementFormTabTransferenceView(selected: $movement.dataTransference)
+                        default:
+                            MovementFormTabBasicView(movement: $movement, location: locationService.location, panel: panel!, op: viewRouter.data.objectId.isEmpty ? "create" : "update", visitType: visitType)
+                    }
+                    MovementBottomNavigationView(tabRouter: tabRouter)
+                }
             }
-            MovementBottomNavigationView(tabRouter: tabRouter)
         }
         .onAppear {
+            locationService.start()
             initForm()
+        }
+        .onDisappear {
+            locationService.stop()
         }
     }
     
     func initForm() {
+        panel = PanelUtils.panel(type: viewRouter.data.type, objectId: viewRouter.data.objectId)
         if viewRouter.data.objectId.isEmpty {
-            movement.panelId = 0
-            movement.panelType = "M"
+            movement.panelId = panel?.id ?? 0
+            movement.panelObjectId = viewRouter.data.objectId
+            movement.panelType = viewRouter.data.type
         } else {
             //doctor = Movement(value: try! MovementDao(realm: try! Realm()).by(objectId: ObjectId(string: viewRouter.data.objectId)) ?? Doctor())
         }
@@ -64,26 +92,149 @@ struct MovementFormView: View {
 struct MovementFormTabBasicView: View {
     
     @Binding var movement: Movement
+    @State var location: CLLocation?
+    @State var panel: Panel
     var op: String
-    var panelType: String
     var visitType: String
     
     @State var plainData = ""
     @State var additionalData = ""
     @State var dynamicData = Dictionary<String, Any>()
+    
     @State private var form = DynamicForm(tabs: [DynamicFormTab]())
     @State private var options = DynamicFormFieldOptions(table: "movement", op: "")
+    @State private var formAssistance = false
+    @State private var formInPoint = false
+    
+    @State private var showInfoDialog = false
+    
+    @State private var basicFormOpts = Config.get(key: "MOV_LOCATION_REQUIRED").value == 1
     
     var body: some View {
         VStack {
-            Text("\(form.tabs.count)")
-            ForEach(form.tabs, id: \.id) { tab in
-                Text("\(form.tabs[0].key)")
-                DynamicFormView(form: $form, tab: $form.tabs[0], options: options)
+            GeometryReader { geometry in
+                HStack(spacing: 0) {
+                    Image("ic-info")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .padding(5)
+                        .frame(width: geometry.size.width / CGFloat(5), alignment: .center)
+                        .foregroundColor(.cInfo)
+                        .onTapGesture {
+                            showInfoDialog = true
+                        }
+                    Image(formAssistance ? "ic-notification-fill" : "ic-notification")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .padding(5)
+                        .frame(width: geometry.size.width / CGFloat(5), alignment: .center)
+                        .foregroundColor(formAssistance ? .cToggleActive : .cAccent)
+                        .onTapGesture {
+                            toggleAssistance()
+                        }
+                    Image(location == nil ? "ic-location-disabled" : "ic-location")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .padding(5)
+                        .frame(width: geometry.size.width / CGFloat(5), alignment: .center)
+                        .foregroundColor(formInPoint ? .cToggleActive : .cAccent)
+                        .onTapGesture {
+                            if location != nil {
+                                toggleInPoint()
+                            }
+                        }
+                    if true {
+                        Image("ic-warning")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .padding(5)
+                            .frame(width: geometry.size.width / CGFloat(5), alignment: .center)
+                            .foregroundColor(.cWarning)
+                            .onTapGesture {
+                                
+                            }
+                    }
+                    if true {
+                        Image("ic-delete")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .padding(5)
+                            .frame(width: geometry.size.width / CGFloat(5), alignment: .center)
+                            .foregroundColor(.cDanger)
+                            .onTapGesture {
+                                
+                            }
+                    }
+                }
+            }
+            .frame(minWidth: 0, maxWidth: .infinity, minHeight: 38, maxHeight: 38)
+            Form {
+                Section {
+                    VStack {
+                        HStack {
+                            Text("AAAAA")
+                            Text("DDDDD")
+                        }
+                    }
+                    VStack {
+                        HStack {
+                            Text("AAAAA")
+                            Text("DDDDD")
+                        }
+                    }
+                    VStack {
+                        HStack {
+                            Text("AAAAA")
+                            Text("DDDDD")
+                        }
+                    }
+                    VStack {
+                        HStack {
+                            Text("AAAAA")
+                            Text("DDDDD")
+                        }
+                    }
+                    VStack {
+                        HStack {
+                            Text("AAAAA")
+                            Text("DDDDD")
+                        }
+                    }
+                    VStack {
+                        HStack {
+                            Text("AAAAA")
+                            Text("DDDDD")
+                        }
+                    }
+                    VStack {
+                        HStack {
+                            Text("AAAAA")
+                            Text("DDDDD")
+                        }
+                    }
+                    VStack {
+                        HStack {
+                            Text("AAAAA")
+                            Text("DDDDD")
+                        }
+                    }
+                    VStack {
+                        HStack {
+                            Text("AAAAA")
+                            Text("DDDDD")
+                        }
+                    }
+                }
+                ForEach(form.tabs, id: \.id) { tab in
+                    DynamicFormView(form: $form, tab: $form.tabs[0], options: options)
+                }
             }
         }
         .onAppear {
             initForm()
+        }
+        .partialSheet(isPresented: $showInfoDialog) {
+            PanelInfoDialog(panel: panel)
         }
     }
     
@@ -92,7 +243,7 @@ struct MovementFormTabBasicView: View {
         options.item = movement.id
         options.op = op
         options.type = visitType.lowercased()
-        options.panelType = panelType
+        options.panelType = panel.type
         dynamicData = Utils.jsonDictionary(string: Config.get(key: "P_MOV_FORM_ADDITIONAL").complement ?? "")
 
         initDynamic(data: dynamicData)
@@ -106,6 +257,16 @@ struct MovementFormTabBasicView: View {
         if !plainData.isEmpty {
             DynamicUtils.fillForm(form: &form, base: plainData, additional: additionalData)
         }
+    }
+    
+    func toggleAssistance() {
+        formAssistance.toggle()
+        movement.rqAssistance = formAssistance ? 1 : 0
+    }
+    
+    func toggleInPoint() {
+        formInPoint.toggle()
+        movement.assocPanelLocation = formInPoint
     }
     
 }
