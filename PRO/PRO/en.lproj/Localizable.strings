@@ -74,3 +74,6 @@
 
 "envDelete" = "Delete";
 "envDate" = "Date";
+
+"envPromotedProducts" = "Promoted products";
+"nonePromotedProducts" = "Please add promoted products";

@@ -118,7 +118,6 @@ struct MaterialDeliveryListView: View {
                 setstock.append(setStock(lot: it.id, quantity: it.quantity))
             }
             if let material = MaterialDao(realm: try! Realm()).by(id: String(i.materialId)) {
-                print("LLEGO AQUI")
                 array.append(Stock(name: material.name ?? "", set: setstock, date: i.date))
             }
         }
