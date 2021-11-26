@@ -18,13 +18,12 @@ struct MovementFormTabPromotedView: View {
     @State private var isEditable = false
     @State private var showToast = false
     @EnvironmentObject var viewRouter: ViewRouter
-    let value: Int = Config.get(key: "MOV_PROMOTED_ONLY_BRAND").value
+    let valueNameBrand: Int = Config.get(key: "MOV_PROMOTED_ONLY_BRAND").value
     
     var body: some View {
         ZStack{
             VStack{
                 Button(action: {
-                    print("xxxx")
                     selectPromotedModalToggle.status.toggle()
                 }, label: {
                     HStack{
@@ -42,7 +41,11 @@ struct MovementFormTabPromotedView: View {
                 })
                 List {
                     ForEach(products, id: \.self) { item in
-                        Text(item.name ?? "")
+                        if valueNameBrand == 0 {
+                            Text(item.name ?? "")
+                        } else {
+                            Text(item.brand ?? "")
+                        }
                     }
                     .onMove(perform: move)
                     .onDelete(perform: self.delete)
@@ -58,25 +61,16 @@ struct MovementFormTabPromotedView: View {
                 
             }
             if selectPromotedModalToggle.status {
-                GeometryReader {geo in
-                    CustomDialogPicker(onSelectionDone: onSelectionDone, selected: $selected, key: "PRODUCT-PROMOTED", multiple: true)
-                }
-                .background(Color.black.opacity(0.45))
-            }
-            VStack {
-                Spacer()
-                HStack {
-                    Spacer()
-                    FAB(image: "ic-cloud", foregroundColor: .cPrimary) {
-                        if products.count > 0 {
-                            viewRouter.currentPage = "MASTER"
-                        } else {
-                            self.showToast.toggle()
-                        }
+                if valueNameBrand == 0 {
+                    GeometryReader {geo in
+                        CustomDialogPicker(onSelectionDone: onSelectionDone, selected: $selected, key: "PRODUCT-PROMOTED", multiple: true)
                     }
-                }
-                .toast(isPresenting: $showToast){
-                    AlertToast(type: .regular, title: NSLocalizedString("nonePromotedProducts", comment: ""))
+                    .background(Color.black.opacity(0.45))
+                } else {
+                    GeometryReader {geo in
+                        CustomDialogPicker(onSelectionDone: onSelectionDone, selected: $selected, key: "PRODUCT-BY-BRAND", multiple: true)
+                    }
+                    .background(Color.black.opacity(0.45))
                 }
             }
         }
@@ -114,8 +108,6 @@ struct MovementFormTabPromotedView: View {
                 its = it
             }
             selected.remove(at: its)
-            print(selected)
-            //selected[type]?.binding.removeAll(where: { $0 == String(its) })
             self.products.remove(atOffsets: offsets)
         }
     }
