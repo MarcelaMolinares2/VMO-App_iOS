@@ -151,6 +151,8 @@ class DynamicConditionRow: Decodable {
 class DynamicFormFieldOptions {
     var table: String = ""
     var op: String = ""
+    var type: String = ""
+    var panelType: String = ""
     var item: Int = 0
     var objectId: ObjectId?
     

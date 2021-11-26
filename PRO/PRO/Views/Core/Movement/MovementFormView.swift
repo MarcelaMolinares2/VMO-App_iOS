@@ -42,9 +42,21 @@ struct MovementFormView: View {
                 case "TRANSFERENCE":
                     MovementFormTabTransferenceView(selected: $movement.dataTransference)
                 default:
-                    MovementFormTabBasicView(movement: $movement)
+                    MovementFormTabBasicView(movement: $movement, op: viewRouter.data.objectId.isEmpty ? "create" : "update", panelType: "M", visitType: visitType)
             }
             MovementBottomNavigationView(tabRouter: tabRouter)
+        }
+        .onAppear {
+            initForm()
+        }
+    }
+    
+    func initForm() {
+        if viewRouter.data.objectId.isEmpty {
+            movement.panelId = 0
+            movement.panelType = "M"
+        } else {
+            //doctor = Movement(value: try! MovementDao(realm: try! Realm()).by(objectId: ObjectId(string: viewRouter.data.objectId)) ?? Doctor())
         }
     }
 }
@@ -52,12 +64,47 @@ struct MovementFormView: View {
 struct MovementFormTabBasicView: View {
     
     @Binding var movement: Movement
+    var op: String
+    var panelType: String
+    var visitType: String
+    
+    @State var plainData = ""
+    @State var additionalData = ""
+    @State var dynamicData = Dictionary<String, Any>()
+    @State private var form = DynamicForm(tabs: [DynamicFormTab]())
+    @State private var options = DynamicFormFieldOptions(table: "movement", op: "")
     
     var body: some View {
-        ScrollView {
-            VStack {
-                Text("BASIC!!!!")
+        VStack {
+            Text("\(form.tabs.count)")
+            ForEach(form.tabs, id: \.id) { tab in
+                Text("\(form.tabs[0].key)")
+                DynamicFormView(form: $form, tab: $form.tabs[0], options: options)
             }
+        }
+        .onAppear {
+            initForm()
+        }
+    }
+    
+    func initForm() {
+        options.objectId = movement.objectId
+        options.item = movement.id
+        options.op = op
+        options.type = visitType.lowercased()
+        options.panelType = panelType
+        dynamicData = Utils.jsonDictionary(string: Config.get(key: "P_MOV_FORM_ADDITIONAL").complement ?? "")
+
+        initDynamic(data: dynamicData)
+    }
+    
+    func initDynamic(data: Dictionary<String, Any>) {
+        plainData = try! Utils.objToJSON(movement)
+        additionalData = (movement.additionalFields ?? "").isEmpty ? (movement.additionalFields ?? "{}") : "{}"
+        
+        form.tabs = DynamicUtils.initForm(data: data).sorted(by: { $0.key > $1.key })
+        if !plainData.isEmpty {
+            DynamicUtils.fillForm(form: &form, base: plainData, additional: additionalData)
         }
     }
     

@@ -128,17 +128,11 @@ struct DynamicFieldView: View {
     }
     
     func isEditable() -> Bool {
-        switch options.table {
-        case "movement":
-            break
-        default:
-            if options.op == "create" {
-                return field.editable.createUserTypes.components(separatedBy: ",").contains(String(user?.type ?? 0))
-            } else {
-                return field.editable.updateUserTypes.components(separatedBy: ",").contains(String(user?.type ?? 0))
-            }
+        if options.op == "create" {
+            return field.editable.createUserTypes.components(separatedBy: ",").contains(String(user?.type ?? 0))
+        } else {
+            return field.editable.updateUserTypes.components(separatedBy: ",").contains(String(user?.type ?? 0))
         }
-        return false
     }
     
     func initRequired() {
@@ -155,11 +149,10 @@ struct DynamicFieldView: View {
     func isRequired() -> Bool {
         switch options.table {
         case "movement":
-            break
+            return optionsValue(key: "required") && movementOptsValue(key: "required")
         default:
             return field.requiredUserTypes.components(separatedBy: ",").contains(String(user?.type ?? 0))
         }
-        return false
     }
     
     func initVisible() {
@@ -176,7 +169,7 @@ struct DynamicFieldView: View {
     func isVisible() -> Bool {
         switch options.table {
         case "movement":
-            break
+            return optionsValue(key: "visible") && movementOptsValue(key: "visible")
         default:
             if options.op == "create" {
                 return field.visible.createUserTypes.components(separatedBy: ",").contains(String(user?.type ?? 0))
@@ -184,7 +177,6 @@ struct DynamicFieldView: View {
                 return field.visible.updateUserTypes.components(separatedBy: ",").contains(String(user?.type ?? 0))
             }
         }
-        return false
     }
     
     func initConditions(set: [DynamicConditionGroup], type: String) {
@@ -213,13 +205,18 @@ struct DynamicFieldView: View {
     func refreshConditions(set: [DynamicConditionGroup], type: String) {
         switch (type) {
         case "editable":
-            field.localEditable = self.validateConditions(set: set)
+            field.localEditable = self.validateConditions(set: set) && self.isEditable()
             break
         case "required":
-            field.localRequired = self.validateConditions(set: set)
+            let condition = self.validateConditions(set: set)
+            if condition {
+                field.localRequired = self.validateConditions(set: set) && self.isRequired()
+            } else {
+                field.localRequired = self.isRequired()
+            }
             break
         case "visible":
-            field.localVisible = self.validateConditions(set: set)
+            field.localVisible = self.validateConditions(set: set) && self.isVisible()
             break
         default:
             break
@@ -248,6 +245,30 @@ struct DynamicFieldView: View {
             }
         }
         return result
+    }
+    
+    func optionsValue(key: String) -> Bool {
+        if let panelTypes = Utils.jsonDictionary(string: field.options)["panelType"] as? Dictionary<String, Any> {
+            if let panelOptions = panelTypes[options.panelType] as? Dictionary<String, Any> {
+                if let keyOptions = panelOptions[key] as? Dictionary<String, Any> {
+                    if let opValues = keyOptions[options.op] as? String {
+                        return opValues.components(separatedBy: ",").contains(String(user?.type ?? 0))
+                    }
+                }
+            }
+        }
+        return false
+    }
+    
+    func movementOptsValue(key: String) -> Bool {
+        if let panelTypes = Utils.jsonDictionary(string: field.options)["visitType"] as? Dictionary<String, Any> {
+            if let visitOptions = panelTypes[options.type] as? Dictionary<String, Any> {
+                if let keyOptions = visitOptions["visible"] as? Int {
+                    return keyOptions == 1
+                }
+            }
+        }
+        return false
     }
     
 }

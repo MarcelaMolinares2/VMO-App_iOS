@@ -10,6 +10,7 @@
 		2B27C783E315079573869677 /* Pods_PROTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F406AC3B8DA4ABD95D2B3874 /* Pods_PROTests.framework */; };
 		2E5431D4272B540E00B99B2A /* RouteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E5431D3272B540E00B99B2A /* RouteView.swift */; };
 		5B30316F593873676B0C40AB /* Pods_PRO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 42A954514421AEF90E2A731C /* Pods_PRO.framework */; };
+		76900EE4C2D9C9D1BCC38AA3 /* amplifyconfiguration.json in Resources */ = {isa = PBXBuildFile; fileRef = 727D1891CD0D9128FF9FFABA /* amplifyconfiguration.json */; };
 		AC13263C25B737E5007CF049 /* MovementFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC13263B25B737E5007CF049 /* MovementFormView.swift */; };
 		AC17AD86274426DB002A376B /* ViewerDialogs.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC17AD85274426DA002A376B /* ViewerDialogs.swift */; };
 		AC1AF8C4274DEC67002658B6 /* MovementFormTabsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC1AF8C3274DEC67002658B6 /* MovementFormTabsView.swift */; };
@@ -32,6 +33,10 @@
 		AC34454D25638B5C00C0D668 /* PharmacyListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC34454C25638B5C00C0D668 /* PharmacyListView.swift */; };
 		AC34455225638B6B00C0D668 /* ClientListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC34455125638B6B00C0D668 /* ClientListView.swift */; };
 		AC3E5C1B25AB78CE00C70FC2 /* DoctorFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC3E5C1A25AB78CE00C70FC2 /* DoctorFormView.swift */; };
+		AC56227A274FDF1A00098C3A /* Amplify in Frameworks */ = {isa = PBXBuildFile; productRef = AC562279274FDF1A00098C3A /* Amplify */; };
+		AC56227C274FDF1A00098C3A /* AWSCognitoAuthPlugin in Frameworks */ = {isa = PBXBuildFile; productRef = AC56227B274FDF1A00098C3A /* AWSCognitoAuthPlugin */; };
+		AC56227E274FDF1A00098C3A /* AWSS3StoragePlugin in Frameworks */ = {isa = PBXBuildFile; productRef = AC56227D274FDF1A00098C3A /* AWSS3StoragePlugin */; };
+		AC562280274FDF1A00098C3A /* AWSAPIPlugin in Frameworks */ = {isa = PBXBuildFile; productRef = AC56227F274FDF1A00098C3A /* AWSAPIPlugin */; };
 		AC59E95C2576B82F00121387 /* GenericViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC59E95B2576B82F00121387 /* GenericViews.swift */; };
 		AC59E99D257B400800121387 /* AppManage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC59E99C257B400800121387 /* AppManage.swift */; };
 		AC59E9A2257B424000121387 /* PanelCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC59E9A1257B424000121387 /* PanelCardView.swift */; };
@@ -91,6 +96,7 @@
 		ACC1963E25A4D51700C5EE3E /* RouteFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACC1963D25A4D51700C5EE3E /* RouteFormView.swift */; };
 		ACDD64B7274C0FDA00D2C340 /* PanelStockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACDD64B6274C0FDA00D2C340 /* PanelStockView.swift */; };
 		ACDD64BC274C104D00D2C340 /* PanelContactView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACDD64BB274C104D00D2C340 /* PanelContactView.swift */; };
+		BDFA1EC1EA0C8934704614E0 /* awsconfiguration.json in Resources */ = {isa = PBXBuildFile; fileRef = 01C38C1E1CEFD504B2BF9AED /* awsconfiguration.json */; };
 		CAFA833543B0257551D2ED9D /* Pods_PRO_PROUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2A6115E031EE597B881A86AA /* Pods_PRO_PROUITests.framework */; };
 /* End PBXBuildFile section */
 
@@ -112,6 +118,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		01C38C1E1CEFD504B2BF9AED /* awsconfiguration.json */ = {isa = PBXFileReference; explicitFileType = text.json; lastKnownFileType = text.json; name = awsconfiguration.json; path = awsconfiguration.json; sourceTree = "<group>"; };
 		17BFEE9ABBECEB9FD0B729EF /* Pods-PRO-PROUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PRO-PROUITests.release.xcconfig"; path = "Target Support Files/Pods-PRO-PROUITests/Pods-PRO-PROUITests.release.xcconfig"; sourceTree = "<group>"; };
 		218E12F5D43CB48EAC5B1675 /* Pods-PROTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PROTests.release.xcconfig"; path = "Target Support Files/Pods-PROTests/Pods-PROTests.release.xcconfig"; sourceTree = "<group>"; };
 		2A6115E031EE597B881A86AA /* Pods_PRO_PROUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_PRO_PROUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -119,6 +126,7 @@
 		2E5431D3272B540E00B99B2A /* RouteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouteView.swift; sourceTree = "<group>"; };
 		42A954514421AEF90E2A731C /* Pods_PRO.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_PRO.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		5D9BE38349937D1120A8746E /* Pods-PRO.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PRO.debug.xcconfig"; path = "Target Support Files/Pods-PRO/Pods-PRO.debug.xcconfig"; sourceTree = "<group>"; };
+		727D1891CD0D9128FF9FFABA /* amplifyconfiguration.json */ = {isa = PBXFileReference; explicitFileType = text.json; lastKnownFileType = text.json; name = amplifyconfiguration.json; path = amplifyconfiguration.json; sourceTree = "<group>"; };
 		AC13263B25B737E5007CF049 /* MovementFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovementFormView.swift; sourceTree = "<group>"; };
 		AC17AD85274426DA002A376B /* ViewerDialogs.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewerDialogs.swift; sourceTree = "<group>"; };
 		AC1AF8C3274DEC67002658B6 /* MovementFormTabsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovementFormTabsView.swift; sourceTree = "<group>"; };
@@ -216,8 +224,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AC562280274FDF1A00098C3A /* AWSAPIPlugin in Frameworks */,
+				AC56227E274FDF1A00098C3A /* AWSS3StoragePlugin in Frameworks */,
+				AC56227A274FDF1A00098C3A /* Amplify in Frameworks */,
 				AC5B9762256CAE0F0007500D /* PartialSheet in Frameworks */,
 				5B30316F593873676B0C40AB /* Pods_PRO.framework in Frameworks */,
+				AC56227C274FDF1A00098C3A /* AWSCognitoAuthPlugin in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -248,6 +260,15 @@
 				F406AC3B8DA4ABD95D2B3874 /* Pods_PROTests.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		4F1BE5A3C1072809DEA16C7A /* AmplifyConfig */ = {
+			isa = PBXGroup;
+			children = (
+				01C38C1E1CEFD504B2BF9AED /* awsconfiguration.json */,
+				727D1891CD0D9128FF9FFABA /* amplifyconfiguration.json */,
+			);
+			name = AmplifyConfig;
 			sourceTree = "<group>";
 		};
 		58B445CDF62E38B8C0B531FD /* Pods */ = {
@@ -411,6 +432,7 @@
 				AC6F1F2024FF2978005E57DC /* Products */,
 				58B445CDF62E38B8C0B531FD /* Pods */,
 				46B72564798B8A0B52A49850 /* Frameworks */,
+				4F1BE5A3C1072809DEA16C7A /* AmplifyConfig */,
 			);
 			sourceTree = "<group>";
 		};
@@ -630,6 +652,10 @@
 			name = PRO;
 			packageProductDependencies = (
 				AC5B9761256CAE0F0007500D /* PartialSheet */,
+				AC562279274FDF1A00098C3A /* Amplify */,
+				AC56227B274FDF1A00098C3A /* AWSCognitoAuthPlugin */,
+				AC56227D274FDF1A00098C3A /* AWSS3StoragePlugin */,
+				AC56227F274FDF1A00098C3A /* AWSAPIPlugin */,
 			);
 			productName = PRO;
 			productReference = AC6F1F1F24FF2978005E57DC /* PRO.app */;
@@ -708,7 +734,8 @@
 			);
 			mainGroup = AC6F1F1624FF2978005E57DC;
 			packageReferences = (
-				AC5B9760256CAE0F0007500D /* XCRemoteSwiftPackageReference "PartialSheet.git" */,
+				AC5B9760256CAE0F0007500D /* XCRemoteSwiftPackageReference "PartialSheet" */,
+				AC562278274FDF1A00098C3A /* XCRemoteSwiftPackageReference "amplify-ios" */,
 			);
 			productRefGroup = AC6F1F2024FF2978005E57DC /* Products */;
 			projectDirPath = "";
@@ -731,6 +758,8 @@
 				AC6F1F2C24FF297A005E57DC /* Preview Assets.xcassets in Resources */,
 				AC6F1F2924FF297A005E57DC /* Assets.xcassets in Resources */,
 				AC893F792549BD07009E1C43 /* GoogleService-Info.plist in Resources */,
+				BDFA1EC1EA0C8934704614E0 /* awsconfiguration.json in Resources */,
+				76900EE4C2D9C9D1BCC38AA3 /* amplifyconfiguration.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -781,9 +810,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-PRO-PROUITests/Pods-PRO-PROUITests-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-PRO-PROUITests/Pods-PRO-PROUITests-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -820,9 +853,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-PRO-PROUITests/Pods-PRO-PROUITests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-PRO-PROUITests/Pods-PRO-PROUITests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -859,9 +896,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-PRO/Pods-PRO-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-PRO/Pods-PRO-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -876,9 +917,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-PRO/Pods-PRO-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-PRO/Pods-PRO-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -1312,7 +1357,15 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		AC5B9760256CAE0F0007500D /* XCRemoteSwiftPackageReference "PartialSheet.git" */ = {
+		AC562278274FDF1A00098C3A /* XCRemoteSwiftPackageReference "amplify-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/aws-amplify/amplify-ios";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.16.1;
+			};
+		};
+		AC5B9760256CAE0F0007500D /* XCRemoteSwiftPackageReference "PartialSheet" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/AndreaMiotto/PartialSheet.git";
 			requirement = {
@@ -1323,9 +1376,29 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		AC562279274FDF1A00098C3A /* Amplify */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AC562278274FDF1A00098C3A /* XCRemoteSwiftPackageReference "amplify-ios" */;
+			productName = Amplify;
+		};
+		AC56227B274FDF1A00098C3A /* AWSCognitoAuthPlugin */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AC562278274FDF1A00098C3A /* XCRemoteSwiftPackageReference "amplify-ios" */;
+			productName = AWSCognitoAuthPlugin;
+		};
+		AC56227D274FDF1A00098C3A /* AWSS3StoragePlugin */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AC562278274FDF1A00098C3A /* XCRemoteSwiftPackageReference "amplify-ios" */;
+			productName = AWSS3StoragePlugin;
+		};
+		AC56227F274FDF1A00098C3A /* AWSAPIPlugin */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AC562278274FDF1A00098C3A /* XCRemoteSwiftPackageReference "amplify-ios" */;
+			productName = AWSAPIPlugin;
+		};
 		AC5B9761256CAE0F0007500D /* PartialSheet */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = AC5B9760256CAE0F0007500D /* XCRemoteSwiftPackageReference "PartialSheet.git" */;
+			package = AC5B9760256CAE0F0007500D /* XCRemoteSwiftPackageReference "PartialSheet" */;
 			productName = PartialSheet;
 		};
 /* End XCSwiftPackageProductDependency section */
