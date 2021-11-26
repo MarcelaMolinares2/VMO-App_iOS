@@ -12,72 +12,54 @@ import AlertToast
 
 struct MovementFormTabPromotedView: View {
     
-    @ObservedObject private var selectPromotedModalToggle = ModalToggle()
     @Binding var selected: [String]
     @State var products = [Product]()
     @State private var isEditable = false
-    @State private var showToast = false
-    @EnvironmentObject var viewRouter: ViewRouter
+    @State private var isSheet = false
     let valueNameBrand: Int = Config.get(key: "MOV_PROMOTED_ONLY_BRAND").value
     
     var body: some View {
-        ZStack{
-            VStack{
-                Button(action: {
-                    selectPromotedModalToggle.status.toggle()
-                }, label: {
-                    HStack{
-                        Spacer()
-                        Text(NSLocalizedString("envPromotedProducts", comment: ""))
-                        Image("ic-plus-circle")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 35)
-                        Spacer()
-                    }
-                    .frame(height: 30)
-                    .padding(10)
-                    .foregroundColor(.cPrimary)
-                })
-                List {
-                    ForEach(products, id: \.self) { item in
-                        if valueNameBrand == 0 {
-                            Text(item.name ?? "")
-                        } else {
-                            Text(item.brand ?? "")
-                        }
-                    }
-                    .onMove(perform: move)
-                    .onDelete(perform: self.delete)
-                    .foregroundColor(.cPrimary)
-                    .onLongPressGesture {
-                        withAnimation {
-                            self.isEditable = true
-                        }
+        VStack{
+            Button(action: {
+                isSheet = true
+            }, label: {
+                HStack{
+                    Spacer()
+                    Text(NSLocalizedString("envPromotedProducts", comment: ""))
+                    Image("ic-plus-circle")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 35)
+                    Spacer()
+                }
+                .frame(height: 30)
+                .padding(10)
+                .foregroundColor(.cPrimary)
+            })
+            List {
+                ForEach(products, id: \.self) { item in
+                    Text((valueNameBrand == 0) ? item.name ?? "": item.brand ?? "")
+                }
+                .onMove(perform: move)
+                .onDelete(perform: self.delete)
+                .foregroundColor(.cPrimary)
+                .onLongPressGesture {
+                    withAnimation {
+                        self.isEditable = true
                     }
                 }
-                .environment(\.editMode, isEditable ? .constant(.active) : .constant(.inactive))
-                .buttonStyle(PlainButtonStyle())
-                
             }
-            if selectPromotedModalToggle.status {
-                if valueNameBrand == 0 {
-                    GeometryReader {geo in
-                        CustomDialogPicker(onSelectionDone: onSelectionDone, selected: $selected, key: "PRODUCT-PROMOTED", multiple: true)
-                    }
-                    .background(Color.black.opacity(0.45))
-                } else {
-                    GeometryReader {geo in
-                        CustomDialogPicker(onSelectionDone: onSelectionDone, selected: $selected, key: "PRODUCT-BY-BRAND", multiple: true)
-                    }
-                    .background(Color.black.opacity(0.45))
-                }
-            }
-        }
+            .environment(\.editMode, isEditable ? .constant(.active) : .constant(.inactive))
+            .buttonStyle(PlainButtonStyle())
+            
+        }.sheet(isPresented: $isSheet, content: {
+            (valueNameBrand == 0) ? CustomDialogPicker(onSelectionDone: onSelectionDone, selected: $selected, key: "PRODUCT-PROMOTED", multiple: true, isSheet: true): CustomDialogPicker(onSelectionDone: onSelectionDone, selected: $selected, key: "PRODUCT-BY-BRAND", multiple: true, isSheet: true)
+        })
+        
     }
     
     func onSelectionDone(_ selected: [String]) {
-        selectPromotedModalToggle.status.toggle()
+        isSheet = false
         self.selected.forEach{ id in
             if let product = ProductDao(realm: try! Realm()).by(id: id){
                 var exists = false
