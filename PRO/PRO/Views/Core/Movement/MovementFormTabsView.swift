@@ -53,7 +53,7 @@ struct MovementFormTabPromotedView: View {
             .buttonStyle(PlainButtonStyle())
             
         }.sheet(isPresented: $isSheet, content: {
-            (valueNameBrand == 0) ? CustomDialogPicker(onSelectionDone: onSelectionDone, selected: $selected, key: "PRODUCT-PROMOTED", multiple: true, isSheet: true): CustomDialogPicker(onSelectionDone: onSelectionDone, selected: $selected, key: "PRODUCT-BY-BRAND", multiple: true, isSheet: true)
+            CustomDialogPicker(onSelectionDone: onSelectionDone, selected: $selected, key: (valueNameBrand == 0) ? "PRODUCT-PROMOTED": "PRODUCT-BY-BRAND", multiple: true, isSheet: true)
         })
         
     }
