@@ -699,18 +699,45 @@ class Movement: Object, Codable, SyncEntity {
 
 class MovementMaterial: Object, Codable {
     @Persisted(primaryKey: true) var objectId: ObjectId
+    @Persisted var id: Int = 0//material_id
+    @Persisted var category: String = ""
+    @Persisted var sets = List<MovementMaterialSet>()
+}
+
+class MovementMaterialSet: Object, Codable {
+    @Persisted(primaryKey: true) var objectId: ObjectId
+    @Persisted var id: String = ""
+    @Persisted var quantity: Int = 0
 }
 
 class MovementProductStock: Object, Codable {
     @Persisted(primaryKey: true) var objectId: ObjectId
+    @Persisted var id: Int = 0//product_id
+    @Persisted var hasStock: Bool = false//has_stock
+    @Persisted var quantity: Float = 0
+    @Persisted var noStockReason: String = ""//no_stock_reason
 }
 
 class MovementProductShopping: Object, Codable {
     @Persisted(primaryKey: true) var objectId: ObjectId
+    @Persisted var id: Int = 0//product_id
+    @Persisted var price: Float = 0
+    @Persisted var competitors = List<MovementProductShoppingCompetitor>()
+}
+
+class MovementProductShoppingCompetitor: Object, Codable {
+    @Persisted(primaryKey: true) var objectId: ObjectId
+    @Persisted var id: String = ""//Competitor Name
+    @Persisted var price: Float = 0
 }
 
 class MovementProductTransference: Object, Codable {
     @Persisted(primaryKey: true) var objectId: ObjectId
+    @Persisted var id: Int = 0 //product_id
+    @Persisted var quantity: Float = 0
+    @Persisted var price: Float = 0
+    @Persisted var bonusProduct: Int = 0//bonus_product
+    @Persisted var bonusQuantity: Float = 0//bonus_quantity
 }
 
 class MovementSimple: Object, Decodable, SyncEntity {
