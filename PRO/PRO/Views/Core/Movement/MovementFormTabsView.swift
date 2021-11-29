@@ -72,6 +72,7 @@ struct MovementFormTabPromotedView: View {
     
     func move(from source: IndexSet, to destination: Int) {
         self.products.move(fromOffsets: source, toOffset: destination)
+        self.selected.move(fromOffsets: source, toOffset: destination)
         withAnimation {
             isEditable = false
         }
@@ -92,6 +93,7 @@ struct MovementFormTabPromotedView: View {
         self.selected.forEach{ id in
             if let product = ProductDao(realm: try! Realm()).by(id: id){
                 
+                /*
                 var exists = false
                 for i in products {
                     if i.id == product.id {
@@ -102,13 +104,13 @@ struct MovementFormTabPromotedView: View {
                 if !exists {
                     products.append(product)
                 }
+                */
                 
                 
-                /*
+                
                 if !validate(product: product){
                     products.append(product)
                 }
-                */
                 
                 /*
                 if !validate(product: product){
