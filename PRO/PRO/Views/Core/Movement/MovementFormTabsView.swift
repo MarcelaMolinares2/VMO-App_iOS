@@ -13,6 +13,7 @@ import AlertToast
 struct MovementFormTabPromotedView: View {
     
     @Binding var selected: [String]
+    @State var selectedBridge = [String]()
     @State var products = [Product]()
     @State private var isEditable = false
     @State private var isSheet = false
@@ -53,7 +54,7 @@ struct MovementFormTabPromotedView: View {
             .buttonStyle(PlainButtonStyle())
             
         }.sheet(isPresented: $isSheet, content: {
-            CustomDialogPicker(onSelectionDone: onSelectionDone, selected: $selected, key: (valueNameBrand == 0) ? "PRODUCT-PROMOTED": "PRODUCT-BY-BRAND", multiple: true, isSheet: true)
+            CustomDialogPicker(onSelectionDone: onSelectionDone, selected: $selectedBridge, key: (valueNameBrand == 0) ? "PRODUCT-PROMOTED": "PRODUCT-BY-BRAND", multiple: true, isSheet: true)
         })
         .onAppear {
             initView()
@@ -62,12 +63,25 @@ struct MovementFormTabPromotedView: View {
     }
     
     func initView(){
-        productsAppend()
+        self.selected.forEach{ id in
+            if let product = ProductDao(realm: try! Realm()).by(id: id){
+                if !validate(product: product){
+                    products.append(product)
+                }
+            }
+        }
     }
     
     func onSelectionDone(_ selected: [String]) {
         isSheet = false
-        productsAppend()
+        self.selectedBridge.forEach{ id in
+            if let product = ProductDao(realm: try! Realm()).by(id: id){
+                if !validate(product: product){
+                    products.append(product)
+                    self.selected.append(id)
+                }
+            }
+        }
     }
     
     func move(from source: IndexSet, to destination: Int) {
@@ -89,51 +103,16 @@ struct MovementFormTabPromotedView: View {
         }
     }
     
-    func productsAppend(){
-        self.selected.forEach{ id in
-            if let product = ProductDao(realm: try! Realm()).by(id: id){
-                
-                /*
-                var exists = false
-                for i in products {
-                    if i.id == product.id {
-                        exists = true
-                        break
-                    }
-                }
-                if !exists {
-                    products.append(product)
-                }
-                */
-                
-                
-                
-                if !validate(product: product){
-                    products.append(product)
-                }
-                
-                /*
-                if !validate(product: product){
-                    products.append(product)
-                }
-                */
-            }
-        }
-    }
-    
     func validate(product: Product) -> Bool {
         var exists = false
-        
         for i in products {
             if i.id == product.id {
                 exists = true
                 break
             }
         }
-        
         return exists
     }
-    
 }
 
 
@@ -171,12 +150,48 @@ struct MovementFormTabTransferenceView: View {
     
     @Binding var selected: RealmSwift.List<MovementProductTransference>
     
+    @State private var isSheet = false
+    @State var ss = [String]()
     var body: some View {
-        ScrollView {
-            VStack {
-                Text("TRANSFERENCE!!!!")
+        VStack {
+            Button(action: {
+                print("aajaja")
+                isSheet = true
+            }, label: {
+                HStack{
+                    Spacer()
+                    Text(NSLocalizedString("envTransference", comment: ""))
+                    Image("ic-plus-circle")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 35)
+                    Spacer()
+                }
+                .frame(height: 30)
+                .padding(10)
+                .foregroundColor(.cPrimary)
+            })
+            List {
+                ForEach(ss, id: \.self) { item in
+                    Text("ff")
+                }
+            }
+        }.sheet(isPresented: $isSheet, content: {
+            CustomDialogPicker(onSelectionDone: onSelectionDone, selected: $ss, key: "PRODUCT-TRANSFERENCE", multiple: true, isSheet: true)
+        })
+    }
+    func onSelectionDone(_ selected: [String]) {
+        isSheet = false
+        /*
+        self.selectedBridge.forEach{ id in
+            if let product = ProductDao(realm: try! Realm()).by(id: id){
+                if !validate(product: product){
+                    products.append(product)
+                    self.selected.append(id)
+                }
             }
         }
+        */
     }
     
 }
