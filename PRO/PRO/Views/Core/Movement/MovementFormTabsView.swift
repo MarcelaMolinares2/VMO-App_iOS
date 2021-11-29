@@ -55,25 +55,19 @@ struct MovementFormTabPromotedView: View {
         }.sheet(isPresented: $isSheet, content: {
             CustomDialogPicker(onSelectionDone: onSelectionDone, selected: $selected, key: (valueNameBrand == 0) ? "PRODUCT-PROMOTED": "PRODUCT-BY-BRAND", multiple: true, isSheet: true)
         })
+        .onAppear {
+            initView()
+        }
         
+    }
+    
+    func initView(){
+        productsAppend()
     }
     
     func onSelectionDone(_ selected: [String]) {
         isSheet = false
-        self.selected.forEach{ id in
-            if let product = ProductDao(realm: try! Realm()).by(id: id){
-                var exists = false
-                for i in products {
-                    if i.id == product.id {
-                        exists = true
-                        break
-                    }
-                }
-                if !exists {
-                    products.append(product)
-                }
-            }
-        }
+        productsAppend()
     }
     
     func move(from source: IndexSet, to destination: Int) {
@@ -92,6 +86,50 @@ struct MovementFormTabPromotedView: View {
             selected.remove(at: its)
             self.products.remove(atOffsets: offsets)
         }
+    }
+    
+    func productsAppend(){
+        self.selected.forEach{ id in
+            if let product = ProductDao(realm: try! Realm()).by(id: id){
+                
+                var exists = false
+                for i in products {
+                    if i.id == product.id {
+                        exists = true
+                        break
+                    }
+                }
+                if !exists {
+                    products.append(product)
+                }
+                
+                
+                /*
+                if !validate(product: product){
+                    products.append(product)
+                }
+                */
+                
+                /*
+                if !validate(product: product){
+                    products.append(product)
+                }
+                */
+            }
+        }
+    }
+    
+    func validate(product: Product) -> Bool {
+        var exists = false
+        
+        for i in products {
+            if i.id == product.id {
+                exists = true
+                break
+            }
+        }
+        
+        return exists
     }
     
 }
