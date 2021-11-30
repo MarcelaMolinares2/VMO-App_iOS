@@ -60,7 +60,7 @@ struct MovementFormView: View {
                         case "STOCK":
                             MovementFormTabStockView(selected: $movement.dataStock)
                         case "TRANSFERENCE":
-                            MovementFormTabTransferenceView(selected: $movement.dataTransference)
+                            MovementFormTabTransferenceView(selected: $movement.dataTransference, visitType: visitType)
                         default:
                             MovementFormTabBasicView(movement: $movement, location: locationService.location, panel: panel!, op: viewRouter.data.objectId.isEmpty ? "create" : "update", visitType: visitType)
                     }

@@ -146,8 +146,8 @@ struct MaterialDeliveryListCardView: View {
                 Spacer()
                 Divider()
                     .frame(height: 0.7)
-                 .padding(.horizontal, 5)
-                 .background(Color.gray)
+                    .padding(.horizontal, 5)
+                    .background(Color.gray)
                 Spacer()
                     .frame(height: 15)
                 VStack {

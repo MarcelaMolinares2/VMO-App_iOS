@@ -9,6 +9,7 @@
 import SwiftUI
 import RealmSwift
 import AlertToast
+import Combine
 
 struct MovementFormTabPromotedView: View {
     
@@ -149,13 +150,21 @@ struct MovementFormTabShoppingView: View {
 struct MovementFormTabTransferenceView: View {
     
     @Binding var selected: RealmSwift.List<MovementProductTransference>
+    var visitType: String
     
+    let dynamicData = Utils.jsonDictionary(string: Config.get(key: "MOV_TRANSFER_FIELDS").complement ?? "")
     @State private var isSheet = false
-    @State var ss = [String]()
+    @State private var idsSelected = [String]()
+    @State private var dataVisitType: Any = ""
+    @State private var numOfPeople = "0"
+    
+    
     var body: some View {
+        
         VStack {
             Button(action: {
                 print("aajaja")
+                print(dynamicData)
                 isSheet = true
             }, label: {
                 HStack{
@@ -169,19 +178,200 @@ struct MovementFormTabTransferenceView: View {
                 }
                 .frame(height: 30)
                 .padding(10)
-                .foregroundColor(.cPrimary)
             })
             List {
-                ForEach(ss, id: \.self) { item in
-                    Text("ff")
+                ForEach(selected, id: \.self) { item in
+                    
+                    
+                    VStack (alignment: .leading, spacing: 5){
+                        VStack {
+                            if let product = ProductDao(realm: try! Realm()).by(id: String(item.id)){
+                                Text(product.name ?? "")
+                                    .font(.system(size: 18))
+                            }
+                            if let quantity = (dataVisitType as! NSDictionary)["quantity"]{
+                                /*
+                                if let requiredBonus = (bouns as! NSDictionary)["required"]{
+                                    print(requiredBonus)
+                                }
+                                */
+                                if let visibleQuantity = (quantity as! NSDictionary)["visible"]{
+                                    if String((visibleQuantity as AnyObject).description) == "1"{
+                                        VStack{
+                                            Text("QUANTITY")
+                                                .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
+                                                .font(.system(size: 14))
+                                            TextField("Total number of people", text: Binding(
+                                                get: { String(item.quantity) },
+                                                set: { item.quantity = Float($0) ?? 0 }
+                                            ))
+                                                .frame(height: 30)
+                                                .foregroundColor(.black)
+                                                .keyboardType(.numberPad)
+                                            Divider()
+                                             .frame(height: 1)
+                                             .padding(.horizontal, 5)
+                                             .background(Color.gray)
+                                        }
+                                        
+                                        
+                                    }
+                                }
+                            }
+                            if let price = (dataVisitType as! NSDictionary)["price"]{
+                                /*
+                                if let requiredBonus = (bouns as! NSDictionary)["required"]{
+                                    print(requiredBonus)
+                                }
+                                */
+                                if let visiblePrice = (price as! NSDictionary)["visible"]{
+                                    if String((visiblePrice as AnyObject).description) == "1"{
+                                        VStack{
+                                            HStack{
+                                                Text("PRICE VISIBLE")
+                                                    .font(.system(size: 14))
+                                                Spacer()
+                                            }
+                                            TextField("Total number of people", text: Binding(
+                                                get: { String(item.price) },
+                                                set: { item.price = Float($0) ?? 0 }
+                                            ))
+                                                .frame(height: 30)
+                                                .foregroundColor(.black)
+                                                .keyboardType(.numberPad)
+                                            Divider()
+                                             .frame(height: 1)
+                                             .padding(.horizontal, 5)
+                                                
+                                             .background(Color.gray)
+                                        }
+                                    }
+                                }
+                            }
+                            
+                        }
+                        VStack {
+                            if let bouns = (dataVisitType as! NSDictionary)["bonus"]{
+                                /*
+                                if let requiredBonus = (bouns as! NSDictionary)["required"]{
+                                    print(requiredBonus)
+                                }
+                                */
+                                if let visibleBonus = (bouns as! NSDictionary)["visible"]{
+                                    if String((visibleBonus as AnyObject).description) == "1" {
+                                        VStack {
+                                            VStack {
+                                                HStack{
+                                                    Spacer()
+                                                    Text("BONUS VISIBLE")
+                                                        .font(.system(size: 16))
+                                                    Spacer()
+                                                }
+                                                Button(action: {
+                                                    print("Pendejo")
+                                                }) {
+                                                    HStack{
+                                                        VStack{
+                                                            Text("Product")
+                                                                .font(.system(size: 14))
+                                                            Text("Select....")
+                                                                .font(.system(size: 14))
+                                                        }
+                                                        Spacer()
+                                                        Image("ic-arrow-expand-more")
+                                                            .resizable()
+                                                            .scaledToFit()
+                                                            .frame(width: 32)
+                                                    }
+                                                    .padding(10)
+                                                    .background(Color.white)
+                                                    .frame(alignment: Alignment.center)
+                                                    .clipped()
+                                                    .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
+                                                }
+                                            }
+                                            VStack{
+                                                HStack{
+                                                    Text("PRICE VISIBLE")
+                                                        .font(.system(size: 14))
+                                                    Spacer()
+                                                }
+                                                TextField("Total number of people", text: Binding(
+                                                    get: { String(item.bonusQuantity) },
+                                                    set: { item.bonusQuantity = Float($0) ?? 0 }
+                                                ))
+                                                    .frame(height: 30)
+                                                    .foregroundColor(.black)
+                                                    .keyboardType(.numberPad)
+                                                Divider()
+                                                 .frame(height: 1)
+                                                 .padding(.horizontal, 5)
+                                                 .background(Color.gray)
+                                            }
+                                            .padding(.horizontal, 10)
+                                            .padding(.vertical, 7)
+                                        }
+                                        .padding(7)
+                                        .background(Color.white)
+                                        .frame(alignment: Alignment.center)
+                                        .clipped()
+                                        .shadow(color: Color.gray, radius: 2, x: 0, y: 0)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    .padding(7)
+                    .background(Color.white)
+                    .frame(alignment: Alignment.center)
+                    .clipped()
+                    .shadow(color: Color.gray, radius: 4, x: 0, y: 0)
                 }
             }
+            .buttonStyle(PlainButtonStyle())
         }.sheet(isPresented: $isSheet, content: {
-            CustomDialogPicker(onSelectionDone: onSelectionDone, selected: $ss, key: "PRODUCT-TRANSFERENCE", multiple: true, isSheet: true)
+            CustomDialogPicker(onSelectionDone: onSelectionDone, selected: $idsSelected, key: "PRODUCT-TRANSFERENCE", multiple: true, isSheet: true)
         })
+        .foregroundColor(.cPrimary)
+        .onAppear{
+            initView()
+        }
     }
+    
+    func initView(){
+        print(Config.get(key: "MOV_TRANSFER_FIELDS").complement ?? "")
+        print("____________")
+        if let data = dynamicData[visitType.lowercased()]{
+            dataVisitType = data
+            if let bouns = (dataVisitType as! NSDictionary)["bonus"]{
+                if let requiredBonus = (bouns as! NSDictionary)["required"]{
+                    print(requiredBonus)
+                }
+                if let visibleBonus = (bouns as! NSDictionary)["visible"]{
+                    print(visibleBonus)
+                }
+            }
+        }
+    }
+    
     func onSelectionDone(_ selected: [String]) {
         isSheet = false
+        print("__________self.selected___________")
+        /*
+        self.selected.forEach{ item in
+            print(item.objectId)
+            print(item.id)
+            print(item.price)
+        }
+        */
+        print(self.selected)
+        print("_________idsSelected____________")
+        print(self.idsSelected)
+        self.idsSelected.forEach{ id in
+            let mm = MovementProductTransference()
+            mm.id = Int(id) ?? 0
+            self.selected.append(mm)
+        }
         /*
         self.selectedBridge.forEach{ id in
             if let product = ProductDao(realm: try! Realm()).by(id: id){
