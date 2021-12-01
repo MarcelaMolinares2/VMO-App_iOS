@@ -157,15 +157,16 @@ struct MovementFormTabTransferenceView: View {
     @State private var idsSelected = [String]()
     @State private var dataVisitType: Any = ""
     @State private var numOfPeople = "0"
-    
+    @State private var multipleSheet = false
+    @State private var typeClick = "General_Button"
+    @State private var itemIdBonus = MovementProductTransference()
     
     var body: some View {
-        
         VStack {
             Button(action: {
-                print("aajaja")
-                print(dynamicData)
                 isSheet = true
+                multipleSheet = true
+                typeClick = "General_Button"
             }, label: {
                 HStack{
                     Spacer()
@@ -181,8 +182,6 @@ struct MovementFormTabTransferenceView: View {
             })
             List {
                 ForEach(selected, id: \.self) { item in
-                    
-                    
                     VStack (alignment: .leading, spacing: 5){
                         VStack {
                             if let product = ProductDao(realm: try! Realm()).by(id: String(item.id)){
@@ -190,11 +189,6 @@ struct MovementFormTabTransferenceView: View {
                                     .font(.system(size: 18))
                             }
                             if let quantity = (dataVisitType as! NSDictionary)["quantity"]{
-                                /*
-                                if let requiredBonus = (bouns as! NSDictionary)["required"]{
-                                    print(requiredBonus)
-                                }
-                                */
                                 if let visibleQuantity = (quantity as! NSDictionary)["visible"]{
                                     if String((visibleQuantity as AnyObject).description) == "1"{
                                         VStack{
@@ -219,11 +213,6 @@ struct MovementFormTabTransferenceView: View {
                                 }
                             }
                             if let price = (dataVisitType as! NSDictionary)["price"]{
-                                /*
-                                if let requiredBonus = (bouns as! NSDictionary)["required"]{
-                                    print(requiredBonus)
-                                }
-                                */
                                 if let visiblePrice = (price as! NSDictionary)["visible"]{
                                     if String((visiblePrice as AnyObject).description) == "1"{
                                         VStack{
@@ -252,11 +241,6 @@ struct MovementFormTabTransferenceView: View {
                         }
                         VStack {
                             if let bouns = (dataVisitType as! NSDictionary)["bonus"]{
-                                /*
-                                if let requiredBonus = (bouns as! NSDictionary)["required"]{
-                                    print(requiredBonus)
-                                }
-                                */
                                 if let visibleBonus = (bouns as! NSDictionary)["visible"]{
                                     if String((visibleBonus as AnyObject).description) == "1" {
                                         VStack {
@@ -268,14 +252,22 @@ struct MovementFormTabTransferenceView: View {
                                                     Spacer()
                                                 }
                                                 Button(action: {
-                                                    print("Pendejo")
+                                                    isSheet = true
+                                                    multipleSheet = false
+                                                    typeClick = "Item_Button"
+                                                    itemIdBonus = item
                                                 }) {
                                                     HStack{
                                                         VStack{
                                                             Text("Product")
                                                                 .font(.system(size: 14))
-                                                            Text("Select....")
-                                                                .font(.system(size: 14))
+                                                            if let product = ProductDao(realm: try! Realm()).by(id: String(item.bonusProduct)){
+                                                                Text(product.name ?? "")
+                                                                    .font(.system(size: 18))
+                                                            } else {
+                                                                Text("Select....")
+                                                                    .font(.system(size: 14))
+                                                            }
                                                         }
                                                         Spacer()
                                                         Image("ic-arrow-expand-more")
@@ -320,6 +312,11 @@ struct MovementFormTabTransferenceView: View {
                                 }
                             }
                         }
+                        /*
+                        Text(NSLocalizedString("env\(field.label.capitalized)", comment: field.label))
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .foregroundColor((field.localRequired && field.value.isEmpty) ? Color.cDanger : .cTextMedium)
+                        */
                     }
                     .padding(7)
                     .background(Color.white)
@@ -327,10 +324,11 @@ struct MovementFormTabTransferenceView: View {
                     .clipped()
                     .shadow(color: Color.gray, radius: 4, x: 0, y: 0)
                 }
+                .onDelete(perform: self.delete)
             }
             .buttonStyle(PlainButtonStyle())
         }.sheet(isPresented: $isSheet, content: {
-            CustomDialogPicker(onSelectionDone: onSelectionDone, selected: $idsSelected, key: "PRODUCT-TRANSFERENCE", multiple: true, isSheet: true)
+            CustomDialogPicker(onSelectionDone: onSelectionDone, selected: $idsSelected, key: "PRODUCT-TRANSFERENCE", multiple: multipleSheet, isSheet: true)
         })
         .foregroundColor(.cPrimary)
         .onAppear{
@@ -339,47 +337,46 @@ struct MovementFormTabTransferenceView: View {
     }
     
     func initView(){
-        print(Config.get(key: "MOV_TRANSFER_FIELDS").complement ?? "")
-        print("____________")
         if let data = dynamicData[visitType.lowercased()]{
             dataVisitType = data
-            if let bouns = (dataVisitType as! NSDictionary)["bonus"]{
-                if let requiredBonus = (bouns as! NSDictionary)["required"]{
-                    print(requiredBonus)
-                }
-                if let visibleBonus = (bouns as! NSDictionary)["visible"]{
-                    print(visibleBonus)
-                }
-            }
         }
     }
     
     func onSelectionDone(_ selected: [String]) {
         isSheet = false
-        print("__________self.selected___________")
-        /*
-        self.selected.forEach{ item in
-            print(item.objectId)
-            print(item.id)
-            print(item.price)
-        }
-        */
-        print(self.selected)
-        print("_________idsSelected____________")
-        print(self.idsSelected)
-        self.idsSelected.forEach{ id in
-            let mm = MovementProductTransference()
-            mm.id = Int(id) ?? 0
-            self.selected.append(mm)
-        }
-        /*
-        self.selectedBridge.forEach{ id in
-            if let product = ProductDao(realm: try! Realm()).by(id: id){
-                if !validate(product: product){
-                    products.append(product)
-                    self.selected.append(id)
+        if typeClick == "General_Button" {
+            self.idsSelected.forEach{ id in
+                let movementProductTransference = MovementProductTransference()
+                movementProductTransference.id = Int(id) ?? 0
+                var exist = false
+                for i in self.selected {
+                    if String(i.id) == id{
+                        exist = true
+                        break
+                    }
+                }
+                if !exist {
+                    self.selected.append(movementProductTransference)
                 }
             }
+        } else {
+            print(idsSelected[0])
+            itemIdBonus.bonusProduct = Int(idsSelected[0]) ?? 0
+        }
+    }
+    
+    func delete(at offsets: IndexSet) {
+        withAnimation{
+            var its: Int = 0
+            offsets.forEach{ it in
+                its = it
+            }
+            self.selected.remove(atOffsets: offsets)
+            //self.products.remove(atOffsets: offsets)
+        }
+        /*
+        withAnimation{
+            self.selected.remove(atOffsets: offsets)
         }
         */
     }
