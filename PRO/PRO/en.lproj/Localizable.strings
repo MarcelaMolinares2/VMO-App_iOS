@@ -79,3 +79,11 @@
 "nonePromotedProducts" = "Please add promoted products";
 
 "envTransference" = "Transference";
+"quantityTransference" = "Quantity";
+"priceTransference" = "Price";
+"bonusTransference" = "Bonus";
+"productTransference" = "Product";
+"nameDisabledTransference" = "Choose...";
+"bonusUnitsTransference" = "Bonus units";
+
+

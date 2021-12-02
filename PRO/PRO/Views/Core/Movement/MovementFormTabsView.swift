@@ -34,9 +34,8 @@ struct MovementFormTabPromotedView: View {
                         .frame(width: 35)
                     Spacer()
                 }
-                .frame(height: 30)
                 .padding(10)
-                .foregroundColor(.cPrimary)
+                .foregroundColor(.cTextMedium)
             })
             List {
                 ForEach(products, id: \.self) { item in
@@ -44,7 +43,7 @@ struct MovementFormTabPromotedView: View {
                 }
                 .onMove(perform: move)
                 .onDelete(perform: self.delete)
-                .foregroundColor(.cPrimary)
+                .foregroundColor(.cTextMedium)
                 .onLongPressGesture {
                     withAnimation {
                         self.isEditable = true
@@ -136,16 +135,40 @@ struct MovementFormTabShoppingView: View {
     
     @Binding var selected: RealmSwift.List<MovementProductShopping>
     
+    @State private var isSheet = false
+    @State private var idsSelected = [String]()
+    
     var body: some View {
-        ScrollView {
-            VStack {
-                Text("SHOPPING!!!!")
-            }
-        }
+        VStack {
+            Button(action: {
+                print("xdd")
+                isSheet = true
+            }, label: {
+                HStack{
+                    Spacer()
+                    Text("SHOPPING")
+                    Image("ic-plus-circle")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 35)
+                    Spacer()
+                }
+                .foregroundColor(.cTextMedium)
+                .padding(10)
+            })
+            Spacer()
+        }.sheet(isPresented: $isSheet, content: {
+            CustomDialogPicker(onSelectionDone: onSelectionDone, selected: $idsSelected, key: "PRODUCT-TRANSFERENCE", multiple: true, isSheet: true)
+        })
     }
     
+    func onSelectionDone(_ selected: [String]) {
+        isSheet = false
+        self.idsSelected.forEach{ id in
+            print(self.idsSelected)
+        }
+    }
 }
-
 
 struct MovementFormTabTransferenceView: View {
     
@@ -156,17 +179,11 @@ struct MovementFormTabTransferenceView: View {
     @State private var isSheet = false
     @State private var idsSelected = [String]()
     @State private var dataVisitType: Any = ""
-    @State private var numOfPeople = "0"
-    @State private var multipleSheet = false
-    @State private var typeClick = "General_Button"
-    @State private var itemIdBonus = MovementProductTransference()
     
     var body: some View {
         VStack {
             Button(action: {
                 isSheet = true
-                multipleSheet = true
-                typeClick = "General_Button"
             }, label: {
                 HStack{
                     Spacer()
@@ -177,158 +194,18 @@ struct MovementFormTabTransferenceView: View {
                         .frame(width: 35)
                     Spacer()
                 }
-                .frame(height: 30)
+                .foregroundColor(.cTextMedium)
                 .padding(10)
             })
             List {
-                ForEach(selected, id: \.self) { item in
-                    VStack (alignment: .leading, spacing: 5){
-                        VStack {
-                            if let product = ProductDao(realm: try! Realm()).by(id: String(item.id)){
-                                Text(product.name ?? "")
-                                    .font(.system(size: 18))
-                            }
-                            if let quantity = (dataVisitType as! NSDictionary)["quantity"]{
-                                if let visibleQuantity = (quantity as! NSDictionary)["visible"]{
-                                    if String((visibleQuantity as AnyObject).description) == "1"{
-                                        VStack{
-                                            Text("QUANTITY")
-                                                .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
-                                                .font(.system(size: 14))
-                                            TextField("Total number of people", text: Binding(
-                                                get: { String(item.quantity) },
-                                                set: { item.quantity = Float($0) ?? 0 }
-                                            ))
-                                                .frame(height: 30)
-                                                .foregroundColor(.black)
-                                                .keyboardType(.numberPad)
-                                            Divider()
-                                             .frame(height: 1)
-                                             .padding(.horizontal, 5)
-                                             .background(Color.gray)
-                                        }
-                                        
-                                        
-                                    }
-                                }
-                            }
-                            if let price = (dataVisitType as! NSDictionary)["price"]{
-                                if let visiblePrice = (price as! NSDictionary)["visible"]{
-                                    if String((visiblePrice as AnyObject).description) == "1"{
-                                        VStack{
-                                            HStack{
-                                                Text("PRICE VISIBLE")
-                                                    .font(.system(size: 14))
-                                                Spacer()
-                                            }
-                                            TextField("Total number of people", text: Binding(
-                                                get: { String(item.price) },
-                                                set: { item.price = Float($0) ?? 0 }
-                                            ))
-                                                .frame(height: 30)
-                                                .foregroundColor(.black)
-                                                .keyboardType(.numberPad)
-                                            Divider()
-                                             .frame(height: 1)
-                                             .padding(.horizontal, 5)
-                                                
-                                             .background(Color.gray)
-                                        }
-                                    }
-                                }
-                            }
-                            
-                        }
-                        VStack {
-                            if let bouns = (dataVisitType as! NSDictionary)["bonus"]{
-                                if let visibleBonus = (bouns as! NSDictionary)["visible"]{
-                                    if String((visibleBonus as AnyObject).description) == "1" {
-                                        VStack {
-                                            VStack {
-                                                HStack{
-                                                    Spacer()
-                                                    Text("BONUS VISIBLE")
-                                                        .font(.system(size: 16))
-                                                    Spacer()
-                                                }
-                                                Button(action: {
-                                                    isSheet = true
-                                                    multipleSheet = false
-                                                    typeClick = "Item_Button"
-                                                    itemIdBonus = item
-                                                }) {
-                                                    HStack{
-                                                        VStack{
-                                                            Text("Product")
-                                                                .font(.system(size: 14))
-                                                            if let product = ProductDao(realm: try! Realm()).by(id: String(item.bonusProduct)){
-                                                                Text(product.name ?? "")
-                                                                    .font(.system(size: 18))
-                                                            } else {
-                                                                Text("Select....")
-                                                                    .font(.system(size: 14))
-                                                            }
-                                                        }
-                                                        Spacer()
-                                                        Image("ic-arrow-expand-more")
-                                                            .resizable()
-                                                            .scaledToFit()
-                                                            .frame(width: 32)
-                                                    }
-                                                    .padding(10)
-                                                    .background(Color.white)
-                                                    .frame(alignment: Alignment.center)
-                                                    .clipped()
-                                                    .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
-                                                }
-                                            }
-                                            VStack{
-                                                HStack{
-                                                    Text("PRICE VISIBLE")
-                                                        .font(.system(size: 14))
-                                                    Spacer()
-                                                }
-                                                TextField("Total number of people", text: Binding(
-                                                    get: { String(item.bonusQuantity) },
-                                                    set: { item.bonusQuantity = Float($0) ?? 0 }
-                                                ))
-                                                    .frame(height: 30)
-                                                    .foregroundColor(.black)
-                                                    .keyboardType(.numberPad)
-                                                Divider()
-                                                 .frame(height: 1)
-                                                 .padding(.horizontal, 5)
-                                                 .background(Color.gray)
-                                            }
-                                            .padding(.horizontal, 10)
-                                            .padding(.vertical, 7)
-                                        }
-                                        .padding(7)
-                                        .background(Color.white)
-                                        .frame(alignment: Alignment.center)
-                                        .clipped()
-                                        .shadow(color: Color.gray, radius: 2, x: 0, y: 0)
-                                    }
-                                }
-                            }
-                        }
-                        /*
-                        Text(NSLocalizedString("env\(field.label.capitalized)", comment: field.label))
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .foregroundColor((field.localRequired && field.value.isEmpty) ? Color.cDanger : .cTextMedium)
-                        */
-                    }
-                    .padding(7)
-                    .background(Color.white)
-                    .frame(alignment: Alignment.center)
-                    .clipped()
-                    .shadow(color: Color.gray, radius: 4, x: 0, y: 0)
+                ForEach(selected.indices, id: \.self) { item in
+                    CardTabTransference(item: $selected[item], dataVisitType: dataVisitType)
                 }
                 .onDelete(perform: self.delete)
             }
             .buttonStyle(PlainButtonStyle())
         }.sheet(isPresented: $isSheet, content: {
-            CustomDialogPicker(onSelectionDone: onSelectionDone, selected: $idsSelected, key: "PRODUCT-TRANSFERENCE", multiple: multipleSheet, isSheet: true)
+            CustomDialogPicker(onSelectionDone: onSelectionDone, selected: $idsSelected, key: "PRODUCT-TRANSFERENCE", multiple: true, isSheet: true)
         })
         .foregroundColor(.cPrimary)
         .onAppear{
@@ -344,41 +221,178 @@ struct MovementFormTabTransferenceView: View {
     
     func onSelectionDone(_ selected: [String]) {
         isSheet = false
-        if typeClick == "General_Button" {
-            self.idsSelected.forEach{ id in
-                let movementProductTransference = MovementProductTransference()
-                movementProductTransference.id = Int(id) ?? 0
-                var exist = false
-                for i in self.selected {
-                    if String(i.id) == id{
-                        exist = true
-                        break
-                    }
-                }
-                if !exist {
-                    self.selected.append(movementProductTransference)
+        self.idsSelected.forEach{ id in
+            var exist = false
+            for i in self.selected {
+                if String(i.id) == id{
+                    exist = true
+                    break
                 }
             }
-        } else {
-            print(idsSelected[0])
-            itemIdBonus.bonusProduct = Int(idsSelected[0]) ?? 0
+            if !exist {
+                let movementProductTransference = MovementProductTransference()
+                movementProductTransference.id = Int(id) ?? 0
+                self.selected.append(movementProductTransference)
+            }
         }
     }
     
     func delete(at offsets: IndexSet) {
         withAnimation{
-            var its: Int = 0
-            offsets.forEach{ it in
-                its = it
-            }
-            self.selected.remove(atOffsets: offsets)
-            //self.products.remove(atOffsets: offsets)
+            //self.selected.remove(atOffsets: offsets)
         }
-        /*
-        withAnimation{
-            self.selected.remove(atOffsets: offsets)
-        }
-        */
     }
     
+}
+
+struct CardTabTransference: View{
+    @Binding var item: MovementProductTransference
+    var dataVisitType: Any
+    
+    @State private var isSheet = false
+    @State private var idsSelected = [String]()
+    var body: some View{
+        VStack (alignment: .leading, spacing: 15){
+            VStack {
+                if let product = ProductDao(realm: try! Realm()).by(id: String(item.id)){
+                    Text(product.name ?? "")
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .foregroundColor(.cTextMedium)
+                        .font(.system(size: 18))
+                }
+                if let quantity = (dataVisitType as! NSDictionary)["quantity"]{
+                    if let visibleQuantity = (quantity as! NSDictionary)["visible"]{
+                        if String((visibleQuantity as AnyObject).description) == "1"{
+                            VStack{
+                                if let requiredQuantity = (quantity as! NSDictionary)["required"]{
+                                    Text(NSLocalizedString("quantityTransference", comment: ""))
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .foregroundColor((String((requiredQuantity as AnyObject).description)  == "1") ? Color.cDanger : .cTextMedium)
+                                        .font(.system(size: 14))
+                                }
+                                TextField("", text: Binding(
+                                    get: { String(item.quantity) },
+                                    set: { item.quantity = Float($0) ?? 0 }
+                                ))
+                                .cornerRadius(CGFloat(4))
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                            }
+                            .padding(.top, 3)
+                        }
+                    }
+                }
+                if let price = (dataVisitType as! NSDictionary)["price"]{
+                    if let visiblePrice = (price as! NSDictionary)["visible"]{
+                        if String((visiblePrice as AnyObject).description) == "1"{
+                            VStack{
+                                if let priceQuantity = (price as! NSDictionary)["required"]{
+                                    Text(NSLocalizedString("priceTransference", comment: ""))
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .foregroundColor((String((priceQuantity as AnyObject).description)  == "1") ? Color.cDanger : .cTextMedium)
+                                        .font(.system(size: 14))
+                                }
+                                TextField("", text: Binding(
+                                    get: { String(item.price) },
+                                    set: { item.price = Float($0) ?? 0 }
+                                ))
+                                .cornerRadius(CGFloat(4))
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                            }
+                            .padding(.top, 3)
+                        }
+                    }
+                }
+            }
+            VStack {
+                if let bouns = (dataVisitType as! NSDictionary)["bonus"]{
+                    if let visibleBonus = (bouns as! NSDictionary)["visible"]{
+                        if String((visibleBonus as AnyObject).description) == "1" {
+                            VStack {
+                                VStack {
+                                    Text(NSLocalizedString("bonusTransference", comment: ""))
+                                        .frame(maxWidth: .infinity, alignment: .center)
+                                        .foregroundColor(.cTextMedium)
+                                        .font(.system(size: 16))
+                                    Button(action: {
+                                        isSheet = true
+                                    }) {
+                                        HStack{
+                                            VStack{
+                                                if let bounsRequired = (bouns as! NSDictionary)["required"]{
+                                                    Text(NSLocalizedString("productTransference", comment: ""))
+                                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                                        .foregroundColor((String((bounsRequired as AnyObject).description)  == "1") ? Color.cDanger : .cTextMedium)
+                                                        .font(.system(size: 14))
+                                                }
+                                                if let product = ProductDao(realm: try! Realm()).by(id: String(item.bonusProduct)){
+                                                    Text(product.name ?? "")
+                                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                                        .foregroundColor(.cTextMedium)
+                                                        .font(.system(size: 14))
+                                                } else {
+                                                    Text(NSLocalizedString("nameDisabledTransference", comment: ""))
+                                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                                        .foregroundColor(.cTextMedium)
+                                                        .font(.system(size: 14))
+                                                
+                                                }
+                                            }
+                                            Spacer()
+                                            Image("ic-arrow-expand-more")
+                                                .resizable()
+                                                .scaledToFit()
+                                                .frame(width: 35)
+                                                .foregroundColor(.cTextMedium)
+                                        }
+                                        .padding(10)
+                                        .background(Color.white)
+                                        .frame(alignment: Alignment.center)
+                                        .clipped()
+                                        .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
+                                    }
+                                }
+                                VStack{
+                                    if let bounsRequired = (bouns as! NSDictionary)["required"]{
+                                        Text(NSLocalizedString("bonusUnitsTransference", comment: ""))
+                                            .frame(maxWidth: .infinity, alignment: .leading)
+                                            .foregroundColor((String((bounsRequired as AnyObject).description)  == "1") ? Color.cDanger : .cTextMedium)
+                                            .font(.system(size: 14))
+                                        
+                                    }
+                                    TextField("", text: Binding(
+                                        get: { String(item.bonusQuantity) },
+                                        set: { item.bonusQuantity = Float($0) ?? 0 }
+                                    ))
+                                        .cornerRadius(CGFloat(4))
+                                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                                }
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 3)
+                            }
+                            .padding(7)
+                            .background(Color.white)
+                            .frame(alignment: Alignment.center)
+                            .clipped()
+                            .shadow(color: Color.gray, radius: 2, x: 0, y: 0)
+                        }
+                    }
+                }
+            }
+        }
+        .padding(7)
+        .background(Color.white)
+        .frame(alignment: Alignment.center)
+        .clipped()
+        .shadow(color: Color.gray, radius: 4, x: 0, y: 0)
+        .sheet(isPresented: $isSheet, content: {
+            CustomDialogPicker(onSelectionDone: onSelectionDone, selected: $idsSelected, key: "PRODUCT-TRANSFERENCE", multiple: false, isSheet: true)
+        })
+    }
+    
+    func onSelectionDone(_ selected: [String]) {
+        self.isSheet = false
+        self.idsSelected.forEach{ id in
+            item.bonusProduct = Int(id) ?? 0
+        }
+    }
 }
