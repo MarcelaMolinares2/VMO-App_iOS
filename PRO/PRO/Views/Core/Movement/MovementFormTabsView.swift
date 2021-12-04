@@ -141,7 +141,6 @@ struct MovementFormTabShoppingView: View {
     var body: some View {
         VStack {
             Button(action: {
-                print("xdd")
                 isSheet = true
             }, label: {
                 HStack{
@@ -156,9 +155,96 @@ struct MovementFormTabShoppingView: View {
                 .foregroundColor(.cTextMedium)
                 .padding(10)
             })
-            Spacer()
+            List {
+                ForEach(selected.indices, id: \.self) { index in
+                    CardTabShopping(item: $selected[index])
+                }
+                .onDelete(perform: self.delete)
+            }
+            .buttonStyle(PlainButtonStyle())
         }.sheet(isPresented: $isSheet, content: {
-            CustomDialogPicker(onSelectionDone: onSelectionDone, selected: $idsSelected, key: "PRODUCT-TRANSFERENCE", multiple: true, isSheet: true)
+            CustomDialogPicker(onSelectionDone: onSelectionDone, selected: $idsSelected, key: "PRODUCT-SHOPPING", multiple: true, isSheet: true)
+        })
+    }
+    
+    func onSelectionDone(_ selected: [String]) {
+        isSheet = false
+        self.idsSelected.forEach{ id in
+            let movementProductShopping = MovementProductShopping()
+            movementProductShopping.id = Int(id) ?? 0
+            self.selected.append(movementProductShopping)
+        }
+    }
+    
+    func delete(at offsets: IndexSet) {
+        withAnimation{
+            //self.selected.remove(atOffsets: offsets)
+        }
+    }
+}
+
+struct CardTabShopping: View {
+    @Binding var item: MovementProductShopping
+    
+    @State private var arr = ["32312", "3","32312", "3","32312", "3","32312", "3","32312", "3","32312", "3","32312", "3","32312", "3","32312", "3","32312", "3","32312", "3","32312", "3","32312", "3","32312", "3","32312", "3","32312", "3","32312", "3"]
+    @State private var isSheet = false
+    @State private var idsSelected = [String]()
+    var body: some View {
+        VStack{
+            //VStack(alignment: .leading, spacing: 7){
+            VStack{
+                if let product = ProductDao(realm: try! Realm()).by(id: String(item.id)){
+                    Text(product.name ?? "")
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .foregroundColor(.cTextMedium)
+                        .font(.system(size: 18))
+                }
+                Text("ENTRY PRICE")
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .foregroundColor(.cTextMedium)
+                    .font(.system(size: 14))
+                TextField("", text: Binding(
+                    get: { String(item.price) },
+                    set: { item.price = Float($0) ?? 0 }
+                ))
+                .cornerRadius(CGFloat(4))
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+            }
+            Button(action: {
+                isSheet = true
+            }, label: {
+                Text("Competitors")
+                .foregroundColor(.cTextMedium)
+                .padding(10)
+            })
+            
+            
+            VStack {
+                ForEach(item.competitors, id: \.self) { itemC in
+                    VStack{
+                        if let product = ProductDao(realm: try! Realm()).by(id: itemC.id){
+                            Text(product.name ?? "")
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .foregroundColor(.cTextMedium)
+                                .font(.system(size: 16))
+                        }
+                        Text("ENTRY PRICE")
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .foregroundColor(.cTextMedium)
+                            .font(.system(size: 14))
+                        TextField("", text: Binding(
+                            get: { String(itemC.price) },
+                            set: { itemC.price = Float($0) ?? 0 }
+                        ))
+                        .cornerRadius(CGFloat(4))
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                    }
+                }
+                .onDelete(perform: self.delete)
+            }
+            .buttonStyle(PlainButtonStyle())
+        }.sheet(isPresented: $isSheet, content: {
+            CustomDialogPicker(onSelectionDone: onSelectionDone, selected: $idsSelected, key: "PRODUCT-SHOPPING", multiple: true, isSheet: true)
         })
     }
     
@@ -166,6 +252,15 @@ struct MovementFormTabShoppingView: View {
         isSheet = false
         self.idsSelected.forEach{ id in
             print(self.idsSelected)
+            let movementProductShoppingCompetitor = MovementProductShoppingCompetitor()
+            movementProductShoppingCompetitor.id = id
+            self.item.competitors.append(movementProductShoppingCompetitor)
+        }
+    }
+    
+    func delete(at offsets: IndexSet) {
+        withAnimation{
+            //self.selected.remove(atOffsets: offsets)
         }
     }
 }
@@ -198,8 +293,8 @@ struct MovementFormTabTransferenceView: View {
                 .padding(10)
             })
             List {
-                ForEach(selected.indices, id: \.self) { item in
-                    CardTabTransference(item: $selected[item], dataVisitType: dataVisitType)
+                ForEach(selected.indices, id: \.self) { index in
+                    CardTabTransference(item: $selected[index], dataVisitType: dataVisitType)
                 }
                 .onDelete(perform: self.delete)
             }
