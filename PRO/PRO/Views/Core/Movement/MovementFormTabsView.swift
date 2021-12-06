@@ -186,12 +186,9 @@ struct MovementFormTabShoppingView: View {
 struct CardTabShopping: View {
     @Binding var item: MovementProductShopping
     
-    @State private var arr = ["32312", "3","32312", "3","32312", "3","32312", "3","32312", "3","32312", "3","32312", "3","32312", "3","32312", "3","32312", "3","32312", "3","32312", "3","32312", "3","32312", "3","32312", "3","32312", "3","32312", "3"]
-    @State private var isSheet = false
-    @State private var idsSelected = [String]()
+    @State var idCompetitors : [String] = []
     var body: some View {
         VStack{
-            //VStack(alignment: .leading, spacing: 7){
             VStack{
                 if let product = ProductDao(realm: try! Realm()).by(id: String(item.id)){
                     Text(product.name ?? "")
@@ -210,57 +207,43 @@ struct CardTabShopping: View {
                 .cornerRadius(CGFloat(4))
                 .textFieldStyle(RoundedBorderTextFieldStyle())
             }
-            Button(action: {
-                isSheet = true
-            }, label: {
-                Text("Competitors")
-                .foregroundColor(.cTextMedium)
-                .padding(10)
-            })
-            
             
             VStack {
-                ForEach(item.competitors, id: \.self) { itemC in
-                    VStack{
-                        if let product = ProductDao(realm: try! Realm()).by(id: itemC.id){
-                            Text(product.name ?? "")
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .foregroundColor(.cTextMedium)
-                                .font(.system(size: 16))
-                        }
-                        Text("ENTRY PRICE")
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .foregroundColor(.cTextMedium)
-                            .font(.system(size: 14))
-                        TextField("", text: Binding(
-                            get: { String(itemC.price) },
-                            set: { itemC.price = Float($0) ?? 0 }
-                        ))
-                        .cornerRadius(CGFloat(4))
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                    }
+                ForEach(item.competitors, id: \.self) { it in
+                    Text(it.id)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .foregroundColor(.cTextMedium)
+                        .font(.system(size: 14))
+                    /*
+                    TextField("", text: Binding(
+                        get: { String(it.price) },
+                        set: { it.price = Float($0) ?? 0 }
+                    ))
+                    .cornerRadius(CGFloat(4))
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    */
                 }
-                .onDelete(perform: self.delete)
             }
             .buttonStyle(PlainButtonStyle())
-        }.sheet(isPresented: $isSheet, content: {
-            CustomDialogPicker(onSelectionDone: onSelectionDone, selected: $idsSelected, key: "PRODUCT-SHOPPING", multiple: true, isSheet: true)
-        })
-    }
-    
-    func onSelectionDone(_ selected: [String]) {
-        isSheet = false
-        self.idsSelected.forEach{ id in
-            print(self.idsSelected)
-            let movementProductShoppingCompetitor = MovementProductShoppingCompetitor()
-            movementProductShoppingCompetitor.id = id
-            self.item.competitors.append(movementProductShoppingCompetitor)
+        }
+        .padding(7)
+        .background(Color.white)
+        .frame(alignment: Alignment.center)
+        .clipped()
+        .shadow(color: Color.gray, radius: 4, x: 0, y: 0)
+        .onAppear{
+            initView()
         }
     }
     
-    func delete(at offsets: IndexSet) {
-        withAnimation{
-            //self.selected.remove(atOffsets: offsets)
+    func initView(){
+        if let product = ProductDao(realm: try! Realm()).by(id: String(item.id)){
+            idCompetitors = (product.competitors ?? "").split(separator: ",").map { String($0) }
+        }
+        idCompetitors.forEach{ it in
+            let movementProductShoppingCompetitor = MovementProductShoppingCompetitor()
+            movementProductShoppingCompetitor.id = it
+            item.competitors.append(movementProductShoppingCompetitor)
         }
     }
 }
