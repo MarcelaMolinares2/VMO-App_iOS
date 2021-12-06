@@ -170,9 +170,18 @@ struct MovementFormTabShoppingView: View {
     func onSelectionDone(_ selected: [String]) {
         isSheet = false
         self.idsSelected.forEach{ id in
-            let movementProductShopping = MovementProductShopping()
-            movementProductShopping.id = Int(id) ?? 0
-            self.selected.append(movementProductShopping)
+            var exist = false
+            for i in self.selected {
+                if String(i.id) == id{
+                    exist = true
+                    break
+                }
+            }
+            if !exist {
+                let movementProductShopping = MovementProductShopping()
+                movementProductShopping.id = Int(id) ?? 0
+                self.selected.append(movementProductShopping)
+            }
         }
     }
     
@@ -207,24 +216,20 @@ struct CardTabShopping: View {
                 .cornerRadius(CGFloat(4))
                 .textFieldStyle(RoundedBorderTextFieldStyle())
             }
-            
+            Spacer()
+                .frame(height: 15)
             VStack {
-                ForEach(item.competitors, id: \.self) { it in
-                    Text(it.id)
-                        .frame(maxWidth: .infinity, alignment: .center)
-                        .foregroundColor(.cTextMedium)
-                        .font(.system(size: 14))
-                    /*
-                    TextField("", text: Binding(
-                        get: { String(it.price) },
-                        set: { it.price = Float($0) ?? 0 }
-                    ))
-                    .cornerRadius(CGFloat(4))
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    */
+                ForEach(item.competitors.indices, id: \.self) { index in
+                    CardCompetitorsShopping(item: $item.competitors[index])
                 }
             }
-            .buttonStyle(PlainButtonStyle())
+            .padding(7)
+            .background(Color.white)
+            .frame(alignment: Alignment.center)
+            .clipped()
+            .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
+            Spacer()
+                .frame(height: 15)
         }
         .padding(7)
         .background(Color.white)
@@ -238,12 +243,35 @@ struct CardTabShopping: View {
     
     func initView(){
         if let product = ProductDao(realm: try! Realm()).by(id: String(item.id)){
-            idCompetitors = (product.competitors ?? "").split(separator: ",").map { String($0) }
+            if item.competitors.count == 0{
+                idCompetitors = (product.competitors ?? "").split(separator: ",").map { String($0) }
+            }
         }
         idCompetitors.forEach{ it in
             let movementProductShoppingCompetitor = MovementProductShoppingCompetitor()
             movementProductShoppingCompetitor.id = it
             item.competitors.append(movementProductShoppingCompetitor)
+        }
+    }
+}
+
+struct CardCompetitorsShopping: View{
+    
+    @Binding var item: MovementProductShoppingCompetitor
+    
+    var body: some View {
+        VStack{
+            Text(item.id)
+                .frame(maxWidth: .infinity, alignment: .center)
+                .foregroundColor(.cTextMedium)
+                .font(.system(size: 14))
+            
+            TextField("", text: Binding(
+                get: { String(item.price) },
+                set: { item.price = Float($0) ?? 0 }
+            ))
+            .cornerRadius(CGFloat(4))
+            .textFieldStyle(RoundedBorderTextFieldStyle())
         }
     }
 }
