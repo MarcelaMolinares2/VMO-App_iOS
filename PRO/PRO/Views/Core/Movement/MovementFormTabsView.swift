@@ -178,9 +178,16 @@ struct MovementFormTabShoppingView: View {
                 }
             }
             if !exist {
-                let movementProductShopping = MovementProductShopping()
-                movementProductShopping.id = Int(id) ?? 0
-                self.selected.append(movementProductShopping)
+                if let product = ProductDao(realm: try! Realm()).by(id: id) {
+                    let movementProductShopping = MovementProductShopping()
+                    movementProductShopping.id = Int(id) ?? 0
+                    product.competitors?.components(separatedBy: ",").forEach({ competitor in
+                        let movementCompetitor = MovementProductShoppingCompetitor()
+                        movementCompetitor.id = competitor
+                        movementProductShopping.competitors.append(movementCompetitor)
+                    })
+                    self.selected.append(movementProductShopping)
+                }
             }
         }
     }
@@ -216,8 +223,6 @@ struct CardTabShopping: View {
                 .cornerRadius(CGFloat(4))
                 .textFieldStyle(RoundedBorderTextFieldStyle())
             }
-            Spacer()
-                .frame(height: 15)
             VStack {
                 ForEach(item.competitors.indices, id: \.self) { index in
                     CardCompetitorsShopping(item: $item.competitors[index])
@@ -228,31 +233,14 @@ struct CardTabShopping: View {
             .frame(alignment: Alignment.center)
             .clipped()
             .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
-            Spacer()
-                .frame(height: 15)
         }
         .padding(7)
         .background(Color.white)
         .frame(alignment: Alignment.center)
         .clipped()
         .shadow(color: Color.gray, radius: 4, x: 0, y: 0)
-        .onAppear{
-            initView()
-        }
     }
     
-    func initView(){
-        if let product = ProductDao(realm: try! Realm()).by(id: String(item.id)){
-            if item.competitors.count == 0{
-                idCompetitors = (product.competitors ?? "").split(separator: ",").map { String($0) }
-            }
-        }
-        idCompetitors.forEach{ it in
-            let movementProductShoppingCompetitor = MovementProductShoppingCompetitor()
-            movementProductShoppingCompetitor.id = it
-            item.competitors.append(movementProductShoppingCompetitor)
-        }
-    }
 }
 
 struct CardCompetitorsShopping: View{

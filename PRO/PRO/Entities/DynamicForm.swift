@@ -109,7 +109,7 @@ struct DynamicFormField: Identifiable, Decodable {
         
         self.key = try container.decode(String.self, forKey: .key)
         self.label = try container.decode(String.self, forKey: .label)
-        self.description = try container.decode(String.self, forKey: .description)
+        self.description = try container.decode(String?.self, forKey: .description)
         self.controlType = try container.decode(String.self, forKey: .controlType)
         self.dataType = try container.decode(String.self, forKey: .dataType)
         self.requiredUserTypes = try container.decode(String.self, forKey: .requiredUserTypes)
