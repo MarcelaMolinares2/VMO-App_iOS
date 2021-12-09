@@ -115,21 +115,147 @@ struct MovementFormTabPromotedView: View {
     }
 }
 
-
 struct MovementFormTabStockView: View {
     
     @Binding var selected: RealmSwift.List<MovementProductStock>
     
+    @State private var isSheet = false
+    @State private var idsSelected = [String]()
+    
     var body: some View {
-        ScrollView {
-            VStack {
-                Text("STOCK!!!!")
+        VStack {
+            Button(action: {
+                isSheet = true
+            }, label: {
+                HStack{
+                    Spacer()
+                    Text(NSLocalizedString("envStock", comment: ""))
+                    Image("ic-plus-circle")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 35)
+                    Spacer()
+                }
+                .foregroundColor(.cTextMedium)
+                .padding(10)
+            })
+            
+            List {
+                ForEach(selected.indices, id: \.self) { index in
+                    CardStock(item: $selected[index])
+                }
+            }
+            .buttonStyle(PlainButtonStyle())
+        }.sheet(isPresented: $isSheet, content: {
+            CustomDialogPicker(onSelectionDone: onSelectionDone, selected: $idsSelected, key: "PRODUCT-PROMOTED", multiple: true, isSheet: true)
+        })
+        
+    }
+    
+    func onSelectionDone(_ selected: [String]) {
+        isSheet = false
+        self.idsSelected.forEach{ id in
+            var exist = false
+            for i in self.selected {
+                if String(i.id) == id{
+                    exist = true
+                    break
+                }
+            }
+            if !exist {
+                let movementProductStock = MovementProductStock()
+                movementProductStock.id = Int(id) ?? 0
+                self.selected.append(movementProductStock)
             }
         }
     }
     
 }
 
+struct CardStock: View {
+    @Binding var item: MovementProductStock
+    
+    @State var configData = Config.get(key: "MOV_STOCK_NE_REASONS").complement ?? ""
+    @State private var showGreeting = false
+    @State private var isSheet = false
+    @State private var selected = [String]()
+    @State private var reason = ""
+    var body: some View {
+        VStack{
+            if let product = ProductDao(realm: try! Realm()).by(id: String(item.id)){
+                Toggle(isOn: $showGreeting){
+                    Text(product.name ?? "")
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .foregroundColor(.cTextMedium)
+                        .font(.system(size: 18))
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .onChange(of: showGreeting, perform: { value in
+                    item.hasStock = value
+                    item.noStockReason = (value) ? "" : item.noStockReason
+                })
+                .toggleStyle(SwitchToggleStyle(tint: .cBlueDark))
+                
+                
+                if showGreeting {
+                    TextField("", text: Binding(
+                        get: { String(item.quantity) },
+                        set: { item.quantity = Float($0) ?? 0 }
+                    ))
+                    .cornerRadius(CGFloat(4))
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                } else {
+                    Button(action: {
+                        isSheet = true
+                    }) {
+                        HStack{
+                            VStack{
+                                Text( (item.noStockReason == "") ? NSLocalizedString("envChoose", comment: ""): reason)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .foregroundColor(.cTextMedium)
+                                    .font(.system(size: 14))
+                            }
+                            Spacer()
+                            Image("ic-arrow-expand-more")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 35)
+                                .foregroundColor(.cTextMedium)
+                        }
+                        .padding(10)
+                        .background(Color.white)
+                        .frame(alignment: Alignment.center)
+                        .clipped()
+                        .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
+                    }
+                }
+                
+            }
+        }
+        .partialSheet(isPresented: $isSheet) {
+            SourceDynamicDialogPicker(onSelectionDone: onSelectionDone, selected: $selected, data: configData, multiple: false, title: "Titulo", isSheet: true)
+        }
+        .padding(7)
+        .background(Color.white)
+        .frame(alignment: Alignment.center)
+        .clipped()
+        .shadow(color: Color.gray, radius: 4, x: 0, y: 0)
+    }
+    
+    func onSelectionDone(_ selected: [String]) {
+        isSheet = false
+        item.noStockReason = self.selected[0]
+        let dynamicData = Utils.jsonObject(string: configData)
+        dynamicData.forEach{ it in
+            if it["id"] as! String == self.selected[0]{
+                print(it)
+                print(it["label"] as! String)
+                reason = it["label"] as! String
+            }
+        }
+    }
+    
+}
 
 struct MovementFormTabShoppingView: View {
     
@@ -145,7 +271,7 @@ struct MovementFormTabShoppingView: View {
             }, label: {
                 HStack{
                     Spacer()
-                    Text("SHOPPING")
+                    Text(NSLocalizedString("envShopping", comment: ""))
                     Image("ic-plus-circle")
                         .resizable()
                         .scaledToFit()
@@ -157,7 +283,7 @@ struct MovementFormTabShoppingView: View {
             })
             List {
                 ForEach(selected.indices, id: \.self) { index in
-                    CardTabShopping(item: $selected[index])
+                    CardShopping(item: $selected[index])
                 }
                 .onDelete(perform: self.delete)
             }
@@ -199,7 +325,7 @@ struct MovementFormTabShoppingView: View {
     }
 }
 
-struct CardTabShopping: View {
+struct CardShopping: View {
     @Binding var item: MovementProductShopping
     
     @State var idCompetitors : [String] = []
@@ -240,7 +366,6 @@ struct CardTabShopping: View {
         .clipped()
         .shadow(color: Color.gray, radius: 4, x: 0, y: 0)
     }
-    
 }
 
 struct CardCompetitorsShopping: View{
@@ -293,7 +418,7 @@ struct MovementFormTabTransferenceView: View {
             })
             List {
                 ForEach(selected.indices, id: \.self) { index in
-                    CardTabTransference(item: $selected[index], dataVisitType: dataVisitType)
+                    CardTransference(item: $selected[index], dataVisitType: dataVisitType)
                 }
                 .onDelete(perform: self.delete)
             }
@@ -339,7 +464,7 @@ struct MovementFormTabTransferenceView: View {
     
 }
 
-struct CardTabTransference: View{
+struct CardTransference: View{
     @Binding var item: MovementProductTransference
     var dataVisitType: Any
     
@@ -424,7 +549,7 @@ struct CardTabTransference: View{
                                                         .foregroundColor(.cTextMedium)
                                                         .font(.system(size: 14))
                                                 } else {
-                                                    Text(NSLocalizedString("nameDisabledTransference", comment: ""))
+                                                    Text(NSLocalizedString("envChoose", comment: ""))
                                                         .frame(maxWidth: .infinity, alignment: .leading)
                                                         .foregroundColor(.cTextMedium)
                                                         .font(.system(size: 14))

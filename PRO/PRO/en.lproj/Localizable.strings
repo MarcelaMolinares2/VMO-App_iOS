@@ -75,6 +75,8 @@
 "envDelete" = "Delete";
 "envDate" = "Date";
 
+"envChoose" = "Choose...";
+
 "envPromotedProducts" = "Promoted products";
 "nonePromotedProducts" = "Please add promoted products";
 
@@ -83,7 +85,8 @@
 "priceTransference" = "Price";
 "bonusTransference" = "Bonus";
 "productTransference" = "Product";
-"nameDisabledTransference" = "Choose...";
 "bonusUnitsTransference" = "Bonus units";
 
+"envShopping" = "Shopping";
 
+"envStock" = "Stock";
