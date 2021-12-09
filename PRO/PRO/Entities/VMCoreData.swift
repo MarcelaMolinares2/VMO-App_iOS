@@ -10,7 +10,7 @@
 import Foundation
 import RealmSwift
 
-class Activity: Object, Codable, SyncEntity {
+class Activity: Object, Codable, SyncEntity, Identifiable {
     @Persisted(primaryKey: true) var objectId: ObjectId
     @Persisted(indexed: true) var id = 0
     @Persisted var transactionStatus: String? = ""

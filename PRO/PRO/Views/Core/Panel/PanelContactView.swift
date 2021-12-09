@@ -14,10 +14,18 @@ struct PanelContactView: View {
     
     var panel: Panel!
     @State var couldAdd = false
+    @State var search = ""
+    @State var showForm = false
     
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
-            
+            PanelContactListView(searchText: $search)
+            FAB(image: "ic-plus", foregroundColor: .cPrimary) {
+                showForm = true
+            }
+        }
+        .sheet(isPresented: $showForm) {
+            PanelContactFormView()
         }
     }
     

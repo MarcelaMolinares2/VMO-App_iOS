@@ -105,7 +105,7 @@ struct DashboardPanelView: View {
                 case "PHARMACY":
                     PharmacyListView(searchText: self.$searchText)
                 case "ACTIVITY":
-                    ActivityListView()
+                    ActivityListView(searchText: self.$searchText)
                 default:
                     DiaryListTabView()
                 }

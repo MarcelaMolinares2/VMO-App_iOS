@@ -16,6 +16,8 @@ struct WrapperView: View {
                 ClientFormView()
             case PanelUtils.formByPanelType(type: "M"):
                 DoctorFormView()
+            case "DTV-FORM":
+                ActivityFormView()
             case "MATERIAL-DELIVERY":
                 MaterialDeliveryView()
             case "MATERIAL-REQUEST":

@@ -7,19 +7,24 @@
 //
 
 import SwiftUI
+import RealmSwift
 
 struct ActivityListView: View {
+    
+    @EnvironmentObject var viewRouter: ViewRouter
+    
+    @ObservedResults(Activity.self, sortDescriptor: SortDescriptor(keyPath: "dateStart", ascending: false)) var activities
+    @Binding var searchText: String
+    @State var menuIsPresented = false
+    
     var body: some View {
-        ScrollView {
+        ZStack(alignment: .bottomTrailing) {
             VStack {
-                Text("Activity List")
+                
+            }
+            FAB(image: "ic-plus", foregroundColor: .cPrimary) {
+                FormEntity(objectId: "").go(path: "DTV-FORM", router: viewRouter)
             }
         }
-    }
-}
-
-struct ActivityListView_Previews: PreviewProvider {
-    static var previews: some View {
-        ActivityListView()
     }
 }
