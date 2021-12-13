@@ -176,28 +176,28 @@ struct CardStock: View {
     @Binding var item: MovementProductStock
     
     @State var configData = Config.get(key: "MOV_STOCK_NE_REASONS").complement ?? ""
-    @State private var showGreeting = false
+    @State private var showReason = false
     @State private var isSheet = false
     @State private var selected = [String]()
     @State private var reason = ""
     var body: some View {
         VStack{
             if let product = ProductDao(realm: try! Realm()).by(id: String(item.id)){
-                Toggle(isOn: $showGreeting){
+                Toggle(isOn: $showReason){
                     Text(product.name ?? "")
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .foregroundColor(.cTextMedium)
                         .font(.system(size: 18))
                         .fixedSize(horizontal: false, vertical: true)
                 }
-                .onChange(of: showGreeting, perform: { value in
+                .onChange(of: showReason, perform: { value in
                     item.hasStock = value
                     item.noStockReason = (value) ? "" : item.noStockReason
                 })
                 .toggleStyle(SwitchToggleStyle(tint: .cBlueDark))
                 
                 
-                if showGreeting {
+                if showReason {
                     TextField("", text: Binding(
                         get: { String(item.quantity) },
                         set: { item.quantity = Float($0) ?? 0 }
@@ -210,6 +210,10 @@ struct CardStock: View {
                     }) {
                         HStack{
                             VStack{
+                                Text(NSLocalizedString("envReason", comment: ""))
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .foregroundColor(.cTextMedium)
+                                    .font(.system(size: 14))
                                 Text( (item.noStockReason == "") ? NSLocalizedString("envChoose", comment: ""): reason)
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     .foregroundColor(.cTextMedium)
@@ -235,11 +239,22 @@ struct CardStock: View {
         .partialSheet(isPresented: $isSheet) {
             SourceDynamicDialogPicker(onSelectionDone: onSelectionDone, selected: $selected, data: configData, multiple: false, title: "Titulo", isSheet: true)
         }
+        .onAppear{initCard()}
         .padding(7)
         .background(Color.white)
         .frame(alignment: Alignment.center)
         .clipped()
         .shadow(color: Color.gray, radius: 4, x: 0, y: 0)
+    }
+    
+    func initCard(){
+        
+        let dynamicData = Utils.jsonObject(string: configData)
+        dynamicData.forEach{ it in
+            if it["id"] as! String == item.noStockReason{
+                reason = it["label"] as! String
+            }
+        }
     }
     
     func onSelectionDone(_ selected: [String]) {
@@ -248,8 +263,6 @@ struct CardStock: View {
         let dynamicData = Utils.jsonObject(string: configData)
         dynamicData.forEach{ it in
             if it["id"] as! String == self.selected[0]{
-                print(it)
-                print(it["label"] as! String)
                 reason = it["label"] as! String
             }
         }

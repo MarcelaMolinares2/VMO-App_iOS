@@ -76,6 +76,7 @@
 "envDate" = "Date";
 
 "envChoose" = "Choose...";
+"envReason" = "Reason";
 
 "envPromotedProducts" = "Promoted products";
 "nonePromotedProducts" = "Please add promoted products";
