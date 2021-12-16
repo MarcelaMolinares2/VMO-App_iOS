@@ -13,15 +13,16 @@ import CoreLocation
 struct ActivityFormView: View {
     
     @State var viewForms = false
+    @State private var activity: Activity = Activity()
     
     var body: some View {
         ZStack{
             VStack{
                 HeaderToggleView(couldSearch: false, title: "modDifferentToVisit", icon: Image("ic-activity"), color: Color.cPanelActivity)
                 if !viewForms{
-                    ViewBasicForm()
+                    ViewBasicForm(activity: activity)
                 } else {
-                    ViewAssistantsSelector()
+                    ViewAssistantsSelector(activity: activity)
                 }
                 GeometryReader { geometry in
                     HStack{
@@ -53,27 +54,34 @@ struct ActivityFormView: View {
                 HStack {
                     Spacer()
                     FAB(image: "ic-cloud", foregroundColor: .cPrimary) {
-                        print("nube raton")
+                        save()
                     }
                 }
             }
             .padding(.bottom, 56)
         }
     }
+    
+    func save(){
+        print(activity)
+        //ActivityDao(realm: try! Realm()).store(activity: activity)
+    }
 }
 
 struct ViewBasicForm: View {
     
+    @State var activity: Activity
+    
     @EnvironmentObject var viewRouter: ViewRouter
-    @StateObject var tabRouter = TabRouter()
-    @ObservedObject var locationService = LocationService()
     
+    @State private var isSheetCycle = false
+    @State private var idsCycle = [String]()
+    @State private var cycle = ""
     
+    var visitType = "NORMAL"
     @State private var dynamicData = Utils.jsonDictionary(string: Config.get(key: "P_OTHER_FORM_ADDITIONAL").complement ?? "")
     @State private var form = DynamicForm(tabs: [DynamicFormTab]())
-    @State private var options = DynamicFormFieldOptions(table: "movement", op: "")
-    @State var mainTabs = [[String: Any]]()
-    @State var bb = ""
+    @State private var options = DynamicFormFieldOptions(table: "activity", op: "")
     @State private var showDayAuth = false
     @State private var dateStart = Date()
     @State private var dateEnd = Date()
@@ -81,9 +89,9 @@ struct ViewBasicForm: View {
     
     var body: some View {
         VStack {
-            VStack{
+            Form {
                 Button(action: {
-                    print("ffff")
+                    isSheetCycle = true
                 }, label: {
                     HStack{
                         VStack{
@@ -91,7 +99,7 @@ struct ViewBasicForm: View {
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .foregroundColor(.cTextMedium)
                                 .font(.system(size: 14))
-                            Text("cccc")
+                            Text((cycle == "") ? NSLocalizedString("envChoose", comment: "") : cycle)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .foregroundColor(.cTextMedium)
                                 .font(.system(size: 16))
@@ -104,119 +112,164 @@ struct ViewBasicForm: View {
                             .foregroundColor(.cTextMedium)
                     }
                     .padding(10)
+                    /*
                     .background(Color.white)
                     .frame(alignment: Alignment.center)
                     .clipped()
                     .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
+                    */
                 })
+                
                 VStack{
-                    HStack{
-                        VStack{
-                            Text("Desde")
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .foregroundColor(.cTextMedium)
-                                .font(.system(size: 14))
-                            DatePicker("", selection: $dateStart, in: Date()..., displayedComponents: [.date, .hourAndMinute])
-                                .datePickerStyle(CompactDatePickerStyle())
-                                .labelsHidden()
-                                .clipped()
-                                .accentColor(.cTextHigh)
-                                .background(Color.white)
-                        }
-                        Spacer()
-                        Image("ic-day-request")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(height: 35)
-                            .foregroundColor(.cTextMedium)
-                    }
-                    .padding(10)
-                    HStack{
-                        VStack{
-                            Text("Hasta")
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .foregroundColor(.cTextMedium)
-                                .font(.system(size: 14))
-                            DatePicker("", selection: $dateEnd, in: Date()..., displayedComponents: [.date, .hourAndMinute])
-                                .datePickerStyle(CompactDatePickerStyle())
-                                .labelsHidden()
-                                .clipped()
-                                .accentColor(.cTextHigh)
-                                .background(Color.white)
-                        }
-                        Spacer()
-                        Image("ic-day-request")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(height: 35)
-                            .foregroundColor(.cTextMedium)
-                    }
-                    .padding(10)
-                }
-                    .background(Color.white)
-                    .frame(alignment: Alignment.center)
-                    .clipped()
-                    .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
-                TextField("escribir", text: $bb)
-                    .cornerRadius(CGFloat(4))
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-            }
-            .padding(10)
-            VStack{
-                HStack{
-                    Toggle(isOn: $showDayAuth){
-                        Text("Solicitar dias autorizados")
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .foregroundColor(.cTextMedium)
-                            .font(.system(size: 18))
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                    .onChange(of: showDayAuth, perform: { value in
-                        print(value)
-                    })
-                    .toggleStyle(SwitchToggleStyle(tint: .cBlueDark))
-                }
-                if showDayAuth {
-                    Text("Porcentaje del dia solicitado (Num)")
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .foregroundColor(.cTextMedium)
-                        .font(.system(size: 14))
-                    Slider(value: $percentageValue, in: 0.0...100, step: 10)
-                    Button(action: {
-                        print("ffff")
-                    }, label: {
+                    VStack{
                         HStack{
                             VStack{
-                                Text("Motivo de dia autorizado")
+                                Text("Desde")
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     .foregroundColor(.cTextMedium)
                                     .font(.system(size: 14))
-                                Text("selecciona")
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .foregroundColor(.cTextMedium)
-                                    .font(.system(size: 16))
+                                DatePicker("", selection: $dateStart, in: Date()..., displayedComponents: [.date, .hourAndMinute])
+                                    .datePickerStyle(CompactDatePickerStyle())
+                                    .labelsHidden()
+                                    .clipped()
+                                    .accentColor(.cTextHigh)
+                                    .background(Color.white)
+                                    .onChange(of: dateStart, perform: { value in
+                                        activity.dateStart = Utils.dateFormat(date: value)
+                                        activity.hourStart = Utils.dateFormat(date: value, format: "HH:mm")
+                                    })
                             }
+                                .padding(10)
                             Spacer()
-                            Image("ic-arrow-expand-more")
+                            Image("ic-day-request")
                                 .resizable()
                                 .scaledToFit()
-                                .frame(width: 35)
+                                .frame(height: 35)
                                 .foregroundColor(.cTextMedium)
+                                .padding(10)
                         }
-                        .padding(10)
                         .background(Color.white)
                         .frame(alignment: Alignment.center)
                         .clipped()
                         .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
-                    })
+                        HStack{
+                            VStack{
+                                Text("Hasta")
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .foregroundColor(.cTextMedium)
+                                    .font(.system(size: 14))
+                                DatePicker("", selection: $dateEnd, in: dateStart..., displayedComponents: [.date, .hourAndMinute])
+                                    .datePickerStyle(CompactDatePickerStyle())
+                                    .labelsHidden()
+                                    .clipped()
+                                    .accentColor(.cTextHigh)
+                                    .background(Color.white)
+                                    .onChange(of: dateEnd, perform: { value in
+                                        activity.dateEnd = Utils.dateFormat(date: value)
+                                        activity.hourEnd = Utils.dateFormat(date: value, format: "HH:mm")
+                                    })
+                            }
+                                .padding(10)
+                            Spacer()
+                            Image("ic-day-request")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(height: 35)
+                                .foregroundColor(.cTextMedium)
+                                .padding(10)
+                        }
+                        .background(Color.white)
+                        .frame(alignment: Alignment.center)
+                        .clipped()
+                        .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
+                    }
+                    /*
+                        .background(Color.white)
+                        .frame(alignment: Alignment.center)
+                        .clipped()
+                        .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
+                    */
+                    TextField("escribir", text: Binding(
+                        get: { String(activity.description_ ?? "") },
+                        set: { activity.description_ = String($0) }
+                    ))
+                        .cornerRadius(CGFloat(4))
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                }
+                .padding(10)
+                
+                Section {
+                    VStack{
+                        HStack{
+                            Toggle(isOn: $showDayAuth){
+                                Text("Solicitar dias autorizados")
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .foregroundColor(.cTextMedium)
+                                    .font(.system(size: 18))
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                            .onChange(of: showDayAuth, perform: { value in
+                                if value {
+                                    activity.dayPercentage = 100
+                                    activity.requestFreeDay = 1
+                                } else {
+                                    activity.dayPercentage = nil
+                                    activity.requestFreeDay = 0
+                                }
+                            })
+                            .toggleStyle(SwitchToggleStyle(tint: .cBlueDark))
+                        }
+                        if showDayAuth {
+                            Text("Porcentaje del dia solicitado \(String(percentageValue))")
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .foregroundColor(.cTextMedium)
+                                .font(.system(size: 14))
+                            Slider(value: $percentageValue, in: 0.0...100, step: 10)
+                            .onChange(of: percentageValue, perform: { value in
+                                activity.dayPercentage = Float(value)
+                            })
+                            Button(action: {
+                                print("ffff")
+                            }, label: {
+                                HStack{
+                                    VStack{
+                                        Text("Motivo de dia autorizado")
+                                            .frame(maxWidth: .infinity, alignment: .leading)
+                                            .foregroundColor(.cTextMedium)
+                                            .font(.system(size: 14))
+                                        Text("selecciona")
+                                            .frame(maxWidth: .infinity, alignment: .leading)
+                                            .foregroundColor(.cTextMedium)
+                                            .font(.system(size: 16))
+                                    }
+                                    Spacer()
+                                    Image("ic-arrow-expand-more")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: 35)
+                                        .foregroundColor(.cTextMedium)
+                                }
+                                .padding(10)
+                                .background(Color.white)
+                                .frame(alignment: Alignment.center)
+                                .clipped()
+                                .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
+                            })
+                        }
+                    }
+                    .padding(10)
+                }
+                
+                ForEach(form.tabs, id: \.id) { tab in
+                    DynamicFormView(form: $form, tab: $form.tabs[0], options: options)
                 }
             }
-            .padding(10)
-            ForEach(form.tabs, id: \.id) { tab in
-                DynamicFormView(form: $form, tab: $form.tabs[0], options: options)
-            }
+            .buttonStyle(PlainButtonStyle())
             Spacer()
-        }.onAppear{
+        }.sheet(isPresented: $isSheetCycle, content: {
+            CustomDialogPicker(onSelectionDone: onSelectionCycleDone, selected: $idsCycle, key: "CYCLE", multiple: false, isSheet: true)
+        })
+        .onAppear{
             initView()
             //CICLO CYCLE
             //MOTIVO DIA AUTORIZADO PENDIENTE
@@ -224,11 +277,33 @@ struct ViewBasicForm: View {
     }
     
     func initView(){
+        options.objectId = activity.objectId
+        options.item = activity.id
+        options.op = ""
+        options.type = visitType.lowercased()
+        options.panelType = viewRouter.data.type
         form.tabs = DynamicUtils.initForm(data: dynamicData).sorted(by: { $0.key > $1.key })
+        /*
+        activity.dateStart = Utils.dateFormat(date: dateStart)
+        activity.hourStart = Utils.dateFormat(date: dateStart, format: "HH:mm")
+        activity.dateEnd = Utils.dateFormat(date: dateEnd)
+        activity.hourEnd = Utils.dateFormat(date: dateEnd, format: "HH:mm")
+        activity.description_ = ""
+        activity.requestFreeDay = 0
+        */
+    }
+    
+    func onSelectionCycleDone(_ selected: [String]) {
+        isSheetCycle = false
+        if let item = CycleDao(realm: try! Realm()).by(id: idsCycle[0]){
+            cycle = item.displayName
+        }
     }
 }
 
 struct ViewAssistantsSelector: View{
+    
+    @State var activity: Activity
     
     @ObservedObject private var selectPanelModalToggle = ModalToggle()
     @State private var cardShow = false
@@ -250,7 +325,6 @@ struct ViewAssistantsSelector: View{
         ]
         ZStack{
             VStack{
-                Text("jajaja")
                 List {
                     ForEach(items, id: \.objectId) { item in
                         HStack(alignment: .center, spacing: 10){
@@ -294,6 +368,10 @@ struct ViewAssistantsSelector: View{
                         }
                         selected[type]?.binding.removeAll(where: { $0 == String(its) })
                         self.items.remove(atOffsets: offsets)
+                        activity.medics = slDoctors.joined(separator: ",")
+                        activity.pharmacies = slPharmacies.joined(separator: ",")
+                        activity.clients = slClients.joined(separator: ",")
+                        activity.patients = slPatients.joined(separator: ",")
                     }
                 }
                 Spacer()
@@ -324,29 +402,57 @@ struct ViewAssistantsSelector: View{
         .partialSheet(isPresented: self.$cardShow) {
             PanelTypeMenu(onPanelSelected: onPanelSelected, panelTypes: ["M", "F", "C", "P"], isPresented: self.$cardShow)
         }
+        .onAppear {
+            load()
+        }
+    }
+    
+    func load() {
+        print(activity)
+        activity.medics?.split(separator: ",").forEach{ it in
+            addPanelItems(type: "M", it: String(it))
+            slDoctors.append(String(it))
+        }
+        activity.pharmacies?.split(separator: ",").forEach{ it in
+            addPanelItems(type: "F", it: String(it))
+            slPharmacies.append(String(it))
+        }
+        activity.clients?.split(separator: ",").forEach{ it in
+            addPanelItems(type: "C", it: String(it))
+            slClients.append(String(it))
+        }
+        activity.patients?.split(separator: ",").forEach{ it in
+            addPanelItems(type: "P", it: String(it))
+            slPatients.append(String(it))
+        }
+        
     }
     
     func addPanelItems(type: String, it: String){
         switch type {
         case "M":
+            activity.medics = slDoctors.joined(separator: ",")
             if let doctor = DoctorDao(realm: try! Realm()).by(id: it){
                 if !validate(items: items, it: it, type: type) {
                     items.append(doctor)
                 }
             }
         case "F":
+            activity.pharmacies = slPharmacies.joined(separator: ",")
             if let pharmacy = PharmacyDao(realm: try! Realm()).by(id: it){
                 if !validate(items: items, it: it, type: type) {
                     items.append(pharmacy)
                 }
             }
         case "C":
+            activity.clients = slClients.joined(separator: ",")
             if let client = ClientDao(realm: try! Realm()).by(id: it){
                 if !validate(items: items, it: it, type: type) {
                     items.append(client)
                 }
             }
         case "P":
+            activity.patients = slPatients.joined(separator: ",")
             if let patient = PatientDao(realm: try! Realm()).by(id: it){
                 if !validate(items: items, it: it, type: type) {
                     items.append(patient)

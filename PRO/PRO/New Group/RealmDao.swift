@@ -152,6 +152,24 @@ class CycleDao: GenericDao {
     
 }
 
+class ActivityDao: GenericDao {
+    
+    func all() -> [Activity] {
+        return Array(realm.objects(Activity.self).sorted(byKeyPath: "lastName"))
+    }
+    
+    func by(id: String) -> Activity? {
+        return realm.objects(Activity.self).filter("id == \(id)").first
+    }
+    
+    func store(activity: Activity) {
+        try! realm.write {
+            realm.add(activity, update: .all)
+        }
+    }
+    
+}
+
 class DoctorDao: GenericDao {
     
     func all() -> [Doctor] {
