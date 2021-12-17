@@ -10,17 +10,11 @@ import SwiftUI
 
 struct PanelStockView: View {
     
-    var panel: Panel!
+    @Binding var selected: [String]
     @State var couldAdd = false
     
     var body: some View {
-        ZStack(alignment: .bottomTrailing) {
-            
-            if couldAdd {
-                FAB(image: "ic-plus", foregroundColor: .cPrimary) {
-                    print(1)
-                }
-            }
+        VStack {
         }
     }
     

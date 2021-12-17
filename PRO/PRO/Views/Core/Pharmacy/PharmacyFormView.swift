@@ -23,6 +23,8 @@ struct PharmacyFormView: View {
     @State private var options = DynamicFormFieldOptions(table: "pharmacy", op: "")
     @State private var showValidationError = false
     
+    @State var productsStock = [String]()
+    
     var body: some View {
         VStack {
             HeaderToggleView(couldSearch: false, title: pharmacy?.name ?? "modPharmacy", icon: Image("ic-pharmacy"), color: Color.cPanelPharmacy)
@@ -32,7 +34,7 @@ struct PharmacyFormView: View {
                 case "LOCATIONS":
                     PanelLocationView(panel: pharmacy, couldAdd: true)
                 case "STOCK":
-                    PanelStockView(panel: pharmacy, couldAdd: true)
+                    PanelStockView(selected: $productsStock, couldAdd: true)
                 default:
                     ZStack(alignment: .bottomTrailing) {
                         ForEach(form.tabs, id: \.id) { tab in
