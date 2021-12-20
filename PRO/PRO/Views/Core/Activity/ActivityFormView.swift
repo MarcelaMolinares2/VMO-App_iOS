@@ -14,6 +14,9 @@ struct ActivityFormView: View {
     
     @State var viewForms = false
     @State private var activity: Activity = Activity()
+    @ObservedObject var dashboardRouter = DashboardRouter()
+    @State var searchText = ""
+    @EnvironmentObject var viewRouter: ViewRouter
     
     var body: some View {
         ZStack{
@@ -33,7 +36,7 @@ struct ActivityFormView: View {
                             .frame(width: geometry.size.width / 2, alignment: .center)
                             .foregroundColor(viewForms ? .cAccent : .cPrimary)
                             .onTapGesture {
-                                viewForms.toggle()
+                                viewForms = false
                             }
                         Image("ic-client")
                             .resizable()
@@ -42,7 +45,7 @@ struct ActivityFormView: View {
                             .frame(width: geometry.size.width / 2, alignment: .center)
                             .foregroundColor(viewForms ? .cPrimary : .cAccent)
                             .onTapGesture {
-                                viewForms.toggle()
+                                viewForms = true
                             }
                     }
                     .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
@@ -64,7 +67,12 @@ struct ActivityFormView: View {
     
     func save(){
         print(activity)
-        //ActivityDao(realm: try! Realm()).store(activity: activity)
+        ActivityDao(realm: try! Realm()).store(activity: activity)
+        self.goTo(page: "MASTER")
+    }
+    
+    func goTo(page: String) {
+        viewRouter.currentPage = page
     }
 }
 
@@ -112,12 +120,6 @@ struct ViewBasicForm: View {
                             .foregroundColor(.cTextMedium)
                     }
                     .padding(10)
-                    /*
-                    .background(Color.white)
-                    .frame(alignment: Alignment.center)
-                    .clipped()
-                    .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
-                    */
                 })
                 
                 VStack{
@@ -136,7 +138,12 @@ struct ViewBasicForm: View {
                                     .background(Color.white)
                                     .onChange(of: dateStart, perform: { value in
                                         activity.dateStart = Utils.dateFormat(date: value)
-                                        activity.hourStart = Utils.dateFormat(date: value, format: "HH:mm")
+                                        activity.hourStart = Utils.dateFormat(date: value, format: "HH:mm:ss")
+                                        if dateStart >= dateEnd {
+                                            dateEnd = dateStart
+                                            activity.dateEnd = Utils.dateFormat(date: value)
+                                            activity.hourEnd = Utils.dateFormat(date: value, format: "HH:mm:ss")
+                                        }
                                     })
                             }
                                 .padding(10)
@@ -166,7 +173,7 @@ struct ViewBasicForm: View {
                                     .background(Color.white)
                                     .onChange(of: dateEnd, perform: { value in
                                         activity.dateEnd = Utils.dateFormat(date: value)
-                                        activity.hourEnd = Utils.dateFormat(date: value, format: "HH:mm")
+                                        activity.hourEnd = Utils.dateFormat(date: value, format: "HH:mm:ss")
                                     })
                             }
                                 .padding(10)
@@ -183,12 +190,6 @@ struct ViewBasicForm: View {
                         .clipped()
                         .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
                     }
-                    /*
-                        .background(Color.white)
-                        .frame(alignment: Alignment.center)
-                        .clipped()
-                        .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
-                    */
                     TextField("escribir", text: Binding(
                         get: { String(activity.description_ ?? "") },
                         set: { activity.description_ = String($0) }
@@ -197,7 +198,6 @@ struct ViewBasicForm: View {
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                 }
                 .padding(10)
-                
                 Section {
                     VStack{
                         HStack{
@@ -259,7 +259,6 @@ struct ViewBasicForm: View {
                     }
                     .padding(10)
                 }
-                
                 ForEach(form.tabs, id: \.id) { tab in
                     DynamicFormView(form: $form, tab: $form.tabs[0], options: options)
                 }
@@ -283,14 +282,24 @@ struct ViewBasicForm: View {
         options.type = visitType.lowercased()
         options.panelType = viewRouter.data.type
         form.tabs = DynamicUtils.initForm(data: dynamicData).sorted(by: { $0.key > $1.key })
-        /*
-        activity.dateStart = Utils.dateFormat(date: dateStart)
-        activity.hourStart = Utils.dateFormat(date: dateStart, format: "HH:mm")
-        activity.dateEnd = Utils.dateFormat(date: dateEnd)
-        activity.hourEnd = Utils.dateFormat(date: dateEnd, format: "HH:mm")
-        activity.description_ = ""
-        activity.requestFreeDay = 0
-        */
+        if let date_MDY: String = activity.dateStart {
+            if let date_HMS: String = activity.hourStart {
+                self.dateStart = Utils.strToDate(value : date_MDY + " " + date_HMS)
+            }
+        } else {
+            activity.dateStart = Utils.dateFormat(date: Date())
+            activity.hourStart = Utils.dateFormat(date: Date(), format: "HH:mm:ss")
+        }
+        if let date_MDY: String = activity.dateEnd {
+            if let date_HMS: String = activity.hourEnd {
+                self.dateEnd = Utils.strToDate(value : date_MDY + " " + date_HMS)
+            }
+        } else {
+            activity.dateEnd = Utils.dateFormat(date: Date())
+            activity.hourEnd = Utils.dateFormat(date: Date(), format: "HH:mm:ss")
+        }
+        showDayAuth = (activity.requestFreeDay == 1) ? true: false
+        self.percentageValue = (activity.dayPercentage != nil) ? Double(activity.dayPercentage ?? 100): Double(100)
     }
     
     func onSelectionCycleDone(_ selected: [String]) {

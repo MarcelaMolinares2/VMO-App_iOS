@@ -189,7 +189,6 @@ struct MaterialDeliveryListCardView: View {
 }
 
 struct MaterialDeliveryFormView: View {
-    
     @ObservedObject var moduleRouter: ModuleRouter
     @ObservedObject private var selectMaterialsModalToggle = ModalToggle()
     @EnvironmentObject var viewRouter: ViewRouter
