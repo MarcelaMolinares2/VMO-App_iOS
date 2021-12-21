@@ -32,8 +32,10 @@ struct ClientFormView: View {
                     PanelContactView(panel: client, couldAdd: true)
                 case "LOCATIONS":
                     PanelLocationView(panel: client, couldAdd: true)
+                /*
                 case "STOCK":
                     PanelStockView(panel: client, couldAdd: true)
+                */
                 default:
                     ZStack(alignment: .bottomTrailing) {
                         ForEach(form.tabs, id: \.id) { tab in
@@ -101,3 +103,4 @@ struct ClientFormView: View {
         tabRouter.current = tab
     }
 }
+

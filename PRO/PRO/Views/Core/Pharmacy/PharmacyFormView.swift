@@ -99,6 +99,5 @@ struct PharmacyFormView: View {
     func onTabSelected(_ tab: String) {
         tabRouter.current = tab
     }
-
     
 }

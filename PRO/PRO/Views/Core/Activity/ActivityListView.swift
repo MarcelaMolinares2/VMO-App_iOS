@@ -21,9 +21,9 @@ struct ActivityListView: View {
         ZStack(alignment: .bottomTrailing) {
             VStack {
                 if !viewActivity{
-                    ListView()
+                    ActivityItemsView(viewRouter: viewRouter)
                 } else {
-                    MapView()
+                    ActivityMapView()
                 }
             }
             VStack {
@@ -49,7 +49,7 @@ struct ActivityListView: View {
     }
 }
 
-struct MapView: View{
+struct ActivityMapView: View{
     var body: some View {
         VStack{
             Text("Hola")
@@ -58,46 +58,68 @@ struct MapView: View{
     }
 }
 
-struct ListView: View{
+struct ActivityItemsView: View{
     
-    @ObservedResults(Activity.self) var activity
+    @ObservedObject var viewRouter: ViewRouter
+    @ObservedResults(Activity.self) var activitys
+    @State private var optionsModal = false
+    
+    @State private var activitySelected: Activity = Activity()
     
     var body: some View {
         VStack{
             List {
-                ForEach (activity, id: \.objectId){ item in
-                    VStack {
-                        Text(item.description_ ?? "")
-                            //.frame(width: UIScreen.main.bounds.width / 2, alignment: .leading)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .foregroundColor(.cTextMedium)
-                            .font(.system(size: 16))
-                            .fixedSize(horizontal: false, vertical: true)
-                            .padding([.leading, .trailing], 4)
-                            /*
-                            Text()
-                                .frame(maxWidth: .infinity, alignment: .trailing)
-                                .foregroundColor(.cTextMedium)
-                                .font(.system(size: 14))
-                                .fixedSize(horizontal: false, vertical: true)
-                            */
-                        Text(Utils.dateFormat(date: Utils.strToDate(value: item.dateStart ?? Utils.dateFormat(date: Date())), format: "dd, MMM yy") + ". " + Utils.dateFormat(date: Utils.strToDate(value: item.dateEnd ?? Utils.dateFormat(date: Date())), format: "dd, MMM yy"))
-                            .frame(maxWidth: .infinity, alignment: .trailing)
-                            .foregroundColor(.cTextMedium)
-                            .font(.system(size: 14))
-                            .fixedSize(horizontal: false, vertical: true)
-                        .padding([.leading, .trailing], 4)
-                        .padding([.top, .bottom], 2)
+                ForEach (activitys, id: \.objectId){ item in
+                    ActivityItemsCardView(item: item).onTapGesture {
+                        self.activitySelected = item
+                        self.optionsModal = true
                     }
-                    .padding([.top, .bottom], 10)
-                    .background(Color.white)
-                    .frame(alignment: Alignment.center)
-                    .clipped()
-                    .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
-                    
                 }
             }
             .buttonStyle(PlainButtonStyle())
         }
+        .partialSheet(isPresented: $optionsModal) {
+            ActivityBottomMenu(onEdit: onEdit, onDetail: onDetail, activity: activitySelected)
+        }
     }
+    
+    
+    func onEdit(_ activity: Activity) {
+        self.optionsModal = false
+        viewRouter.data = FormEntity(objectId: activity.objectId.stringValue)
+        FormEntity(objectId: activity.objectId.stringValue).go(path: "DTV-FORM", router: viewRouter)
+        print("Edit")
+    }
+    
+    func onDetail(_ activity: Activity) {
+        self.optionsModal = false
+        print("Datile")
+    }
+}
+
+struct ActivityItemsCardView: View{
+    var item: Activity
+    var body: some View {
+        VStack {
+            Text(item.description_ ?? "")
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .foregroundColor(.cTextMedium)
+                .font(.system(size: 16))
+                .fixedSize(horizontal: false, vertical: true)
+                .padding([.leading, .trailing], 4)
+            Text(Utils.dateFormat(date: Utils.strToDate(value: item.dateStart ?? Utils.dateFormat(date: Date())), format: "dd, MMM yy") + ". " + Utils.dateFormat(date: Utils.strToDate(value: item.dateEnd ?? Utils.dateFormat(date: Date())), format: "dd, MMM yy"))
+                .frame(maxWidth: .infinity, alignment: .trailing)
+                .foregroundColor(.cTextMedium)
+                .font(.system(size: 14))
+                .fixedSize(horizontal: false, vertical: true)
+            .padding([.leading, .trailing], 4)
+            .padding([.top, .bottom], 2)
+        }
+        .padding([.top, .bottom], 10)
+        .background(Color.white)
+        .frame(alignment: Alignment.center)
+        .clipped()
+        .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
+    }
+    
 }

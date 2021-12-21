@@ -9,6 +9,7 @@
 import SwiftUI
 import RealmSwift
 import CoreLocation
+import AlertToast
 
 struct ActivityFormView: View {
     
@@ -17,15 +18,16 @@ struct ActivityFormView: View {
     @ObservedObject var dashboardRouter = DashboardRouter()
     @State var searchText = ""
     @EnvironmentObject var viewRouter: ViewRouter
+    @State private var showToast = false
     
     var body: some View {
         ZStack{
             VStack{
                 HeaderToggleView(couldSearch: false, title: "modDifferentToVisit", icon: Image("ic-activity"), color: Color.cPanelActivity)
-                if !viewForms{
-                    ViewBasicForm(activity: activity)
+                if !viewForms {
+                    ActivityBasicFormView(activity: $activity)
                 } else {
-                    ViewAssistantsSelector(activity: activity)
+                    AssistantsActivityFormView(activity: $activity)
                 }
                 GeometryReader { geometry in
                     HStack{
@@ -52,6 +54,7 @@ struct ActivityFormView: View {
                 }
                 .frame(minWidth: 0, maxWidth: .infinity, minHeight: 46, maxHeight: 46)
             }
+            
             VStack {
                 Spacer()
                 HStack {
@@ -63,12 +66,42 @@ struct ActivityFormView: View {
             }
             .padding(.bottom, 56)
         }
+        .toast(isPresenting: $showToast) {
+            AlertToast(type: .regular, title: NSLocalizedString("envRequireItems", comment: ""))
+        }
+        .onAppear{
+            load()
+        }
+    }
+    
+    func load() {
+        
+        if !viewRouter.data.objectId.isEmpty {
+            if let activityItem = try? ActivityDao(realm: try! Realm()).by(objectId: ObjectId(string: viewRouter.data.objectId)) {
+                activity = activityItem
+            }
+        }
+        
     }
     
     func save(){
         print(activity)
-        ActivityDao(realm: try! Realm()).store(activity: activity)
-        self.goTo(page: "MASTER")
+        
+        if activity.requestFreeDay == 0{
+            if activity.description_ == nil {
+                self.showToast.toggle()
+            } else{
+                ActivityDao(realm: try! Realm()).store(activity: activity)
+                self.goTo(page: "MASTER")
+            }
+        } else {
+            if activity.description_ == nil || activity.dayReason == nil {
+                self.showToast.toggle()
+            } else {
+                ActivityDao(realm: try! Realm()).store(activity: activity)
+                self.goTo(page: "MASTER")
+            }
+        }
     }
     
     func goTo(page: String) {
@@ -76,9 +109,9 @@ struct ActivityFormView: View {
     }
 }
 
-struct ViewBasicForm: View {
+struct ActivityBasicFormView: View {
     
-    @State var activity: Activity
+    @Binding var activity: Activity
     
     @EnvironmentObject var viewRouter: ViewRouter
     
@@ -91,9 +124,11 @@ struct ViewBasicForm: View {
     @State private var form = DynamicForm(tabs: [DynamicFormTab]())
     @State private var options = DynamicFormFieldOptions(table: "activity", op: "")
     @State private var showDayAuth = false
-    @State private var dateStart = Date()
-    @State private var dateEnd = Date()
-    @State var percentageValue = Double(100)
+    @State private var dateStart : Date = Date()
+    @State private var dateEnd : Date = Date()
+    @State private var percentageValue = Double(100)
+    @State private var commentActivity = ""
+    @State private var reasonActivity = ""
     
     var body: some View {
         VStack {
@@ -103,7 +138,7 @@ struct ViewBasicForm: View {
                 }, label: {
                     HStack{
                         VStack{
-                            Text("Ciclo")
+                            Text(NSLocalizedString("Cycle", comment: ""))
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .foregroundColor(.cTextMedium)
                                 .font(.system(size: 14))
@@ -126,7 +161,7 @@ struct ViewBasicForm: View {
                     VStack{
                         HStack{
                             VStack{
-                                Text("Desde")
+                                Text(NSLocalizedString("envFrom", comment: ""))
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     .foregroundColor(.cTextMedium)
                                     .font(.system(size: 14))
@@ -161,7 +196,7 @@ struct ViewBasicForm: View {
                         .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
                         HStack{
                             VStack{
-                                Text("Hasta")
+                                Text(NSLocalizedString("envTo", comment: ""))
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     .foregroundColor(.cTextMedium)
                                     .font(.system(size: 14))
@@ -190,19 +225,28 @@ struct ViewBasicForm: View {
                         .clipped()
                         .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
                     }
-                    TextField("escribir", text: Binding(
-                        get: { String(activity.description_ ?? "") },
-                        set: { activity.description_ = String($0) }
-                    ))
-                        .cornerRadius(CGFloat(4))
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                    Text(NSLocalizedString("envComment", comment: ""))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .foregroundColor((commentActivity == "") ? .cDanger : .cTextMedium)
+                        .font(.system(size: 14))
+                    VStack{
+                        TextEditor(text: $commentActivity)
+                        .frame(height: 80)
+                        .onChange(of: commentActivity, perform: { value in
+                            activity.description_ = value
+                        })
+                    }
+                    .background(Color.white)
+                    .frame(alignment: Alignment.center)
+                    .clipped()
+                    .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
                 }
                 .padding(10)
                 Section {
                     VStack{
                         HStack{
                             Toggle(isOn: $showDayAuth){
-                                Text("Solicitar dias autorizados")
+                                Text(NSLocalizedString("activityRequestDay", comment: ""))
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     .foregroundColor(.cTextMedium)
                                     .font(.system(size: 18))
@@ -220,7 +264,8 @@ struct ViewBasicForm: View {
                             .toggleStyle(SwitchToggleStyle(tint: .cBlueDark))
                         }
                         if showDayAuth {
-                            Text("Porcentaje del dia solicitado \(String(percentageValue))")
+                            Text(String(format: NSLocalizedString("activityPercentageDay", comment: ""), String(percentageValue)))
+                            //Text(NSLocalizedString("activityPercentageDay", comment: ""), String(percentageValue))
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .foregroundColor(.cTextMedium)
                                 .font(.system(size: 14))
@@ -229,15 +274,16 @@ struct ViewBasicForm: View {
                                 activity.dayPercentage = Float(value)
                             })
                             Button(action: {
-                                print("ffff")
+                                reasonActivity = (reasonActivity == "") ? "hola": ""
+                                activity.dayReason = reasonActivity
                             }, label: {
                                 HStack{
                                     VStack{
-                                        Text("Motivo de dia autorizado")
+                                        Text(NSLocalizedString("activityReasonDay", comment: ""))
                                             .frame(maxWidth: .infinity, alignment: .leading)
-                                            .foregroundColor(.cTextMedium)
+                                            .foregroundColor((reasonActivity == "") ? .cDanger : .cTextMedium)
                                             .font(.system(size: 14))
-                                        Text("selecciona")
+                                        Text((reasonActivity != "") ? reasonActivity: NSLocalizedString("envChoose", comment: ""))
                                             .frame(maxWidth: .infinity, alignment: .leading)
                                             .foregroundColor(.cTextMedium)
                                             .font(.system(size: 16))
@@ -269,13 +315,13 @@ struct ViewBasicForm: View {
             CustomDialogPicker(onSelectionDone: onSelectionCycleDone, selected: $idsCycle, key: "CYCLE", multiple: false, isSheet: true)
         })
         .onAppear{
-            initView()
-            //CICLO CYCLE
-            //MOTIVO DIA AUTORIZADO PENDIENTE
+            load()
         }
     }
     
-    func initView(){
+    func load(){
+        
+        print(activity)
         options.objectId = activity.objectId
         options.item = activity.id
         options.op = ""
@@ -299,20 +345,31 @@ struct ViewBasicForm: View {
             activity.hourEnd = Utils.dateFormat(date: Date(), format: "HH:mm:ss")
         }
         showDayAuth = (activity.requestFreeDay == 1) ? true: false
+        //activity.requestFreeDay = (showDayAuth) ? 1 : 0
         self.percentageValue = (activity.dayPercentage != nil) ? Double(activity.dayPercentage ?? 100): Double(100)
+        
+        /*
+        if let itemCycle = CycleDao(realm: try! Realm()).by(id: "1"){
+            cycle = itemCycle.displayName
+            activity.cycle = itemCycle;
+        }
+         */
+        reasonActivity = activity.dayReason ?? ""
+        commentActivity = activity.description_ ?? ""
     }
     
     func onSelectionCycleDone(_ selected: [String]) {
         isSheetCycle = false
-        if let item = CycleDao(realm: try! Realm()).by(id: idsCycle[0]){
-            cycle = item.displayName
+        if let itemCycle = CycleDao(realm: try! Realm()).by(id: idsCycle[0]){
+            cycle = itemCycle.displayName
+            print(itemCycle.id)
         }
     }
 }
 
-struct ViewAssistantsSelector: View{
+struct AssistantsActivityFormView: View{
     
-    @State var activity: Activity
+    @Binding var activity: Activity
     
     @ObservedObject private var selectPanelModalToggle = ModalToggle()
     @State private var cardShow = false

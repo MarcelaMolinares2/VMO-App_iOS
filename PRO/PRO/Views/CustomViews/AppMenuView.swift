@@ -649,3 +649,63 @@ struct RouteBottomMenu: View {
         }
     }
 }
+
+
+struct ActivityBottomMenu: View {
+    let onEdit: (_ group: Activity) -> Void
+    let onDetail: (_ group: Activity) -> Void
+    
+    @State var activity: Activity
+    @State private var customGridItems: [GenericGridItem] = []
+    @State var columns: [GridItem] = []
+    
+    var body: some View {
+        VStack {
+            HStack {
+                Text(NSLocalizedString("envComment", comment: ""))
+                Spacer()
+            }
+            .padding(10)
+            .foregroundColor(.white)
+            .background(Color.cPrimaryLight.opacity(1))
+            HStack {
+                Spacer()
+                Button(action: {
+                    onDetail(activity)
+                }) {
+                    VStack {
+                        Image("ic-diary")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
+                            .foregroundColor(.cPrimaryLight)
+                        Text(NSLocalizedString("envDetail", comment: ""))
+                            .foregroundColor(.cPrimary)
+                            .lineLimit(1)
+                            .font(.system(size: CGFloat(15)))
+                    }
+                }
+                .padding([.top, .bottom], 10)
+                Spacer()
+                Button(action: {
+                    onEdit(activity)
+                }) {
+                    VStack {
+                        Image("ic-edit")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
+                            .foregroundColor(.cPrimaryLight)
+                        Text(NSLocalizedString("envEdit", comment: ""))
+                            .foregroundColor(.cPrimary)
+                            .lineLimit(1)
+                            .font(.system(size: CGFloat(15)))
+                    }
+                }
+                .padding([.top, .bottom], 10)
+                Spacer()
+            }
+            .padding(.bottom, 2)
+        }
+    }
+}

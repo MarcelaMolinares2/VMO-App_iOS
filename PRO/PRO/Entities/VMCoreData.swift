@@ -34,7 +34,7 @@ class Activity: Object, Codable, SyncEntity, Identifiable {
     //@Persisted var fieldsData: String?
     @Persisted var transaction = ""
     @Persisted var lastUpdate = ""
-    var cycle: Cycle?
+    @Persisted var cycle: Cycle?
     
     private enum CodingKeys: String, CodingKey {
         case id = "id_actividad", description_ = "descripcion", dateStart = "fecha_inicial", dateEnd = "fecha_final", hourStart = "hora_inicial", hourEnd = "hora_final", medics = "id_medico", pharmacies = "id_farmacia", clients = "id_cliente", patients = "id_paciente", latitude = "latitud", longitude = "longitud", requestFreeDay = "solicitar_dias_autorizados"

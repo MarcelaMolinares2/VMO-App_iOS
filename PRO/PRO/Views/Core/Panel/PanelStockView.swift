@@ -15,6 +15,7 @@ struct PanelStockView: View {
     
     var body: some View {
         VStack {
+            Text("fffffff")
         }
     }
     

@@ -162,6 +162,10 @@ class ActivityDao: GenericDao {
         return realm.objects(Activity.self).filter("id == \(id)").first
     }
     
+    func by(objectId: ObjectId) -> Activity? {
+        return realm.object(ofType: Activity.self, forPrimaryKey: objectId)
+    }
+    
     func store(activity: Activity) {
         try! realm.write {
             realm.add(activity, update: .all)

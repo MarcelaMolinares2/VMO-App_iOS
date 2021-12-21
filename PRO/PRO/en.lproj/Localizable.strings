@@ -77,6 +77,11 @@
 
 "envChoose" = "Choose...";
 "envReason" = "Reason";
+"envComment" = "Comment";
+"envCycle" = "Cycle";
+"envRequireItems" = "Please add required items";
+"envFrom" = "From";
+"envTo" = "To";
 
 "envPromotedProducts" = "Promoted products";
 "nonePromotedProducts" = "Please add promoted products";
@@ -91,3 +96,8 @@
 "envShopping" = "Shopping";
 
 "envStock" = "Stock";
+
+"activityRequestDay" = "Request authorized day";
+"activityPercentageDay" = "Percentage of the requested day (%@)%";
+"activityReasonDay" = "Reason for authorized day";
+
