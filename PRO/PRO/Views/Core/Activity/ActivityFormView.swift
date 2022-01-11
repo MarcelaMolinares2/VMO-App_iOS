@@ -7,6 +7,7 @@
 //
 
 import SwiftUI
+import Realm
 import RealmSwift
 import CoreLocation
 import AlertToast
@@ -320,7 +321,7 @@ struct ActivityBasicFormView: View {
     }
     
     func load(){
-        
+        print("holaaa xxx BASIC")
         print(activity)
         options.objectId = activity.objectId
         options.item = activity.id
@@ -375,6 +376,8 @@ struct AssistantsActivityFormView: View{
     @State private var cardShow = false
     @State private var type = ""
     @State private var items = [Panel & SyncEntity]()
+    
+    let realm = try! Realm()
     
     @State private var slDefault = [String]()
     @State private var slDoctors = [String]()
@@ -460,6 +463,7 @@ struct AssistantsActivityFormView: View{
                 .background(Color.black.opacity(0.45))
                 .onDisappear {
                     selected[self.type]?.binding.forEach{ it in
+                        addActivitysPanels(type: self.type)
                         addPanelItems(type: self.type, it: it)
                     }
                 }
@@ -474,7 +478,10 @@ struct AssistantsActivityFormView: View{
     }
     
     func load() {
+        print("holaaa xxx LISTT")
+        print(slDoctors)
         print(activity)
+        
         activity.medics?.split(separator: ",").forEach{ it in
             addPanelItems(type: "M", it: String(it))
             slDoctors.append(String(it))
@@ -491,34 +498,52 @@ struct AssistantsActivityFormView: View{
             addPanelItems(type: "P", it: String(it))
             slPatients.append(String(it))
         }
-        
+    }
+    
+    func addActivitysPanels(type: String){
+        switch type {
+        case "M":
+            try! realm.write {
+                activity.medics = slDoctors.joined(separator: ",")
+            }
+        case "F":
+            try! realm.write {
+                activity.pharmacies = slPharmacies.joined(separator: ",")
+            }
+        case "C":
+            try! realm.write {
+                activity.clients = slClients.joined(separator: ",")
+            }
+        case "P":
+            try! realm.write {
+                activity.patients = slPatients.joined(separator: ",")
+            }
+        default:
+            break
+        }
     }
     
     func addPanelItems(type: String, it: String){
         switch type {
         case "M":
-            activity.medics = slDoctors.joined(separator: ",")
             if let doctor = DoctorDao(realm: try! Realm()).by(id: it){
                 if !validate(items: items, it: it, type: type) {
                     items.append(doctor)
                 }
             }
         case "F":
-            activity.pharmacies = slPharmacies.joined(separator: ",")
             if let pharmacy = PharmacyDao(realm: try! Realm()).by(id: it){
                 if !validate(items: items, it: it, type: type) {
                     items.append(pharmacy)
                 }
             }
         case "C":
-            activity.clients = slClients.joined(separator: ",")
             if let client = ClientDao(realm: try! Realm()).by(id: it){
                 if !validate(items: items, it: it, type: type) {
                     items.append(client)
                 }
             }
         case "P":
-            activity.patients = slPatients.joined(separator: ",")
             if let patient = PatientDao(realm: try! Realm()).by(id: it){
                 if !validate(items: items, it: it, type: type) {
                     items.append(patient)

@@ -83,7 +83,6 @@ struct ActivityItemsView: View{
         }
     }
     
-    
     func onEdit(_ activity: Activity) {
         self.optionsModal = false
         viewRouter.data = FormEntity(objectId: activity.objectId.stringValue)
@@ -99,6 +98,7 @@ struct ActivityItemsView: View{
 
 struct ActivityItemsCardView: View{
     var item: Activity
+    
     var body: some View {
         VStack {
             Text(item.description_ ?? "")
