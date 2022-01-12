@@ -15,6 +15,7 @@ import AlertToast
 struct ActivityFormView: View {
     
     @State var viewForms = false
+    @State var waitLoad = false
     @State private var activity: Activity = Activity()
     @ObservedObject var dashboardRouter = DashboardRouter()
     @State var searchText = ""
@@ -25,10 +26,12 @@ struct ActivityFormView: View {
         ZStack{
             VStack{
                 HeaderToggleView(couldSearch: false, title: "modDifferentToVisit", icon: Image("ic-activity"), color: Color.cPanelActivity)
-                if !viewForms {
-                    ActivityBasicFormView(activity: $activity)
-                } else {
-                    AssistantsActivityFormView(activity: $activity)
+                if waitLoad {
+                    if !viewForms {
+                        ActivityBasicFormView(activity: activity)
+                    } else {
+                        AssistantsActivityFormView(activity: activity)
+                    }
                 }
                 GeometryReader { geometry in
                     HStack{
@@ -76,18 +79,15 @@ struct ActivityFormView: View {
     }
     
     func load() {
-        
         if !viewRouter.data.objectId.isEmpty {
             if let activityItem = try? ActivityDao(realm: try! Realm()).by(objectId: ObjectId(string: viewRouter.data.objectId)) {
-                activity = activityItem
+                activity = Activity(value: activityItem)
             }
         }
-        
+        waitLoad = true
     }
     
     func save(){
-        print(activity)
-        
         if activity.requestFreeDay == 0{
             if activity.description_ == nil {
                 self.showToast.toggle()
@@ -112,7 +112,7 @@ struct ActivityFormView: View {
 
 struct ActivityBasicFormView: View {
     
-    @Binding var activity: Activity
+    @State var activity: Activity
     
     @EnvironmentObject var viewRouter: ViewRouter
     
@@ -260,6 +260,8 @@ struct ActivityBasicFormView: View {
                                 } else {
                                     activity.dayPercentage = nil
                                     activity.requestFreeDay = 0
+                                    activity.dayReason = nil
+                                    reasonActivity = ""
                                 }
                             })
                             .toggleStyle(SwitchToggleStyle(tint: .cBlueDark))
@@ -275,7 +277,7 @@ struct ActivityBasicFormView: View {
                                 activity.dayPercentage = Float(value)
                             })
                             Button(action: {
-                                reasonActivity = (reasonActivity == "") ? "hola": ""
+                                reasonActivity = (reasonActivity == "") ? "reason": ""
                                 activity.dayReason = reasonActivity
                             }, label: {
                                 HStack{
@@ -321,8 +323,6 @@ struct ActivityBasicFormView: View {
     }
     
     func load(){
-        print("holaaa xxx BASIC")
-        print(activity)
         options.objectId = activity.objectId
         options.item = activity.id
         options.op = ""
@@ -345,32 +345,31 @@ struct ActivityBasicFormView: View {
             activity.dateEnd = Utils.dateFormat(date: Date())
             activity.hourEnd = Utils.dateFormat(date: Date(), format: "HH:mm:ss")
         }
+        activity.requestFreeDay = (activity.requestFreeDay == nil) ? 0: activity.requestFreeDay
         showDayAuth = (activity.requestFreeDay == 1) ? true: false
-        //activity.requestFreeDay = (showDayAuth) ? 1 : 0
+        
         self.percentageValue = (activity.dayPercentage != nil) ? Double(activity.dayPercentage ?? 100): Double(100)
         
-        /*
-        if let itemCycle = CycleDao(realm: try! Realm()).by(id: "1"){
-            cycle = itemCycle.displayName
-            activity.cycle = itemCycle;
-        }
-         */
         reasonActivity = activity.dayReason ?? ""
         commentActivity = activity.description_ ?? ""
+        if let itemCycle = CycleDao(realm: try! Realm()).by(id: "1"){
+            cycle = itemCycle.displayName
+            activity.cycle = itemCycle
+        }
     }
     
     func onSelectionCycleDone(_ selected: [String]) {
         isSheetCycle = false
         if let itemCycle = CycleDao(realm: try! Realm()).by(id: idsCycle[0]){
             cycle = itemCycle.displayName
-            print(itemCycle.id)
+            activity.cycle = itemCycle
         }
     }
 }
 
 struct AssistantsActivityFormView: View{
     
-    @Binding var activity: Activity
+    @State var activity: Activity
     
     @ObservedObject private var selectPanelModalToggle = ModalToggle()
     @State private var cardShow = false
@@ -478,10 +477,6 @@ struct AssistantsActivityFormView: View{
     }
     
     func load() {
-        print("holaaa xxx LISTT")
-        print(slDoctors)
-        print(activity)
-        
         activity.medics?.split(separator: ",").forEach{ it in
             addPanelItems(type: "M", it: String(it))
             slDoctors.append(String(it))
@@ -503,21 +498,13 @@ struct AssistantsActivityFormView: View{
     func addActivitysPanels(type: String){
         switch type {
         case "M":
-            try! realm.write {
-                activity.medics = slDoctors.joined(separator: ",")
-            }
+            activity.medics = slDoctors.joined(separator: ",")
         case "F":
-            try! realm.write {
-                activity.pharmacies = slPharmacies.joined(separator: ",")
-            }
+            activity.pharmacies = slPharmacies.joined(separator: ",")
         case "C":
-            try! realm.write {
-                activity.clients = slClients.joined(separator: ",")
-            }
+            activity.clients = slClients.joined(separator: ",")
         case "P":
-            try! realm.write {
-                activity.patients = slPatients.joined(separator: ",")
-            }
+            activity.patients = slPatients.joined(separator: ",")
         default:
             break
         }

@@ -69,7 +69,7 @@ struct ActivityItemsView: View{
     var body: some View {
         VStack{
             List {
-                ForEach (activitys, id: \.objectId){ item in
+                ForEach (activitys.sorted { Utils.strDateFormat(value: $0.dateStart ?? "") < Utils.strDateFormat(value: $1.dateStart ?? "")}, id: \.objectId){ item in
                     ActivityItemsCardView(item: item).onTapGesture {
                         self.activitySelected = item
                         self.optionsModal = true
