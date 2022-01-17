@@ -92,6 +92,8 @@ struct ActivityItemsView: View{
     
     func onDetail(_ activity: Activity) {
         self.optionsModal = false
+        viewRouter.data = FormEntity(objectId: activity.objectId.stringValue)
+        FormEntity(objectId: activity.objectId.stringValue).go(path: "DTV-SUMMARY", router: viewRouter)
         print("Datile")
     }
 }
@@ -102,6 +104,8 @@ struct ActivityItemsCardView: View{
     var body: some View {
         VStack {
             Text(item.description_ ?? "")
+                .lineLimit(3)
+                .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .foregroundColor(.cTextMedium)
                 .font(.system(size: 16))
@@ -115,7 +119,8 @@ struct ActivityItemsCardView: View{
             .padding([.leading, .trailing], 4)
             .padding([.top, .bottom], 2)
         }
-        .padding([.top, .bottom], 10)
+        //.padding([.top, .bottom], 10)
+        .padding(10)
         .background(Color.white)
         .frame(alignment: Alignment.center)
         .clipped()

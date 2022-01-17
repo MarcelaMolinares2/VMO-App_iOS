@@ -1,5 +1,6 @@
 ${PODS_ROOT}/Target Support Files/Pods-PRO/Pods-PRO-frameworks.sh
 ${BUILT_PRODUCTS_DIR}/AlertToast/AlertToast.framework
+${BUILT_PRODUCTS_DIR}/BottomSheetSwiftUI/BottomSheetSwiftUI.framework
 ${BUILT_PRODUCTS_DIR}/FirebaseCore/FirebaseCore.framework
 ${BUILT_PRODUCTS_DIR}/FirebaseCoreDiagnostics/FirebaseCoreDiagnostics.framework
 ${BUILT_PRODUCTS_DIR}/FirebaseCrashlytics/FirebaseCrashlytics.framework

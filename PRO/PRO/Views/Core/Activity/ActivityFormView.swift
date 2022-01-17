@@ -7,19 +7,20 @@
 //
 
 import SwiftUI
-import Realm
 import RealmSwift
 import CoreLocation
 import AlertToast
 
 struct ActivityFormView: View {
     
-    @State var viewForms = false
-    @State var waitLoad = false
+    @EnvironmentObject var viewRouter: ViewRouter
+    
     @State private var activity: Activity = Activity()
     @ObservedObject var dashboardRouter = DashboardRouter()
+    
+    @State var viewForms = false
+    @State var waitLoad = false
     @State var searchText = ""
-    @EnvironmentObject var viewRouter: ViewRouter
     @State private var showToast = false
     
     var body: some View {
@@ -88,6 +89,7 @@ struct ActivityFormView: View {
     }
     
     func save(){
+        activity.requestFreeDay = (activity.requestFreeDay == nil) ? 0: activity.requestFreeDay
         if activity.requestFreeDay == 0{
             if activity.description_ == nil {
                 self.showToast.toggle()
@@ -125,6 +127,7 @@ struct ActivityBasicFormView: View {
     @State private var form = DynamicForm(tabs: [DynamicFormTab]())
     @State private var options = DynamicFormFieldOptions(table: "activity", op: "")
     @State private var showDayAuth = false
+    @State private var showSectionRequestDay = false
     @State private var dateStart : Date = Date()
     @State private var dateEnd : Date = Date()
     @State private var percentageValue = Double(100)
@@ -166,7 +169,7 @@ struct ActivityBasicFormView: View {
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     .foregroundColor(.cTextMedium)
                                     .font(.system(size: 14))
-                                DatePicker("", selection: $dateStart, in: Date()..., displayedComponents: [.date, .hourAndMinute])
+                                DatePicker("", selection: $dateStart, in: dateStart..., displayedComponents: [.date, .hourAndMinute])
                                     .datePickerStyle(CompactDatePickerStyle())
                                     .labelsHidden()
                                     .clipped()
@@ -243,70 +246,72 @@ struct ActivityBasicFormView: View {
                     .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
                 }
                 .padding(10)
-                Section {
-                    VStack{
-                        HStack{
-                            Toggle(isOn: $showDayAuth){
-                                Text(NSLocalizedString("activityRequestDay", comment: ""))
+                if showSectionRequestDay {
+                    Section {
+                        VStack{
+                            HStack{
+                                Toggle(isOn: $showDayAuth){
+                                    Text(NSLocalizedString("activityRequestDay", comment: ""))
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .foregroundColor(.cTextMedium)
+                                        .font(.system(size: 18))
+                                        .fixedSize(horizontal: false, vertical: true)
+                                }
+                                .onChange(of: showDayAuth, perform: { value in
+                                    if value {
+                                        activity.dayPercentage = 100
+                                        activity.requestFreeDay = 1
+                                    } else {
+                                        activity.dayPercentage = nil
+                                        activity.requestFreeDay = 0
+                                        activity.dayReason = nil
+                                        reasonActivity = ""
+                                    }
+                                })
+                                .toggleStyle(SwitchToggleStyle(tint: .cBlueDark))
+                            }
+                            if showDayAuth {
+                                Text(String(format: NSLocalizedString("activityPercentageDay", comment: ""), String(percentageValue)))
+                                //Text(NSLocalizedString("activityPercentageDay", comment: ""), String(percentageValue))
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     .foregroundColor(.cTextMedium)
-                                    .font(.system(size: 18))
-                                    .fixedSize(horizontal: false, vertical: true)
-                            }
-                            .onChange(of: showDayAuth, perform: { value in
-                                if value {
-                                    activity.dayPercentage = 100
-                                    activity.requestFreeDay = 1
-                                } else {
-                                    activity.dayPercentage = nil
-                                    activity.requestFreeDay = 0
-                                    activity.dayReason = nil
-                                    reasonActivity = ""
-                                }
-                            })
-                            .toggleStyle(SwitchToggleStyle(tint: .cBlueDark))
-                        }
-                        if showDayAuth {
-                            Text(String(format: NSLocalizedString("activityPercentageDay", comment: ""), String(percentageValue)))
-                            //Text(NSLocalizedString("activityPercentageDay", comment: ""), String(percentageValue))
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .foregroundColor(.cTextMedium)
-                                .font(.system(size: 14))
-                            Slider(value: $percentageValue, in: 0.0...100, step: 10)
-                            .onChange(of: percentageValue, perform: { value in
-                                activity.dayPercentage = Float(value)
-                            })
-                            Button(action: {
-                                reasonActivity = (reasonActivity == "") ? "reason": ""
-                                activity.dayReason = reasonActivity
-                            }, label: {
-                                HStack{
-                                    VStack{
-                                        Text(NSLocalizedString("activityReasonDay", comment: ""))
-                                            .frame(maxWidth: .infinity, alignment: .leading)
-                                            .foregroundColor((reasonActivity == "") ? .cDanger : .cTextMedium)
-                                            .font(.system(size: 14))
-                                        Text((reasonActivity != "") ? reasonActivity: NSLocalizedString("envChoose", comment: ""))
-                                            .frame(maxWidth: .infinity, alignment: .leading)
+                                    .font(.system(size: 14))
+                                Slider(value: $percentageValue, in: 0.0...100, step: 10)
+                                .onChange(of: percentageValue, perform: { value in
+                                    activity.dayPercentage = Float(value)
+                                })
+                                Button(action: {
+                                    reasonActivity = (reasonActivity == "") ? "reason": ""
+                                    activity.dayReason = reasonActivity
+                                }, label: {
+                                    HStack{
+                                        VStack{
+                                            Text(NSLocalizedString("activityReasonDay", comment: ""))
+                                                .frame(maxWidth: .infinity, alignment: .leading)
+                                                .foregroundColor((reasonActivity == "") ? .cDanger : .cTextMedium)
+                                                .font(.system(size: 14))
+                                            Text((reasonActivity != "") ? reasonActivity: NSLocalizedString("envChoose", comment: ""))
+                                                .frame(maxWidth: .infinity, alignment: .leading)
+                                                .foregroundColor(.cTextMedium)
+                                                .font(.system(size: 16))
+                                        }
+                                        Spacer()
+                                        Image("ic-arrow-expand-more")
+                                            .resizable()
+                                            .scaledToFit()
+                                            .frame(width: 35)
                                             .foregroundColor(.cTextMedium)
-                                            .font(.system(size: 16))
                                     }
-                                    Spacer()
-                                    Image("ic-arrow-expand-more")
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(width: 35)
-                                        .foregroundColor(.cTextMedium)
-                                }
-                                .padding(10)
-                                .background(Color.white)
-                                .frame(alignment: Alignment.center)
-                                .clipped()
-                                .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
-                            })
+                                    .padding(10)
+                                    .background(Color.white)
+                                    .frame(alignment: Alignment.center)
+                                    .clipped()
+                                    .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
+                                })
+                            }
                         }
+                        .padding(10)
                     }
-                    .padding(10)
                 }
                 ForEach(form.tabs, id: \.id) { tab in
                     DynamicFormView(form: $form, tab: $form.tabs[0], options: options)
@@ -345,7 +350,7 @@ struct ActivityBasicFormView: View {
             activity.dateEnd = Utils.dateFormat(date: Date())
             activity.hourEnd = Utils.dateFormat(date: Date(), format: "HH:mm:ss")
         }
-        activity.requestFreeDay = (activity.requestFreeDay == nil) ? 0: activity.requestFreeDay
+        showSectionRequestDay = (activity.requestFreeDay == 0) ? false: true
         showDayAuth = (activity.requestFreeDay == 1) ? true: false
         
         self.percentageValue = (activity.dayPercentage != nil) ? Double(activity.dayPercentage ?? 100): Double(100)
@@ -375,8 +380,6 @@ struct AssistantsActivityFormView: View{
     @State private var cardShow = false
     @State private var type = ""
     @State private var items = [Panel & SyncEntity]()
-    
-    let realm = try! Realm()
     
     @State private var slDefault = [String]()
     @State private var slDoctors = [String]()

@@ -1,5 +1,6 @@
 PODS:
   - AlertToast (1.3.7)
+  - BottomSheetSwiftUI (2.4.0)
   - Firebase/Analytics (8.9.1):
     - Firebase/Core
   - Firebase/Core (8.9.1):
@@ -145,6 +146,7 @@ PODS:
 
 DEPENDENCIES:
   - AlertToast
+  - BottomSheetSwiftUI
   - Firebase/Analytics
   - Firebase/Crashlytics
   - Firebase/Messaging
@@ -158,6 +160,7 @@ DEPENDENCIES:
 SPEC REPOS:
   trunk:
     - AlertToast
+    - BottomSheetSwiftUI
     - Firebase
     - FirebaseAnalytics
     - FirebaseCore
@@ -180,6 +183,7 @@ SPEC REPOS:
 
 SPEC CHECKSUMS:
   AlertToast: 8c9d5efb2df6ea728b32b62bce99d876ec3e5393
+  BottomSheetSwiftUI: c176c3022969d6383deaa388dd011199cc50f5bd
   Firebase: fb5114cd2bf96e2ff7bcb01d0d9a156cf5fd2f07
   FirebaseAnalytics: 4ab446ce08a3fe52e8a4303dd997cf26276bf968
   FirebaseCore: c5aab092d9c4b8efea894946166b04c9d9ef0e68
@@ -200,6 +204,6 @@ SPEC CHECKSUMS:
   SwiftUIPager: 994249cf7ee9a10ea1fcd8e6643962bb17742fc6
   URLImage: 36a66c03ba2a9ccbbf06bc83431f2cef171008e8
 
-PODFILE CHECKSUM: f366b81de0e9631ce27c83ce421df1b77f957093
+PODFILE CHECKSUM: 9783f071a13f40a5337cb2a96f2d18653071a6e1
 
 COCOAPODS: 1.11.2

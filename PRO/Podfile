@@ -16,7 +16,7 @@ target 'PRO' do
   pod 'GooglePlaces'
   pod 'SwiftUIPager'
   pod 'SwiftTryCatch'
-
+  pod 'BottomSheetSwiftUI'
   target 'PROTests' do
     inherit! :search_paths
     # Pods for testing

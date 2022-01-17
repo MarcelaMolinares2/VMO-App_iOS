@@ -18,6 +18,8 @@ struct WrapperView: View {
                 DoctorFormView()
             case "DTV-FORM":
                 ActivityFormView()
+            case "DTV-SUMMARY":
+                ActivitySummaryView()
             case "MATERIAL-DELIVERY":
                 MaterialDeliveryView()
             case "MATERIAL-REQUEST":
