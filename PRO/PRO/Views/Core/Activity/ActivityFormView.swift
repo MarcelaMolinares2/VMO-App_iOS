@@ -142,7 +142,7 @@ struct ActivityBasicFormView: View {
                 }, label: {
                     HStack{
                         VStack{
-                            Text(NSLocalizedString("Cycle", comment: ""))
+                            Text(NSLocalizedString("envCycle", comment: ""))
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .foregroundColor(.cTextMedium)
                                 .font(.system(size: 14))
@@ -271,8 +271,7 @@ struct ActivityBasicFormView: View {
                                 .toggleStyle(SwitchToggleStyle(tint: .cBlueDark))
                             }
                             if showDayAuth {
-                                Text(String(format: NSLocalizedString("activityPercentageDay", comment: ""), String(percentageValue)))
-                                //Text(NSLocalizedString("activityPercentageDay", comment: ""), String(percentageValue))
+                                Text(String(format: NSLocalizedString("envRequestedDayPercentage", comment: ""), String(percentageValue)))
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     .foregroundColor(.cTextMedium)
                                     .font(.system(size: 14))
@@ -281,12 +280,12 @@ struct ActivityBasicFormView: View {
                                     activity.dayPercentage = Float(value)
                                 })
                                 Button(action: {
-                                    reasonActivity = (reasonActivity == "") ? "reason": ""
+                                    reasonActivity = (reasonActivity == "") ? "reason": "reason"
                                     activity.dayReason = reasonActivity
                                 }, label: {
                                     HStack{
                                         VStack{
-                                            Text(NSLocalizedString("activityReasonDay", comment: ""))
+                                            Text(NSLocalizedString("envDayRequestReason", comment: ""))
                                                 .frame(maxWidth: .infinity, alignment: .leading)
                                                 .foregroundColor((reasonActivity == "") ? .cDanger : .cTextMedium)
                                                 .font(.system(size: 14))

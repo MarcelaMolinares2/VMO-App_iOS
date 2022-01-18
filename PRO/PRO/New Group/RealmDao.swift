@@ -152,10 +152,45 @@ class CycleDao: GenericDao {
     
 }
 
+class FreeDayReasonDao: GenericDao {
+    
+    func all() -> [FreeDayReason] {
+        return Array(realm.objects(FreeDayReason.self).sorted(byKeyPath: "cycle").sorted(byKeyPath: "year"))
+    }
+    
+    func by(id: String) -> FreeDayReason? {
+        return realm.objects(FreeDayReason.self).filter("id == \(id)").first
+    }
+    
+}
+
+
+class RequestDayDao: GenericDao {
+    
+    func all() -> [RequestDay] {
+        return Array(realm.objects(RequestDay.self).sorted(byKeyPath: "id"))
+    }
+    
+    func by(id: String) -> RequestDay? {
+        return realm.objects(RequestDay.self).filter("id == \(id)").first
+    }
+    
+    func by(objectId: ObjectId) -> RequestDay? {
+        return realm.object(ofType: RequestDay.self, forPrimaryKey: objectId)
+    }
+    
+    func store(request: RequestDay) {
+        try! realm.write {
+            realm.add(request, update: .all)
+        }
+    }
+    
+}
+
 class ActivityDao: GenericDao {
     
     func all() -> [Activity] {
-        return Array(realm.objects(Activity.self).sorted(byKeyPath: "lastName"))
+        return Array(realm.objects(Activity.self).sorted(byKeyPath: "id"))
     }
     
     func by(id: String) -> Activity? {

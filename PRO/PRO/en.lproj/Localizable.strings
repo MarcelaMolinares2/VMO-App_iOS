@@ -98,6 +98,6 @@
 "envStock" = "Stock";
 
 "activityRequestDay" = "Request authorized day";
-"activityPercentageDay" = "Percentage of the requested day (%@)%";
-"activityReasonDay" = "Reason for authorized day";
+"envRequestedDayPercentage" = "Percentage of the requested day (%@)%";
+"envDayRequestReason" = "Reason for authorized day";
 
