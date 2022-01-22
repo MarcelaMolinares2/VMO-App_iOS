@@ -154,3 +154,51 @@ struct KeyInfoView: View {
         }
     }
 }
+
+protocol CustomContainerView: View {
+    associatedtype Content
+    init(content: @escaping () -> Content)
+}
+
+extension CustomContainerView {
+    init(@ViewBuilder _ content: @escaping () -> Content) {
+        self.init(content: content)
+    }
+}
+
+struct CustomForm<Content: View>: CustomContainerView {
+    var content: () -> Content
+    
+    var body: some View {
+        ScrollView {
+            VStack(content: content).padding()
+        }
+        .background(Color.cForm)
+    }
+}
+
+struct CustomSection<Content: View>: View {
+    var title: String = ""
+    var content: () -> Content
+    
+    init(_ title: String = "", @ViewBuilder content: @escaping () -> Content) {
+        self.title = title
+        self.content = content
+    }
+    
+    var body: some View {
+        VStack {
+            if !title.isEmpty {
+                Text(title)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .foregroundColor(.cTextMedium)
+            }
+            VStack(content: content)
+                .padding()
+                .background(Color.white)
+                .cornerRadius(5)
+        }
+        .padding(.top, 10)
+    }
+}
+

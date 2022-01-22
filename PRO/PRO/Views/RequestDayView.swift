@@ -36,34 +36,36 @@ struct RequestDayView: View {
         ZStack {
             VStack {
                 HeaderToggleView(couldSearch: false, title: "modRequestDays", icon: Image("ic-day-request"), color: Color.cPanelRequestDay)
-                Form {
-                    Button(action: {
-                        isSheetCycle = true
-                    }, label: {
-                        HStack{
-                            VStack{
-                                Text(NSLocalizedString("envCycle", comment: ""))
-                                    .frame(maxWidth: .infinity, alignment: .leading)
+                CustomForm {
+                    CustomSection {
+                        Button(action: {
+                            isSheetCycle = true
+                        }, label: {
+                            HStack{
+                                VStack{
+                                    Text(NSLocalizedString("envCycle", comment: ""))
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .foregroundColor(.cTextHigh)
+                                        .font(.system(size: 14))
+                                    Text((cycle == "") ? NSLocalizedString("envChoose", comment: "") : cycle)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .foregroundColor(.cTextHigh)
+                                        .font(.system(size: 16))
+                                }
+                                Spacer()
+                                Image("ic-arrow-expand-more")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 35)
                                     .foregroundColor(.cTextHigh)
-                                    .font(.system(size: 14))
-                                Text((cycle == "") ? NSLocalizedString("envChoose", comment: "") : cycle)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .foregroundColor(.cTextHigh)
-                                    .font(.system(size: 16))
                             }
-                            Spacer()
-                            Image("ic-arrow-expand-more")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 35)
-                                .foregroundColor(.cTextHigh)
-                        }
-                        .sheet(isPresented: $isSheetCycle, content: {
-                            CustomDialogPicker(onSelectionDone: onSelectionCycleDone, selected: $idsCycle, key: "CYCLE", multiple: false, isSheet: true)
+                            .sheet(isPresented: $isSheetCycle, content: {
+                                CustomDialogPicker(onSelectionDone: onSelectionCycleDone, selected: $idsCycle, key: "CYCLE", multiple: false, isSheet: true)
+                            })
+                            .padding(10)
                         })
-                        .padding(10)
-                    })
-                    VStack{
+                    }
+                    CustomSection {
                         HStack{
                             VStack{
                                 Text(NSLocalizedString("envFrom", comment: ""))
@@ -141,65 +143,60 @@ struct RequestDayView: View {
                                 .disabled(true)
                         }
                     }
-                    Section {
-                        VStack{
-                            VStack {
-                                Text(String(format: NSLocalizedString("envRequestedDayPercentage", comment: ""), String(percentageValue)))
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .foregroundColor(.cTextHigh)
-                                    .font(.system(size: 14))
-                                Slider(value: $percentageValue, in: 0.0...100, step: 10)
-                            }
-                            Button(action: {
-                                isSheetReason = true
-                            }, label: {
-                                HStack{
-                                    VStack{
-                                        Text(NSLocalizedString("envDayRequestReason", comment: ""))
-                                            .frame(maxWidth: .infinity, alignment: .leading)
-                                            .foregroundColor((reason == "") ? .cDanger : .cTextHigh)
-                                            .font(.system(size: 14))
-                                        Text((reason != "") ? reason: NSLocalizedString("envChoose", comment: ""))
-                                            .frame(maxWidth: .infinity, alignment: .leading)
-                                            .foregroundColor(.cTextHigh)
-                                            .font(.system(size: 16))
-                                    }
-                                    Spacer()
-                                    Image("ic-arrow-expand-more")
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(width: 35)
-                                        .foregroundColor(.cTextHigh)
-                                }
-                                .sheet(isPresented: $isSheetReason, content: {
-                                    CustomDialogPicker(onSelectionDone: onSelectionReasonDone, selected: $idsReason, key: "STYLE", multiple: false, isSheet: true)
-                                })
-                                .padding(10)
-                                .background(Color.white)
-                                .frame(alignment: Alignment.center)
-                                .clipped()
-                                .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
-                            })
-                            VStack {
-                                Text(NSLocalizedString("envComment", comment: ""))
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .foregroundColor((comment == "") ? .cDanger : .cTextHigh)
-                                    .font(.system(size: 14))
+                    CustomSection {
+                        VStack {
+                            Text(String(format: NSLocalizedString("envRequestedDayPercentage", comment: ""), String(percentageValue)))
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .foregroundColor(.cTextHigh)
+                                .font(.system(size: 14))
+                            Slider(value: $percentageValue, in: 0.0...100, step: 10)
+                        }
+                        Button(action: {
+                            isSheetReason = true
+                        }, label: {
+                            HStack{
                                 VStack{
-                                    TextEditor(text: $comment)
-                                        .frame(height: 80)
+                                    Text(NSLocalizedString("envDayRequestReason", comment: ""))
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .foregroundColor((reason == "") ? .cDanger : .cTextHigh)
+                                        .font(.system(size: 14))
+                                    Text((reason != "") ? reason: NSLocalizedString("envChoose", comment: ""))
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .foregroundColor(.cTextHigh)
+                                        .font(.system(size: 16))
                                 }
-                                .background(Color.white)
-                                .frame(alignment: Alignment.center)
-                                .clipped()
-                                .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
+                                Spacer()
+                                Image("ic-arrow-expand-more")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 35)
+                                    .foregroundColor(.cTextHigh)
                             }
-                            
+                            .sheet(isPresented: $isSheetReason, content: {
+                                CustomDialogPicker(onSelectionDone: onSelectionReasonDone, selected: $idsReason, key: "STYLE", multiple: false, isSheet: true)
+                            })
+                            .padding(10)
+                            .background(Color.white)
+                            .frame(alignment: Alignment.center)
+                            .clipped()
+                            .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
+                        })
+                        VStack {
+                            Text(NSLocalizedString("envComment", comment: ""))
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .foregroundColor((comment == "") ? .cDanger : .cTextHigh)
+                                .font(.system(size: 14))
+                            VStack{
+                                TextEditor(text: $comment)
+                                    .frame(height: 80)
+                            }
+                            .background(Color.white)
+                            .frame(alignment: Alignment.center)
+                            .clipped()
+                            .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
                         }
                     }
                 }
-                .buttonStyle(PlainButtonStyle())
-                Spacer()
             }
             VStack {
                 Spacer()
