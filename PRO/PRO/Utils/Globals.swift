@@ -70,5 +70,6 @@ extension Color {
     static let cBlueDark = Color("colorBlueDark")
     static let cWarning = Color("colorWarning")
     static let cInfo = Color("colorInfo")
+    static let cForm = Color("colorForm")
 
 }

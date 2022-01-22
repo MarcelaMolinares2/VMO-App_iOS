@@ -28,7 +28,7 @@ struct DynamicFormSection: View {
     var options: DynamicFormFieldOptions
     
     var body: some View {
-        Section(header: Text(group.title)) {
+        CustomSection(group.title) {
             ForEach(group.fields.indices) { index in
                 if group.fields[index].localVisible {
                     DynamicFieldView(form: $form, field: $group.fields[index], options: options)
@@ -689,6 +689,7 @@ struct DynamicFormList: View {
                     .frame(width: 16, height: 16, alignment: .center)
                     .foregroundColor(.cAccent)
             }
+            .frame(minHeight: 40)
         }
         .onAppear {
             load()

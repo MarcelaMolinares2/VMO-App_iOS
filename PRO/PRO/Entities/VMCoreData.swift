@@ -680,6 +680,8 @@ class Movement: Object, Codable, SyncEntity {
     @Persisted var dataShopping = List<MovementProductShopping>()
     @Persisted var dataTransference = List<MovementProductTransference>()
     
+    var tmpDate = Date()
+    
     private enum CodingKeys: String, CodingKey {
         case id = "id_movimiento", panelId = "id_medico", panelType = "tipo", date = "fecha_visita", realDate = "fecha_real", hour = "hora_visita", comment = "comentario", target = "objetivo_proxima", duration = "duracion", executed = "no_efect", latitude = "latitud", longitude = "longitud", companionId = "id_acompanante", wasScheduled = "agendado", rqAssistance = "asistencia", openAt = "fecha_inicio", closedAt = "fecha_fin", contactType = "tipo_contacto", contactedBy = "contactado_por", dataContacts = "contacto", additionalFields = "fields", cycleId = "ciclo", dataPromoted = "productos_prom", dataMaterial = "rl_material_deliveries", dataStock = "rl_product_stock", dataShopping = "rl_shopping", dataTransference = "rl_product_transference"
     }
