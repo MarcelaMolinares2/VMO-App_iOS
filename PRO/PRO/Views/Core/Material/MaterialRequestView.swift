@@ -67,7 +67,7 @@ struct MaterialRequestView: View {
                 }
                 .padding(15)
                 
-                TextField(NSLocalizedString("materialObservations", comment: ""), text: bindingComment)
+                TextField(NSLocalizedString("envObservations", comment: ""), text: bindingComment)
                     .frame(height: 30)
                     .padding([.leading, .trailing], 10)
                     .foregroundColor(.black)

@@ -446,6 +446,7 @@ struct GlobalMenu: View {
                     .padding(.horizontal, 10)
                     .padding(.vertical, 2)
                     Button(action: {
+                        self.goTo(page: "EXPENSES-VIEW")
                     }) {
                         HStack {
                             Image("ic-expense")

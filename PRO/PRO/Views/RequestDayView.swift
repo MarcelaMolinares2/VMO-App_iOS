@@ -8,6 +8,7 @@
 
 import SwiftUI
 import RealmSwift
+import AlertToast
 
 struct RequestDayView: View {
     
@@ -29,114 +30,119 @@ struct RequestDayView: View {
     @State private var idsReason = [String]()
     @State private var reason = ""
     
+    @State private var showToast = false
+    
     var body: some View {
         ZStack {
             VStack {
                 HeaderToggleView(couldSearch: false, title: "modRequestDays", icon: Image("ic-day-request"), color: Color.cPanelRequestDay)
-                VStack{
-                    Form {
-                        Button(action: {
-                            isSheetCycle = true
-                        }, label: {
-                            HStack{
-                                VStack{
-                                    Text(NSLocalizedString("envCycle", comment: ""))
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                        .foregroundColor(.cTextHigh)
-                                        .font(.system(size: 14))
-                                    Text((cycle == "") ? NSLocalizedString("envChoose", comment: "") : cycle)
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                        .foregroundColor(.cTextHigh)
-                                        .font(.system(size: 16))
-                                }
-                                Spacer()
-                                Image("ic-arrow-expand-more")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 35)
-                                    .foregroundColor(.cTextHigh)
-                            }
-                            .sheet(isPresented: $isSheetCycle, content: {
-                                CustomDialogPicker(onSelectionDone: onSelectionCycleDone, selected: $idsCycle, key: "CYCLE", multiple: false, isSheet: true)
-                            })
-                            .padding(10)
-                        })
-                        VStack{
-                            HStack{
-                                VStack{
-                                    Text(NSLocalizedString("envFrom", comment: ""))
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                        .foregroundColor(.cTextHigh)
-                                        .font(.system(size: 14))
-                                    DatePicker("", selection: $dateStart, in: Date()..., displayedComponents: [.date])
-                                        .datePickerStyle(CompactDatePickerStyle())
-                                        .labelsHidden()
-                                        .clipped()
-                                        .accentColor(.cTextHigh)
-                                        .background(Color.white)
-                                        .onChange(of: dateStart, perform: { value in
-                                            if dateStart >= dateEnd {
-                                                dateEnd = dateStart
-                                                noDays = String(Calendar.current.dateComponents([.day], from: dateStart, to: dateEnd).day! + 1)
-                                            }
-                                        })
-                                }
-                                .padding(10)
-                                Spacer()
-                                Image("ic-day-request")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(height: 35)
-                                    .foregroundColor(.cTextHigh)
-                                    .padding(10)
-                            }
-                            .background(Color.white)
-                            .frame(alignment: Alignment.center)
-                            .clipped()
-                            .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
-                            HStack{
-                                VStack{
-                                    Text(NSLocalizedString("envTo", comment: ""))
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                        .foregroundColor(.cTextHigh)
-                                        .font(.system(size: 14))
-                                    DatePicker("", selection: $dateEnd, in: Date()..., displayedComponents: [.date])
-                                        .datePickerStyle(CompactDatePickerStyle())
-                                        .labelsHidden()
-                                        .clipped()
-                                        .accentColor(.cTextHigh)
-                                        .background(Color.white)
-                                        .onChange(of: dateEnd, perform: { value in
-                                            noDays = String(Calendar.current.dateComponents([.day], from: dateStart, to: dateEnd).day! + 1)
-                                        })
-                                }
-                                .padding(10)
-                                Spacer()
-                                Image("ic-day-request")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(height: 35)
-                                    .foregroundColor(.cTextHigh)
-                                    .padding(10)
-                            }
-                            .background(Color.white)
-                            .frame(alignment: Alignment.center)
-                            .clipped()
-                            .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
-                            VStack {
-                                Text("envNoRequestedDays")
-                                    .font(.system(size: 14))
+                Form {
+                    Button(action: {
+                        isSheetCycle = true
+                    }, label: {
+                        HStack{
+                            VStack{
+                                Text(NSLocalizedString("envCycle", comment: ""))
                                     .frame(maxWidth: .infinity, alignment: .leading)
-                                    .foregroundColor(noDays.isEmpty ? .cDanger : .cTextHigh)
-                                TextField("envNoDays", text: $noDays)
-                                    .frame(minHeight: 38.0)
-                                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                                    .keyboardType(.numberPad)
-                                    .autocapitalization(.none)
-                                    .disabled(true)
+                                    .foregroundColor(.cTextHigh)
+                                    .font(.system(size: 14))
+                                Text((cycle == "") ? NSLocalizedString("envChoose", comment: "") : cycle)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .foregroundColor(.cTextHigh)
+                                    .font(.system(size: 16))
                             }
+                            Spacer()
+                            Image("ic-arrow-expand-more")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 35)
+                                .foregroundColor(.cTextHigh)
                         }
-                        Section {
+                        .sheet(isPresented: $isSheetCycle, content: {
+                            CustomDialogPicker(onSelectionDone: onSelectionCycleDone, selected: $idsCycle, key: "CYCLE", multiple: false, isSheet: true)
+                        })
+                        .padding(10)
+                    })
+                    VStack{
+                        HStack{
+                            VStack{
+                                Text(NSLocalizedString("envFrom", comment: ""))
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .foregroundColor(.cTextHigh)
+                                    .font(.system(size: 14))
+                                DatePicker("", selection: $dateStart, in: Date()..., displayedComponents: [.date])
+                                    .datePickerStyle(CompactDatePickerStyle())
+                                    .labelsHidden()
+                                    .clipped()
+                                    .accentColor(.cTextHigh)
+                                    .background(Color.white)
+                                    .onChange(of: dateStart, perform: { value in
+                                        if dateStart >= dateEnd {
+                                            dateEnd = dateStart
+                                            noDays = String(Calendar.current.dateComponents([.day], from: dateStart, to: dateEnd).day! + 1)
+                                        }
+                                    })
+                            }
+                            .padding(10)
+                            Spacer()
+                            Image("ic-day-request")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(height: 35)
+                                .foregroundColor(.cTextHigh)
+                                .padding(10)
+                        }
+                        .background(Color.white)
+                        .frame(alignment: Alignment.center)
+                        .clipped()
+                        .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
+                        HStack{
+                            VStack{
+                                Text(NSLocalizedString("envTo", comment: ""))
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .foregroundColor(.cTextHigh)
+                                    .font(.system(size: 14))
+                                DatePicker("", selection: $dateEnd, in: Date()..., displayedComponents: [.date])
+                                    .datePickerStyle(CompactDatePickerStyle())
+                                    .labelsHidden()
+                                    .clipped()
+                                    .accentColor(.cTextHigh)
+                                    .background(Color.white)
+                                    .onChange(of: dateEnd, perform: { value in
+                                        if dateStart >= dateEnd {
+                                            dateEnd = dateStart
+                                            noDays = String(Calendar.current.dateComponents([.day], from: dateStart, to: dateEnd).day! + 1)
+                                        }
+                                    })
+                            }
+                            .padding(10)
+                            Spacer()
+                            Image("ic-day-request")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(height: 35)
+                                .foregroundColor(.cTextHigh)
+                                .padding(10)
+                        }
+                        .background(Color.white)
+                        .frame(alignment: Alignment.center)
+                        .clipped()
+                        .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
+                        VStack {
+                            Text("envNoRequestedDays")
+                                .font(.system(size: 14))
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .foregroundColor(noDays.isEmpty ? .cDanger : .cTextHigh)
+                            TextField("envNoDays", text: $noDays)
+                                .frame(minHeight: 38.0)
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                                .keyboardType(.numberPad)
+                                .autocapitalization(.none)
+                                .disabled(true)
+                        }
+                    }
+                    Section {
+                        VStack{
                             VStack {
                                 Text(String(format: NSLocalizedString("envRequestedDayPercentage", comment: ""), String(percentageValue)))
                                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -188,11 +194,12 @@ struct RequestDayView: View {
                                 .clipped()
                                 .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
                             }
+                            
                         }
                     }
-                    .buttonStyle(PlainButtonStyle())
-                    Spacer()
                 }
+                .buttonStyle(PlainButtonStyle())
+                Spacer()
             }
             VStack {
                 Spacer()
@@ -205,6 +212,9 @@ struct RequestDayView: View {
                     }
                 }
             }
+        }
+        .toast(isPresenting: $showToast) {
+            AlertToast(type: .regular, title: NSLocalizedString("envRequireItems", comment: ""))
         }
         .onAppear {
             load()
@@ -220,6 +230,7 @@ struct RequestDayView: View {
     
     func validate() -> Bool {
         if idsCycle.isEmpty || idsReason.isEmpty || reason.isEmpty || percentageValue <= 0 || noDays.isEmpty || comment.isEmpty{
+            self.showToast.toggle()
             return false
         }
         return true

@@ -64,7 +64,7 @@
 "expDate" = "(Exp.: %@)";
 "noneMaterialDelivery" = "Please add material";
 "materialQuantity" = "Q: %@";
-"materialObservations" = "Observations";
+"envObservations" = "Observations";
 "addMaterialDelivery" = "Material and samples";
 
 "envName" = "Name";

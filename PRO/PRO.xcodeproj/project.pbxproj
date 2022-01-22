@@ -10,6 +10,7 @@
 		18C6927C84D38BA9EE3F545B /* Pods_PRO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E3C06D47BDA9998B4B375715 /* Pods_PRO.framework */; };
 		2E11FEA9278F635D0087AA66 /* ActivitySummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E11FEA8278F635D0087AA66 /* ActivitySummaryView.swift */; };
 		2E5431D4272B540E00B99B2A /* RouteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E5431D3272B540E00B99B2A /* RouteView.swift */; };
+		2EC3123D279873580092CB85 /* ExpensesFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EC3123C279873580092CB85 /* ExpensesFormView.swift */; };
 		2FAF5A6336548F2D98AD4BAE /* Pods_PROTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AB8F1CF126A59CADCF161A74 /* Pods_PROTests.framework */; };
 		3A3473BE99512C06EBA024F5 /* Pods_PRO_PROUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 38C7C9F320FB5C095FED1876 /* Pods_PRO_PROUITests.framework */; };
 		76900EE4C2D9C9D1BCC38AA3 /* amplifyconfiguration.json in Resources */ = {isa = PBXBuildFile; fileRef = 727D1891CD0D9128FF9FFABA /* amplifyconfiguration.json */; };
@@ -125,6 +126,7 @@
 		09088EBD37B79740C57A1DBB /* Pods-PROTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PROTests.release.xcconfig"; path = "Target Support Files/Pods-PROTests/Pods-PROTests.release.xcconfig"; sourceTree = "<group>"; };
 		2E11FEA8278F635D0087AA66 /* ActivitySummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivitySummaryView.swift; sourceTree = "<group>"; };
 		2E5431D3272B540E00B99B2A /* RouteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouteView.swift; sourceTree = "<group>"; };
+		2EC3123C279873580092CB85 /* ExpensesFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpensesFormView.swift; sourceTree = "<group>"; };
 		38C7C9F320FB5C095FED1876 /* Pods_PRO_PROUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_PRO_PROUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3C4A6044C111C9D48B7331F7 /* Pods-PRO-PROUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PRO-PROUITests.release.xcconfig"; path = "Target Support Files/Pods-PRO-PROUITests/Pods-PRO-PROUITests.release.xcconfig"; sourceTree = "<group>"; };
 		68134B15E467F03395CB862C /* Pods-PROTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PROTests.debug.xcconfig"; path = "Target Support Files/Pods-PROTests/Pods-PROTests.debug.xcconfig"; sourceTree = "<group>"; };
@@ -546,6 +548,7 @@
 		ACA106CE2575906500FDD7E4 /* Others */ = {
 			isa = PBXGroup;
 			children = (
+				2EC3123C279873580092CB85 /* ExpensesFormView.swift */,
 				ACA106CF2575907900FDD7E4 /* RequestDayView.swift */,
 				ACA106E12575E8D000FDD7E4 /* SupportView.swift */,
 				AC59E9A1257B424000121387 /* PanelCardView.swift */,
@@ -743,7 +746,7 @@
 			);
 			mainGroup = AC6F1F1624FF2978005E57DC;
 			packageReferences = (
-				AC5B9760256CAE0F0007500D /* XCRemoteSwiftPackageReference "PartialSheet.git" */,
+				AC5B9760256CAE0F0007500D /* XCRemoteSwiftPackageReference "PartialSheet" */,
 				AC562278274FDF1A00098C3A /* XCRemoteSwiftPackageReference "amplify-ios" */,
 			);
 			productRefGroup = AC6F1F2024FF2978005E57DC /* Products */;
@@ -947,6 +950,7 @@
 				ACC053402550629500B9753A /* MediaServer.swift in Sources */,
 				2E11FEA9278F635D0087AA66 /* ActivitySummaryView.swift in Sources */,
 				ACA15F462591AB2300E92FF2 /* PanelLocationView.swift in Sources */,
+				2EC3123D279873580092CB85 /* ExpensesFormView.swift in Sources */,
 				AC60C1F0274749C400294834 /* PotentialFormView.swift in Sources */,
 				AC78D2EC26D54FA900674A4F /* DialogPickers.swift in Sources */,
 				ACC1963E25A4D51700C5EE3E /* RouteFormView.swift in Sources */,
@@ -1361,7 +1365,7 @@
 				minimumVersion = 1.16.1;
 			};
 		};
-		AC5B9760256CAE0F0007500D /* XCRemoteSwiftPackageReference "PartialSheet.git" */ = {
+		AC5B9760256CAE0F0007500D /* XCRemoteSwiftPackageReference "PartialSheet" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/AndreaMiotto/PartialSheet.git";
 			requirement = {
@@ -1394,7 +1398,7 @@
 		};
 		AC5B9761256CAE0F0007500D /* PartialSheet */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = AC5B9760256CAE0F0007500D /* XCRemoteSwiftPackageReference "PartialSheet.git" */;
+			package = AC5B9760256CAE0F0007500D /* XCRemoteSwiftPackageReference "PartialSheet" */;
 			productName = PartialSheet;
 		};
 /* End XCSwiftPackageProductDependency section */

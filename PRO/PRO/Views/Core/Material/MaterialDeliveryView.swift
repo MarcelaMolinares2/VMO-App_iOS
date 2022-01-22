@@ -123,9 +123,10 @@ struct MaterialDeliveryListView: View {
         }
         let appServer = AppServer()
         appServer.postRequest(data: [String: Any](), path: "vm/material-delivery/filter") { (bool, int, any) in
-            let b = any as? Array<String> ?? []
-            for i in b{
-                let decoded = try! JSONDecoder().decode(StockApi.self, from: i.data(using: .utf8)!)
+            let requestAny = any as? Array<String> ?? []
+            requestAny.forEach{ value in
+            //for value in requestAny {
+                let decoded = try! JSONDecoder().decode(StockApi.self, from: value.data(using: .utf8)!)
                 let setstock = [setStock(lot: decoded.lote, quantity: decoded.cantidad)]
                 array.append(Stock(name: decoded.material.nombre, set: setstock, date: decoded.fecha))
                 
@@ -332,7 +333,7 @@ struct MaterialDeliveryFormCardView: View {
                         .background(Color.gray)
                     }
                 }
-                TextField(NSLocalizedString("materialObservations", comment: ""), text: bindingComment)
+                TextField(NSLocalizedString("envObservations", comment: ""), text: bindingComment)
                     .frame(height: 30)
                     .padding(.vertical, 10)
                     .foregroundColor(.black)

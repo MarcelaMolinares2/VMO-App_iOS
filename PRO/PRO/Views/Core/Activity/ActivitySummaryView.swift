@@ -25,7 +25,7 @@ struct ActivitySummaryView: View {
     var body: some View {
         ZStack{
             VStack {
-                HeaderToggleView(couldSearch: false, title: "modDifferentToVisit", icon: Image("ic-activity"), color: Color.cPanelActivity)
+                HeaderToggleView(couldSearch: false, title: "modSummaryActivity", icon: Image("ic-activity"), color: Color.cPanelActivity)
                 
                 if waitLoad {
                     if !viewForms {

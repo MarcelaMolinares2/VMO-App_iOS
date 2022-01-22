@@ -44,6 +44,8 @@ struct WrapperView: View {
                 MaterialRequestView()
             case "ROUTE-VIEW":
                 RouteView()
+            case "EXPENSES-VIEW":
+                ExpensesFormView()
             /*
             case "ROUTE-FORM":
                 RouteFormView()

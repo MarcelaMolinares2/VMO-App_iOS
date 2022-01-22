@@ -1123,6 +1123,124 @@ class RequestDay: Object, Codable, SyncEntity {
     }
 }
 
+class Expenses: Object, Codable, SyncEntity {
+    @Persisted(primaryKey: true) var objectId: ObjectId
+    @Persisted(indexed: true) var id = 0
+    @Persisted var transactionStatus: String? = ""
+    @Persisted var transactionPending: String? = ""
+    @Persisted var transactionResponse: String? = ""
+    
+    @Persisted var baseURL: String? = ""
+    @Persisted var user: Int? = 0
+    @Persisted var expenseDate: String? = ""
+    @Persisted var verification: String? = ""
+    @Persisted var originDestination: String? = ""
+    @Persisted var concept: String? = ""
+    @Persisted var total: Float? = 0
+    @Persisted var km: Float? = 0
+    @Persisted var kmExpense: Float? = 0
+    @Persisted var observations: String? = ""
+    @Persisted var conceptData: String? = ""
+    
+    private enum CodingKeys: String, CodingKey {
+        case baseURL = "registro_gastos", user = "id_usuario", expenseDate = "fecha_gasto", verification = "comprobacion", originDestination = "origen_destino", km = "km", kmExpense = "gasto_km", observations = "observaciones", conceptData = "conceptData"
+    }
+    
+    override init() {
+        super.init()
+    }
+    
+    required init(from decoder: Decoder) throws {
+        super.init()
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        self.baseURL = try DynamicUtils.stringTypeDecoding(container: container, key: .baseURL)
+        self.user = try DynamicUtils.intTypeDecoding(container: container, key: .user)
+        self.expenseDate = try DynamicUtils.stringTypeDecoding(container: container, key: .expenseDate)
+        self.verification = try DynamicUtils.stringTypeDecoding(container: container, key: .verification)
+        self.originDestination = try DynamicUtils.stringTypeDecoding(container: container, key: .originDestination)
+        self.km = try DynamicUtils.floatTypeDecoding(container: container, key: .km)
+        self.kmExpense = try DynamicUtils.floatTypeDecoding(container: container, key: .kmExpense)
+        self.observations = try DynamicUtils.stringTypeDecoding(container: container, key: .observations)
+        self.conceptData = try DynamicUtils.stringTypeDecoding(container: container, key: .conceptData)
+    }
+    
+    private enum EncodingKeys: String, CodingKey {
+        case baseURL = "registro_gastos", user = "id_usuario", expenseDate = "fecha_gasto", verification = "comprobacion", originDestination = "origen_destino", km = "km", kmExpense = "gasto_km", observations = "observaciones", conceptData = "conceptData"
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: EncodingKeys.self)
+        
+        try container.encode(baseURL, forKey: .baseURL)
+        try container.encode(user, forKey: .user)
+        try container.encode(expenseDate, forKey: .expenseDate)
+        try container.encode(verification, forKey: .verification)
+        try container.encode(originDestination, forKey: .originDestination)
+        try container.encode(km, forKey: .km)
+        try container.encode(kmExpense, forKey: .kmExpense)
+        try container.encode(observations, forKey: .observations)
+        try container.encode(conceptData, forKey: .conceptData)
+    }
+    
+    static func primaryCodingKey() -> String {
+        let codingKey: CodingKeys
+        codingKey = .user
+        return codingKey.rawValue
+    }
+}
+
+
+class ConceptExpenses: Object, Codable, SyncEntity {
+    @Persisted(primaryKey: true) var objectId: ObjectId
+    @Persisted(indexed: true) var id = 0
+    @Persisted var transactionStatus: String? = ""
+    @Persisted var transactionPending: String? = ""
+    @Persisted var transactionResponse: String? = ""
+    
+    @Persisted var baseURL: String? = ""
+    @Persisted var name: String? = ""
+    @Persisted var photo: String? = ""
+    @Persisted var value: String? = ""
+    @Persisted var companyDNI: String? = ""
+    @Persisted var companyName: String? = ""
+    
+    private enum CodingKeys: String, CodingKey {
+        case baseURL = "registro_gastos", id = "id_concepto", name = "concepto"
+    }
+    
+    override init() {
+        super.init()
+    }
+    
+    required init(from decoder: Decoder) throws {
+        super.init()
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        self.baseURL = try DynamicUtils.stringTypeDecoding(container: container, key: .baseURL)
+        self.id = try DynamicUtils.intTypeDecoding(container: container, key: .id)
+        self.name = try DynamicUtils.stringTypeDecoding(container: container, key: .name)
+    }
+    
+    private enum EncodingKeys: String, CodingKey {
+        case baseURL = "registro_gastos", id = "id_concepto", name = "concepto"
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: EncodingKeys.self)
+        
+        try container.encode(baseURL, forKey: .baseURL)
+        try container.encode(id, forKey: .id)
+        try container.encode(name, forKey: .name)
+    }
+    
+    static func primaryCodingKey() -> String {
+        let codingKey: CodingKeys
+        codingKey = .id
+        return codingKey.rawValue
+    }
+}
+
 class UserPanel: Object, Decodable, SyncEntity {
     @Persisted(primaryKey: true) var objectId: ObjectId
     @Persisted(indexed: true) var id = 0
