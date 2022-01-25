@@ -38,104 +38,103 @@ struct ExpensesFormView: View {
         ZStack{
             VStack{
                 HeaderToggleView(couldSearch: false, title: "modExpenses", icon: Image("ic-expense"), color: Color.cPanelRequestDay)
-                Form{
+                HStack {
                     VStack{
-                        HStack{
+                        Text(NSLocalizedString("envDate", comment: ""))
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .foregroundColor(.cTextHigh)
+                            .font(.system(size: 14))
+                        DatePicker("", selection: $dateStart, in: Date()..., displayedComponents: [.date])
+                            .datePickerStyle(CompactDatePickerStyle())
+                            .labelsHidden()
+                            .clipped()
+                            .accentColor(.cTextHigh)
+                            .background(Color.white)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .onChange(of: dateStart, perform: { value in
+                                expenses.expenseDate = Utils.dateFormat(date: dateStart)
+                            })
+                    }
+                    VStack {
+                        Text("envtotalPurchase")
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .foregroundColor(.cTextHigh)
+                            .font(.system(size: 14))
+                        TextField("...", text: $total)
+                            .cornerRadius(CGFloat(4))
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .onChange(of: total, perform: { value in
+                                expenses.total = Float(total)
+                            })
+                        Text("envTotalKm")
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .foregroundColor(.cTextHigh)
+                            .font(.system(size: 14))
+                        TextField("...", text: $kmExpense)
+                            .cornerRadius(CGFloat(4))
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .onChange(of: kmExpense, perform: { value in
+                                expenses.kmExpense = Float(kmExpense)
+                            })
+                    }
+                }
+                .padding(15)
+                CustomForm{
+                    CustomSection{
+                        VStack{
+                            VStack {
+                                Text(NSLocalizedString("envConcept", comment: ""))
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .foregroundColor((concept == "") ? .cDanger : .cTextHigh)
+                                    .font(.system(size: 14))
+                                VStack{
+                                    TextEditor(text: $concept)
+                                        .frame(height: 80)
+                                        .onChange(of: concept, perform: { value in
+                                            expenses.verification = concept
+                                        })
+                                }
+                                .background(Color.white)
+                                .frame(alignment: Alignment.center)
+                                .clipped()
+                                .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
+                            }
                             VStack{
-                                Text(NSLocalizedString("envDate", comment: ""))
+                                Text(NSLocalizedString("envOriginDestiny", comment: ""))
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     .foregroundColor(.cTextHigh)
                                     .font(.system(size: 14))
-                                DatePicker("", selection: $dateStart, in: Date()..., displayedComponents: [.date])
-                                    .datePickerStyle(CompactDatePickerStyle())
-                                    .labelsHidden()
-                                    .clipped()
-                                    .accentColor(.cTextHigh)
-                                    .background(Color.white)
+                                TextField("...", text: $originDestiny)
+                                    .cornerRadius(CGFloat(4))
+                                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    .onChange(of: originDestiny, perform: { value in
+                                        expenses.originDestination = originDestiny
+                                    })
+                            }
+                            VStack {
+                                Text("envKm")
                                     .frame(maxWidth: .infinity, alignment: .leading)
-                                    .onChange(of: dateStart, perform: { value in
-                                        expenses.expenseDate = Utils.dateFormat(date: dateStart)
+                                    .foregroundColor(.cTextHigh)
+                                    .font(.system(size: 14))
+                                TextField("...", text: $km)
+                                    .cornerRadius(CGFloat(4))
+                                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    .onChange(of: km, perform: { value in
+                                        expenses.km = Float(km)
                                     })
                             }
-                            Spacer()
-                            Image("ic-day-request")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(height: 35)
-                                .foregroundColor(.cTextHigh)
                         }
-                        .padding(10)
-                        .background(Color.white)
-                        .frame(alignment: Alignment.center)
-                        .clipped()
-                        .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
-                        VStack {
-                            Text(NSLocalizedString("envConcept", comment: ""))
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .foregroundColor((concept == "") ? .cDanger : .cTextHigh)
-                                .font(.system(size: 14))
-                            VStack{
-                                TextEditor(text: $concept)
-                                    .frame(height: 80)
-                                    .onChange(of: concept, perform: { value in
-                                        expenses.verification = concept
-                                    })
-                            }
-                            .background(Color.white)
-                            .frame(alignment: Alignment.center)
-                            .clipped()
-                            .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
-                        }
-                        VStack{
-                            Text(NSLocalizedString("envOriginDestiny", comment: ""))
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .foregroundColor(.cTextHigh)
-                                .font(.system(size: 14))
-                            TextField("...", text: $originDestiny)
-                                .cornerRadius(CGFloat(4))
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                                .onChange(of: originDestiny, perform: { value in
-                                    expenses.originDestination = originDestiny
-                                })
-                        }
+                        .padding([.top, .bottom], 10)
                     }
-                    .padding([.top, .bottom], 10)
-                    Section{
-                        List{
+                    CustomSection{
+                        VStack{
                             ForEach(array, id: \.id) { item in
                                 ExpensesFormCardView(conceptExpenses: item)
                             }
                         }
                     }
-                    .padding([.top, .bottom], 10)
-                    Section{
+                    CustomSection{
                         VStack{
-                            Text("envPurchasetotal")
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .foregroundColor(.cTextHigh)
-                                .font(.system(size: 14))
-                            TextField("...", text: $total)
-                                .cornerRadius(CGFloat(4))
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                                .onChange(of: total, perform: { value in
-                                    expenses.total = Float(total)
-                                })
-                            Text("envKm")
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .foregroundColor(.cTextHigh)
-                                .font(.system(size: 14))
-                            TextField("...", text: $km)
-                                .cornerRadius(CGFloat(4))
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                                .onChange(of: km, perform: { value in
-                                    expenses.km = Float(km)
-                                })
-                            TextField("...", text: $kmExpense)
-                                .cornerRadius(CGFloat(4))
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                                .onChange(of: kmExpense, perform: { value in
-                                    expenses.kmExpense = Float(kmExpense)
-                                })
                             Text("envObservations")
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .foregroundColor(.cTextHigh)
@@ -153,7 +152,6 @@ struct ExpensesFormView: View {
                             .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
                         }
                     }
-                    .padding([.top, .bottom], 10)
                     
                 }
                 .buttonStyle(PlainButtonStyle())
@@ -310,21 +308,26 @@ struct ExpensesFormCardView: View {
     
     func onSelectionDone(_ done: Bool) {
         self.isSheet = false
-        if done {
-            MediaUtils.store(uiImage: uiImage, table: options.table, field: conceptExpenses.objectId.description, id: options.item, localId: options.objectId?.stringValue ?? "")
+        if selectedPhoto == "EDIT" {
+            if done {
+                MediaUtils.store(uiImage: uiImage, table: options.table, field: conceptExpenses.objectId.description, id: options.item, localId: options.objectId?.stringValue ?? "")
+            }
             selectedPhoto = "OK"
+        } else {
+            if done {
+                MediaUtils.store(uiImage: uiImage, table: options.table, field: conceptExpenses.objectId.description, id: options.item, localId: options.objectId?.stringValue ?? "")
+                selectedPhoto = "OK"
+            }
         }
     }
     
     func onEdit(_ uiImage: UIImage) {
-        //isSheet = false
         selectedPhoto = "EDIT"
-        print("edit")
     }
     
     func onDelete(_ uiImage: UIImage) {
         isSheet = false
-        print("delete")
+        selectedPhoto = ""
     }
     
 }
