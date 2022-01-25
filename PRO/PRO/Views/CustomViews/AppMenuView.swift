@@ -651,7 +651,6 @@ struct RouteBottomMenu: View {
     }
 }
 
-
 struct ActivityBottomMenu: View {
     let onEdit: (_ group: Activity) -> Void
     let onDetail: (_ group: Activity) -> Void
@@ -707,6 +706,80 @@ struct ActivityBottomMenu: View {
                 Spacer()
             }
             .padding(.bottom, 2)
+        }
+    }
+}
+
+struct ExpensePhotoBottomMenu: View {
+    
+    let onEdit: (_ uiImage: UIImage) -> Void
+    let onDelete: (_ uiImage: UIImage) -> Void
+    
+    var uiImage: UIImage
+    
+    var body: some View {
+        VStack {
+            Spacer()
+            VStack {
+                Text("envImgeSave")
+                    .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
+                    .font(.system(size: 26))
+                    .padding(10)
+                Spacer()
+                    .frame(height: 30)
+                Image(uiImage: self.uiImage)
+                    .resizable()
+                    .scaledToFill()
+                    .cornerRadius(10)
+                    .overlay(RoundedRectangle(cornerRadius: 10)
+                        .stroke(Color.white, lineWidth: 1))
+                    .frame(width: 200, height: 200)
+                    .shadow(radius: 20)
+            }
+                
+            HStack {
+                Spacer()
+                Button(action: {
+                    onEdit(uiImage)
+                }) {
+                    VStack {
+                        Image("ic-edit")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
+                            .foregroundColor(.cPrimaryLight)
+                        Text(NSLocalizedString("envEdit", comment: ""))
+                            .foregroundColor(.cPrimary)
+                            .lineLimit(1)
+                            .font(.system(size: CGFloat(15)))
+                    }
+                    .padding(10)
+                    .clipped()
+                }
+                .padding(10)
+                Spacer()
+                Button(action: {
+                    onDelete(uiImage)
+                }) {
+                    VStack {
+                        Image("ic-trash")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
+                            .foregroundColor(.cPrimaryLight)
+                        Text(NSLocalizedString("Delete", comment: ""))
+                            .foregroundColor(.cPrimary)
+                            .lineLimit(1)
+                            .font(.system(size: CGFloat(15)))
+                    }
+                    .padding(10)
+                    .clipped()
+                }
+                .padding(10)
+                Spacer()
+            }
+            .frame(height: UIScreen.main.bounds.size.height / 4)
+            .padding(10)
         }
     }
 }

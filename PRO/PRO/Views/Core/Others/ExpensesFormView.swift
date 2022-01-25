@@ -217,8 +217,9 @@ struct ExpensesFormCardView: View {
     var conceptExpenses: ConceptExpenses
     
     @State private var options = DynamicFormFieldOptions(table: "expenses", op: "")
+    @State private var isActionSheet = false
     @State private var isSheet = false
-    @State private var shouldPresentSheet = false
+    @State private var selectedPhoto = ""
     @State private var selectedPhotoMode = ""
     @State private var uiImage: UIImage?
     @State private var sheetLayout: SheetLayout = .picker
@@ -255,14 +256,18 @@ struct ExpensesFormCardView: View {
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                     Spacer()
                     Button(action: {
-                        self.isSheet = true
-                        print("add photo value")
+                        if selectedPhoto == "OK" {
+                            isSheet = true
+                        } else {
+                            self.isActionSheet = true
+                            print("add photo value")
+                        }
                     }, label: {
                         Image("ic-photo-add")
                             .resizable()
                             .scaledToFit()
                             .frame(height: 25)
-                            .foregroundColor(.cTextHigh)
+                            .foregroundColor((selectedPhoto == "OK") ? .cToggleActive : .cTextHigh)
                     })
                 }
                 TextField("envCompanyDNI...", text: bindingDNI)
@@ -277,83 +282,51 @@ struct ExpensesFormCardView: View {
             .clipped()
             .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
         }
-        .actionSheet(isPresented: self.$isSheet) {
+        .sheet(isPresented: $isSheet) {
+            if selectedPhoto == "OK" {
+                ExpensePhotoBottomMenu(onEdit: onEdit, onDelete: onDelete, uiImage: uiImage!)
+            } else {
+                CustomImagePickerView(sourceType: sourceType, uiImage: self.$uiImage, onSelectionDone: onSelectionDone)
+            }
+        }
+        .actionSheet(isPresented: self.$isActionSheet) {
             ActionSheet(title: Text("envSelect"), message: Text(""), buttons: [
-                .default(Text("envCamera"), action: {
+                .default(
+                    Text((selectedPhoto == "OK") ? "envViewPhto" : "envCamera")
+                    , action: {
                     self.sourceType = .camera
                     sheetLayout = .picker
-                    shouldPresentSheet = true
+                    isSheet = true
                 }),
-                .default(Text("envGallery"), action: {
+                .default(Text((selectedPhoto == "OK") ? "envEditPhto" : "envGallery"), action: {
                     self.sourceType = .photoLibrary
                     sheetLayout = .picker
-                    shouldPresentSheet = true
+                    isSheet = true
                 }),
                 .cancel()
             ])
         }
-        .sheet(isPresented: $shouldPresentSheet) {
-            VStack {
-                CustomImagePickerView(sourceType: sourceType, uiImage: self.$uiImage, onSelectionDone: onSelectionDone)
-                /*
-                if selectedPhotoMode == "" {
-                    VStack {
-                        Spacer()
-                        Text("Seleccione alguna opcion")
-                        HStack {
-                            Button(action: {
-                                selectedPhotoMode = "G"
-                            }) {
-                                VStack {
-                                    Image("ic-collections")
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
-                                        .foregroundColor(.cTextHigh)
-                                    Text("envGalery")
-                                        .lineLimit(1)
-                                        .font(.system(size: CGFloat(15)))
-                                        .foregroundColor(.cPrimary)
-                                }
-                            }
-                            .padding([.top, .bottom], 10)
-                            
-                            Button(action: {
-                                selectedPhotoMode = "C"
-                            }) {
-                                VStack {
-                                    Image("ic-photo-camera")
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
-                                        .foregroundColor(.cTextHigh)
-                                    Text("envCamera")
-                                        .lineLimit(1)
-                                        .font(.system(size: CGFloat(15)))
-                                        .foregroundColor(.cPrimary)
-                                }
-                            }
-                            .padding([.top, .bottom], 10)
-                        }
-                    }
-                }
-                else if selectedPhotoMode == "G" {
-                    CustomImagePickerView(sourceType: .photoLibrary, uiImage: $uiImage, onSelectionDone: onSelectionDone)
-                } else if selectedPhotoMode == "C"{
-                    CustomImagePickerView(sourceType: .camera, uiImage: $uiImage, onSelectionDone: onSelectionDone)
-                }
-                */
-            }
-            //CustomImagePickerView(sourceType: .camera, uiImage: $uiImage, onSelectionDone: onSelectionDone)
-        }
     }
     
     func onSelectionDone(_ done: Bool) {
-        self.shouldPresentSheet = false
+        self.isSheet = false
         if done {
             MediaUtils.store(uiImage: uiImage, table: options.table, field: conceptExpenses.objectId.description, id: options.item, localId: options.objectId?.stringValue ?? "")
+            selectedPhoto = "OK"
         }
     }
+    
+    func onEdit(_ uiImage: UIImage) {
+        //isSheet = false
+        selectedPhoto = "EDIT"
+        print("edit")
+    }
+    
+    func onDelete(_ uiImage: UIImage) {
+        isSheet = false
+        print("delete")
+    }
+    
 }
 
 struct ExpensesFormView_Previews: PreviewProvider {
