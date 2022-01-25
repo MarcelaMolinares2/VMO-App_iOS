@@ -442,7 +442,14 @@ struct DynamicFormImage: View {
         self.shouldPresentSheet = false
         field.value = done ? "Y" : field.value
         if done {
-            MediaUtils.store(uiImage: uiImage, table: options.table, field: field.key, id: options.item, localId: options.objectId?.stringValue ?? "")
+            MediaUtils.store(
+                uiImage: uiImage,
+                table: options.table,
+                field: field.key,
+                id: options.item,
+                localId: options.objectId?.stringValue ?? ""
+            )
+            print(uiImage ?? "")
         }
     }
     

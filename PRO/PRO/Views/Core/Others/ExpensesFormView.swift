@@ -8,7 +8,7 @@
 
 import SwiftUI
 import RealmSwift
-
+import UIKit
 
 struct ConceptExpensesApi: Codable {
     var id_concepto: Int
@@ -78,7 +78,7 @@ struct ExpensesFormView: View {
                                 TextEditor(text: $concept)
                                     .frame(height: 80)
                                     .onChange(of: concept, perform: { value in
-                                        expenses.concept = concept
+                                        expenses.verification = concept
                                     })
                             }
                             .background(Color.white)
@@ -101,97 +101,11 @@ struct ExpensesFormView: View {
                     }
                     .padding([.top, .bottom], 10)
                     Section{
-                        
                         List{
                             ForEach(array, id: \.id) { item in
-                                //MaterialDeliveryListCardView(item: item)
-                                let bindingValue = Binding<String>(get: {
-                                    item.value ?? ""
-                                }, set: {
-                                    item.value = $0
-                                })
-                                let bindingDNI = Binding<String>(get: {
-                                    item.companyDNI ?? ""
-                                }, set: {
-                                    item.companyDNI = $0
-                                })
-                                let bindingName = Binding<String>(get: {
-                                    item.companyName ?? ""
-                                }, set: {
-                                    item.companyName = $0
-                                })
-                                VStack{
-                                    Text(item.name ?? "")
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                        .foregroundColor(.cTextHigh)
-                                    Text("envValue")
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                        .foregroundColor(.cTextHigh)
-                                        .font(.system(size: 14))
-                                    HStack{
-                                        TextField("...", text: bindingValue)
-                                            .cornerRadius(CGFloat(4))
-                                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                                        Spacer()
-                                        Button(action: {
-                                            print("add photo value")
-                                        }, label: {
-                                            Image("ic-photo-add")
-                                                .resizable()
-                                                .scaledToFit()
-                                                .frame(height: 25)
-                                                .foregroundColor(.cTextHigh)
-                                        })
-                                    }
-                                    TextField("envCompanyDNI...", text: bindingDNI)
-                                        .cornerRadius(CGFloat(4))
-                                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                                    TextField("envCompanyName...", text: bindingName)
-                                        .cornerRadius(CGFloat(4))
-                                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                                }
-                                .padding(10)
-                                .background(Color.white)
-                                .clipped()
-                                .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
+                                ExpensesFormCardView(conceptExpenses: item)
                             }
                         }
-                        /*
-                        VStack{
-                            Text("envTravel")
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .foregroundColor(.cTextHigh)
-                            Text("envValue")
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .foregroundColor(.cTextHigh)
-                                .font(.system(size: 14))
-                            HStack{
-                                TextField("...", text: $originDestiny)
-                                    .cornerRadius(CGFloat(4))
-                                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                                Spacer()
-                                Button(action: {
-                                    print("add photo value")
-                                }, label: {
-                                    Image("ic-photo-add")
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(height: 25)
-                                        .foregroundColor(.cTextHigh)
-                                })
-                            }
-                            TextField("...", text: $originDestiny)
-                                .cornerRadius(CGFloat(4))
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                            TextField("...", text: $originDestiny)
-                                .cornerRadius(CGFloat(4))
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                        }
-                        .padding(10)
-                        .background(Color.white)
-                        .clipped()
-                        .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
-                        */
                     }
                     .padding([.top, .bottom], 10)
                     Section{
@@ -237,12 +151,6 @@ struct ExpensesFormView: View {
                             .frame(alignment: Alignment.center)
                             .clipped()
                             .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
-                            
-                            /*
-                            TextField("...", text: $originDestiny)
-                                .cornerRadius(CGFloat(4))
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                            */
                         }
                     }
                     .padding([.top, .bottom], 10)
@@ -288,23 +196,11 @@ struct ExpensesFormView: View {
             expenses.expenseDate = Utils.dateFormat(date: dateStart)
         }
         
-        /*
-        print(expenses)
-        print("__________________________")
-        print(ExpensesDao(realm: try! Realm()).all())
-        
-        print("__________________")
-        */
-        
         let appServer = AppServer()
         appServer.getRequest(path: "vm/config/expense/concept") { (bool, int, any) in
             let requestAny = any as? Array<String> ?? []
             requestAny.forEach{ value in
-                print(value)
-                
                 let decoded = try! JSONDecoder().decode(ConceptExpensesApi.self, from: value.data(using: .utf8)!)
-                //let setstock = [setStock(lot: decoded.lote, quantity: decoded.cantidad)]
-                //array.append(Stock(name: decoded.material.nombre, set: setstock, date: decoded.fecha))
                 let cc = ConceptExpenses()
                 cc.id = decoded.id_concepto
                 cc.name = decoded.concepto ?? ""
@@ -313,9 +209,150 @@ struct ExpensesFormView: View {
             }
             print("arrayTotal", array)
         }
-        
-        
-        //waitLoad = true
+    }
+}
+
+
+struct ExpensesFormCardView: View {
+    var conceptExpenses: ConceptExpenses
+    
+    @State private var options = DynamicFormFieldOptions(table: "expenses", op: "")
+    @State private var isSheet = false
+    @State private var shouldPresentSheet = false
+    @State private var selectedPhotoMode = ""
+    @State private var uiImage: UIImage?
+    @State private var sheetLayout: SheetLayout = .picker
+    @State private var sourceType: UIImagePickerController.SourceType = .camera
+    
+    var body: some View {
+        VStack{
+            let bindingValue = Binding<String>(get: {
+                conceptExpenses.value ?? ""
+            }, set: {
+                conceptExpenses.value = $0
+            })
+            let bindingDNI = Binding<String>(get: {
+                conceptExpenses.companyDNI ?? ""
+            }, set: {
+                conceptExpenses.companyDNI = $0
+            })
+            let bindingName = Binding<String>(get: {
+                conceptExpenses.companyName ?? ""
+            }, set: {
+                conceptExpenses.companyName = $0
+            })
+            VStack{
+                Text(conceptExpenses.name ?? "")
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .foregroundColor(.cTextHigh)
+                Text("envValue")
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .foregroundColor(.cTextHigh)
+                    .font(.system(size: 14))
+                HStack{
+                    TextField("...", text: bindingValue)
+                        .cornerRadius(CGFloat(4))
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                    Spacer()
+                    Button(action: {
+                        self.isSheet = true
+                        print("add photo value")
+                    }, label: {
+                        Image("ic-photo-add")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(height: 25)
+                            .foregroundColor(.cTextHigh)
+                    })
+                }
+                TextField("envCompanyDNI...", text: bindingDNI)
+                    .cornerRadius(CGFloat(4))
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                TextField("envCompanyName...", text: bindingName)
+                    .cornerRadius(CGFloat(4))
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+            }
+            .padding(10)
+            .background(Color.white)
+            .clipped()
+            .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
+        }
+        .actionSheet(isPresented: self.$isSheet) {
+            ActionSheet(title: Text("envSelect"), message: Text(""), buttons: [
+                .default(Text("envCamera"), action: {
+                    self.sourceType = .camera
+                    sheetLayout = .picker
+                    shouldPresentSheet = true
+                }),
+                .default(Text("envGallery"), action: {
+                    self.sourceType = .photoLibrary
+                    sheetLayout = .picker
+                    shouldPresentSheet = true
+                }),
+                .cancel()
+            ])
+        }
+        .sheet(isPresented: $shouldPresentSheet) {
+            VStack {
+                CustomImagePickerView(sourceType: sourceType, uiImage: self.$uiImage, onSelectionDone: onSelectionDone)
+                /*
+                if selectedPhotoMode == "" {
+                    VStack {
+                        Spacer()
+                        Text("Seleccione alguna opcion")
+                        HStack {
+                            Button(action: {
+                                selectedPhotoMode = "G"
+                            }) {
+                                VStack {
+                                    Image("ic-collections")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
+                                        .foregroundColor(.cTextHigh)
+                                    Text("envGalery")
+                                        .lineLimit(1)
+                                        .font(.system(size: CGFloat(15)))
+                                        .foregroundColor(.cPrimary)
+                                }
+                            }
+                            .padding([.top, .bottom], 10)
+                            
+                            Button(action: {
+                                selectedPhotoMode = "C"
+                            }) {
+                                VStack {
+                                    Image("ic-photo-camera")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
+                                        .foregroundColor(.cTextHigh)
+                                    Text("envCamera")
+                                        .lineLimit(1)
+                                        .font(.system(size: CGFloat(15)))
+                                        .foregroundColor(.cPrimary)
+                                }
+                            }
+                            .padding([.top, .bottom], 10)
+                        }
+                    }
+                }
+                else if selectedPhotoMode == "G" {
+                    CustomImagePickerView(sourceType: .photoLibrary, uiImage: $uiImage, onSelectionDone: onSelectionDone)
+                } else if selectedPhotoMode == "C"{
+                    CustomImagePickerView(sourceType: .camera, uiImage: $uiImage, onSelectionDone: onSelectionDone)
+                }
+                */
+            }
+            //CustomImagePickerView(sourceType: .camera, uiImage: $uiImage, onSelectionDone: onSelectionDone)
+        }
+    }
+    
+    func onSelectionDone(_ done: Bool) {
+        self.shouldPresentSheet = false
+        if done {
+            MediaUtils.store(uiImage: uiImage, table: options.table, field: conceptExpenses.objectId.description, id: options.item, localId: options.objectId?.stringValue ?? "")
+        }
     }
 }
 
