@@ -136,118 +136,123 @@ struct ActivityBasicFormView: View {
     
     var body: some View {
         VStack {
-            Form {
-                Button(action: {
-                    isSheetCycle = true
-                }, label: {
-                    HStack{
-                        VStack{
-                            Text(NSLocalizedString("envCycle", comment: ""))
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .foregroundColor(.cTextMedium)
-                                .font(.system(size: 14))
-                            Text((cycle == "") ? NSLocalizedString("envChoose", comment: "") : cycle)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .foregroundColor(.cTextMedium)
-                                .font(.system(size: 16))
-                        }
-                        Spacer()
-                        Image("ic-arrow-expand-more")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 35)
-                            .foregroundColor(.cTextMedium)
-                    }
-                    .padding(10)
-                })
+            CustomForm {
                 
-                VStack{
+                CustomSection{
                     VStack{
-                        HStack{
-                            VStack{
-                                Text(NSLocalizedString("envFrom", comment: ""))
-                                    .frame(maxWidth: .infinity, alignment: .leading)
+                        Button(action: {
+                            isSheetCycle = true
+                        }, label: {
+                            HStack{
+                                VStack{
+                                    Text(NSLocalizedString("envCycle", comment: ""))
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .foregroundColor(.cTextMedium)
+                                        .font(.system(size: 14))
+                                    Text((cycle == "") ? NSLocalizedString("envChoose", comment: "") : cycle)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .foregroundColor(.cTextMedium)
+                                        .font(.system(size: 16))
+                                }
+                                Spacer()
+                                Image("ic-arrow-expand-more")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 35)
                                     .foregroundColor(.cTextMedium)
-                                    .font(.system(size: 14))
-                                DatePicker("", selection: $dateStart, in: dateStart..., displayedComponents: [.date, .hourAndMinute])
-                                    .datePickerStyle(CompactDatePickerStyle())
-                                    .labelsHidden()
-                                    .clipped()
-                                    .accentColor(.cTextHigh)
-                                    .background(Color.white)
-                                    .onChange(of: dateStart, perform: { value in
-                                        activity.dateStart = Utils.dateFormat(date: value)
-                                        activity.hourStart = Utils.dateFormat(date: value, format: "HH:mm:ss")
-                                        if dateStart >= dateEnd {
-                                            dateEnd = dateStart
-                                            activity.dateEnd = Utils.dateFormat(date: value)
-                                            activity.hourEnd = Utils.dateFormat(date: value, format: "HH:mm:ss")
-                                        }
-                                    })
                             }
-                                .padding(10)
-                            Spacer()
-                            Image("ic-day-request")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(height: 35)
-                                .foregroundColor(.cTextMedium)
-                                .padding(10)
-                        }
-                        .background(Color.white)
-                        .frame(alignment: Alignment.center)
-                        .clipped()
-                        .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
-                        HStack{
-                            VStack{
-                                Text(NSLocalizedString("envTo", comment: ""))
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .foregroundColor(.cTextMedium)
-                                    .font(.system(size: 14))
-                                DatePicker("", selection: $dateEnd, in: dateStart..., displayedComponents: [.date, .hourAndMinute])
-                                    .datePickerStyle(CompactDatePickerStyle())
-                                    .labelsHidden()
-                                    .clipped()
-                                    .accentColor(.cTextHigh)
-                                    .background(Color.white)
-                                    .onChange(of: dateEnd, perform: { value in
-                                        activity.dateEnd = Utils.dateFormat(date: value)
-                                        activity.hourEnd = Utils.dateFormat(date: value, format: "HH:mm:ss")
-                                    })
-                            }
-                                .padding(10)
-                            Spacer()
-                            Image("ic-day-request")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(height: 35)
-                                .foregroundColor(.cTextMedium)
-                                .padding(10)
-                        }
-                        .background(Color.white)
-                        .frame(alignment: Alignment.center)
-                        .clipped()
-                        .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
-                    }
-                    Text(NSLocalizedString("envComment", comment: ""))
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .foregroundColor((commentActivity == "") ? .cDanger : .cTextMedium)
-                        .font(.system(size: 14))
-                    VStack{
-                        TextEditor(text: $commentActivity)
-                        .frame(height: 80)
-                        .onChange(of: commentActivity, perform: { value in
-                            activity.description_ = value
+                            .padding(10)
                         })
+                        VStack{
+                            VStack{
+                                HStack{
+                                    VStack{
+                                        Text(NSLocalizedString("envFrom", comment: ""))
+                                            .frame(maxWidth: .infinity, alignment: .leading)
+                                            .foregroundColor(.cTextMedium)
+                                            .font(.system(size: 14))
+                                        DatePicker("", selection: $dateStart, in: dateStart..., displayedComponents: [.date, .hourAndMinute])
+                                            .datePickerStyle(CompactDatePickerStyle())
+                                            .labelsHidden()
+                                            .clipped()
+                                            .accentColor(.cTextHigh)
+                                            .background(Color.white)
+                                            .onChange(of: dateStart, perform: { value in
+                                                activity.dateStart = Utils.dateFormat(date: value)
+                                                activity.hourStart = Utils.dateFormat(date: value, format: "HH:mm:ss")
+                                                if dateStart >= dateEnd {
+                                                    dateEnd = dateStart
+                                                    activity.dateEnd = Utils.dateFormat(date: value)
+                                                    activity.hourEnd = Utils.dateFormat(date: value, format: "HH:mm:ss")
+                                                }
+                                            })
+                                    }
+                                        .padding(10)
+                                    Spacer()
+                                    Image("ic-day-request")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(height: 35)
+                                        .foregroundColor(.cTextMedium)
+                                        .padding(10)
+                                }
+                                .background(Color.white)
+                                .frame(alignment: Alignment.center)
+                                .clipped()
+                                .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
+                                HStack{
+                                    VStack{
+                                        Text(NSLocalizedString("envTo", comment: ""))
+                                            .frame(maxWidth: .infinity, alignment: .leading)
+                                            .foregroundColor(.cTextMedium)
+                                            .font(.system(size: 14))
+                                        DatePicker("", selection: $dateEnd, in: dateStart..., displayedComponents: [.date, .hourAndMinute])
+                                            .datePickerStyle(CompactDatePickerStyle())
+                                            .labelsHidden()
+                                            .clipped()
+                                            .accentColor(.cTextHigh)
+                                            .background(Color.white)
+                                            .onChange(of: dateEnd, perform: { value in
+                                                activity.dateEnd = Utils.dateFormat(date: value)
+                                                activity.hourEnd = Utils.dateFormat(date: value, format: "HH:mm:ss")
+                                            })
+                                    }
+                                        .padding(10)
+                                    Spacer()
+                                    Image("ic-day-request")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(height: 35)
+                                        .foregroundColor(.cTextMedium)
+                                        .padding(10)
+                                }
+                                .background(Color.white)
+                                .frame(alignment: Alignment.center)
+                                .clipped()
+                                .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
+                            }
+                            Text(NSLocalizedString("envComment", comment: ""))
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .foregroundColor((commentActivity == "") ? .cDanger : .cTextMedium)
+                                .font(.system(size: 14))
+                            VStack{
+                                TextEditor(text: $commentActivity)
+                                .frame(height: 80)
+                                .onChange(of: commentActivity, perform: { value in
+                                    activity.description_ = value
+                                })
+                            }
+                            .background(Color.white)
+                            .frame(alignment: Alignment.center)
+                            .clipped()
+                            .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
+                        }
+                        .padding(10)
                     }
-                    .background(Color.white)
-                    .frame(alignment: Alignment.center)
-                    .clipped()
-                    .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
                 }
-                .padding(10)
+                
                 if showSectionRequestDay {
-                    Section {
+                    CustomSection {
                         VStack{
                             HStack{
                                 Toggle(isOn: $showDayAuth){
@@ -312,8 +317,12 @@ struct ActivityBasicFormView: View {
                         .padding(10)
                     }
                 }
-                ForEach(form.tabs, id: \.id) { tab in
-                    DynamicFormView(form: $form, tab: $form.tabs[0], options: options)
+                CustomSection{
+                    VStack{
+                        ForEach(form.tabs, id: \.id) { tab in
+                            DynamicFormView(form: $form, tab: $form.tabs[0], options: options)
+                        }
+                    }
                 }
             }
             .buttonStyle(PlainButtonStyle())

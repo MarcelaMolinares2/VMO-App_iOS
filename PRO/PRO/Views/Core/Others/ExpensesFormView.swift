@@ -164,7 +164,6 @@ struct ExpensesFormView: View {
                             .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
                         }
                     }
-                    
                 }
                 .buttonStyle(PlainButtonStyle())
                 Spacer()

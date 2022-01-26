@@ -99,7 +99,7 @@ struct ActivityMapSummaryView: View {
     
     @State var activity: Activity
     
-    @State private var bottomSheetPosition: BottomSheetPosition = .bottom
+    @State private var bottomSheetPosition: BottomSheetPosition = .middle
     
     @State private var dateStart : Date = Date()
     @State private var dateEnd : Date = Date()
