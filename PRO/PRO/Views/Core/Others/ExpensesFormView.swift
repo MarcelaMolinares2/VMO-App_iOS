@@ -9,6 +9,7 @@
 import SwiftUI
 import RealmSwift
 import UIKit
+import Combine
 
 struct ConceptExpensesApi: Codable {
     var id_concepto: Int
@@ -33,6 +34,8 @@ struct ExpensesFormView: View {
     @State private var km: String = ""
     @State private var kmExpense: String = ""
     @State private var observations: String = ""
+    
+    @State private var valueTotalExpense: Bool = false
     
     var body: some View {
         ZStack{
@@ -63,6 +66,7 @@ struct ExpensesFormView: View {
                         TextField("...", text: $total)
                             .cornerRadius(CGFloat(4))
                             .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .disabled(true)
                             .onChange(of: total, perform: { value in
                                 expenses.total = Float(total)
                             })
@@ -73,6 +77,7 @@ struct ExpensesFormView: View {
                         TextField("...", text: $kmExpense)
                             .cornerRadius(CGFloat(4))
                             .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .disabled(true)
                             .onChange(of: kmExpense, perform: { value in
                                 expenses.kmExpense = Float(kmExpense)
                             })
@@ -129,7 +134,14 @@ struct ExpensesFormView: View {
                     CustomSection{
                         VStack{
                             ForEach(array, id: \.id) { item in
-                                ExpensesFormCardView(conceptExpenses: item)
+                                ExpensesFormCardView(conceptExpenses: item, valueTotalExpense: $valueTotalExpense)
+                                    .padding(5)
+                                    /*
+                                    .onChange(of: valueTotalExpense, perform: { value in
+                                        print(value)
+                                    })
+                                    */
+                                    
                             }
                         }
                     }
@@ -162,6 +174,7 @@ struct ExpensesFormView: View {
                 HStack {
                     Spacer()
                     FAB(image: "ic-cloud", foregroundColor: .cPrimary) {
+                        print("valueTotalExpense: ", valueTotalExpense)
                         print("_________________")
                         var fullData: [String] = []
                         array.forEach{ value in
@@ -212,7 +225,8 @@ struct ExpensesFormView: View {
 
 
 struct ExpensesFormCardView: View {
-    var conceptExpenses: ConceptExpenses
+    @State var conceptExpenses: ConceptExpenses
+    @Binding var valueTotalExpense: Bool
     
     @State private var options = DynamicFormFieldOptions(table: "expenses", op: "")
     @State private var isActionSheet = false
@@ -223,35 +237,36 @@ struct ExpensesFormCardView: View {
     @State private var sheetLayout: SheetLayout = .picker
     @State private var sourceType: UIImagePickerController.SourceType = .camera
     
+    @State private var valueExpense = ""
+    @State private var dniExpense = ""
+    @State private var nameExpense = ""
+    
     var body: some View {
         VStack{
-            let bindingValue = Binding<String>(get: {
-                conceptExpenses.value ?? ""
-            }, set: {
-                conceptExpenses.value = $0
-            })
-            let bindingDNI = Binding<String>(get: {
-                conceptExpenses.companyDNI ?? ""
-            }, set: {
-                conceptExpenses.companyDNI = $0
-            })
-            let bindingName = Binding<String>(get: {
-                conceptExpenses.companyName ?? ""
-            }, set: {
-                conceptExpenses.companyName = $0
-            })
             VStack{
                 Text(conceptExpenses.name ?? "")
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .foregroundColor(.cTextHigh)
-                Text("envValue")
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .foregroundColor(.cTextHigh)
-                    .font(.system(size: 14))
+                    .font(.system(size: 16))
                 HStack{
-                    TextField("...", text: bindingValue)
-                        .cornerRadius(CGFloat(4))
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                    VStack {
+                        Text("envValue")
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .foregroundColor(.cTextHigh)
+                            .font(.system(size: 12))
+                        TextField("envValue...", text: $valueExpense)
+                            .cornerRadius(CGFloat(4))
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .keyboardType(.numberPad)
+                            .onReceive(Just(valueExpense)) { newValue in
+                                let filtered = newValue.filter{ "0123456789".contains($0) }
+                                if filtered != newValue{
+                                    valueExpense = filtered
+                                }
+                                conceptExpenses.value = valueExpense
+                                valueTotalExpense.toggle()
+                            }
+                    }
                     Spacer()
                     Button(action: {
                         if selectedPhoto == "OK" {
@@ -268,12 +283,32 @@ struct ExpensesFormCardView: View {
                             .foregroundColor((selectedPhoto == "OK") ? .cToggleActive : .cTextHigh)
                     })
                 }
-                TextField("envCompanyDNI...", text: bindingDNI)
-                    .cornerRadius(CGFloat(4))
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                TextField("envCompanyName...", text: bindingName)
-                    .cornerRadius(CGFloat(4))
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                VStack {
+                    VStack{
+                        Text("envCompanyDNI")
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .foregroundColor(.cTextHigh)
+                            .font(.system(size: 12))
+                        TextField("envCompanyDNI...", text: $dniExpense)
+                            .cornerRadius(CGFloat(4))
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .onChange(of: dniExpense, perform:  { value in
+                                conceptExpenses.companyDNI = dniExpense
+                            })
+                    }
+                    VStack{
+                        Text("envCompanyName")
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .foregroundColor(.cTextHigh)
+                            .font(.system(size: 12))
+                        TextField("envCompanyName...", text: $nameExpense)
+                            .cornerRadius(CGFloat(4))
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .onChange(of: nameExpense, perform:  { value in
+                                conceptExpenses.companyName = nameExpense
+                            })
+                    }
+                }
             }
             .padding(10)
             .background(Color.white)

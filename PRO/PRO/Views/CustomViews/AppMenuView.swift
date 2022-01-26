@@ -729,12 +729,26 @@ struct ExpensePhotoBottomMenu: View {
                     .frame(height: 30)
                 Image(uiImage: self.uiImage)
                     .resizable()
-                    .scaledToFill()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: 250.0, height: 250.0, alignment: .center)
+                    .clipShape(Circle())
+                    /*
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: 250.0, height: 250.0, alignment: .center)
+                    .border(Color.blue, width: 3.0)
+                    .clipped()
+                */
+                    /*
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: UIScreen.main.bounds.size.width, height: UIScreen.main.bounds.size.height / 3)
+                    //.resizable()
                     .cornerRadius(10)
                     .overlay(RoundedRectangle(cornerRadius: 10)
                         .stroke(Color.white, lineWidth: 1))
-                    .frame(width: 200, height: 200)
-                    .shadow(radius: 20)
+                    //.shadow(radius: 20)
+                */
             }
                 
             HStack {
