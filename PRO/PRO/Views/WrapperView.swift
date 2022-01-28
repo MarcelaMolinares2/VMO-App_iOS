@@ -26,6 +26,8 @@ struct WrapperView: View {
                 MaterialRequestView()
             case "MOVEMENT-FORM":
                 MovementFormView()
+            case "MOVEMENTS-VIEW":
+                MovementsView()
             case "PANEL-CARD":
                 PanelCardView(panel: viewRouter.panel(), defaultTab: viewRouter.option(key: "tab", default: "CARD"))
             case "PATIENT-LIST":

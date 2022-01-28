@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		18C6927C84D38BA9EE3F545B /* Pods_PRO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E3C06D47BDA9998B4B375715 /* Pods_PRO.framework */; };
 		2E11FEA9278F635D0087AA66 /* ActivitySummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E11FEA8278F635D0087AA66 /* ActivitySummaryView.swift */; };
+		2E28EF4727A2E86A00658855 /* MovementsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E28EF4627A2E86A00658855 /* MovementsView.swift */; };
 		2E5431D4272B540E00B99B2A /* RouteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E5431D3272B540E00B99B2A /* RouteView.swift */; };
 		2EC3123D279873580092CB85 /* ExpensesFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EC3123C279873580092CB85 /* ExpensesFormView.swift */; };
 		2FAF5A6336548F2D98AD4BAE /* Pods_PROTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AB8F1CF126A59CADCF161A74 /* Pods_PROTests.framework */; };
@@ -125,6 +126,7 @@
 		01C38C1E1CEFD504B2BF9AED /* awsconfiguration.json */ = {isa = PBXFileReference; explicitFileType = text.json; path = awsconfiguration.json; sourceTree = "<group>"; };
 		09088EBD37B79740C57A1DBB /* Pods-PROTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PROTests.release.xcconfig"; path = "Target Support Files/Pods-PROTests/Pods-PROTests.release.xcconfig"; sourceTree = "<group>"; };
 		2E11FEA8278F635D0087AA66 /* ActivitySummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivitySummaryView.swift; sourceTree = "<group>"; };
+		2E28EF4627A2E86A00658855 /* MovementsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovementsView.swift; sourceTree = "<group>"; };
 		2E5431D3272B540E00B99B2A /* RouteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouteView.swift; sourceTree = "<group>"; };
 		2EC3123C279873580092CB85 /* ExpensesFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpensesFormView.swift; sourceTree = "<group>"; };
 		38C7C9F320FB5C095FED1876 /* Pods_PRO_PROUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_PRO_PROUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -552,6 +554,7 @@
 				ACA106CF2575907900FDD7E4 /* RequestDayView.swift */,
 				ACA106E12575E8D000FDD7E4 /* SupportView.swift */,
 				AC59E9A1257B424000121387 /* PanelCardView.swift */,
+				2E28EF4627A2E86A00658855 /* MovementsView.swift */,
 			);
 			path = Others;
 			sourceTree = "<group>";
@@ -971,6 +974,7 @@
 				AC34452125637F4C00C0D668 /* BirthdayTabView.swift in Sources */,
 				AC6F1F2524FF2978005E57DC /* SceneDelegate.swift in Sources */,
 				AC60C1FF274750E200294834 /* PanelGenericViews.swift in Sources */,
+				2E28EF4727A2E86A00658855 /* MovementsView.swift in Sources */,
 				AC34452B25637F7000C0D668 /* NotificationTabView.swift in Sources */,
 				ACC053942550DA1800B9753A /* VMCoreData.swift in Sources */,
 				AC60C1F527474A0800294834 /* PatientFormView.swift in Sources */,

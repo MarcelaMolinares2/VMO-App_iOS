@@ -479,6 +479,23 @@ struct GlobalMenu: View {
                     .padding(.horizontal, 10)
                     .padding(.vertical, 2)
                     Button(action: {
+                        self.goTo(page: "MOVEMENTS-VIEW")
+                    }) {
+                        HStack {
+                            Image("ic-diary")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(maxWidth: iconSize, maxHeight: iconSize, alignment: .center)
+                                .foregroundColor(.cPrimary)
+                                .padding(6)
+                            Text("modMovements")
+                                .foregroundColor(.cPrimary)
+                                .frame(maxWidth: .infinity, minHeight: 36, maxHeight: 36, alignment: .leading)
+                        }
+                    }
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 2)
+                    Button(action: {
                         self.goTo(page: "SUPPORT")
                     }) {
                         HStack {

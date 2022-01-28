@@ -57,6 +57,7 @@
 "modMaterialDelivery" = "Material Delivery";
 "modExpenses" = "Expenses";
 "modTransference" = "Transference";
+"modMovements" = "Movements";
 "modReports" = "Reports";
 "modSupport" = "Support";
 
