@@ -392,3 +392,23 @@ class Zone: Object, Codable {
         return codingKey.rawValue
     }
 }
+
+class ConceptExpense: Object, Codable, Identifiable {
+    @Persisted(primaryKey: true) var objectId: ObjectId
+    @Persisted var id = 0
+    
+    @Persisted var concept: String? = ""
+    @Persisted var account: Int? = 0
+    @Persisted var department:String? = ""
+    @Persisted var refundable:Int? = 0
+    
+    private enum CodingKeys: String, CodingKey {
+        case id = "id_concepto", concept = "concepto", account = "cuenta", department = "departamento", refundable = "reembolsable"
+    }
+    
+    static func primaryCodingKey() -> String {
+        let codingKey: CodingKeys
+        codingKey = .id
+        return codingKey.rawValue
+    }
+}

@@ -11,21 +11,15 @@ import RealmSwift
 import UIKit
 import Combine
 
-struct ConceptExpensesApi: Codable {
-    var id_concepto: Int
-    var concepto: String?
-    var cuenta: Int?
-    var departamento:String?
-    var reembolsable:Int?
-}
-
 struct ExpensesFormView: View {
     
     @EnvironmentObject var viewRouter: ViewRouter
     
-    @State private var expenses: Expenses = Expenses()
+    @State private var expense: Expense = Expense()
     
-    @State private var array: [ConceptExpenses] = []
+    @State private var conceptsExpensesSimple: [ConceptExpenseSimple] = []
+    
+    @ObservedResults(ConceptExpense.self) var conceptsExpenses
     
     @State private var dateStart = Date()
     @State private var concept: String = ""
@@ -55,7 +49,7 @@ struct ExpensesFormView: View {
                             .background(Color.white)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .onChange(of: dateStart, perform: { value in
-                                expenses.expenseDate = Utils.dateFormat(date: dateStart)
+                                expense.expenseDate = Utils.dateFormat(date: dateStart)
                             })
                     }
                     VStack {
@@ -68,7 +62,7 @@ struct ExpensesFormView: View {
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                             .disabled(true)
                             .onChange(of: total, perform: { value in
-                                expenses.total = Float(total)
+                                expense.total = Float(total)
                             })
                         Text("envTotalKm")
                             .frame(maxWidth: .infinity, alignment: .leading)
@@ -79,7 +73,7 @@ struct ExpensesFormView: View {
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                             .disabled(true)
                             .onChange(of: kmExpense, perform: { value in
-                                expenses.kmExpense = Float(kmExpense)
+                                expense.kmExpense = Float(kmExpense)
                             })
                     }
                 }
@@ -96,7 +90,7 @@ struct ExpensesFormView: View {
                                     TextEditor(text: $concept)
                                         .frame(height: 80)
                                         .onChange(of: concept, perform: { value in
-                                            expenses.verification = concept
+                                            expense.verification = concept
                                         })
                                 }
                                 .background(Color.white)
@@ -113,7 +107,7 @@ struct ExpensesFormView: View {
                                     .cornerRadius(CGFloat(4))
                                     .textFieldStyle(RoundedBorderTextFieldStyle())
                                     .onChange(of: originDestiny, perform: { value in
-                                        expenses.originDestination = originDestiny
+                                        expense.originDestination = originDestiny
                                     })
                             }
                             VStack {
@@ -124,23 +118,23 @@ struct ExpensesFormView: View {
                                 TextField("...", text: $km)
                                     .cornerRadius(CGFloat(4))
                                     .textFieldStyle(RoundedBorderTextFieldStyle())
-                                    .onChange(of: km, perform: { value in
-                                        expenses.km = Float(km)
-                                    })
+                                    .keyboardType(.numberPad)
+                                    .onReceive(Just(km)) { newValue in
+                                        let filtered = newValue.filter{ "0123456789".contains($0) }
+                                        if filtered != newValue{
+                                            km = filtered
+                                        }
+                                        expense.km = Float(km)
+                                    }
                             }
                         }
                         .padding([.top, .bottom], 10)
                     }
                     CustomSection{
                         VStack{
-                            ForEach(array, id: \.id) { item in
-                                ExpensesFormCardView(conceptExpenses: item, valueTotalExpense: $valueTotalExpense)
+                            ForEach(conceptsExpensesSimple, id: \.id) { item in
+                                ExpensesFormCardView(conceptExpenseSimple: item, valueTotalExpense: $valueTotalExpense)
                                     .padding(5)
-                                    /*
-                                    .onChange(of: valueTotalExpense, perform: { value in
-                                        print(value)
-                                    })
-                                    */
                                     
                             }
                         }
@@ -155,7 +149,7 @@ struct ExpensesFormView: View {
                                 TextEditor(text: $observations)
                                     .frame(height: 80)
                                     .onChange(of: observations, perform: { value in
-                                        expenses.observations = observations
+                                        expense.observations = observations
                                     })
                             }
                             .background(Color.white)
@@ -173,58 +167,54 @@ struct ExpensesFormView: View {
                 HStack {
                     Spacer()
                     FAB(image: "ic-cloud", foregroundColor: .cPrimary) {
-                        print("valueTotalExpense: ", valueTotalExpense)
-                        print("_________________")
-                        var fullData: [String] = []
-                        array.forEach{ value in
-                            var tmp: [String] = []
-                            tmp.append(value.name ?? "")
-                            tmp.append(value.value ?? "")
-                            tmp.append(value.companyDNI ?? "")
-                            tmp.append(value.companyName ?? "")
-                            tmp.append(value.photo ?? "")
-                            fullData.append(tmp.joined(separator: ","))
-                        }
-                        expenses.conceptData = fullData.joined(separator: "::")
-                        print(expenses)
-                        print("_________________")
+                        save()
                     }
                 }
             }
         }
         .onAppear{
-            load()
+            initView()
         }
     }
     
-    func load() {
-        if !viewRouter.data.objectId.isEmpty {
-            if let expensesItem = try? ExpensesDao(realm: try! Realm()).by(objectId: ObjectId(string: viewRouter.data.objectId)) {
-                expenses = Expenses(value: expensesItem)
-            }
-        } else {
-            expenses.expenseDate = Utils.dateFormat(date: dateStart)
-        }
+    func initView() {
+        print(ExpenseDao(realm: try! Realm()).all())
         
-        let appServer = AppServer()
-        appServer.getRequest(path: "vm/config/expense/concept") { (bool, int, any) in
-            let requestAny = any as? Array<String> ?? []
-            requestAny.forEach{ value in
-                let decoded = try! JSONDecoder().decode(ConceptExpensesApi.self, from: value.data(using: .utf8)!)
-                let cc = ConceptExpenses()
-                cc.id = decoded.id_concepto
-                cc.name = decoded.concepto ?? ""
-                array.append(cc)
-                print("*", decoded)
-            }
-            print("arrayTotal", array)
+        
+        expense.expenseDate = Utils.dateFormat(date: dateStart)
+        conceptsExpenses.forEach{ value in
+            let temp = ConceptExpenseSimple()
+            temp.id = value.id
+            temp.name = value.concept ?? ""
+            conceptsExpensesSimple.append(temp)
         }
+    }
+    
+    func save() {
+        var fullData: [String] = []
+        conceptsExpensesSimple.forEach{ value in
+            var tmp: [String] = []
+            tmp.append(value.name ?? "")
+            tmp.append(value.value ?? "")
+            tmp.append(value.companyDNI ?? "")
+            tmp.append(value.companyName ?? "")
+            tmp.append(value.photo ?? "")
+            fullData.append(tmp.joined(separator: ","))
+        }
+        expense.conceptData = fullData.joined(separator: "::")
+        print(expense)
+        ExpenseDao(realm: try! Realm()).store(expense: expense)
+        self.goTo(page: "MASTER")
+    }
+    
+    func goTo(page: String) {
+        viewRouter.currentPage = page
     }
 }
 
 
 struct ExpensesFormCardView: View {
-    @State var conceptExpenses: ConceptExpenses
+    @State var conceptExpenseSimple: ConceptExpenseSimple
     @Binding var valueTotalExpense: Bool
     
     @State private var options = DynamicFormFieldOptions(table: "expenses", op: "")
@@ -243,7 +233,7 @@ struct ExpensesFormCardView: View {
     var body: some View {
         VStack{
             VStack{
-                Text(conceptExpenses.name ?? "")
+                Text(conceptExpenseSimple.name ?? "")
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .foregroundColor(.cTextHigh)
                     .font(.system(size: 16))
@@ -262,7 +252,7 @@ struct ExpensesFormCardView: View {
                                 if filtered != newValue{
                                     valueExpense = filtered
                                 }
-                                conceptExpenses.value = valueExpense
+                                conceptExpenseSimple.value = valueExpense
                                 valueTotalExpense.toggle()
                             }
                     }
@@ -272,7 +262,6 @@ struct ExpensesFormCardView: View {
                             isSheet = true
                         } else {
                             self.isActionSheet = true
-                            print("add photo value")
                         }
                     }, label: {
                         Image("ic-photo-add")
@@ -292,7 +281,7 @@ struct ExpensesFormCardView: View {
                             .cornerRadius(CGFloat(4))
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                             .onChange(of: dniExpense, perform:  { value in
-                                conceptExpenses.companyDNI = dniExpense
+                                conceptExpenseSimple.companyDNI = dniExpense
                             })
                     }
                     VStack{
@@ -304,7 +293,7 @@ struct ExpensesFormCardView: View {
                             .cornerRadius(CGFloat(4))
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                             .onChange(of: nameExpense, perform:  { value in
-                                conceptExpenses.companyName = nameExpense
+                                conceptExpenseSimple.companyName = nameExpense
                             })
                     }
                 }
@@ -344,12 +333,12 @@ struct ExpensesFormCardView: View {
         self.isSheet = false
         if selectedPhoto == "EDIT" {
             if done {
-                MediaUtils.store(uiImage: uiImage, table: options.table, field: conceptExpenses.objectId.description, id: options.item, localId: options.objectId?.stringValue ?? "")
+                MediaUtils.store(uiImage: uiImage, table: options.table, field: conceptExpenseSimple.objectId.description, id: options.item, localId: options.objectId?.stringValue ?? "")
             }
             selectedPhoto = "OK"
         } else {
             if done {
-                MediaUtils.store(uiImage: uiImage, table: options.table, field: conceptExpenses.objectId.description, id: options.item, localId: options.objectId?.stringValue ?? "")
+                MediaUtils.store(uiImage: uiImage, table: options.table, field: conceptExpenseSimple.objectId.description, id: options.item, localId: options.objectId?.stringValue ?? "")
                 selectedPhoto = "OK"
             }
         }

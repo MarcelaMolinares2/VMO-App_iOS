@@ -209,23 +209,23 @@ class ActivityDao: GenericDao {
     
 }
 
-class ExpensesDao: GenericDao {
+class ExpenseDao: GenericDao {
     
-    func all() -> [Expenses] {
-        return Array(realm.objects(Expenses.self).sorted(byKeyPath: "id"))
+    func all() -> [Expense] {
+        return Array(realm.objects(Expense.self).sorted(byKeyPath: "id"))
     }
     
-    func by(id: String) -> Expenses? {
-        return realm.objects(Expenses.self).filter("id == \(id)").first
+    func by(id: String) -> Expense? {
+        return realm.objects(Expense.self).filter("id == \(id)").first
     }
     
-    func by(objectId: ObjectId) -> Expenses? {
-        return realm.object(ofType: Expenses.self, forPrimaryKey: objectId)
+    func by(objectId: ObjectId) -> Expense? {
+        return realm.object(ofType: Expense.self, forPrimaryKey: objectId)
     }
     
-    func store(activity: Expenses) {
+    func store(expense: Expense) {
         try! realm.write {
-            realm.add(activity, update: .all)
+            realm.add(expense, update: .all)
         }
     }
     

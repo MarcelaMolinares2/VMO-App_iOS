@@ -10,7 +10,7 @@ import BackgroundTasks
 import RealmSwift
 
 enum RequestServices {
-    case brick, category, city, college, config, country, cycle, day_request_reason, pharmacy_chain, pharmacy_type, prices_list, specialty, style, user, zone,//Tertiary
+    case brick, category, city, college, config, country, cycle, day_request_reason, pharmacy_chain, pharmacy_type, prices_list, specialty, style, user, zone, concept_expense,//Tertiary
          material, product, line,//Secondary
          activity, client, doctor, patient, pharmacy, potential//Primary
 }
@@ -148,6 +148,8 @@ class RequestOperation: Operation {
                 getRQ(from: User.self, path: "user", primaryKey: User.primaryCodingKey())
             case .zone:
                 getRQ(from: Zone.self, path: "zone", primaryKey: Zone.primaryCodingKey())
+            case .concept_expense:
+                getRQ(from: ConceptExpense.self, path: "expense/concept", primaryKey: ConceptExpense.primaryCodingKey())
             case .day_request_reason:
                 getRQ(from: FreeDayReason.self, path: "free-day-reason", primaryKey: FreeDayReason.primaryCodingKey())
             case .line:
