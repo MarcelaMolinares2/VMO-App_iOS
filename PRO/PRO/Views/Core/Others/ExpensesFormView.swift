@@ -19,14 +19,12 @@ struct ExpensesFormView: View {
     
     @State private var conceptsExpensesSimple: [ConceptExpenseSimple] = []
     
-    @ObservedResults(ConceptExpense.self) var conceptsExpenses
+    @ObservedResults(ConceptExpense.self) var conceptExpenses
     
     @State private var dateStart = Date()
     @State private var concept: String = ""
     @State private var total: String = ""
     @State private var originDestiny: String = ""
-    @State private var km: String = ""
-    @State private var kmExpense: String = ""
     @State private var observations: String = ""
     
     @State private var valueTotalExpense: Bool = false
@@ -57,24 +55,10 @@ struct ExpensesFormView: View {
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .foregroundColor(.cTextHigh)
                             .font(.system(size: 14))
-                        TextField("...", text: $total)
-                            .cornerRadius(CGFloat(4))
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .disabled(true)
-                            .onChange(of: total, perform: { value in
-                                expense.total = Float(total)
-                            })
-                        Text("envTotalKm")
+                        Text(total)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .foregroundColor(.cTextHigh)
                             .font(.system(size: 14))
-                        TextField("...", text: $kmExpense)
-                            .cornerRadius(CGFloat(4))
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .disabled(true)
-                            .onChange(of: kmExpense, perform: { value in
-                                expense.kmExpense = Float(kmExpense)
-                            })
                     }
                 }
                 .padding(15)
@@ -109,23 +93,6 @@ struct ExpensesFormView: View {
                                     .onChange(of: originDestiny, perform: { value in
                                         expense.originDestination = originDestiny
                                     })
-                            }
-                            VStack {
-                                Text("envKm")
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .foregroundColor(.cTextHigh)
-                                    .font(.system(size: 14))
-                                TextField("...", text: $km)
-                                    .cornerRadius(CGFloat(4))
-                                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                                    .keyboardType(.numberPad)
-                                    .onReceive(Just(km)) { newValue in
-                                        let filtered = newValue.filter{ "0123456789".contains($0) }
-                                        if filtered != newValue{
-                                            km = filtered
-                                        }
-                                        expense.km = Float(km)
-                                    }
                             }
                         }
                         .padding([.top, .bottom], 10)
@@ -179,10 +146,8 @@ struct ExpensesFormView: View {
     
     func initView() {
         print(ExpenseDao(realm: try! Realm()).all())
-        
-        
         expense.expenseDate = Utils.dateFormat(date: dateStart)
-        conceptsExpenses.forEach{ value in
+        conceptExpenses.forEach{ value in
             let temp = ConceptExpenseSimple()
             temp.id = value.id
             temp.name = value.concept ?? ""
@@ -203,8 +168,8 @@ struct ExpensesFormView: View {
         }
         expense.conceptData = fullData.joined(separator: "::")
         print(expense)
-        ExpenseDao(realm: try! Realm()).store(expense: expense)
-        self.goTo(page: "MASTER")
+        //ExpenseDao(realm: try! Realm()).store(expense: expense)
+        //self.goTo(page: "MASTER")
     }
     
     func goTo(page: String) {
