@@ -19,8 +19,8 @@
 		AC17AD86274426DB002A376B /* ViewerDialogs.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC17AD85274426DA002A376B /* ViewerDialogs.swift */; };
 		AC1AF8C4274DEC67002658B6 /* MovementFormTabsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC1AF8C3274DEC67002658B6 /* MovementFormTabsView.swift */; };
 		AC22180C27624F9C00815E4E /* ActivityFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC22180B27624F9C00815E4E /* ActivityFormView.swift */; };
-		AC3444C42562C66900C0D668 /* RequestOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC3444C32562C66900C0D668 /* RequestOperation.swift */; };
-		AC3444CA2562C72400C0D668 /* SyncRecurrentService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC3444C92562C72400C0D668 /* SyncRecurrentService.swift */; };
+		AC3444C42562C66900C0D668 /* DownloadRequestOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC3444C32562C66900C0D668 /* DownloadRequestOperation.swift */; };
+		AC3444CA2562C72400C0D668 /* UploadRequestOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC3444C92562C72400C0D668 /* UploadRequestOperation.swift */; };
 		AC3444D72562CA4E00C0D668 /* SyncDataService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC3444D62562CA4E00C0D668 /* SyncDataService.swift */; };
 		AC3444DD2562CCE200C0D668 /* SyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC3444DC2562CCE200C0D668 /* SyncService.swift */; };
 		AC3444E32563683F00C0D668 /* SLAIDPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC3444E22563683F00C0D668 /* SLAIDPanelView.swift */; };
@@ -140,8 +140,8 @@
 		AC17AD85274426DA002A376B /* ViewerDialogs.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewerDialogs.swift; sourceTree = "<group>"; };
 		AC1AF8C3274DEC67002658B6 /* MovementFormTabsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovementFormTabsView.swift; sourceTree = "<group>"; };
 		AC22180B27624F9C00815E4E /* ActivityFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityFormView.swift; sourceTree = "<group>"; };
-		AC3444C32562C66900C0D668 /* RequestOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestOperation.swift; sourceTree = "<group>"; };
-		AC3444C92562C72400C0D668 /* SyncRecurrentService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncRecurrentService.swift; sourceTree = "<group>"; };
+		AC3444C32562C66900C0D668 /* DownloadRequestOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadRequestOperation.swift; sourceTree = "<group>"; };
+		AC3444C92562C72400C0D668 /* UploadRequestOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UploadRequestOperation.swift; sourceTree = "<group>"; };
 		AC3444D62562CA4E00C0D668 /* SyncDataService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncDataService.swift; sourceTree = "<group>"; };
 		AC3444DC2562CCE200C0D668 /* SyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncService.swift; sourceTree = "<group>"; };
 		AC3444E22563683F00C0D668 /* SLAIDPanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SLAIDPanelView.swift; sourceTree = "<group>"; };
@@ -303,8 +303,9 @@
 		AC3444C82562C70300C0D668 /* Download */ = {
 			isa = PBXGroup;
 			children = (
-				AC3444C92562C72400C0D668 /* SyncRecurrentService.swift */,
+				AC3444C32562C66900C0D668 /* DownloadRequestOperation.swift */,
 				AC3444D62562CA4E00C0D668 /* SyncDataService.swift */,
+				AC3444DC2562CCE200C0D668 /* SyncService.swift */,
 			);
 			path = Download;
 			sourceTree = "<group>";
@@ -312,6 +313,7 @@
 		AC3444DB2562CCD300C0D668 /* Upload */ = {
 			isa = PBXGroup;
 			children = (
+				AC3444C92562C72400C0D668 /* UploadRequestOperation.swift */,
 			);
 			path = Upload;
 			sourceTree = "<group>";
@@ -594,8 +596,6 @@
 				AC3444DB2562CCD300C0D668 /* Upload */,
 				AC3444C82562C70300C0D668 /* Download */,
 				ACC053572550981E00B9753A /* AuthService.swift */,
-				AC3444C32562C66900C0D668 /* RequestOperation.swift */,
-				AC3444DC2562CCE200C0D668 /* SyncService.swift */,
 				ACC49D1A2750881E0078F7CA /* LocationService.swift */,
 			);
 			path = Services;
@@ -940,7 +940,7 @@
 				AC22180C27624F9C00815E4E /* ActivityFormView.swift in Sources */,
 				AC60C1FA27474A4100294834 /* PharmacyFormView.swift in Sources */,
 				AC6F1F2324FF2978005E57DC /* AppDelegate.swift in Sources */,
-				AC3444CA2562C72400C0D668 /* SyncRecurrentService.swift in Sources */,
+				AC3444CA2562C72400C0D668 /* UploadRequestOperation.swift in Sources */,
 				AC78D2F726D563ED00674A4F /* MaterialDeliveryView.swift in Sources */,
 				AC60C1E6274745B200294834 /* PatientListView.swift in Sources */,
 				ACDD64B7274C0FDA00D2C340 /* PanelStockView.swift in Sources */,
@@ -960,7 +960,7 @@
 				AC59E9A7257B425F00121387 /* ClientFormView.swift in Sources */,
 				ACDD64BC274C104D00D2C340 /* PanelContactView.swift in Sources */,
 				AC59E99D257B400800121387 /* AppManage.swift in Sources */,
-				AC3444C42562C66900C0D668 /* RequestOperation.swift in Sources */,
+				AC3444C42562C66900C0D668 /* DownloadRequestOperation.swift in Sources */,
 				AC59E95C2576B82F00121387 /* GenericViews.swift in Sources */,
 				AC1AF8C4274DEC67002658B6 /* MovementFormTabsView.swift in Sources */,
 				ACC0539C2550DA2300B9753A /* VMConfigData.swift in Sources */,

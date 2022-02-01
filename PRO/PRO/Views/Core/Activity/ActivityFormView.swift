@@ -342,6 +342,7 @@ struct ActivityBasicFormView: View {
         options.type = visitType.lowercased()
         options.panelType = viewRouter.data.type
         form.tabs = DynamicUtils.initForm(data: dynamicData).sorted(by: { $0.key > $1.key })
+        self.dateStart = Utils.strToDate(value: (activity.dateStart ?? "") + " " + (activity.hourStart ?? ""))
         if let date_MDY: String = activity.dateStart {
             if let date_HMS: String = activity.hourStart {
                 self.dateStart = Utils.strToDate(value : date_MDY + " " + date_HMS)

@@ -41,7 +41,7 @@ struct ClientFormView: View {
                         ForEach(form.tabs, id: \.id) { tab in
                             if tab.key == tabRouter.current {
                                 if let ix = form.tabs.firstIndex(where: { $0.key == tabRouter.current }) {
-                                    Form {
+                                    CustomForm {
                                         DynamicFormView(form: $form, tab: $form.tabs[ix], options: options)
                                     }
                                 }

@@ -14,7 +14,7 @@ class Activity: Object, Codable, SyncEntity, Identifiable {
     @Persisted(primaryKey: true) var objectId: ObjectId
     @Persisted(indexed: true) var id = 0
     @Persisted var transactionStatus: String? = ""
-    @Persisted var transactionPending: String? = ""
+    @Persisted var transactionType: String? = ""
     @Persisted var transactionResponse: String? = ""
     
     @Persisted var description_: String?
@@ -52,7 +52,7 @@ class AdvertisingMaterialDelivery: Object, Codable, SyncEntity {
     @Persisted(primaryKey: true) var objectId: ObjectId
     @Persisted(indexed: true) var id = 0
     @Persisted var transactionStatus: String? = ""
-    @Persisted var transactionPending: String? = ""
+    @Persisted var transactionType: String? = ""
     @Persisted var transactionResponse: String? = ""
     @Persisted var userId: Int = 0
     @Persisted var userTo: Int = 0
@@ -84,7 +84,7 @@ class AdvertisingMaterialRequest: Object, Codable, SyncEntity {
     @Persisted var date: String = ""
     @Persisted var comment: String = ""
     @Persisted var transactionStatus: String? = ""
-    @Persisted var transactionPending: String? = ""
+    @Persisted var transactionType: String? = ""
     @Persisted var transactionResponse: String? = ""
     
     private enum CodingKeys: String, CodingKey {
@@ -96,7 +96,7 @@ protocol SyncEntity {
     var objectId: ObjectId { get set }
     var id: Int { get set }
     var transactionStatus: String? { get set }
-    var transactionPending: String? { get set }
+    var transactionType: String? { get set }
     var transactionResponse: String? { get set }
 }
 
@@ -165,7 +165,7 @@ class GenericPanel: Panel, SyncEntity {
     var objectId: ObjectId = ObjectId()
     var id: Int = 0
     var transactionStatus: String?
-    var transactionPending: String?
+    var transactionType: String?
     var transactionResponse: String?
     
 }
@@ -174,7 +174,7 @@ class Client: Object, Codable, Panel, SyncEntity, Identifiable {
     @Persisted(primaryKey: true) var objectId: ObjectId
     @Persisted(indexed: true) var id = 0
     @Persisted var transactionStatus: String? = ""
-    @Persisted var transactionPending: String? = ""
+    @Persisted var transactionType: String? = ""
     @Persisted var transactionResponse: String? = ""
     
     @Persisted var idNumber: String?
@@ -281,7 +281,7 @@ class Contact: Object, Codable, Panel, SyncEntity, Identifiable {
     @Persisted var idNumber: String?
     @Persisted var type: String = "CT"
     @Persisted var transactionStatus: String? = ""
-    @Persisted var transactionPending: String? = ""
+    @Persisted var transactionType: String? = ""
     @Persisted var transactionResponse: String? = ""
     
     @Persisted var name: String?
@@ -383,7 +383,7 @@ class Diary: Object, Codable, SyncEntity {
     @Persisted(primaryKey: true) var objectId: ObjectId
     @Persisted(indexed: true) var id = 0
     @Persisted var transactionStatus: String? = ""
-    @Persisted var transactionPending: String? = ""
+    @Persisted var transactionType: String? = ""
     @Persisted var transactionResponse: String? = ""
     
     @Persisted var date: String?
@@ -426,7 +426,7 @@ class Doctor: Object, Codable, Panel, SyncEntity, Identifiable {
     @Persisted(primaryKey: true) var objectId: ObjectId
     @Persisted(indexed: true) var id = 0
     @Persisted var transactionStatus: String? = ""
-    @Persisted var transactionPending: String? = ""
+    @Persisted var transactionType: String? = ""
     @Persisted var transactionResponse: String? = ""
     
     lazy var name: String? = { "\(firstName ?? "") \(lastName ?? "")" }()
@@ -607,7 +607,7 @@ class Group: Object, Codable, SyncEntity, ObjectKeyIdentifiable {
     @Persisted(indexed: true) var id = 0
     
     @Persisted var transactionStatus: String? = ""
-    @Persisted var transactionPending: String? = ""
+    @Persisted var transactionType: String? = ""
     @Persisted var transactionResponse: String? = ""
     
     @Persisted var name: String? = ""
@@ -631,7 +631,7 @@ class MediaItem: Object, Decodable, SyncEntity {
     @Persisted(primaryKey: true) var objectId: ObjectId
     @Persisted(indexed: true) var id = 0
     @Persisted var transactionStatus: String? = "PENDING"
-    @Persisted var transactionPending: String? = ""
+    @Persisted var transactionType: String? = ""
     @Persisted var transactionResponse: String? = ""
     
     @Persisted var table: String = ""
@@ -646,7 +646,7 @@ class Movement: Object, Codable, SyncEntity {
     @Persisted(primaryKey: true) var objectId: ObjectId
     @Persisted(indexed: true) var id = 0
     @Persisted var transactionStatus: String? = ""
-    @Persisted var transactionPending: String? = ""
+    @Persisted var transactionType: String? = ""
     @Persisted var transactionResponse: String? = ""
     
     @Persisted var panelId: Int = 0
@@ -746,7 +746,7 @@ class MovementSimple: Object, Decodable, SyncEntity {
     @Persisted(primaryKey: true) var objectId: ObjectId
     @Persisted(indexed: true) var id = 0
     @Persisted var transactionStatus: String? = ""
-    @Persisted var transactionPending: String? = ""
+    @Persisted var transactionType: String? = ""
     @Persisted var transactionResponse: String? = ""
     
     @Persisted var cycleId = 0
@@ -767,7 +767,7 @@ class PanelLocation: Object, Decodable, SyncEntity {
     @Persisted(primaryKey: true) var objectId: ObjectId
     @Persisted(indexed: true) var id = 0
     @Persisted var transactionStatus: String? = ""
-    @Persisted var transactionPending: String? = ""
+    @Persisted var transactionType: String? = ""
     @Persisted var transactionResponse: String? = ""
     
     @Persisted var address: String?
@@ -792,7 +792,7 @@ class Patient: Object, Codable, Panel, SyncEntity, Identifiable {
     @Persisted(primaryKey: true) var objectId: ObjectId
     @Persisted(indexed: true) var id = 0
     @Persisted var transactionStatus: String? = ""
-    @Persisted var transactionPending: String? = ""
+    @Persisted var transactionType: String? = ""
     @Persisted var transactionResponse: String? = ""
     
     lazy var name: String? = { "\(String(describing: firstName)) \(String(describing: lastName))" }()
@@ -886,7 +886,7 @@ class Pharmacy: Object, Codable, Panel, SyncEntity, Identifiable {
     @Persisted(primaryKey: true) var objectId: ObjectId
     @Persisted(indexed: true) var id = 0
     @Persisted var transactionStatus: String? = ""
-    @Persisted var transactionPending: String? = ""
+    @Persisted var transactionType: String? = ""
     @Persisted var transactionResponse: String? = ""
     
     @Persisted var idNumber: String?
@@ -1009,7 +1009,7 @@ class PotentialProfessional: Object, Codable, Panel, SyncEntity, Identifiable {
     @Persisted(primaryKey: true) var objectId: ObjectId
     @Persisted(indexed: true) var id = 0
     @Persisted var transactionStatus: String? = ""
-    @Persisted var transactionPending: String? = ""
+    @Persisted var transactionType: String? = ""
     @Persisted var transactionResponse: String? = ""
     
     @Persisted var idNumber: String?
@@ -1102,7 +1102,7 @@ class RequestDay: Object, Codable, SyncEntity {
     @Persisted(primaryKey: true) var objectId: ObjectId
     @Persisted(indexed: true) var id = 0
     @Persisted var transactionStatus: String? = ""
-    @Persisted var transactionPending: String? = ""
+    @Persisted var transactionType: String? = ""
     @Persisted var transactionResponse: String? = ""
     
     @Persisted var dateStart: Date?
@@ -1129,7 +1129,7 @@ class Expense: Object, Codable, SyncEntity {
     @Persisted(primaryKey: true) var objectId: ObjectId
     @Persisted(indexed: true) var id = 0
     @Persisted var transactionStatus: String? = ""
-    @Persisted var transactionPending: String? = ""
+    @Persisted var transactionType: String? = ""
     @Persisted var transactionResponse: String? = ""
     
     @Persisted var baseURL: String? = ""
@@ -1159,7 +1159,7 @@ class ConceptExpenseSimple: Object, Codable, SyncEntity {
     @Persisted(primaryKey: true) var objectId: ObjectId
     @Persisted(indexed: true) var id = 0
     @Persisted var transactionStatus: String? = ""
-    @Persisted var transactionPending: String? = ""
+    @Persisted var transactionType: String? = ""
     @Persisted var transactionResponse: String? = ""
     
     @Persisted var baseURL: String? = ""
@@ -1209,7 +1209,7 @@ class UserPanel: Object, Decodable, SyncEntity {
     @Persisted(primaryKey: true) var objectId: ObjectId
     @Persisted(indexed: true) var id = 0
     @Persisted var transactionStatus: String? = ""
-    @Persisted var transactionPending: String? = ""
+    @Persisted var transactionType: String? = ""
     @Persisted var transactionResponse: String? = ""
     
     @Persisted var userID = 0

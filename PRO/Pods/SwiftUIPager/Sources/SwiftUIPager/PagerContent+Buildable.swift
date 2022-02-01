@@ -164,8 +164,8 @@ extension Pager.PagerContent: Buildable {
     /// - Parameter value: animation to use while dragging and to page
     ///
     /// - Warning: `spring` animations don't work well. Avoid high responses while dragging as the animation should be short
-    public func draggingAnimation(_ companyValue: DraggingAnimation) -> Self {
-        mutating(keyPath: \.draggingAnimation, companyValue: companyValue)
+    public func draggingAnimation(_ value: DraggingAnimation) -> Self {
+        mutating(keyPath: \.draggingAnimation, value: value)
     }
 
     #endif

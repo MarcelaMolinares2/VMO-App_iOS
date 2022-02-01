@@ -73,6 +73,7 @@ struct DynamicFieldView: View {
                 Text("A")
             }
         }
+        .padding(.vertical, 6)
         .onAppear {
             load()
         }
@@ -696,7 +697,6 @@ struct DynamicFormList: View {
                     .frame(width: 16, height: 16, alignment: .center)
                     .foregroundColor(.cAccent)
             }
-            .frame(minHeight: 40)
         }
         .onAppear {
             load()

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "1240"
+   LastUpgradeVersion = "1320"
    version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -14,9 +14,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "7EDD561B01B453B33504B0EACB2107CC"
-               BuildableName = "SwiftUIPager.framework"
-               BlueprintName = "SwiftUIPager"
+               BlueprintIdentifier = "54EDDE04C38B7E81E6612C2663A5A2C1"
+               BuildableName = "SwiftTryCatch.framework"
+               BlueprintName = "SwiftTryCatch"
                ReferencedContainer = "container:Pods.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>

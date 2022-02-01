@@ -1,21 +1,30 @@
 //
-//  SyncService.swift
+//  SyncRecurrentService.swift
 //  PRO
 //
 //  Created by VMO on 16/11/20.
 //  Copyright © 2020 VMO. All rights reserved.
 //
 
-import BackgroundTasks
+import Foundation
 
-class SyncOperation: Operation {
-    var fails: [String: [Int16: String]] = [:]
-    
+enum UploadRequestServices {
+    case activity, client, doctor, patient, pharmacy, potential
+}
+
+class UploadRequestOperation: Operation {
     @objc private enum State: Int {
         case ready
         case executing
         case finished
     }
+    
+    var step = 0
+    var fails: [String: [Int16: String]] = [:]
+    
+    var prefix = ""
+    var services: [UploadRequestServices] = []
+    
     
     private var _state = State.ready
     private let stateQueue = DispatchQueue(label: Bundle.main.bundleIdentifier! + ".op.state", attributes: .concurrent)
@@ -54,47 +63,14 @@ class SyncOperation: Operation {
         main()
     }
     
-    override func main() {
-        guard !dependencies.contains(where: { $0.isCancelled }), !isCancelled else {
-            return
-        }
-        self.syncTertiary()
+    open override func main() {
+        fatalError("Implement in sublcass to perform task")
     }
     
     public final func finish() {
         if isExecuting {
             state = .finished
         }
-    }
-    
-    func syncPrimary() {
-        let operationQueue = OperationQueue()
-        let syncPrimary = SyncPrimaryService()
-        syncPrimary.completionBlock = {
-            self.fails.merge(dict: syncPrimary.fails)
-            self.finish()
-        }
-        operationQueue.addOperations([syncPrimary], waitUntilFinished: true)
-    }
-    
-    func syncSecondary() {
-        let operationQueue = OperationQueue()
-        let syncSecondary = SyncSecondaryService()
-        syncSecondary.completionBlock = {
-            self.fails.merge(dict: syncSecondary.fails)
-            self.syncPrimary()
-        }
-        operationQueue.addOperations([syncSecondary], waitUntilFinished: true)
-    }
-    
-    func syncTertiary() {
-        let operationQueue = OperationQueue()
-        let syncTertiary = SyncTertiaryService()
-        syncTertiary.completionBlock = {
-            self.fails.merge(dict: syncTertiary.fails)
-            self.syncSecondary()
-        }
-        operationQueue.addOperations([syncTertiary], waitUntilFinished: true)
     }
     
 }

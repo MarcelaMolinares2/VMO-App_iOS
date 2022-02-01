@@ -8,14 +8,15 @@
 
 import BackgroundTasks
 import RealmSwift
+import Amplify
 
-enum RequestServices {
+enum DownloadRequestServices {
     case brick, category, city, college, config, country, cycle, day_request_reason, pharmacy_chain, pharmacy_type, prices_list, specialty, style, user, zone, concept_expense,//Tertiary
          material, product, line,//Secondary
          activity, client, doctor, patient, pharmacy, potential//Primary
 }
 
-class RequestOperation: Operation {
+class DownloadRequestOperation: Operation {
     @objc private enum State: Int {
         case ready
         case executing
@@ -26,7 +27,7 @@ class RequestOperation: Operation {
     var fails: [String: [Int16: String]] = [:]
     
     var prefix = ""
-    var services: [RequestServices] = []
+    var services: [DownloadRequestServices] = []
     
     private var _state = State.ready
     private let stateQueue = DispatchQueue(label: Bundle.main.bundleIdentifier! + ".op.state", attributes: .concurrent)
@@ -81,10 +82,22 @@ class RequestOperation: Operation {
         }
     }
     
-    func postRQ<T: Object & Codable>(from: T.Type, path: String, data: [String : Any], primaryKey: String, keys: [String: String] = [String: String]()) {
+    func postRQ<T: Object & Codable>(from: T.Type, path: String, data: [String : Any], primaryKey: String, keys: [String: String] = [String: String](), validate: Bool = false) {
+        if validate {
+            if !validateLocal(from: from) {
+                self.end()
+                return
+            }
+        }
         AppServer().postRequest(data: data, path: "\(prefix)/\(path)") { (successful, code, data) in
             self.handleRequest(from: from, path: path, primaryKey: primaryKey, keys: keys, successful: successful, code: code, data: data)
         }
+    }
+    
+    func validateLocal<T: Object & Codable>(from: T.Type) -> Bool {
+        let realm = try! Realm()
+        let local = realm.objects(from.self).filter("transactionType != ''")
+        return local.isEmpty
     }
     
     func handleRequest<T: Object & Codable>(from: T.Type, path: String, primaryKey: String, keys: [String: String], successful: Bool, code: Int16, data: Any) {
@@ -93,6 +106,7 @@ class RequestOperation: Operation {
             do {
                 // Open a thread-safe transaction.
                 try realm.write {
+                    realm.delete(realm.objects(from.self))
                     if let rs = data as? [String] {
                         //print(rs)
                         for item in rs {
@@ -139,7 +153,7 @@ class RequestOperation: Operation {
             case .city:
                 getRQ(from: City.self, path: "city", primaryKey: City.primaryCodingKey())
             case .config:
-                getRQ(from: Config.self, path: "", primaryKey: Config.primaryCodingKey())
+                getRQ(from: Config.self, path: "config", primaryKey: Config.primaryCodingKey())
             case .country:
                 getRQ(from: Country.self, path: "country", primaryKey: Country.primaryCodingKey())
             case .cycle:
@@ -162,37 +176,43 @@ class RequestOperation: Operation {
                 postRQ(from: Activity.self, path: "activity/filter", data:
                         [
                             "id_usuario" : JWTUtils.sub()
-                        ], primaryKey: Activity.primaryCodingKey()
+                        ], primaryKey: Activity.primaryCodingKey(),
+                       validate: true
                 )
             case .client:
                 postRQ(from: Client.self, path: "bridge/client/filter", data:
                         [
                             "user_ids" : JWTUtils.sub()
-                        ], primaryKey: Client.primaryCodingKey()
+                        ], primaryKey: Client.primaryCodingKey(),
+                       validate: true
                 )
             case .doctor:
                 postRQ(from: Doctor.self, path: "doctor/filter", data:
                         [
                             "user_ids" : JWTUtils.sub()
-                        ], primaryKey: Doctor.primaryCodingKey()
+                        ], primaryKey: Doctor.primaryCodingKey(),
+                       validate: true
                 )
             case .patient:
-                postRQ(from: Patient.self, path: "patient/filter", data:
+                postRQ(from: Patient.self, path: "bridge/patient/filter", data:
                         [
                             "user_ids" : JWTUtils.sub()
-                        ], primaryKey: Patient.primaryCodingKey()
+                        ], primaryKey: Patient.primaryCodingKey(),
+                       validate: true
                 )
             case .pharmacy:
-                postRQ(from: Pharmacy.self, path: "pharmacy/filter", data:
+                postRQ(from: Pharmacy.self, path: "bridge/pharmacy/filter", data:
                         [
                             "user_ids" : JWTUtils.sub()
-                        ], primaryKey: Pharmacy.primaryCodingKey()
+                        ], primaryKey: Pharmacy.primaryCodingKey(),
+                       validate: true
                 )
             case .potential:
-                postRQ(from: PotentialProfessional.self, path: "potential/filter", data:
+                postRQ(from: PotentialProfessional.self, path: "bridge/potential/filter", data:
                         [
                             "user_ids" : JWTUtils.sub()
-                        ], primaryKey: PotentialProfessional.primaryCodingKey()
+                        ], primaryKey: PotentialProfessional.primaryCodingKey(),
+                       validate: true
                 )
                 case .category:
                     getRQ(from: Category.self, path: "panel-category", primaryKey: Category.primaryCodingKey())

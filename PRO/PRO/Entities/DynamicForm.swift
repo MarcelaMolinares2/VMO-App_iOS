@@ -110,22 +110,22 @@ struct DynamicFormField: Identifiable, Decodable {
         self.key = try container.decode(String.self, forKey: .key)
         self.label = try container.decode(String.self, forKey: .label)
         self.description = try container.decode(String?.self, forKey: .description)
-        self.controlType = try container.decode(String.self, forKey: .controlType)
-        self.dataType = try container.decode(String.self, forKey: .dataType)
+        self.controlType = try DynamicUtils.stringTypeDecoding(container: container, key: .controlType)
+        self.dataType = try DynamicUtils.stringTypeDecoding(container: container, key: .dataType)
         self.requiredUserTypes = try container.decode(String.self, forKey: .requiredUserTypes)
         
         self.visible = try container.decode(DynamicFormFieldUserOpts.self, forKey: .visible)
         self.editable = try container.decode(DynamicFormFieldUserOpts.self, forKey: .editable)
         
         self.maxLength = try container.decode(Int.self, forKey: .maxLength)
-        self.mask = try container.decode(String.self, forKey: .mask)
+        self.mask = try DynamicUtils.stringTypeDecoding(container: container, key: .mask)
         self.acceptOtherValue = try container.decode(Bool.self, forKey: .acceptOtherValue)
         self.defaultValue = try container.decode(String?.self, forKey: .defaultValue)
-        self.source = try container.decode(String.self, forKey: .source)
-        self.sourceType = try container.decode(String.self, forKey: .sourceType)
-        self.countries = try container.decode(String.self, forKey: .countries)
-        self.cities = try container.decode(String.self, forKey: .cities)
-        self.options = try container.decode(String.self, forKey: .options)
+        self.source = try DynamicUtils.stringTypeDecoding(container: container, key: .source)
+        self.sourceType = try DynamicUtils.stringTypeDecoding(container: container, key: .sourceType)
+        self.countries = try DynamicUtils.stringTypeDecoding(container: container, key: .countries)
+        self.cities = try DynamicUtils.stringTypeDecoding(container: container, key: .cities)
+        self.options = try DynamicUtils.stringTypeDecoding(container: container, key: .options)
     }
     
     mutating func setValue(value: String) {

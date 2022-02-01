@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "1240"
+   LastUpgradeVersion = "1320"
    version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -14,9 +14,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "61FDE7A4822C11816823B0B7DE20543B"
-               BuildableName = "BottomSheetSwiftUI.framework"
-               BlueprintName = "BottomSheetSwiftUI"
+               BlueprintIdentifier = "E5B4BBC6DD552AC8943C7E22772FC1D3"
+               BuildableName = "GoogleMaps"
+               BlueprintName = "GoogleMaps"
                ReferencedContainer = "container:Pods.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>

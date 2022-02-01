@@ -170,11 +170,53 @@ struct MovementFormTabBasicView: View {
             .frame(minWidth: 0, maxWidth: .infinity, minHeight: 38, maxHeight: 38)
             Form {
                 Section {
-                    VStack {
-                        HStack {
-                            Text("AAAAA")
-                            Text("DDDDD")
+                    HStack {
+                        HStack{
+                            VStack{
+                                Text(NSLocalizedString("envCycle", comment: ""))
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .foregroundColor(.cTextMedium)
+                                    .font(.system(size: 14))
+                                Text((movement.cycleId <= 0) ? NSLocalizedString("envChoose", comment: "") : "----")
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .foregroundColor(.cTextMedium)
+                                    .font(.system(size: 16))
+                            }
+                            Spacer()
+                            Image("ic-arrow-expand-more")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 35)
+                                .foregroundColor(.cTextMedium)
                         }
+                        .padding(10)
+                        HStack{
+                            VStack{
+                                Text(NSLocalizedString("envFrom", comment: ""))
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .foregroundColor(.cTextMedium)
+                                    .font(.system(size: 14))
+                                DatePicker("", selection: $movement.tmpDate, in: Date()..., displayedComponents: [.date, .hourAndMinute])
+                                    .datePickerStyle(CompactDatePickerStyle())
+                                    .labelsHidden()
+                                    .clipped()
+                                    .accentColor(.cTextHigh)
+                                    .background(Color.white)
+                                    .onChange(of: movement.tmpDate, perform: { value in
+                                        
+                                    })
+                            }
+                            .padding(10)
+                            Spacer()
+                            Image("ic-day-request")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(height: 35)
+                                .foregroundColor(.cTextMedium)
+                                .padding(10)
+                        }
+                    }
+                    VStack {
                     }
                     VStack {
                         HStack {

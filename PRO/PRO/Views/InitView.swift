@@ -129,6 +129,11 @@ struct InitView: View {
         let operationQueue = OperationQueue()
         let syncOperation = SyncOperation()
         syncOperation.completionBlock = {
+            DispatchQueue.main.async {
+                self.userSettings.toggleInit(value: true)
+                self.viewRouter.currentPage = "MASTER"
+            }
+            /*
             if syncOperation.fails.isEmpty {
                 DispatchQueue.main.async {
                     self.userSettings.toggleInit(value: true)
@@ -137,6 +142,7 @@ struct InitView: View {
             } else {
                 self.fails = syncOperation.fails
             }
+             */
             isExecuting = false
         }
         operationQueue.addOperations([syncOperation], waitUntilFinished: false)
