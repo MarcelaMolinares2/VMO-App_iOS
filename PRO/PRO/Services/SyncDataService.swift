@@ -88,3 +88,31 @@ class SyncQuaternaryService: DownloadRequestOperation {
     }
     
 }
+
+class SyncUploadService: UploadRequestOperation {
+    
+    override func main() {
+        self.prefix = "vm"
+
+        step = 0
+        services = [.doctor]
+        upload()
+    }
+    
+}
+
+class SyncUploadOnDemandService: UploadRequestOperation {
+    
+    init(service: UploadRequestServices) {
+        super.init()
+        services = [service]
+    }
+    
+    override func main() {
+        self.prefix = "vm"
+        
+        step = 0
+        upload()
+    }
+    
+}

@@ -80,7 +80,7 @@ class NetworkService {
         if !data.isEmpty {
             dataURL = "\(dataURL)\(params(data: data))"
         }
-        print(dataURL)
+        print(method, dataURL)
         let url = URL(string: dataURL)!
         
         var request = URLRequest(url: url)

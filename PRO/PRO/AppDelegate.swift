@@ -12,6 +12,9 @@ import UserNotificationsUI
 import RealmSwift
 import GoogleMaps
 import GooglePlaces
+import Amplify
+import AWSCognitoAuthPlugin
+import AWSS3StoragePlugin
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -19,7 +22,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
         Realm.Configuration.defaultConfiguration = Realm.Configuration(
-        schemaVersion: 71,
+        schemaVersion: 72,
         migrationBlock: { migration, oldSchemaVersion in
             if (oldSchemaVersion < 1) {
             }
@@ -46,6 +49,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         GMSServices.provideAPIKey("AIzaSyAlK1aWCKRqEKN94i8Y9EsEF7NW0OFDjhU")
         GMSPlacesClient.provideAPIKey("AIzaSyAlK1aWCKRqEKN94i8Y9EsEF7NW0OFDjhU")
+        
+        do {
+            try Amplify.add(plugin: AWSCognitoAuthPlugin())
+            try Amplify.add(plugin: AWSS3StoragePlugin())
+            try Amplify.configure()
+            print("Amplify configured with auth plugin")
+        } catch {
+            print("Failed to initialize Amplify with \(error)")
+        }
         
         return true
     }

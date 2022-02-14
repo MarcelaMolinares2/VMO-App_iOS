@@ -22,8 +22,8 @@ class AppServer: NetworkService {
         taskRequest(request: request, completion: completion)
     }
     
-    public func putRequest(data: [String:Any], path: String, completion: @escaping (Bool, Int16, Any)->()) {
-        let request = generateRequest(data: data, method: "PUT", path: path)
+    public func putRequest(id: Int, data: [String:Any], path: String, completion: @escaping (Bool, Int16, Any)->()) {
+        let request = generateRequest(data: data, method: "PUT", path: "\(path)/\(id)")
         taskRequest(request: request, completion: completion)
     }
     

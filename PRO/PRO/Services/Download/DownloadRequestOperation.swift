@@ -67,7 +67,7 @@ class DownloadRequestOperation: Operation {
     }
     
     open override func main() {
-        fatalError("Implement in sublcass to perform task")
+        fatalError("Implement in subclass to perform task")
     }
     
     public final func finish() {

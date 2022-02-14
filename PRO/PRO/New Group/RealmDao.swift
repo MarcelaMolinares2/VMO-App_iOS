@@ -237,6 +237,12 @@ class DoctorDao: GenericDao {
         return Array(realm.objects(Doctor.self).sorted(byKeyPath: "lastName"))
     }
     
+    func local() -> [Doctor] {
+        return Array(realm.objects(Doctor.self).where {
+            ($0.transactionType != "") && ($0.transactionStatus == "")
+        })
+    }
+    
     func by(id: String) -> Doctor? {
         return realm.objects(Doctor.self).filter("id == \(id)").first
     }
@@ -434,6 +440,12 @@ class MediaItemDao: GenericDao {
                 realm.add(mediaItem)
             }
         }
+    }
+    
+    func by(table: String, item: ObjectId) -> [MediaItem] {
+        return Array(realm.objects(MediaItem.self).where {
+            $0.table == table && $0.localItem == item.stringValue
+        })
     }
     
 }

@@ -83,6 +83,7 @@ struct DoctorFormView: View {
         if DynamicUtils.validate(form: form) && doctor != nil {
             DynamicUtils.cloneObject(main: doctor, temporal: try! JSONDecoder().decode(Doctor.self, from: DynamicUtils.toJSON(form: form).data(using: .utf8)!), skipped: ["objectId", "id", "type"])
             doctor?.additionalFields = DynamicUtils.generateAdditional(form: form)
+            doctor?.transactionType = options.op.uppercased()
             DoctorDao(realm: try! Realm()).store(doctor: doctor!)
             viewRouter.currentPage = "MASTER"
         } else {

@@ -57,6 +57,13 @@ class MediaUtils {
         return NSURL() as URL
     }
     
+    static func awsPath(media: MediaItem) -> String {
+        if let laboratoryHash = UserDefaults.standard.string(forKey: Globals.LABORATORY_HASH) {
+            return "\(laboratoryHash)/\(media.table)/\(media.id)/\(media.field)/resource.\(media.ext)"
+        }
+        return "\("LAB-PATH")/\(media.table)/\(media.id)/\(media.field)/resource.\(media.ext)"
+    }
+    
 }
 
 class FileUtils {

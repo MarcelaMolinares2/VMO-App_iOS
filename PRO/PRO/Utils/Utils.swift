@@ -113,6 +113,21 @@ class Utils {
         return [Dictionary<String, Any>]()
     }
     
+    static func jsonObjectArray(string: String) -> [String: Any] {
+        let data = string.data(using: .utf8)!
+        do {
+            if let jsonArray = try JSONSerialization.jsonObject(with: data, options : .allowFragments) as? [String: Any]
+            {
+                return jsonArray
+            } else {
+                print("bad json")
+            }
+        } catch let error as NSError {
+            print(error)
+        }
+        return [String: Any]()
+    }
+    
     static func strToDate(value: String, format: String = "yyyy-MM-dd HH:mm:ss") -> Date {
         let formatter = DateFormatter()
         formatter.timeZone = TimeZone.current

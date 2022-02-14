@@ -27,7 +27,12 @@ struct ContentView: View {
                     InitView()
                 }
             } else {
-                LoginView()
+                switch viewRouter.currentPage {
+                    case "AWS-VERIFY":
+                        MasterView()
+                    default:
+                        LoginView()
+                }
             }
         }
         .addPartialSheet()
@@ -37,11 +42,15 @@ struct ContentView: View {
     }
     
     func load() {
-        if userSettings.loggedIn && userSettings.initStatus {
+        /*if userSettings.loggedIn && userSettings.initStatus {
             let operationQueue = OperationQueue()
             let syncOperation = SyncOperation()
             operationQueue.addOperations([syncOperation], waitUntilFinished: false)
-        }
+        }*/
+        
+        let operationQueue = OperationQueue()
+        let syncUploadOperation = SyncUploadService()
+        operationQueue.addOperations([syncUploadOperation], waitUntilFinished: false)
     }
 }
 

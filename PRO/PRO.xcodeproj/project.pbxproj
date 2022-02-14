@@ -64,6 +64,8 @@
 		AC6F1F2F24FF297A005E57DC /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AC6F1F2D24FF297A005E57DC /* LaunchScreen.storyboard */; };
 		AC6F1F3A24FF297B005E57DC /* PROTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC6F1F3924FF297B005E57DC /* PROTests.swift */; };
 		AC6F1F4524FF297B005E57DC /* PROUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC6F1F4424FF297B005E57DC /* PROUITests.swift */; };
+		AC7892FE27AC4030002EBEBB /* amplifyconfiguration.json in Resources */ = {isa = PBXBuildFile; fileRef = AC7892FC27AC402F002EBEBB /* amplifyconfiguration.json */; };
+		AC7892FF27AC4030002EBEBB /* awsconfiguration.json in Resources */ = {isa = PBXBuildFile; fileRef = AC7892FD27AC402F002EBEBB /* awsconfiguration.json */; };
 		AC78D2E726D54A2D00674A4F /* EnvObjects.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC78D2E626D54A2D00674A4F /* EnvObjects.swift */; };
 		AC78D2EC26D54FA900674A4F /* DialogPickers.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC78D2EB26D54FA900674A4F /* DialogPickers.swift */; };
 		AC78D2F126D5551D00674A4F /* RealmDao.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC78D2F026D5551D00674A4F /* RealmDao.swift */; };
@@ -186,6 +188,8 @@
 		AC6F1F4024FF297B005E57DC /* PROUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PROUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		AC6F1F4424FF297B005E57DC /* PROUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PROUITests.swift; sourceTree = "<group>"; };
 		AC6F1F4624FF297B005E57DC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		AC7892FC27AC402F002EBEBB /* amplifyconfiguration.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = amplifyconfiguration.json; sourceTree = SOURCE_ROOT; };
+		AC7892FD27AC402F002EBEBB /* awsconfiguration.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = awsconfiguration.json; sourceTree = SOURCE_ROOT; };
 		AC78D2E626D54A2D00674A4F /* EnvObjects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnvObjects.swift; sourceTree = "<group>"; };
 		AC78D2EB26D54FA900674A4F /* DialogPickers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DialogPickers.swift; sourceTree = "<group>"; };
 		AC78D2F026D5551D00674A4F /* RealmDao.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmDao.swift; sourceTree = "<group>"; };
@@ -267,6 +271,8 @@
 			children = (
 				01C38C1E1CEFD504B2BF9AED /* awsconfiguration.json */,
 				727D1891CD0D9128FF9FFABA /* amplifyconfiguration.json */,
+				AC7892FD27AC402F002EBEBB /* awsconfiguration.json */,
+				AC7892FC27AC402F002EBEBB /* amplifyconfiguration.json */,
 			);
 			name = AmplifyConfig;
 			sourceTree = "<group>";
@@ -304,7 +310,6 @@
 			isa = PBXGroup;
 			children = (
 				AC3444C32562C66900C0D668 /* DownloadRequestOperation.swift */,
-				AC3444D62562CA4E00C0D668 /* SyncDataService.swift */,
 				AC3444DC2562CCE200C0D668 /* SyncService.swift */,
 			);
 			path = Download;
@@ -453,6 +458,8 @@
 		AC6F1F2124FF2978005E57DC /* PRO */ = {
 			isa = PBXGroup;
 			children = (
+				AC7892FC27AC402F002EBEBB /* amplifyconfiguration.json */,
+				AC7892FD27AC402F002EBEBB /* awsconfiguration.json */,
 				ACA106EB2575F73700FDD7E4 /* MVVM */,
 				ACC053922550D9D200B9753A /* Entities */,
 				AC6F1F2224FF2978005E57DC /* AppDelegate.swift */,
@@ -596,6 +603,7 @@
 				AC3444DB2562CCD300C0D668 /* Upload */,
 				AC3444C82562C70300C0D668 /* Download */,
 				ACC053572550981E00B9753A /* AuthService.swift */,
+				AC3444D62562CA4E00C0D668 /* SyncDataService.swift */,
 				ACC49D1A2750881E0078F7CA /* LocationService.swift */,
 			);
 			path = Services;
@@ -771,7 +779,9 @@
 				ACC05350255067EC00B9753A /* Localizable.strings in Resources */,
 				AC6F1F2F24FF297A005E57DC /* LaunchScreen.storyboard in Resources */,
 				AC6F1F2C24FF297A005E57DC /* Preview Assets.xcassets in Resources */,
+				AC7892FE27AC4030002EBEBB /* amplifyconfiguration.json in Resources */,
 				AC6F1F2924FF297A005E57DC /* Assets.xcassets in Resources */,
+				AC7892FF27AC4030002EBEBB /* awsconfiguration.json in Resources */,
 				AC893F792549BD07009E1C43 /* GoogleService-Info.plist in Resources */,
 				BDFA1EC1EA0C8934704614E0 /* awsconfiguration.json in Resources */,
 				76900EE4C2D9C9D1BCC38AA3 /* amplifyconfiguration.json in Resources */,
@@ -803,9 +813,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-PRO-PROUITests/Pods-PRO-PROUITests-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-PRO-PROUITests/Pods-PRO-PROUITests-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -820,9 +834,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-PRO/Pods-PRO-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-PRO/Pods-PRO-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -837,9 +855,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-PRO/Pods-PRO-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-PRO/Pods-PRO-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -876,9 +898,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-PRO-PROUITests/Pods-PRO-PROUITests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-PRO-PROUITests/Pods-PRO-PROUITests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
