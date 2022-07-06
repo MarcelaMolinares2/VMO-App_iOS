@@ -10,23 +10,14 @@ import UIKit
 import Firebase
 import UserNotificationsUI
 import RealmSwift
-import GoogleMaps
-import GooglePlaces
 import Amplify
 import AWSCognitoAuthPlugin
 import AWSS3StoragePlugin
 
-@UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
-        Realm.Configuration.defaultConfiguration = Realm.Configuration(
-        schemaVersion: 72,
-        migrationBlock: { migration, oldSchemaVersion in
-            if (oldSchemaVersion < 1) {
-            }
-        })
         
         FirebaseApp.configure()
         
@@ -47,17 +38,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         application.registerForRemoteNotifications()
         
-        GMSServices.provideAPIKey("AIzaSyAlK1aWCKRqEKN94i8Y9EsEF7NW0OFDjhU")
-        GMSPlacesClient.provideAPIKey("AIzaSyAlK1aWCKRqEKN94i8Y9EsEF7NW0OFDjhU")
-        
-        do {
-            try Amplify.add(plugin: AWSCognitoAuthPlugin())
-            try Amplify.add(plugin: AWSS3StoragePlugin())
-            try Amplify.configure()
-            print("Amplify configured with auth plugin")
-        } catch {
-            print("Failed to initialize Amplify with \(error)")
-        }
         
         return true
     }
@@ -82,9 +62,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 extension UIApplication {
 
     class func setStatusBarStyle(_ style: UIStatusBarStyle) {
-        if let vc = UIApplication.getKeyWindow()?.rootViewController as? CustomHostingController {
+        /*if let vc = UIApplication.getKeyWindow()?.rootViewController as? CustomHostingController {
             vc.changeStatusBarStyle(style)
-        }
+        }*/
     }
 
     private class func getKeyWindow() -> UIWindow? {

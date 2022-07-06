@@ -18,6 +18,8 @@ struct ClientListView: View {
     @State var menuIsPresented = false
     @State var panel: Panel & SyncEntity = GenericPanel()
     
+    let realm = try! Realm()
+    
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
             VStack {
@@ -40,7 +42,7 @@ struct ClientListView: View {
                         ForEach(clients.filter {
                             self.searchText.isEmpty ? true :
                                 ($0.name ?? "").lowercased().contains(self.searchText.lowercased()) ||
-                                ($0.city?.name ?? "").lowercased().contains(self.searchText.lowercased())
+                                ($0.cityName(realm: self.realm)).lowercased().contains(self.searchText.lowercased())
                         }, id: \.objectId) { element in
                             PanelItem(panel: element).onTapGesture {
                                 self.panel = element
@@ -50,7 +52,7 @@ struct ClientListView: View {
                     }
                 }
             }
-            FAB(image: "ic-plus", foregroundColor: .cPrimary) {
+            FAB(image: "ic-plus") {
                 FormEntity(objectId: "").go(path: PanelUtils.formByPanelType(type: "C"), router: viewRouter)
             }
         }

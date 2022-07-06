@@ -22,14 +22,6 @@ class SyncOperation: Operation {
         .tertiary: 1440,
         .quaternary: 3360
     ]
-    let keys: [SyncOperationLevel: String] = [
-        .onDemand: "",
-        .recurrent: "SYNC_OP_RECURRENT",
-        .primary: "SYNC_OP_PRIMARY",
-        .secondary: "SYNC_OP_SECONDARY",
-        .tertiary: "SYNC_OP_TERTIARY",
-        .quaternary: "SYNC_OP_QUATERNARY"
-    ]
     
     @objc private enum State: Int {
         case ready
@@ -93,7 +85,7 @@ class SyncOperation: Operation {
             let syncRecurrent = SyncRecurrentService()
             syncRecurrent.completionBlock = {
                 self.fails.merge(dict: syncRecurrent.fails)
-                self.updateInterval(level: .recurrent)
+                SyncUtils.updateInterval(level: .recurrent)
                 self.finish()
             }
             operationQueue.addOperations([syncRecurrent], waitUntilFinished: true)
@@ -108,7 +100,7 @@ class SyncOperation: Operation {
             let syncPrimary = SyncPrimaryService()
             syncPrimary.completionBlock = {
                 self.fails.merge(dict: syncPrimary.fails)
-                self.updateInterval(level: .primary)
+                SyncUtils.updateInterval(level: .primary)
                 self.syncRecurrent()
             }
             operationQueue.addOperations([syncPrimary], waitUntilFinished: true)
@@ -123,7 +115,7 @@ class SyncOperation: Operation {
             let syncSecondary = SyncSecondaryService()
             syncSecondary.completionBlock = {
                 self.fails.merge(dict: syncSecondary.fails)
-                self.updateInterval(level: .secondary)
+                SyncUtils.updateInterval(level: .secondary)
                 self.syncPrimary()
             }
             operationQueue.addOperations([syncSecondary], waitUntilFinished: true)
@@ -138,7 +130,7 @@ class SyncOperation: Operation {
             let syncTertiary = SyncTertiaryService()
             syncTertiary.completionBlock = {
                 self.fails.merge(dict: syncTertiary.fails)
-                self.updateInterval(level: .tertiary)
+                SyncUtils.updateInterval(level: .tertiary)
                 self.syncSecondary()
             }
             operationQueue.addOperations([syncTertiary], waitUntilFinished: true)
@@ -153,7 +145,7 @@ class SyncOperation: Operation {
             let syncQuaternary = SyncQuaternaryService()
             syncQuaternary.completionBlock = {
                 self.fails.merge(dict: syncQuaternary.fails)
-                self.updateInterval(level: .quaternary)
+                SyncUtils.updateInterval(level: .quaternary)
                 self.syncTertiary()
             }
             operationQueue.addOperations([syncQuaternary], waitUntilFinished: true)
@@ -168,7 +160,7 @@ class SyncOperation: Operation {
             return true
         }
         
-        guard let key = keys[level] else { return false }
+        guard let key = SyncUtils.keys[level] else { return false }
         let last = UserDefaults.standard.double(forKey: key)
         if last <= 0 {
             return true
@@ -176,12 +168,6 @@ class SyncOperation: Operation {
             let timestamp: Double = NSDate().timeIntervalSince1970
             return (Int(timestamp - last) / 60) > interval
         }
-    }
-    
-    func updateInterval(level: SyncOperationLevel) {
-        guard let key = keys[level] else { return }
-        let timestamp: Double = NSDate().timeIntervalSince1970
-        UserDefaults.standard.set(timestamp, forKey: key)
     }
     
 }

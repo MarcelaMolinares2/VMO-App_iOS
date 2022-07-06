@@ -44,6 +44,16 @@ struct GenericGridItem: Hashable {
     var name: String
 }
 
+enum GenericListLayout {
+    case list, map
+}
+
+struct BindingWrapperToast {
+    let uuid: UUID = UUID()
+    @Binding var error: String
+    @Binding var show: Bool
+}
+
 class ModalToggle: ObservableObject {
     @Published var status: Bool = false
 }
@@ -164,4 +174,60 @@ class DynamicFormFieldOptions {
 
 class CustomAdditionalField: Codable {
     var data: String
+}
+
+class MasterDashboardTab {
+    var key: String = ""
+    var icon: String = ""
+    var label: String = ""
+    var route: String = ""
+    
+    init(key: String, icon: String, label: String, route: String) {
+        self.key = key
+        self.icon = icon
+        self.label = label
+        self.route = route
+    }
+    
+}
+
+class MasterLaboratory: Codable {
+    var id: Int = 0
+    var name: String = ""
+    var hash: String = ""
+    var path: String = ""
+    
+    private enum CodingKeys: String, CodingKey {
+        case id, name = "nombre", hash = "hash_", path
+    }
+    
+}
+
+class MasterLaboratoryUser: Codable {
+    var id: Int = 0
+    var name: String = ""
+    var dni: String = ""
+    
+    private enum CodingKeys: String, CodingKey {
+        case id = "id_usuario", name = "nombre", dni = "identificacion"
+    }
+    
+}
+
+class AdvertisingMaterialDeliveryReport: Codable {
+    var id: Int = 0
+    var transactionType: String = "D"
+    var operationType: String = "O"
+    var quantity: Int = 0
+    var comment: String = ""
+    var date: String = ""
+    
+    var material: AdvertisingMaterial?
+    var set: AdvertisingMaterialSet?
+    var madeBy: User?
+    
+    private enum CodingKeys: String, CodingKey {
+        case id = "material_operation_id", transactionType = "transaction_type", operationType = "operation_type", quantity, comment = "observations", date = "date_time", material, set = "material_set", madeBy = "made_by_user"
+    }
+    
 }

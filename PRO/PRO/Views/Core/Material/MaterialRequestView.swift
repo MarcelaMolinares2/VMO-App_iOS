@@ -23,6 +23,7 @@ struct MaterialRequestView: View {
     @State private var selectedMaterials = [String]()
     @State private var materialRequest = AdvertisingMaterialRequest()
     @State private var dateStart = Date()
+    @State private var comment = ""
     @State var materials: [Materials] = []
     
     var realm = try? Realm()
@@ -34,11 +35,6 @@ struct MaterialRequestView: View {
     @State private var showToast = false
     
     var body: some View {
-        let bindingComment = Binding<String>(get: {
-            materialRequest.comment
-        }, set: {
-            materialRequest.comment = $0
-        })
         ZStack {
             VStack {
                 HeaderToggleView(couldSearch: false, title: "modMaterialDelivery", icon: Image("ic-material"), color: Color.cPanelMaterial)
@@ -67,7 +63,7 @@ struct MaterialRequestView: View {
                 }
                 .padding(15)
                 
-                TextField(NSLocalizedString("envObservations", comment: ""), text: bindingComment)
+                TextField(NSLocalizedString("envObservations", comment: ""), text: $comment)
                     .frame(height: 30)
                     .padding([.leading, .trailing], 10)
                     .foregroundColor(.black)
@@ -95,7 +91,7 @@ struct MaterialRequestView: View {
             VStack {
                 Spacer()
                 HStack {
-                    FAB(image: "ic-plus", foregroundColor: .cPrimary) {
+                    FAB(image: "ic-plus") {
                         selectMaterialsModalToggle.status.toggle()
                     }
                     .padding(.horizontal, 20)
@@ -107,14 +103,14 @@ struct MaterialRequestView: View {
                 Spacer()
                 HStack {
                     Spacer()
-                    FAB(image: "ic-cloud", foregroundColor: .cPrimary) {
+                    FAB(image: "ic-cloud") {
                         let formatter = DateFormatter()
                         formatter.dateStyle = .short
                         formatter.timeStyle = .none
                         let datetime = formatter.string(from: dateStart)
                         if materials.count > 0 {
                             materialRequest.date = datetime
-                            materialRequest.materials = materials.map { $0.id }.joined(separator: ",")
+                            //materialRequest.materials = materials.map { $0.id }.joined(separator: ",")
                             AdvertisingMaterialRequestDao(realm: try! Realm()).store(advertisingMaterialRequest: materialRequest)
                             goTo(page: "MASTER")
                         } else {

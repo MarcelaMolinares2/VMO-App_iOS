@@ -16,48 +16,33 @@ struct ContentView: View {
     var body: some View {
         VStack {
             if userSettings.loggedIn {
-                if userSettings.initStatus {
-                    switch viewRouter.currentPage {
+                switch viewRouter.currentPage {
                     case "MASTER":
                         MasterView()
                     default:
                         WrapperView()
-                    }
-                } else {
-                    InitView()
                 }
             } else {
                 switch viewRouter.currentPage {
-                    case "AWS-VERIFY":
-                        MasterView()
+                    case "APP-MASTER":
+                        MasterLoginView()
+                    case "APP-MASTER-LAB":
+                        MasterLaboratoryView()
+                    case "AUTH-COGNITO-CONFIRM":
+                        AuthCognitoConfirmView()
+                    case "AUTH-RECOVER-PASSWORD":
+                        AuthRecoverPasswordView()
                     default:
-                        LoginView()
+                        AuthSignInView()
                 }
             }
         }
-        .addPartialSheet()
-        .onAppear {
-            load()
-        }
+        .attachPartialSheetToRoot()
     }
     
     func load() {
-        /*if userSettings.loggedIn && userSettings.initStatus {
-            let operationQueue = OperationQueue()
-            let syncOperation = SyncOperation()
-            operationQueue.addOperations([syncOperation], waitUntilFinished: false)
-        }*/
-        
         let operationQueue = OperationQueue()
         let syncUploadOperation = SyncUploadService()
         operationQueue.addOperations([syncUploadOperation], waitUntilFinished: false)
     }
 }
-
-#if DEBUG
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView().environmentObject(ViewRouter()).environmentObject(UserSettings())
-    }
-}
-#endif

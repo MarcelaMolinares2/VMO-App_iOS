@@ -51,7 +51,7 @@ struct PotentialListView: View {
                     }
                 }
             }
-            FAB(image: "ic-plus", foregroundColor: .cPrimary) {
+            FAB(image: "ic-plus") {
                 FormEntity(objectId: "").go(path: PanelUtils.formByPanelType(type: "T"), router: viewRouter)
             }
         }

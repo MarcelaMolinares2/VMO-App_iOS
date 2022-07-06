@@ -41,7 +41,7 @@ struct PotentialFormView: View {
                             }
                         }
                     }
-                    FAB(image: "ic-cloud", foregroundColor: .cPrimary) {
+                    FAB(image: "ic-cloud") {
                         self.save()
                     }
                 }
@@ -64,7 +64,7 @@ struct PotentialFormView: View {
         } else {
             potential = PotentialProfessional(value: try! PotentialDao(realm: try! Realm()).by(objectId: ObjectId(string: viewRouter.data.objectId)) ?? Patient())
             plainData = try! Utils.objToJSON(potential)
-            additionalData = potential?.additionalFields ?? "{}"
+            additionalData = potential?.fields ?? "{}"
         }
         options.objectId = potential?.objectId
         options.item = potential?.id ?? 0
@@ -87,7 +87,7 @@ struct PotentialFormView: View {
     func save(){
         if DynamicUtils.validate(form: form) && potential != nil {
             DynamicUtils.cloneObject(main: potential, temporal: try! JSONDecoder().decode(PotentialProfessional.self, from: DynamicUtils.toJSON(form: form).data(using: .utf8)!), skipped: ["objectId", "id", "type"])
-            potential?.additionalFields = DynamicUtils.generateAdditional(form: form)
+            potential?.fields = DynamicUtils.generateAdditional(form: form)
             PotentialDao(realm: try! Realm()).store(potential: potential!)
             viewRouter.currentPage = "POTENTIAL-LIST"
         } else {

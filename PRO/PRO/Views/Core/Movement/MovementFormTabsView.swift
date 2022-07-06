@@ -39,7 +39,7 @@ struct MovementFormTabPromotedView: View {
             })
             List {
                 ForEach(products, id: \.self) { item in
-                    Text((valueNameBrand == 0) ? item.name ?? "": item.brand ?? "")
+                    //Text((valueNameBrand == 0) ? item.name ?? "": item.brand ?? "")
                 }
                 .onMove(perform: move)
                 .onDelete(perform: self.delete)

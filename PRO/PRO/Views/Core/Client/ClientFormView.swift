@@ -47,7 +47,7 @@ struct ClientFormView: View {
                                 }
                             }
                         }
-                        FAB(image: "ic-cloud", foregroundColor: .cPrimary) {
+                        FAB(image: "ic-cloud") {
                             self.save()
                         }
                     }
@@ -69,7 +69,7 @@ struct ClientFormView: View {
         } else {
             client = Client(value: try! ClientDao(realm: try! Realm()).by(objectId: ObjectId(string: viewRouter.data.objectId)) ?? Client())
             plainData = try! Utils.objToJSON(client)
-            additionalData = client?.additionalFields ?? "{}"
+            additionalData = client?.fields ?? "{}"
         }
         options.objectId = client?.objectId
         options.item = client?.id ?? 0
@@ -90,7 +90,7 @@ struct ClientFormView: View {
     func save() {
         if DynamicUtils.validate(form: form) && client != nil {
             DynamicUtils.cloneObject(main: client, temporal: try! JSONDecoder().decode(Client.self, from: DynamicUtils.toJSON(form: form).data(using: .utf8)!), skipped: ["objectId", "id", "type"])
-            client?.additionalFields = DynamicUtils.generateAdditional(form: form)
+            client?.fields = DynamicUtils.generateAdditional(form: form)
             ClientDao(realm: try! Realm()).store(client: client!)
             viewRouter.currentPage = "MASTER"
         } else {

@@ -81,8 +81,7 @@ struct MaterialDeliveryListView: View {
     
     @ObservedObject var moduleRouter: ModuleRouter
     
-    @State private var deliveries = MaterialDeliveryDao(realm: try! Realm()).all()
-    @State private var array: [Stock] = []
+    @State private var deliveries: [AdvertisingMaterialDeliveryReport] = []
     
     var body: some View {
         ZStack {
@@ -90,9 +89,12 @@ struct MaterialDeliveryListView: View {
                 HeaderToggleView(couldSearch: false, title: "modMaterialDelivery", icon: Image("ic-material"), color: Color.cPanelMaterial)
                 Spacer()
                 List {
-                    ForEach(array, id: \.id) { item in
-                        MaterialDeliveryListCardView(item: item)
+                    ForEach(deliveries, id: \.id) { item in
+                        MaterialDeliveryListItemView(item: item)
                     }
+                }
+                .refreshable {
+                    getDeliveries()
                 }
             }
             .foregroundColor(.cPrimaryLight)
@@ -100,48 +102,54 @@ struct MaterialDeliveryListView: View {
                 Spacer()
                 HStack {
                     Spacer()
-                    FAB(image: "ic-plus", foregroundColor: .cPrimary) {
+                    FAB(image: "ic-plus") {
                         moduleRouter.currentPage = "FORM"
                     }
                 }
             }
         }
         .onAppear {
-            loadData()
+            getDeliveries()
         }
     }
     
-    func loadData() {
-        for i in deliveries{
-            var setstock: [setStock] = []
-            i.sets.forEach{ it in
-                setstock.append(setStock(lot: it.id, quantity: it.quantity))
-            }
-            if let material = MaterialDao(realm: try! Realm()).by(id: String(i.materialId)) {
-                array.append(Stock(name: material.name ?? "", set: setstock, date: i.date))
+    func getDeliveries() {
+        let realm = try! Realm()
+        let local = MaterialDeliveryDao(realm: realm).all()
+        for i in local {
+            i.materials.forEach { m in
+                let material = MaterialDao(realm: realm).by(id: m.materialId)
+                m.sets.forEach { s in
+                    let item = AdvertisingMaterialDeliveryReport()
+                    item.quantity = s.quantity
+                    item.comment = i.comment
+                    item.date = i.date
+                    item.material = material
+                    item.madeBy = UserDao(realm: realm).logged()
+                    
+                    deliveries.append(item)
+                }
             }
         }
-        let appServer = AppServer()
-        appServer.postRequest(data: [String: Any](), path: "vm/material-delivery/filter") { (bool, int, any) in
+        AppServer().postRequest(data: [String: Any](), path: "vm/advertising-material/report/deliveries") { (bool, int, any) in
             let requestAny = any as? Array<String> ?? []
             requestAny.forEach{ value in
-            //for value in requestAny {
-                let decoded = try! JSONDecoder().decode(StockApi.self, from: value.data(using: .utf8)!)
-                let setstock = [setStock(lot: decoded.lote, quantity: decoded.cantidad)]
-                array.append(Stock(name: decoded.material.nombre, set: setstock, date: decoded.fecha))
-                
+                let decoded = try! JSONDecoder().decode(AdvertisingMaterialDeliveryReport.self, from: value.data(using: .utf8)!)
+                deliveries.append(decoded)
             }
         }
     }
 }
 
-struct MaterialDeliveryListCardView: View {
-    var item: Stock
+struct MaterialDeliveryListItemView: View {
+    
+    var item: AdvertisingMaterialDeliveryReport
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 5){
             VStack{
                 HStack{
-                    Text(item.name)
+                    Text(item.material?.name ?? "")
                     Spacer()
                 }
                 Spacer()
@@ -152,16 +160,14 @@ struct MaterialDeliveryListCardView: View {
                 Spacer()
                     .frame(height: 15)
                 VStack {
-                    ForEach(item.set, id: \.self) { item in
-                        HStack{
-                            Text(String(item.lot))
-                            Spacer()
-                            Text(String(format: NSLocalizedString("materialQuantity", comment: ""), String(item.quantity)))
-                                .font(.system(size: 18, weight: .heavy, design: .default))
-                        }
+                    HStack{
+                        Text(item.set?.label ?? "--")
                         Spacer()
-                            .frame(height: 15)
+                        Text(String(format: NSLocalizedString("materialQuantity", comment: ""), String(item.quantity)))
+                            .font(.system(size: 18, weight: .heavy, design: .default))
                     }
+                    Spacer()
+                        .frame(height: 15)
                 }
                 Divider()
                     .frame(height: 0.7)
@@ -170,13 +176,8 @@ struct MaterialDeliveryListCardView: View {
                 Spacer()
                 HStack{
                     Spacer()
-                    if item.date != "" {
-                        Text(Utils.dateFormat(date: Utils.strToDate(value: item.date), format: "dd, MMM yy"))
-                            .font(.system(size: 14))
-                    } else {
-                        Text("")
-                            .font(.system(size: 14))
-                    }
+                    Text(Utils.dateFormat(date: Utils.strToDate(value: item.date), format: "dd, MMM yy"))
+                        .font(.system(size: 14))
                 }
                 
             }
@@ -195,7 +196,7 @@ struct MaterialDeliveryFormView: View {
     @EnvironmentObject var viewRouter: ViewRouter
     
     @State private var selectedMaterials = [String]()
-    @State private var deliveries = [AdvertisingMaterialDelivery]()
+    @State private var delivery = AdvertisingMaterialDelivery()
     
     var realm = try? Realm()
     
@@ -223,8 +224,8 @@ struct MaterialDeliveryFormView: View {
                 .clipped()
                 .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
                 List {
-                    ForEach(deliveries, id: \.materialId) { item in
-                        MaterialDeliveryFormCardView(material: item)
+                    ForEach(delivery.materials.indices, id: \.self) { i in
+                        MaterialDeliveryFormCardView(deliveryMaterial: $delivery.materials[i])
                     }
                     .onDelete(perform: self.delete)
                 }
@@ -235,9 +236,9 @@ struct MaterialDeliveryFormView: View {
                 Spacer()
                 HStack {
                     Spacer()
-                    FAB(image: "ic-cloud", foregroundColor: .cPrimary) {
-                        if deliveries.count > 0 {
-                            MaterialDeliveryDao(realm: try! Realm()).store(deliveries: deliveries)
+                    FAB(image: "ic-cloud") {
+                        if delivery.materials.count > 0 {
+                            //MaterialDeliveryDao(realm: try! Realm()).store(deliveries: deliveries)
                             moduleRouter.currentPage = "LIST"
                         } else {
                             self.showToast.toggle()
@@ -259,13 +260,13 @@ struct MaterialDeliveryFormView: View {
     
     private func delete(at offsets: IndexSet) {
         withAnimation{
-            self.deliveries.remove(atOffsets: offsets)
+            self.delivery.materials.remove(atOffsets: offsets)
         }
     }
     
     func onSelectionDone(_ selected: [String]) {
         selectMaterialsModalToggle.status.toggle()
-        selectedMaterials.forEach { id in
+        /*selectedMaterials.forEach { id in
             if let material = MaterialDao(realm: try! Realm()).by(id: id) {
                 var exists = false
                 for i in deliveries {
@@ -295,7 +296,7 @@ struct MaterialDeliveryFormView: View {
                     deliveries.append(delivery)
                 }
             }
-        }
+        }*/
     }
 }
 
@@ -303,18 +304,14 @@ struct MaterialDeliveryFormView: View {
 
 struct MaterialDeliveryFormCardView: View {
     @State var observation: String = ""
-    var material: AdvertisingMaterialDelivery
+    @Binding var deliveryMaterial: AdvertisingMaterialDeliveryMaterial
     
     var body: some View {
-        let bindingComment = Binding<String>(get: {
-            self.material.comment
-        }, set: {
-            self.material.comment = $0
-        })
+        let material = MaterialDao(realm: try! Realm()).by(id: deliveryMaterial.materialId)
         VStack(alignment: .leading, spacing: 5){
             VStack{
                 HStack {
-                    Text(material.material?.name ?? "")
+                    Text(material?.name ?? "")
                     Spacer()
                 }
                 Divider()
@@ -323,8 +320,8 @@ struct MaterialDeliveryFormCardView: View {
                 .background(Color.gray)
                 Spacer()
                 VStack {
-                    ForEach(material.sets, id: \.id) { set in
-                        MaterialDeliverySetFormCardView(set: set)
+                    ForEach(deliveryMaterial.sets.indices, id: \.self) { i in
+                        MaterialDeliverySetFormCardView(deliverySet: $deliveryMaterial.sets[i])
                             .padding(.horizontal, 15)
                             .padding(.vertical, 10)
                         Divider()
@@ -333,11 +330,6 @@ struct MaterialDeliveryFormCardView: View {
                         .background(Color.gray)
                     }
                 }
-                TextField(NSLocalizedString("envObservations", comment: ""), text: bindingComment)
-                    .frame(height: 30)
-                    .padding(.vertical, 10)
-                    .foregroundColor(.black)
-                
                 Divider()
                  .frame(height: 1)
                  .padding(.horizontal, 5)
@@ -354,27 +346,24 @@ struct MaterialDeliveryFormCardView: View {
 }
 
 struct MaterialDeliverySetFormCardView: View {
-    @State var set: AdvertisingMaterialDeliverySet
+    @Binding var deliverySet: AdvertisingMaterialDeliveryMaterialSet
     @State var tvNumber: Int = 0
     
     var body: some View {
-        
+        let set = AdvertisingMaterialSet()
         VStack {
-            if set.id != "0" {
-                HStack {
-                    Text(String(set.id))
-                    Spacer()
-                    
-                    Text(String(format: NSLocalizedString("expDate", comment: ""), Utils.dateFormat(date: Utils.strToDate(value: set.set.dueDate ?? ""), format: "dd, MMM yy")))
-                }
+            HStack {
+                Text(String(set.label))
                 Spacer()
-                    .frame(height: 15)
+                Text(String(format: NSLocalizedString("expDate", comment: ""), Utils.dateFormat(date: Utils.strToDate(value: set.dueDate ?? ""), format: "dd, MMM yy")))
             }
+            Spacer()
+                .frame(height: 15)
             HStack {
                 Button(action: {
-                    if set.quantity > 0 {
+                    if deliverySet.quantity > 0 {
                         tvNumber -= 1
-                        set.quantity = tvNumber
+                        deliverySet.quantity = tvNumber
                     }
                 }, label: {
                     Image("ic-minus-circle")
@@ -387,10 +376,10 @@ struct MaterialDeliverySetFormCardView: View {
                 VStack {
                     Text("\(String(tvNumber))")
                         .frame(height: 15)
-                    if (set.set.stock) - (set.set.delivered) > 0 {
+                    if (set.stock) - (set.delivered) > 0 {
                         Spacer()
                         Text(String(format: NSLocalizedString("materialRemainder", comment: ""),
-                                    String((set.set.stock) - (set.set.delivered))))
+                                    String((set.stock) - (set.delivered))))
                             .foregroundColor(.cBlueDark)
                     } else {
                         Spacer()
@@ -398,14 +387,9 @@ struct MaterialDeliverySetFormCardView: View {
                 }
                 Spacer()
                 Button(action: {
-                    if set.set.id == "" {
+                    if deliverySet.quantity < (set.stock - set.delivered) {
                         tvNumber += 1
-                        set.quantity = tvNumber
-                    } else {
-                        if set.quantity < (set.set.stock - set.set.delivered) {
-                            tvNumber += 1
-                            set.quantity = tvNumber
-                        }
+                        deliverySet.quantity = tvNumber
                     }
                     
                 }, label: {
@@ -417,11 +401,5 @@ struct MaterialDeliverySetFormCardView: View {
                 .background(Color.white)
             }
         }
-    }
-}
-
-struct MaterialDeliveryView_Previews: PreviewProvider {
-    static var previews: some View {
-        MaterialDeliveryView()
     }
 }

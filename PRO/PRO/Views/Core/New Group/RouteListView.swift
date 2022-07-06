@@ -24,7 +24,7 @@ struct RouteListView2: View {
                 ScrollView {
                     
                 }
-                FAB(image: "ic-plus", foregroundColor: .cPrimary) {
+                FAB(image: "ic-plus") {
                     viewRouter.currentPage = "ROUTE-FORM"
                 }
             }

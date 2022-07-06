@@ -40,7 +40,7 @@ struct DoctorFormView: View {
                             }
                         }
                     }
-                    FAB(image: "ic-cloud", foregroundColor: .cPrimary) {
+                    FAB(image: "ic-cloud") {
                         self.save()
                     }
                 }
@@ -62,7 +62,7 @@ struct DoctorFormView: View {
         } else {
             doctor = Doctor(value: try! DoctorDao(realm: try! Realm()).by(objectId: ObjectId(string: viewRouter.data.objectId)) ?? Doctor())
             plainData = try! Utils.objToJSON(doctor)
-            additionalData = doctor?.additionalFields ?? "{}"
+            additionalData = doctor?.fields ?? "{}"
         }
         options.objectId = doctor?.objectId
         options.item = doctor?.id ?? 0
@@ -82,7 +82,7 @@ struct DoctorFormView: View {
     func save() {
         if DynamicUtils.validate(form: form) && doctor != nil {
             DynamicUtils.cloneObject(main: doctor, temporal: try! JSONDecoder().decode(Doctor.self, from: DynamicUtils.toJSON(form: form).data(using: .utf8)!), skipped: ["objectId", "id", "type"])
-            doctor?.additionalFields = DynamicUtils.generateAdditional(form: form)
+            doctor?.fields = DynamicUtils.generateAdditional(form: form)
             doctor?.transactionType = options.op.uppercased()
             DoctorDao(realm: try! Realm()).store(doctor: doctor!)
             viewRouter.currentPage = "MASTER"

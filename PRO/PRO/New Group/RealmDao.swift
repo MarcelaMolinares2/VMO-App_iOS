@@ -50,12 +50,12 @@ class BrickDao: GenericDao {
 
 class CategoryDao: GenericDao {
     
-    func all() -> [Category] {
-        return Array(realm.objects(Category.self).sorted(byKeyPath: "name"))
+    func all() -> [PanelCategory] {
+        return Array(realm.objects(PanelCategory.self).sorted(byKeyPath: "name"))
     }
     
-    func by(id: String) -> Category? {
-        return realm.objects(Category.self).filter("id == \(id)").first
+    func by(id: String) -> PanelCategory? {
+        return realm.objects(PanelCategory.self).filter("id == \(id)").first
     }
     
 }
@@ -68,6 +68,10 @@ class CityDao: GenericDao {
     
     func by(id: String) -> City? {
         return realm.objects(City.self).filter("id == \(id)").first
+    }
+    
+    func by(id: Int?) -> City? {
+        return by(id: String(describing: id ?? 0))
     }
     
 }
@@ -108,19 +112,19 @@ class CollegeDao: GenericDao {
 
 class ContactDao: GenericDao {
     
-    func all() -> [Contact] {
-        return Array(realm.objects(Contact.self).sorted(byKeyPath: "name"))
+    func all() -> [PanelContact] {
+        return Array(realm.objects(PanelContact.self).sorted(byKeyPath: "name"))
     }
     
-    func by(id: String) -> Contact? {
-        return realm.objects(Contact.self).filter("id == \(id)").first
+    func by(id: String) -> PanelContact? {
+        return realm.objects(PanelContact.self).filter("id == \(id)").first
     }
     
-    func by(objectId: ObjectId) -> Contact? {
-        return realm.object(ofType: Contact.self, forPrimaryKey: objectId)
+    func by(objectId: ObjectId) -> PanelContact? {
+        return realm.object(ofType: PanelContact.self, forPrimaryKey: objectId)
     }
     
-    func store(contact: Contact) {
+    func store(contact: PanelContact) {
         try! realm.write {
             realm.add(contact, update: .all)
         }
@@ -189,19 +193,19 @@ class RequestDayDao: GenericDao {
 
 class ActivityDao: GenericDao {
     
-    func all() -> [Activity] {
-        return Array(realm.objects(Activity.self).sorted(byKeyPath: "id"))
+    func all() -> [DifferentToVisit] {
+        return Array(realm.objects(DifferentToVisit.self).sorted(byKeyPath: "id"))
     }
     
-    func by(id: String) -> Activity? {
-        return realm.objects(Activity.self).filter("id == \(id)").first
+    func by(id: String) -> DifferentToVisit? {
+        return realm.objects(DifferentToVisit.self).filter("id == \(id)").first
     }
     
-    func by(objectId: ObjectId) -> Activity? {
-        return realm.object(ofType: Activity.self, forPrimaryKey: objectId)
+    func by(objectId: ObjectId) -> DifferentToVisit? {
+        return realm.object(ofType: DifferentToVisit.self, forPrimaryKey: objectId)
     }
     
-    func store(activity: Activity) {
+    func store(activity: DifferentToVisit) {
         try! realm.write {
             realm.add(activity, update: .all)
         }
@@ -306,7 +310,7 @@ class GenericSelectableDao: GenericDao {
     }
     
     func countries() -> [GenericSelectableItem] {
-        CountryDao(realm: self.realm).all().map { GenericSelectableItem(id: "\($0.id)", label: $0.name ?? "") }
+        CountryDao(realm: self.realm).all().map { GenericSelectableItem(id: "\($0.id)", label: $0.name) }
     }
     
     func cycles() -> [GenericSelectableItem] {
@@ -314,7 +318,7 @@ class GenericSelectableDao: GenericDao {
     }
     
     func lines() -> [GenericSelectableItem] {
-        LineDao(realm: self.realm).all().map { GenericSelectableItem(id: "\($0.id)", label: $0.name ?? "") }
+        LineDao(realm: self.realm).all().map { GenericSelectableItem(id: "\($0.id)", label: $0.name) }
     }
     
     func materials() -> [GenericSelectableItem] {
@@ -326,7 +330,7 @@ class GenericSelectableDao: GenericDao {
     }
     
     func pharmacyTypes() -> [GenericSelectableItem] {
-        PharmacyTypeDao(realm: self.realm).all().map { GenericSelectableItem(id: "\($0.id)", label: $0.name ?? "") }
+        PharmacyTypeDao(realm: self.realm).all().map { GenericSelectableItem(id: "\($0.id)", label: $0.name) }
     }
     
     func pricesLists() -> [GenericSelectableItem] {
@@ -334,24 +338,15 @@ class GenericSelectableDao: GenericDao {
     }
     
     func products() -> [GenericSelectableItem] {
-        ProductDao(realm: self.realm).all().map { GenericSelectableItem(id: "\($0.id)", label: $0.name ?? "") }
+        ProductDao(realm: self.realm).all().map { GenericSelectableItem(id: "\($0.id)", label: $0.name) }
     }
     
     func productBrands() -> [GenericSelectableItem] {
-        let all = ProductDao(realm: self.realm).all().map { GenericSelectableItem(id: "\($0.id)", label: $0.brand ?? "") }
-        var results = [GenericSelectableItem]()
-        all.forEach { item in
-            if !results.contains(where: { it in
-                return it.label == item.label
-            }) {
-                results.append(item)
-            }
-        }
-        return results
+        ProductBrandDao(realm: self.realm).all().map { GenericSelectableItem(id: "\($0.id)", label: $0.name) }
     }
     
     func productsWithCompetitors() -> [GenericSelectableItem] {
-        ProductDao(realm: self.realm).competitors().map { GenericSelectableItem(id: "\($0.id)", label: $0.name ?? "") }
+        ProductDao(realm: self.realm).competitors().map { GenericSelectableItem(id: "\($0.id)", label: $0.name) }
     }
     
     func specialties(tp: String = "P") -> [GenericSelectableItem] {
@@ -361,11 +356,11 @@ class GenericSelectableDao: GenericDao {
         } else {
             items = SpecialtyDao(realm: self.realm).secondary()
         }
-        return items.map { GenericSelectableItem(id: "\($0.id)", label: $0.name ?? "") }
+        return items.map { GenericSelectableItem(id: "\($0.id)", label: $0.name) }
     }
     
     func styles() -> [GenericSelectableItem] {
-        StyleDao(realm: self.realm).all().map { GenericSelectableItem(id: "\($0.id)", label: $0.name ?? "") }
+        StyleDao(realm: self.realm).all().map { GenericSelectableItem(id: "\($0.id)", label: $0.name) }
     }
     
     func zones() -> [GenericSelectableItem] {
@@ -394,6 +389,10 @@ class MaterialDao: GenericDao {
     
     func by(id: String) -> AdvertisingMaterial? {
         return realm.objects(AdvertisingMaterial.self).filter("id == \(id)").first
+    }
+    
+    func by(id: Int) -> AdvertisingMaterial? {
+        return by(id: String(describing: id))
     }
     
 }
@@ -570,6 +569,18 @@ class ProductDao: GenericDao {
     
 }
 
+class ProductBrandDao: GenericDao {
+    
+    func all() -> [ProductBrand] {
+        return Array(realm.objects(ProductBrand.self).sorted(byKeyPath: "name"))
+    }
+    
+    func by(id: String) -> ProductBrand? {
+        return realm.objects(ProductBrand.self).filter("id == \(id)").first
+    }
+    
+}
+
 class SpecialtyDao: GenericDao {
     
     func primary() -> [Specialty] {
@@ -594,6 +605,22 @@ class StyleDao: GenericDao {
     
     func by(id: String) -> Style? {
         return realm.objects(Style.self).filter("id == \(id)").first
+    }
+    
+}
+
+class UserDao: GenericDao {
+    
+    func all() -> [User] {
+        return Array(realm.objects(User.self).sorted(byKeyPath: "name"))
+    }
+    
+    func by(id: Int) -> User? {
+        return realm.objects(User.self).filter("id == \(id)").first
+    }
+    
+    func logged() -> User? {
+        return by(id: JWTUtils.sub())
     }
     
 }

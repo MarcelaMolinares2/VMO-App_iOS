@@ -9,42 +9,33 @@
 import SwiftUI
 
 struct SLAIDPanelView: View {
+    
+    let modSLAID = Config.get(key: "SLAID").value
+    
     var body: some View {
-        VStack {
-            HStack {
-                Button(action: {
-                    
-                }) {
-                    Image("logo-header")
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 70, height: 44)
-                }
-                Spacer()
-                Text("envSLAID")
-                    .foregroundColor(.cPrimaryDark)
-                    .multilineTextAlignment(.center)
-                Spacer()
-                Button(action: {
-                    
-                }) {
-                    Image("ic-right-arrow")
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 70, height: 44, alignment: .center)
-                        .padding(2)
-                }
-            }
-            .background(
-                Color.white
-                    .shadow(color: .cAccent, radius: 2, y: 2)
-            )
-            ScrollView {
+        ZStack {
+            if modSLAID == 1 {
+            } else {
                 VStack {
-                    ForEach(0..<10) {_ in
-                        Text("AA")
-                            .frame(minWidth: 0, maxWidth: .infinity, minHeight: 200, maxHeight: 200)
+                    Spacer()
+                    VStack(alignment: .center, spacing: 20) {
+                        Text("envVisualAids")
+                            .font(.system(size: 30))
+                            .foregroundColor(.cTextHigh)
+                        Image("ic-lock")
+                            .resizable()
+                            .frame(height: 60)
+                            .scaledToFit()
+                        Text("envVANotAvailable")
+                            .font(.system(size: 16))
+                            .foregroundColor(.cTextHigh)
+                            .multilineTextAlignment(.center)
+                        Text("envVANotAvailableRequest")
+                            .font(.system(size: 15))
+                            .foregroundColor(.cTextMedium)
                     }
+                    .padding(.horizontal, 40)
+                    Spacer()
                 }
             }
         }

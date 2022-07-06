@@ -54,7 +54,7 @@ struct RouteListView: View {
                 Spacer()
                 HStack {
                     Spacer()
-                    FAB(image: "ic-plus", foregroundColor: .cPrimary) {
+                    FAB(image: "ic-plus") {
                         moduleRouter.currentPage = "FORM"
                     }
                 }
@@ -260,7 +260,7 @@ struct RouteFormView: View {
                 Spacer()
                 HStack {
                     Spacer()
-                    FAB(image: "ic-cloud", foregroundColor: .cPrimary) {
+                    FAB(image: "ic-cloud") {
                         if !name.replacingOccurrences(of: " ", with: "").isEmpty {
                             save()
                         } else {
@@ -277,7 +277,7 @@ struct RouteFormView: View {
             VStack {
                 Spacer()
                 HStack {
-                    FAB(image: "ic-plus", foregroundColor: .cPrimary) {
+                    FAB(image: "ic-plus") {
                         cardShow.toggle()
                     }
                     .padding(.horizontal, 20)

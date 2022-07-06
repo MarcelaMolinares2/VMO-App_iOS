@@ -48,7 +48,6 @@ struct PanelDialogPicker: View {
     var skip: Bool = false
     
     @ObservedObject var viewModel = ListPanelViewModel()
-    @StateObject var headerRouter = TabRouter()
     @State var searchText = ""
     let headerHeight = CGFloat(40)
     
@@ -64,7 +63,9 @@ struct PanelDialogPicker: View {
                             .scaledToFit()
                             .padding(5)
                     }
-                    SearchBar(headerRouter: self.headerRouter, text: $searchText, placeholder: Text("Buscar"))
+                    SearchBar(text: $searchText, placeholder: Text("Buscar")) {
+                        
+                    }
                 }
                 .frame(height: headerHeight)
                 .padding([.leading, .trailing], 10)
@@ -224,7 +225,9 @@ struct SourceDynamicDialogPicker: View {
                     }
                 }
                 if !isSheet ||  CGFloat(viewModel.items.count * 50) > CGFloat(UIScreen.main.bounds.height - (200 + (multiple ? 50 : 0))) {
-                    SearchBar(headerRouter: self.headerRouter, text: $searchText, placeholder: Text("envSearch"))
+                    SearchBar(text: $searchText, placeholder: Text("envSearch")) {
+                        
+                    }
                 } else {
                     Text(title)
                 }
@@ -326,7 +329,9 @@ struct CustomDialogPicker: View {
                     }
                 }
                 if !isSheet ||  CGFloat(viewModel.items.count * 50) > CGFloat(UIScreen.main.bounds.height - (200 + (multiple ? 50 : 0))) {
-                    SearchBar(headerRouter: self.headerRouter, text: $searchText, placeholder: Text("envSearch"))
+                    SearchBar(text: $searchText, placeholder: Text("envSearch")) {
+                        
+                    }
                 } else {
                     Text(title)
                 }

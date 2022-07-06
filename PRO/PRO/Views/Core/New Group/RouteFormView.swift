@@ -38,7 +38,7 @@ struct RouteFormView2: View {
                             }
                         }
                     }
-                    FAB(image: "ic-cloud", foregroundColor: .cPrimary) {
+                    FAB(image: "ic-cloud") {
                         if validate() {
                             save()
                         }

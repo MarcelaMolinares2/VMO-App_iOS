@@ -8,12 +8,14 @@
 
 import RealmSwift
 import SwiftUI
+import Lottie
 
 struct PanelListView: View {
     @State var data: Array<Panel & SyncEntity>
     @Binding var searchText: String
 
     var body: some View {
+        let realm = try! Realm()
         ZStack(alignment: .trailing) {
             Text("Total en panel: \(data.count)")
                 .foregroundColor(.cTextMedium)
@@ -33,7 +35,7 @@ struct PanelListView: View {
                 ForEach(data.filter {
                     self.searchText.isEmpty ? true :
                         ($0.name ?? "").lowercased().contains(self.searchText.lowercased()) ||
-                        ($0.city?.name ?? "").lowercased().contains(self.searchText.lowercased())
+                    ($0.cityName(realm: realm) ).lowercased().contains(self.searchText.lowercased())
                 }, id: \.id) { element in
                     PanelItem(panel: element).onTapGesture {
                         
@@ -67,12 +69,12 @@ struct PanelItem: View {
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     */
-                    Text(panel.type == "M" ? "\(address), \(panel.city?.name ?? " -- ")" : panel.city?.name ?? " -- ")
+                    /*Text(panel.type == "M" ? "\(address), \(panel.city?.name ?? " -- ")" : panel.city?.name ?? " -- ")
                         .font(.system(size: 14))
                         .foregroundColor(.cPrimary)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .lineLimit(2)
-                    /*Text(panel.type == "M" ? panel.institution ?? " -- " : address)
+                    Text(panel.type == "M" ? panel.institution ?? " -- " : address)
                         .font(.system(size: 14))
                         .foregroundColor(.cPrimary)
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -82,11 +84,12 @@ struct PanelItem: View {
                 .frame(maxWidth: .infinity)
                 VStack(alignment: .trailing, spacing: 2) {
                     VStack {
-                        Text(panel.category?.name ?? "")
+                        /*Text(panel.category?.name ?? "")
                             .padding(.horizontal, 5)
                             .font(.system(size: 14))
                             .foregroundColor(.cTextLight)
                             .frame(height: 20)
+                         */
                     }
                     .frame(minWidth: 30)
                     .background(Color.cPrimary)
@@ -110,11 +113,11 @@ struct PanelItem: View {
     func manage() {
         if panel.locations.count > 0 {
             let location = panel.locations[0]
-            address = location.address ?? ""
+            address = location.address
         }
         let sub = JWTUtils.sub()
-        panel.userPanel.forEach { item in
-            if item.userID == sub {
+        panel.users.forEach { item in
+            if item.userId == sub {
                 visitsFee = item.visitsFee
                 visitsCycle = item.visitsCycle
             }
@@ -202,3 +205,32 @@ struct CustomSection<Content: View>: View {
     }
 }
 
+struct LottieView: UIViewRepresentable {
+    var name: String
+    var loopMode: LottieLoopMode = .playOnce
+    var speed: CGFloat = 2
+    
+    var animationView = AnimationView()
+    
+    func makeUIView(context: UIViewRepresentableContext<LottieView>) -> UIView {
+        let view = UIView(frame: .zero)
+        
+        animationView.animation = Animation.named(name)
+        animationView.contentMode = .scaleAspectFit
+        animationView.loopMode = loopMode
+        animationView.animationSpeed = speed
+        animationView.play()
+        
+        animationView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(animationView)
+        
+        NSLayoutConstraint.activate([
+            animationView.heightAnchor.constraint(equalTo: view.heightAnchor),
+            animationView.widthAnchor.constraint(equalTo: view.widthAnchor)
+        ])
+        
+        return view
+    }
+    
+    func updateUIView(_ uiView: UIView, context: UIViewRepresentableContext<LottieView>) {}
+}

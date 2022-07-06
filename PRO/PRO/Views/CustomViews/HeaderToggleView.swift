@@ -47,7 +47,7 @@ struct HeaderToggleView: View {
                     .padding(6)
                     .foregroundColor(color)
             } else {
-                SearchBar(headerRouter: self.headerRouter, text: $searchText, placeholder: Text(NSLocalizedString("envSearch", comment: "") + " " + NSLocalizedString(title, comment: "").lowercased()))
+                //SearchBar(headerRouter: self.headerRouter, text: $searchText, placeholder: Text(NSLocalizedString("envSearch", comment: "") + " " + NSLocalizedString(title, comment: "").lowercased()))
             }
         }
         .frame(minWidth: 0, maxWidth: .infinity, minHeight: 44, maxHeight: 44)

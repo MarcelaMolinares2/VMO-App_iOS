@@ -202,7 +202,7 @@ struct RequestDayView: View {
                 Spacer()
                 HStack {
                     Spacer()
-                    FAB(image: "ic-cloud", foregroundColor: .cPrimary) {
+                    FAB(image: "ic-cloud") {
                         if validate() {
                             save()
                         }

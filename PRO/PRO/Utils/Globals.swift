@@ -15,6 +15,7 @@ class Globals {
     static let ACCESS_TOKEN = "ACCESS_TOKEN"
     static let LABORATORY_HASH = "LABORATORY_HASH"
     static let LABORATORY_PATH = "LABORATORY_PATH"
+    static let MASTER_HASH = "MASTER_HASH"
     static let SESSION_STATUS = "SESSION_STATUS"
     static let USER_DATA = "USER_DATA"
     static let INIT_STATUS = "INIT_STATUS"
@@ -22,6 +23,8 @@ class Globals {
     static let MEDIA_SERVER = "https://media.vmocentral.com/v3/"
     static let MEDIA_KEY = "5aaa37ee4590b70296f3f0698032a361"
     static let MEDIA_TOKEN = "MEDIA_TOKEN"
+    
+    static let COGNITO_USERNAME = "COGNITO_USERNAME"
     
     static let BG_TASK_REFRESH = "com.vmo.PRO.refresh"
     
@@ -38,10 +41,12 @@ extension Color {
     static let cPrimary = Color("colorPrimary")
     static let cPrimaryDark = Color("colorPrimaryDark")
     static let cPrimaryLight = Color("colorPrimaryLight")
+    static let cBackgroundStatic = Color("colorBackgroundStatic")
     static let cAccent = Color("colorAccent")
     static let cAccentLight = Color("colorAccentLight")
     static let cTextField = Color("colorTextField")
     static let cTextFieldLogin = Color("colorTextFieldLogin")
+    static let cIcon = Color("colorIcon")
     static let cIconLight = Color("colorIconLight")
     static let cDanger = Color("colorDanger")
     static let cCard = Color("colorCard")
@@ -53,6 +58,8 @@ extension Color {
     static let cSelected = Color("colorSelected")
     static let cFieldBorder = Color("colorFieldBorder")
     static let cToggleActive = Color("colorToggleActive")
+    static let cFABBackground = Color("colorFABBackground")
+    static let cFABForeground = Color("colorFABForeground")
     
     static let cPanelActivity = Color("colorPanelActivity")
     static let cPanelClient = Color("colorPanelClient")
@@ -66,6 +73,8 @@ extension Color {
     static let cPanelPharmacy = Color("colorPanelPharmacy")
     static let cPanelPotential = Color("colorPanelPotential")
     static let cPanelRequestDay = Color("colorPanelRequestDay")
+    
+    static let cSyncView = Color("colorSyncView")
     
     static let cBlueDark = Color("colorBlueDark")
     static let cWarning = Color("colorWarning")

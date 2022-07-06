@@ -87,3 +87,11 @@ extension Decodable {
         self = try decoder.decode(Self.self, from: data)
     }
 }
+
+extension Array {
+    func splitInSubArrays(into size: Int) -> [[Element]] {
+        return (0..<size).map {
+            stride(from: $0, to: count, by: size).map { self[$0] }
+        }
+    }
+}

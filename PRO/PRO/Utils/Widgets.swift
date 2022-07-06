@@ -11,23 +11,13 @@ import SwiftUI
 
 class Widgets {
     
-    static func toast(message: String) {
-        /*let scene = UIApplication.shared.connectedScenes.first
-        if let sceneDelegate : SceneDelegate = scene?.delegate as? SceneDelegate{
-            if let view = sceneDelegate.window?.rootViewController?.view{
-                view.makeToast(message)
-            }
-        }*/
-    }
-    
 }
 
 struct SearchBar: View {
-    @StateObject var headerRouter: TabRouter
-    
     @Binding var text: String
 
     var placeholder: Text
+    let onSearchClose: () -> Void
     var editingChanged: (Bool)->() = { _ in }
     var commit: ()->() = { }
     
@@ -40,10 +30,10 @@ struct SearchBar: View {
             HStack {
                 TextField("", text: $text, onEditingChanged: editingChanged, onCommit: commit)
                     .frame(maxWidth: .infinity, maxHeight: 40, alignment: .leading)
-                    .foregroundColor(.cPrimary)
+                    .foregroundColor(.cTextHigh)
                 Button(action: {
                     if self.text.isEmpty {
-                        headerRouter.current = "TITLE"
+                        onSearchClose()
                     } else {
                         self.text = ""
                     }
@@ -52,7 +42,7 @@ struct SearchBar: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width: 20, height: 20, alignment: .center)
-                        .foregroundColor(.cPrimary)
+                        .foregroundColor(.cIcon)
                 }
                 .frame(width: 60, height: 30, alignment: .center)
             }
@@ -148,76 +138,11 @@ struct InlineLoader: View {
     }
 }
 
-struct PageViewController: UIViewControllerRepresentable {
-    
-    var viewControllers: [UIViewController]
-    @Binding var currentPageIndex: Int
-    
-    func makeCoordinator() -> Coordinator {
-        Coordinator(self)
-    }
-    
-    func makeUIViewController(context: Context) -> UIPageViewController {
-        let pageViewController = UIPageViewController(
-            transitionStyle: .scroll,
-            navigationOrientation: .horizontal)
-        pageViewController.dataSource = context.coordinator
-        pageViewController.delegate = context.coordinator
-        return pageViewController
-    }
-    
-    func updateUIViewController(_ pageViewController: UIPageViewController, context: Context) {
-        pageViewController.setViewControllers([viewControllers[currentPageIndex]], direction: .forward, animated: true)
-    }
-    
-    class Coordinator: NSObject, UIPageViewControllerDataSource, UIPageViewControllerDelegate {
-        
-        var parent: PageViewController
-
-        init(_ pageViewController: PageViewController) {
-            self.parent = pageViewController
-        }
-        
-        func pageViewController(_ pageViewController: UIPageViewController, viewControllerBefore viewController: UIViewController) -> UIViewController? {
-            guard let index = parent.viewControllers.firstIndex(of: viewController) else {
-                return nil
-            }
-            if index == 0 {
-                return parent.viewControllers.last
-            }
-            return parent.viewControllers[index - 1]
-            
-        }
-        
-        func pageViewController(_ pageViewController: UIPageViewController, viewControllerAfter viewController: UIViewController) -> UIViewController? {
-            guard let index = parent.viewControllers.firstIndex(of: viewController) else {
-                return nil
-            }
-            if index + 1 == parent.viewControllers.count {
-                return parent.viewControllers.first
-            }
-            return parent.viewControllers[index + 1]
-        }
-        
-        func pageViewController(_ pageViewController: UIPageViewController, didFinishAnimating finished: Bool, previousViewControllers: [UIViewController], transitionCompleted completed: Bool) {
-            if completed,
-                let visibleViewController = pageViewController.viewControllers?.first,
-                let index = parent.viewControllers.firstIndex(of: visibleViewController)
-            {
-                parent.currentPageIndex = index
-            }
-        }
-        
-    }
-    
-}
-
-
 struct FAB: View {
     
     var image: String
-    var foregroundColor: Color
-    var iconColor = Color.white
+    var size: CGFloat = Globals.UI_FAB_SIZE
+    var margin: CGFloat = 24
     var action: () -> Void
     
     var body: some View {
@@ -227,18 +152,15 @@ struct FAB: View {
             }) {
                 ZStack {
                     Circle()
-                        .foregroundColor(foregroundColor)
+                        .foregroundColor(.cFABBackground)
                     Image(image)
                         .resizable()
-                        .frame(width: Globals.UI_FAB_SIZE - 24, height: Globals.UI_FAB_SIZE - 24)
-                        .foregroundColor(iconColor)
-                        .shadow(color: .gray, radius: 0.2, x: 1, y: 1)
+                        .frame(width: size - margin, height: size - margin)
+                        .foregroundColor(.cFABForeground)
                 }
-                .frame(width: Globals.UI_FAB_SIZE, height: Globals.UI_FAB_SIZE)
+                .frame(width: size, height: size)
             }
         }
-        .padding(.trailing, Globals.UI_FAB_TRAILING)
-        .padding(.bottom, Globals.UI_FAB_BOTTOM)
     }
 }
 

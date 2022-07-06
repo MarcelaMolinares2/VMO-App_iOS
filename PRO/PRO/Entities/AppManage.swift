@@ -42,13 +42,13 @@ class SectionCard {
         
         var detailBasic = [SectionDetail]()
         detailBasic.append(SectionDetail(title: "envFullName", content: client.name ?? "", field: ""))
-        detailBasic.append(SectionDetail(title: "envDNI", content: client.idNumber ?? "", field: ""))
-        detailBasic.append(SectionDetail(title: "envLocation", content: "\(client.city?.name ?? ""), \(client.country?.name ?? "")", field: ""))
+        detailBasic.append(SectionDetail(title: "envDNI", content: client.idNumber, field: ""))
+        /*detailBasic.append(SectionDetail(title: "envLocation", content: "\(client.city?.name ?? ""), \(client.country?.name ?? "")", field: ""))
         detailBasic.append(SectionDetail(title: "envZone", content: client.zone?.name ?? "", field: ""))
         detailBasic.append(SectionDetail(title: "envBrick", content: client.brick?.name ?? "", field: ""))
         detailBasic.append(SectionDetail(title: "envPhone", content: client.phone ?? "", field: "", type: .phone))
         detailBasic.append(SectionDetail(title: "envEmail", content: client.email ?? "", field: "", type: .email))
-        
+        */
         data.append(SectionCard(title: "envBasic", details: detailBasic))
         
         var detailAdditional = [SectionDetail]()
@@ -87,4 +87,8 @@ class SectionDetail {
 
 enum ContentType {
     case text, email, phone, image, url
+}
+
+enum PanelLayout {
+    case list, map
 }

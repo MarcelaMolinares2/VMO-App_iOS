@@ -29,7 +29,7 @@ struct PanelCardView: View {
             default:
                 ZStack(alignment: .bottomTrailing) {
                     DetailCardView(sections: sections)
-                    FAB(image: "ic-edit", foregroundColor: .cPrimary) {
+                    FAB(image: "ic-edit") {
                         print(1)
                     }
                 }

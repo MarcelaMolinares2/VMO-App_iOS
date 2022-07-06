@@ -30,16 +30,66 @@
 "envFilters" = "Filters";
 
 
+//Auth
+"envAuthFormMessage" = "Please fill all the fields";
+"envAuthSignIn" = "Sign In";
+"envAuthForgotPassword" = "Do you forgot your password?";
+"envAuthFormDomain" = "Domain";
+"envAuthFormPassword" = "Password";
+"envAuthFormUsername" = "Username";
+"envAuthFormCode" = "Code";
+"envAuthCognitoSuccess" = "Your account has been confirmed";
+"envAuthCognitoMessage" = "We have sent a code to your email. Please enter the code bellow";
+"envAuthCognitoComplement" = "(Don't forget to check the spam folder)";
+"envAuthResendCode" = "Resend code";
+"envAuthCognitoCodeSent" = "The confirmation code has been sent";
+
+//Sync
+"envSyncMessage" = "We're sync your data.";
+
+//Generic
+"envValidate" = "Validate";
+
+//Panels
+"envClient" = "Client";
+"envClients" = "Clients";
+"envDoctor" = "Doctor";
+"envDoctors" = "Doctors";
+"envPatient" = "Patient";
+"envPatients" = "Patients";
+"envPharmacy" = "Pharmacy";
+"envPharmacies" = "Pharmacies";
+"envPotential" = "Potential";
+"envPotentials" = "Potentials";
+
+
+//SLAID
+"envVisualAids" = "Visual Aids";
+"envVANotAvailable" = "This module is not available for your organization";
+"envVANotAvailableRequest" = "Request it to";
+
+//Error
+"errLogin" = "Username/Password incorrect";
+"errServerConection" = "Server error connection";
+"errMasterPassword" = "Password is incorrect";
+"errCognitoConfirm" = "The entered code is wrong";
+
+
+
+
+
+
+
+
+
+
+"formReport" = "Report";
+
+
 "errLaboratoryNotFound" = "Laboratory not found";
 
-"formDomain" = "Domain";
-"formPassword" = "Password";
-"formSignIn" = "Sign In";
-"formReport" = "Report";
-"formUsername" = "Username";
 
 "msgInitInfo" = "You only have to perform this process every time you sign in";
-"msgInitWarning" = "We're sync the data. Please don't close the app.";
 
 "msgSyncError" = "Data can't be downloaded. You need this to start to working in the platform.";
 

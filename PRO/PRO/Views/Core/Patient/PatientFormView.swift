@@ -43,7 +43,7 @@ struct PatientFormView: View {
                         }
                     }
                     
-                    FAB(image: "ic-cloud", foregroundColor: .cPrimary) {
+                    FAB(image: "ic-cloud") {
                         self.save()
                     }
                 }
@@ -67,7 +67,7 @@ struct PatientFormView: View {
         } else {
             patient = Patient(value: try! PatientDao(realm: try! Realm()).by(objectId: ObjectId(string: viewRouter.data.objectId)) ?? Patient())
             plainData = try! Utils.objToJSON(patient)
-            additionalData = patient?.additionalFields ?? "{}"
+            additionalData = patient?.fields ?? "{}"
         }
         options.objectId = patient?.objectId
         options.item = patient?.id ?? 0
@@ -90,7 +90,7 @@ struct PatientFormView: View {
     func save(){
         if DynamicUtils.validate(form: form) && patient != nil {
             DynamicUtils.cloneObject(main: patient, temporal: try! JSONDecoder().decode(Patient.self, from: DynamicUtils.toJSON(form: form).data(using: .utf8)!), skipped: ["objectId", "id", "type"])
-            patient?.additionalFields = DynamicUtils.generateAdditional(form: form)
+            patient?.fields = DynamicUtils.generateAdditional(form: form)
             PatientDao(realm: try! Realm()).store(patient: patient!)
             viewRouter.currentPage = "PATIENT-LIST"
         } else {

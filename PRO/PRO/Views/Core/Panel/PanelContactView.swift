@@ -20,7 +20,7 @@ struct PanelContactView: View {
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
             PanelContactListView(searchText: $search)
-            FAB(image: "ic-plus", foregroundColor: .cPrimary) {
+            FAB(image: "ic-plus") {
                 showForm = true
             }
         }
@@ -35,7 +35,7 @@ struct PanelContactListView: View {
     
     @EnvironmentObject var viewRouter: ViewRouter
     
-    @ObservedResults(Contact.self, sortDescriptor: SortDescriptor(keyPath: "name", ascending: true)) var contacts
+    @ObservedResults(PanelContact.self, sortDescriptor: SortDescriptor(keyPath: "name", ascending: true)) var contacts
     @Binding var searchText: String
     @State var menuIsPresented = false
     @State var panel: Panel & SyncEntity = GenericPanel()
@@ -60,7 +60,7 @@ struct PanelContactListView: View {
                     }
                 }
             }
-            FAB(image: "ic-plus", foregroundColor: .cPrimary) {
+            FAB(image: "ic-plus") {
                 FormEntity(objectId: "").go(path: PanelUtils.formByPanelType(type: "CT"), router: viewRouter)
             }
         }
@@ -77,7 +77,7 @@ struct PanelContactFormView: View {
     @EnvironmentObject var viewRouter: ViewRouter
     @StateObject var tabRouter = TabRouter()
     
-    @State var contact: Contact?
+    @State var contact: PanelContact?
     @State var plainData = ""
     @State var additionalData = ""
     @State var dynamicData = Dictionary<String, Any>()
@@ -100,7 +100,7 @@ struct PanelContactFormView: View {
                                 }
                             }
                         }
-                        FAB(image: "ic-cloud", foregroundColor: .cPrimary) {
+                        FAB(image: "ic-cloud") {
                             self.save()
                         }
                     }
@@ -118,11 +118,11 @@ struct PanelContactFormView: View {
     
     func initForm() {
         if viewRouter.data.objectId.isEmpty {
-            contact = Contact()
+            contact = PanelContact()
         } else {
-            contact = Contact(value: try! ContactDao(realm: try! Realm()).by(objectId: ObjectId(string: viewRouter.data.objectId)) ?? Contact())
+            contact = PanelContact(value: try! ContactDao(realm: try! Realm()).by(objectId: ObjectId(string: viewRouter.data.objectId)) ?? PanelContact())
             plainData = try! Utils.objToJSON(contact)
-            additionalData = contact?.additionalFields ?? "{}"
+            additionalData = contact?.fields ?? "{}"
         }
         options.objectId = contact?.objectId
         options.item = contact?.id ?? 0
@@ -141,8 +141,8 @@ struct PanelContactFormView: View {
     
     func save() {
         if DynamicUtils.validate(form: form) && contact != nil {
-            DynamicUtils.cloneObject(main: contact, temporal: try! JSONDecoder().decode(Contact.self, from: DynamicUtils.toJSON(form: form).data(using: .utf8)!), skipped: ["objectId", "id", "type"])
-            contact?.additionalFields = DynamicUtils.generateAdditional(form: form)
+            DynamicUtils.cloneObject(main: contact, temporal: try! JSONDecoder().decode(PanelContact.self, from: DynamicUtils.toJSON(form: form).data(using: .utf8)!), skipped: ["objectId", "id", "type"])
+            contact?.fields = DynamicUtils.generateAdditional(form: form)
             ContactDao(realm: try! Realm()).store(contact: contact!)
             viewRouter.currentPage = "MASTER"
         } else {

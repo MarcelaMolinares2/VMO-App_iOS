@@ -9,42 +9,32 @@
 import SwiftUI
 import RealmSwift
 
-struct ActivityListView: View {
+struct ActivityListWrapperView: View {
     
     @EnvironmentObject var viewRouter: ViewRouter
     
     @Binding var searchText: String
     
-    @State var viewActivity = false
+    @State var layout: GenericListLayout = .list
     
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
-            VStack {
-                if !viewActivity{
-                    ActivityItemsView(viewRouter: viewRouter)
-                } else {
+            switch layout {
+                case .list:
+                    ActivityListView(viewRouter: viewRouter)
+                case .map:
                     ActivityMapView()
-                }
             }
-            VStack {
+            HStack {
+                FAB(image: (layout == .list) ? "ic-list": "ic-map") {
+                    layout = layout == .list ? .map : .list
+                }
                 Spacer()
-                HStack {
-                    Spacer()
-                    FAB(image: "ic-plus", foregroundColor: .cPrimary) {
-                        FormEntity(objectId: "").go(path: "DTV-FORM", router: viewRouter)
-                    }
+                FAB(image: "ic-plus") {
+                    FormEntity(objectId: "").go(path: "DTV-FORM", router: viewRouter)
                 }
             }
-            VStack {
-                Spacer()
-                HStack {
-                    FAB(image: (viewActivity) ? "ic-list": "ic-map", foregroundColor: .cPrimary) {
-                        viewActivity.toggle()
-                    }
-                    .padding(.horizontal, 20)
-                    Spacer()
-                }
-            }
+            .padding(.horizontal, 20)
         }
     }
 }
@@ -58,19 +48,19 @@ struct ActivityMapView: View{
     }
 }
 
-struct ActivityItemsView: View{
+struct ActivityListView: View{
     
     @ObservedObject var viewRouter: ViewRouter
-    @ObservedResults(Activity.self) var activitys
+    @ObservedResults(DifferentToVisit.self, sortDescriptor: SortDescriptor(keyPath: "dateFrom", ascending: false)) var activities
     @State private var optionsModal = false
     
-    @State private var activitySelected: Activity = Activity()
+    @State private var activitySelected: DifferentToVisit = DifferentToVisit()
     
     var body: some View {
         VStack{
             List {
-                ForEach (activitys.sorted { Utils.strDateFormat(value: $0.dateStart ?? "") < Utils.strDateFormat(value: $1.dateStart ?? "")}, id: \.objectId){ item in
-                    ActivityItemsCardView(item: item).onTapGesture {
+                ForEach (activities, id: \.objectId){ item in
+                    ActivityItemCardView(item: item).onTapGesture {
                         self.activitySelected = item
                         self.optionsModal = true
                     }
@@ -83,14 +73,14 @@ struct ActivityItemsView: View{
         }
     }
     
-    func onEdit(_ activity: Activity) {
+    func onEdit(_ activity: DifferentToVisit) {
         self.optionsModal = false
         viewRouter.data = FormEntity(objectId: activity.objectId.stringValue)
         FormEntity(objectId: activity.objectId.stringValue).go(path: "DTV-FORM", router: viewRouter)
         print("Edit")
     }
     
-    func onDetail(_ activity: Activity) {
+    func onDetail(_ activity: DifferentToVisit) {
         self.optionsModal = false
         viewRouter.data = FormEntity(objectId: activity.objectId.stringValue)
         FormEntity(objectId: activity.objectId.stringValue).go(path: "DTV-SUMMARY", router: viewRouter)
@@ -98,12 +88,12 @@ struct ActivityItemsView: View{
     }
 }
 
-struct ActivityItemsCardView: View{
-    var item: Activity
+struct ActivityItemCardView: View{
+    var item: DifferentToVisit
     
     var body: some View {
         VStack {
-            Text(item.description_ ?? "")
+            Text(item.comment)
                 .lineLimit(3)
                 .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -111,7 +101,7 @@ struct ActivityItemsCardView: View{
                 .font(.system(size: 16))
                 .fixedSize(horizontal: false, vertical: true)
                 .padding([.leading, .trailing], 4)
-            Text(Utils.dateFormat(date: Utils.strToDate(value: item.dateStart ?? Utils.dateFormat(date: Date())), format: "dd, MMM yy") + ". " + Utils.dateFormat(date: Utils.strToDate(value: item.dateEnd ?? Utils.dateFormat(date: Date())), format: "dd, MMM yy"))
+            Text("\(Utils.dateFormat(value: item.dateFrom, toFormat: "dd, MMM yy")) \(NSLocalizedString("envTo", comment: "to")) \(Utils.dateFormat(value: item.dateTo, toFormat: "dd, MMM yy"))")
                 .frame(maxWidth: .infinity, alignment: .trailing)
                 .foregroundColor(.cTextMedium)
                 .font(.system(size: 14))

@@ -10,6 +10,7 @@ import SwiftUI
 import RealmSwift
 import GoogleMaps
 import SwiftTryCatch
+import CryptoKit
 
 class Utils {
     
@@ -153,6 +154,14 @@ class Utils {
         return formatter.string(from: date)
     }
     
+    static func dateFormat(value: String, toFormat: String = "yyyy-MM-dd", fromFormat: String = "yyyy-MM-dd HH:mm:ss") -> String {
+        let date = strToDate(value: value, format: fromFormat)
+        let formatter = DateFormatter()
+        formatter.dateFormat = toFormat
+        formatter.timeZone = TimeZone.current
+        return formatter.string(from: date)
+    }
+    
     static func shortDate(value: String) -> String {
         return dateFormat(date: strToDate(value: value), format: "MMM d")
     }
@@ -210,6 +219,21 @@ class Utils {
             list.append(GenericSelectableItem(id: Utils.castString(value: item["id"]), label: Utils.castString(value: item["label"])))
         }
         return list
+    }
+    
+    static func md5(string: String) -> String {
+        let digest = Insecure.MD5.hash(data: string.data(using: .utf8) ?? Data())
+        
+        return digest.map {
+            String(format: "%02hhx", $0)
+        }.joined()
+    }
+    
+    static func zero(n: Int) -> String {
+        if n < 10 {
+            return "0\(n)"
+        }
+        return String(describing: n)
     }
     
 }
@@ -584,6 +608,26 @@ class DynamicUtils {
             return "{}"
         } catch DecodingError.valueNotFound {
             return "{}"
+        }
+    }
+    
+    static func listTypeDecoding<T: CodingKey, R: Object & Decodable>(container: KeyedDecodingContainer<T>, key: KeyedDecodingContainer<T>.Key) throws -> RealmSwift.List<R> {
+        do {
+            return try container.decode(RealmSwift.List<R>.self, forKey: key)
+        } catch DecodingError.keyNotFound {
+            return RealmSwift.List<R>()
+        } catch DecodingError.valueNotFound {
+            return RealmSwift.List<R>()
+        }
+    }
+    
+    static func objectTypeDecoding<T: CodingKey, R: Object & Decodable>(container: KeyedDecodingContainer<T>, key: KeyedDecodingContainer<T>.Key) throws -> R {
+        do {
+            return try container.decode(R.self, forKey: key)
+        } catch DecodingError.keyNotFound {
+            return R()
+        } catch DecodingError.valueNotFound {
+            return R()
         }
     }
     

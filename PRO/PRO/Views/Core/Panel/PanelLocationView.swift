@@ -17,7 +17,7 @@ struct PanelLocationView: View {
         ZStack(alignment: .bottomTrailing) {
             PanelLocationMapsView(locations: panel.locations)
             if couldAdd {
-                FAB(image: "ic-plus", foregroundColor: .cPrimary) {
+                FAB(image: "ic-plus") {
                     print(1)
                 }
             }

@@ -670,10 +670,10 @@ struct RouteBottomMenu: View {
 }
 
 struct ActivityBottomMenu: View {
-    let onEdit: (_ group: Activity) -> Void
-    let onDetail: (_ group: Activity) -> Void
+    let onEdit: (_ group: DifferentToVisit) -> Void
+    let onDetail: (_ group: DifferentToVisit) -> Void
     
-    @State var activity: Activity
+    @State var activity: DifferentToVisit
     @State private var customGridItems: [GenericGridItem] = []
     @State var columns: [GridItem] = []
     

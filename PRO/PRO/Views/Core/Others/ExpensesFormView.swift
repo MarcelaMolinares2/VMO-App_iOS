@@ -19,7 +19,7 @@ struct ExpensesFormView: View {
     
     @State private var conceptsExpensesSimple: [ConceptExpenseSimple] = []
     
-    @ObservedResults(ConceptExpense.self) var conceptExpenses
+    @ObservedResults(ExpenseConcept.self) var conceptExpenses
     
     @State private var dateStart = Date()
     @State private var concept: String = ""
@@ -133,7 +133,7 @@ struct ExpensesFormView: View {
                 Spacer()
                 HStack {
                     Spacer()
-                    FAB(image: "ic-cloud", foregroundColor: .cPrimary) {
+                    FAB(image: "ic-cloud") {
                         save()
                     }
                 }
@@ -150,7 +150,7 @@ struct ExpensesFormView: View {
         conceptExpenses.forEach{ value in
             let temp = ConceptExpenseSimple()
             temp.id = value.id
-            temp.name = value.concept ?? ""
+            //temp.name = value.concept ?? ""
             conceptsExpensesSimple.append(temp)
         }
     }

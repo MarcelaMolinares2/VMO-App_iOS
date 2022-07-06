@@ -15,7 +15,7 @@ struct ActivityFormView: View {
     
     @EnvironmentObject var viewRouter: ViewRouter
     
-    @State private var activity: Activity = Activity()
+    @State private var activity: DifferentToVisit = DifferentToVisit()
     @ObservedObject var dashboardRouter = DashboardRouter()
     
     @State var viewForms = false
@@ -64,8 +64,8 @@ struct ActivityFormView: View {
                 Spacer()
                 HStack {
                     Spacer()
-                    FAB(image: "ic-cloud", foregroundColor: .cPrimary) {
-                        save()
+                    FAB(image: "ic-cloud") {
+                        validate()
                     }
                 }
             }
@@ -82,28 +82,29 @@ struct ActivityFormView: View {
     func load() {
         if !viewRouter.data.objectId.isEmpty {
             if let activityItem = try? ActivityDao(realm: try! Realm()).by(objectId: ObjectId(string: viewRouter.data.objectId)) {
-                activity = Activity(value: activityItem)
+                activity = DifferentToVisit(value: activityItem)
             }
         }
         waitLoad = true
     }
     
-    func save(){
-        activity.requestFreeDay = (activity.requestFreeDay == nil) ? 0: activity.requestFreeDay
-        if activity.requestFreeDay == 0{
-            if activity.description_ == nil {
-                self.showToast.toggle()
-            } else{
-                ActivityDao(realm: try! Realm()).store(activity: activity)
-                self.goTo(page: "MASTER")
-            }
-        } else {
-            if activity.description_ == nil || activity.dayReason == nil {
-                self.showToast.toggle()
-            } else {
-                ActivityDao(realm: try! Realm()).store(activity: activity)
-                self.goTo(page: "MASTER")
-            }
+    func validate() {
+        if activity.comment.isEmpty {
+            self.showToast.toggle()
+            return
+        }
+        if activity.requestFreeDay == 1 {
+            
+        }
+        
+        save()
+    }
+    
+    func save() {
+        ActivityDao(realm: try! Realm()).store(activity: activity)
+        self.goTo(page: "MASTER")
+        if activity.requestFreeDay == 1 {
+            
         }
     }
     
@@ -114,7 +115,7 @@ struct ActivityFormView: View {
 
 struct ActivityBasicFormView: View {
     
-    @State var activity: Activity
+    @State var activity: DifferentToVisit
     
     @EnvironmentObject var viewRouter: ViewRouter
     
@@ -137,7 +138,7 @@ struct ActivityBasicFormView: View {
     var body: some View {
         VStack {
             CustomForm {
-                
+                /*
                 CustomSection{
                     VStack{
                         Button(action: {
@@ -250,7 +251,6 @@ struct ActivityBasicFormView: View {
                         .padding(10)
                     }
                 }
-                
                 if showSectionRequestDay {
                     CustomSection {
                         VStack{
@@ -317,6 +317,7 @@ struct ActivityBasicFormView: View {
                         .padding(10)
                     }
                 }
+                */
                 CustomSection{
                     VStack{
                         ForEach(form.tabs, id: \.id) { tab in
@@ -336,14 +337,14 @@ struct ActivityBasicFormView: View {
     }
     
     func load(){
-        options.objectId = activity.objectId
+        /*options.objectId = activity.objectId
         options.item = activity.id
         options.op = ""
         options.type = visitType.lowercased()
         options.panelType = viewRouter.data.type
         form.tabs = DynamicUtils.initForm(data: dynamicData).sorted(by: { $0.key > $1.key })
         self.dateStart = Utils.strToDate(value: (activity.dateStart ?? "") + " " + (activity.hourStart ?? ""))
-        if let date_MDY: String = activity.dateStart {
+        if let date_MDY: String = activity.dateFrom {
             if let date_HMS: String = activity.hourStart {
                 self.dateStart = Utils.strToDate(value : date_MDY + " " + date_HMS)
             }
@@ -369,21 +370,21 @@ struct ActivityBasicFormView: View {
         if let itemCycle = CycleDao(realm: try! Realm()).by(id: "1"){
             cycle = itemCycle.displayName
             activity.cycle = itemCycle
-        }
+        }*/
     }
     
     func onSelectionCycleDone(_ selected: [String]) {
         isSheetCycle = false
         if let itemCycle = CycleDao(realm: try! Realm()).by(id: idsCycle[0]){
             cycle = itemCycle.displayName
-            activity.cycle = itemCycle
+            //activity.cycle = itemCycle
         }
     }
 }
 
 struct AssistantsActivityFormView: View{
     
-    @State var activity: Activity
+    @State var activity: DifferentToVisit
     
     @ObservedObject private var selectPanelModalToggle = ModalToggle()
     @State private var cardShow = false
@@ -448,10 +449,10 @@ struct AssistantsActivityFormView: View{
                         }
                         selected[type]?.binding.removeAll(where: { $0 == String(its) })
                         self.items.remove(atOffsets: offsets)
-                        activity.medics = slDoctors.joined(separator: ",")
-                        activity.pharmacies = slPharmacies.joined(separator: ",")
-                        activity.clients = slClients.joined(separator: ",")
-                        activity.patients = slPatients.joined(separator: ",")
+                        //activity.medics = slDoctors.joined(separator: ",")
+                        //activity.pharmacies = slPharmacies.joined(separator: ",")
+                        //activity.clients = slClients.joined(separator: ",")
+                        //activity.patients = slPatients.joined(separator: ",")
                     }
                 }
                 Spacer()
@@ -459,7 +460,7 @@ struct AssistantsActivityFormView: View{
             VStack {
                 Spacer()
                 HStack {
-                    FAB(image: "ic-plus", foregroundColor: .cPrimary) {
+                    FAB(image: "ic-plus") {
                         print("plus raton")
                         cardShow.toggle()
                     }
@@ -489,7 +490,7 @@ struct AssistantsActivityFormView: View{
     }
     
     func load() {
-        activity.medics?.split(separator: ",").forEach{ it in
+        /*activity.medics?.split(separator: ",").forEach{ it in
             addPanelItems(type: "M", it: String(it))
             slDoctors.append(String(it))
         }
@@ -504,11 +505,11 @@ struct AssistantsActivityFormView: View{
         activity.patients?.split(separator: ",").forEach{ it in
             addPanelItems(type: "P", it: String(it))
             slPatients.append(String(it))
-        }
+        }*/
     }
     
     func addActivitysPanels(type: String){
-        switch type {
+        /*switch type {
         case "M":
             activity.medics = slDoctors.joined(separator: ",")
         case "F":
@@ -519,7 +520,7 @@ struct AssistantsActivityFormView: View{
             activity.patients = slPatients.joined(separator: ",")
         default:
             break
-        }
+        }*/
     }
     
     func addPanelItems(type: String, it: String){

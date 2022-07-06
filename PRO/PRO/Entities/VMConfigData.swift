@@ -36,13 +36,14 @@ class AdvertisingMaterial: Object, Codable {
 
 class AdvertisingMaterialSet: Object, Codable {
     @Persisted(primaryKey: true) var objectId: ObjectId
-    @Persisted var id = ""
+    @Persisted var id = 0
+    @Persisted var label = ""
     @Persisted var stock = 0
     @Persisted var delivered = 0
     @Persisted var dueDate: String?
     
     private enum CodingKeys: String, CodingKey {
-        case id = "lote", dueDate = "due_date", stock, delivered
+        case id = "material_set_id", label = "set_id", dueDate = "due_date", stock, delivered
     }
 }
 
@@ -61,29 +62,6 @@ class Brick: Object, Codable {
         codingKey = .id
         return codingKey.rawValue
     }
-}
-
-class Category: Object, Codable {
-    @Persisted(primaryKey: true) var objectId: ObjectId
-    @Persisted var id = 0
-    @Persisted var name: String?
-    @Persisted var scoreStart: Float?
-    @Persisted var scoreEnd: Float?
-    @Persisted var visitsFeeMedic: Int?
-    @Persisted var visitsFeePharmacy: Int?
-    @Persisted var visitsFeeClient: Int?
-    @Persisted var isDefault: Int?
-    
-    private enum CodingKeys: String, CodingKey {
-        case id = "id_categoria", name = "categorias", scoreStart = "puntaje_i", scoreEnd = "puntaje_f", visitsFeeMedic = "num_visitas_m", visitsFeePharmacy = "num_visitas_f", visitsFeeClient = "num_visitas_c", isDefault = "predefinida"
-    }
-    
-    static func primaryCodingKey() -> String {
-        let codingKey: CodingKeys
-        codingKey = .id
-        return codingKey.rawValue
-    }
-    
 }
 
 class City: Object, Codable {
@@ -150,10 +128,26 @@ class Config: Object, Codable {
     }
 }
 
+class ContactControlType: Object, Codable {
+    @Persisted(primaryKey: true) var objectId: ObjectId
+    @Persisted var id = 0
+    @Persisted var name: String
+    
+    private enum CodingKeys: String, CodingKey {
+        case id = "contact_control_type_id", name = "name_"
+    }
+    
+    static func primaryCodingKey() -> String {
+        let codingKey: CodingKeys
+        codingKey = .id
+        return codingKey.rawValue
+    }
+}
+
 class Country: Object, Codable {
     @Persisted(primaryKey: true) var objectId: ObjectId
     @Persisted var id = 0
-    @Persisted var name: String?
+    @Persisted var name: String
     
     private enum CodingKeys: String, CodingKey {
         case id = "id_pais", name = "pais"
@@ -169,11 +163,16 @@ class Country: Object, Codable {
 class Cycle: Object, Codable {
     @Persisted(primaryKey: true) var objectId: ObjectId
     @Persisted var id = 0
-    @Persisted var cycle = 0
+    @Persisted var name = "0"
     @Persisted var year = 0
+    @Persisted var lineId = 0
+    @Persisted var countryId = 0
+    @Persisted var isActive = ""
+    @Persisted var dateFrom = ""
+    @Persisted var dateTo = ""
     
     private enum CodingKeys: String, CodingKey {
-        case id = "id_ciclo", cycle = "ciclo", year = "ano"
+        case id = "id_ciclo", name = "ciclo", year = "ano", lineId = "id_linea", countryId = "id_pais", isActive = "activo", dateFrom = "fecha_inicial", dateTo = "fecha_final"
     }
     
     static func primaryCodingKey() -> String {
@@ -183,15 +182,49 @@ class Cycle: Object, Codable {
     }
     
     var displayName: String {
-        return "\(cycle) - \(year)"
+        return "\(name) - \(year)"
+    }
+}
+
+class ExpenseConcept: Object, Codable, Identifiable {
+    @Persisted(primaryKey: true) var objectId: ObjectId
+    @Persisted var id = 0
+    @Persisted var name: String
+    
+    private enum CodingKeys: String, CodingKey {
+        case id = "id_concepto", name = "concepto"
+    }
+    
+    static func primaryCodingKey() -> String {
+        let codingKey: CodingKeys
+        codingKey = .id
+        return codingKey.rawValue
+    }
+}
+
+class FailReason: Object, Codable {
+    @Persisted(primaryKey: true) var objectId: ObjectId
+    @Persisted var id = 0
+    @Persisted var panelType: String
+    @Persisted var environment: String
+    @Persisted var content: String
+    
+    private enum CodingKeys: String, CodingKey {
+        case id = "free_day_reason_id", panelType = "panel_type", environment, content
+    }
+    
+    static func primaryCodingKey() -> String {
+        let codingKey: CodingKeys
+        codingKey = .id
+        return codingKey.rawValue
     }
 }
 
 class FreeDayReason: Object, Codable {
     @Persisted(primaryKey: true) var objectId: ObjectId
     @Persisted var id = 0
-    @Persisted var content: String?
-    @Persisted var availableIn: String?
+    @Persisted var content: String
+    @Persisted var availableIn: String
     
     private enum CodingKeys: String, CodingKey {
         case id = "free_day_reason_id", availableIn = "available_in", content
@@ -207,12 +240,49 @@ class FreeDayReason: Object, Codable {
 class Line: Object, Codable {
     @Persisted(primaryKey: true) var objectId: ObjectId
     @Persisted var id = 0
-    @Persisted var name: String?
+    @Persisted var name: String
     @Persisted var abbreviation: String?
     @Persisted var countryId: Int?
     
     private enum CodingKeys: String, CodingKey {
         case id = "id_linea", name = "linea", abbreviation = "abreviatura", countryId = "id_pais"
+    }
+    
+    static func primaryCodingKey() -> String {
+        let codingKey: CodingKeys
+        codingKey = .id
+        return codingKey.rawValue
+    }
+}
+
+class PanelCategory: Object, Codable {
+    @Persisted(primaryKey: true) var objectId: ObjectId
+    @Persisted var id = 0
+    @Persisted var name: String?
+    @Persisted var scoreStart: Float?
+    @Persisted var scoreEnd: Float?
+    @Persisted var isDefault: Int?
+    
+    private enum CodingKeys: String, CodingKey {
+        case id = "id_categoria", name = "categorias", scoreStart = "puntaje_i", scoreEnd = "puntaje_f", isDefault = "predefinida"
+    }
+    
+    static func primaryCodingKey() -> String {
+        let codingKey: CodingKeys
+        codingKey = .id
+        return codingKey.rawValue
+    }
+    
+}
+
+class PanelDeleteReason: Object, Codable {
+    @Persisted(primaryKey: true) var objectId: ObjectId
+    @Persisted var id = 0
+    @Persisted var panelType: String
+    @Persisted var content: String
+    
+    private enum CodingKeys: String, CodingKey {
+        case id = "panel_delete_reason_id", panelType = "panel_type", content
     }
     
     static func primaryCodingKey() -> String {
@@ -244,10 +314,29 @@ class PharmacyChain: Object, Codable {
 class PharmacyType: Object, Codable {
     @Persisted(primaryKey: true) var objectId: ObjectId
     @Persisted var id = 0
-    @Persisted var name: String?
+    @Persisted var name: String
     
     private enum CodingKeys: String, CodingKey {
         case id = "pharmacy_type_id", name = "name_"
+    }
+    
+    static func primaryCodingKey() -> String {
+        let codingKey: CodingKeys
+        codingKey = .id
+        return codingKey.rawValue
+    }
+}
+
+class PredefinedComment: Object, Codable {
+    @Persisted(primaryKey: true) var objectId: ObjectId
+    @Persisted var id = 0
+    @Persisted var content: String
+    @Persisted var table: String
+    @Persisted var field: String
+    @Persisted var types: String
+    
+    private enum CodingKeys: String, CodingKey {
+        case id = "id_comentario", content = "contenido", table = "tabla", field = "campo", types = "tipo"
     }
     
     static func primaryCodingKey() -> String {
@@ -279,10 +368,12 @@ class PricesList: Object, Codable {
 class Product: Object, Codable {
     @Persisted(primaryKey: true) var objectId: ObjectId
     @Persisted var id = 0
+    @Persisted var name: String
     @Persisted var code: String?
-    @Persisted var name: String?
+    @Persisted var presentation: String?
     @Persisted var competitors: String?
-    @Persisted var brand: String?
+    @Persisted var verifyExistence: Int?
+    @Persisted var brandId: Int?
     @Persisted var lineId: Int?
     @Persisted var countryId: Int?
     
@@ -290,7 +381,24 @@ class Product: Object, Codable {
     var country: Country?
     
     private enum CodingKeys: String, CodingKey {
-        case id = "id_producto", code = "codigo", name = "producto", lineId = "id_linea", countryId = "id_pais", competitors = "competidores", brand = "marca"
+        case id = "id_producto", name = "producto", code = "codigo", presentation = "id_presentacion", competitors = "competidores",
+             verifyExistence = "verificar_existencia", brandId = "brand_id", lineId = "id_linea", countryId = "id_pais"
+    }
+    
+    static func primaryCodingKey() -> String {
+        let codingKey: CodingKeys
+        codingKey = .id
+        return codingKey.rawValue
+    }
+}
+
+class ProductBrand: Object, Codable {
+    @Persisted(primaryKey: true) var objectId: ObjectId
+    @Persisted var id = 0
+    @Persisted var name: String
+    
+    private enum CodingKeys: String, CodingKey {
+        case id = "product_brand_id", name = "name_"
     }
     
     static func primaryCodingKey() -> String {
@@ -303,7 +411,7 @@ class Product: Object, Codable {
 class Specialty: Object, Codable {
     @Persisted(primaryKey: true) var objectId: ObjectId
     @Persisted var id = 0
-    @Persisted var name: String?
+    @Persisted var name: String
     @Persisted var isPrimary: Int?
     @Persisted var isSecondary: Int?
     
@@ -322,7 +430,7 @@ class Specialty: Object, Codable {
 class Style: Object, Codable {
     @Persisted(primaryKey: true) var objectId: ObjectId
     @Persisted var id = 0
-    @Persisted var name: String?
+    @Persisted var name: String
     @Persisted var color: String?
     
     private enum CodingKeys: String, CodingKey {
@@ -340,15 +448,23 @@ class Style: Object, Codable {
 class User: Object, Codable {
     @Persisted(primaryKey: true) var objectId: ObjectId
     @Persisted var id = 0
-    @Persisted var dni: String?
-    @Persisted var name: String?
+    @Persisted var dni: String
+    @Persisted var name: String
     @Persisted var email: String?
-    @Persisted var type: Int?
-    @Persisted var city: Int?
-    @Persisted var zone: Int?
+    @Persisted var type: Int = 1
+    @Persisted var countryId: Int
+    @Persisted var regionId: Int?
+    @Persisted var cityId: Int
+    @Persisted var zoneId: Int
+    @Persisted var lineId: Int?
+    
+    @Persisted var hierarchy: List<UserHierarchy>
+    @Persisted var permissions: List<UserPermission>
+    @Persisted var permissionsInCharge: List<UserPermissionInCharge>
     
     private enum CodingKeys: String, CodingKey {
-        case id = "id_usuario", dni = "identificacion", name = "nombre", type = "tipo", city = "id_ciudad", zone = "id_zona", email
+        case id = "id_usuario", dni = "identificacion", name = "nombre", type = "tipo", countryId = "id_pais", regionId = "id_region",
+             cityId = "id_ciudad", zoneId = "id_zona", lineId = "id_linea", hierarchy, permissions, permissionsInCharge = "permissions_in_charge"
     }
     
     static func primaryCodingKey() -> String {
@@ -358,15 +474,52 @@ class User: Object, Codable {
     }
 }
 
-class VisitingHour: Object, Codable {
-    @Persisted(primaryKey: true) var objectId: ObjectId
+class UserHierarchy: Object, Codable {
     @Persisted var id = 0
-    @Persisted var dayOfWeek: Int?
-    @Persisted var hourStart: Int?
-    @Persisted var hourEnd: Int?
+    @Persisted var userId: Int
     
     private enum CodingKeys: String, CodingKey {
-        case id = "visiting_hour_id", dayOfWeek = "day_of_week", hourStart = "hour_start", hourEnd = "hour_end"
+        case id = "user_hierarchy_id", userId = "user_id"
+    }
+    
+    static func primaryCodingKey() -> String {
+        let codingKey: CodingKeys
+        codingKey = .id
+        return codingKey.rawValue
+    }
+}
+
+class UserPermission: Object, Codable {
+    @Persisted var id = 0
+    @Persisted var module: String
+    @Persisted var environment: String
+    @Persisted var read: Int
+    @Persisted var create: Int
+    @Persisted var update: Int
+    @Persisted var delete: Int
+    
+    private enum CodingKeys: String, CodingKey {
+        case id = "user_permission_id", module, environment, read = "read_", create = "create_", update = "update_", delete = "delete_"
+    }
+    
+    static func primaryCodingKey() -> String {
+        let codingKey: CodingKeys
+        codingKey = .id
+        return codingKey.rawValue
+    }
+}
+
+class UserPermissionInCharge: Object, Codable {
+    @Persisted var id = 0
+    @Persisted var module: String
+    @Persisted var environment: String
+    @Persisted var read: Int
+    @Persisted var create: Int
+    @Persisted var update: Int
+    @Persisted var delete: Int
+    
+    private enum CodingKeys: String, CodingKey {
+        case id = "user_permission_in_charge_id", module, environment, read = "read_", create = "create_", update = "update_", delete = "delete_"
     }
     
     static func primaryCodingKey() -> String {
@@ -393,22 +546,8 @@ class Zone: Object, Codable {
     }
 }
 
-class ConceptExpense: Object, Codable, Identifiable {
-    @Persisted(primaryKey: true) var objectId: ObjectId
-    @Persisted var id = 0
-    
-    @Persisted var concept: String? = ""
-    @Persisted var account: Int? = 0
-    @Persisted var department:String? = ""
-    @Persisted var refundable:Int? = 0
-    
-    private enum CodingKeys: String, CodingKey {
-        case id = "id_concepto", concept = "concepto", account = "cuenta", department = "departamento", refundable = "reembolsable"
-    }
-    
-    static func primaryCodingKey() -> String {
-        let codingKey: CodingKeys
-        codingKey = .id
-        return codingKey.rawValue
-    }
+class CurrentOperation: Object, Identifiable {
+    @Persisted(primaryKey: true) var type: String
+    @Persisted var current: String = ""
+    @Persisted var status: Int = 0
 }

@@ -14,7 +14,7 @@ struct ActivitySummaryView: View {
     
     @EnvironmentObject var viewRouter: ViewRouter
     
-    @State private var activity: Activity = Activity()
+    @State private var activity: DifferentToVisit = DifferentToVisit()
     
     @State var viewForms = false
     @State var waitLoad = false
@@ -71,7 +71,7 @@ struct ActivitySummaryView: View {
                 Spacer()
                 HStack {
                     Spacer()
-                    FAB(image: "ic-edit", foregroundColor: .cPrimary) {
+                    FAB(image: "ic-edit") {
                         FormEntity(objectId: activity.objectId.stringValue).go(path: "DTV-FORM", router: viewRouter)
                         print("Edit")
                     }
@@ -87,7 +87,7 @@ struct ActivitySummaryView: View {
     func load() {
         if !viewRouter.data.objectId.isEmpty {
             if let activityItem = try? ActivityDao(realm: try! Realm()).by(objectId: ObjectId(string: viewRouter.data.objectId)) {
-                activity = Activity(value: activityItem)
+                activity = DifferentToVisit(value: activityItem)
             }
         }
         print(activity)
@@ -97,7 +97,7 @@ struct ActivitySummaryView: View {
 
 struct ActivityMapSummaryView: View {
     
-    @State var activity: Activity
+    @State var activity: DifferentToVisit
     
     @State private var bottomSheetPosition: BottomSheetPosition = .middle
     
@@ -336,6 +336,7 @@ struct ActivityMapSummaryView: View {
     }
     
     func load() {
+        /*
         if let date_MDY: String = activity.dateStart {
             if let date_HMS: String = activity.hourStart {
                 dateStart = Utils.strToDate(value : date_MDY + " " + date_HMS)
@@ -348,6 +349,7 @@ struct ActivityMapSummaryView: View {
         }
         
         commentActivity = activity.description_ ?? ""
+        */
     }
     
     public enum BottomSheetPosition: CGFloat, CaseIterable {
@@ -357,7 +359,7 @@ struct ActivityMapSummaryView: View {
 
 struct ActivityListSummaryView: View {
     
-    @State var activity: Activity
+    @State var activity: DifferentToVisit
     
     @State private var items = [Panel & SyncEntity]()
     
@@ -413,7 +415,7 @@ struct ActivityListSummaryView: View {
     
     func load() {
         print(activity)
-        activity.medics?.split(separator: ",").forEach{ it in
+        /*activity.medics?.split(separator: ",").forEach{ it in
             addPanelItems(type: "M", it: String(it))
         }
         activity.pharmacies?.split(separator: ",").forEach{ it in
@@ -425,6 +427,7 @@ struct ActivityListSummaryView: View {
         activity.patients?.split(separator: ",").forEach{ it in
             addPanelItems(type: "P", it: String(it))
         }
+        */
         print(items)
     }
     

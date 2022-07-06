@@ -76,21 +76,37 @@ class DownloadRequestOperation: Operation {
         }
     }
     
-    func getRQ<T: Object & Codable>(from: T.Type, path: String, primaryKey: String, keys: [String: String] = [String: String]()) {
+    func getRQ<T: Object & Codable>(from: T.Type, path: String, primaryKey: String, identifier: String = "", keys: [String: String] = [String: String]()) {
+        updateCurrentOperation(current: identifier.isEmpty ? path : identifier)
         AppServer().getRequest(path: "\(prefix)/\(path)") { (successful, code, data) in
             self.handleRequest(from: from, path: path, primaryKey: primaryKey, keys: keys, successful: successful, code: code, data: data)
         }
     }
     
-    func postRQ<T: Object & Codable>(from: T.Type, path: String, data: [String : Any], primaryKey: String, keys: [String: String] = [String: String](), validate: Bool = false) {
+    func postRQ<T: Object & Codable>(from: T.Type, path: String, data: [String : Any], primaryKey: String, identifier: String = "", keys: [String: String] = [String: String](), validate: Bool = false) {
         if validate {
             if !validateLocal(from: from) {
                 self.end()
                 return
             }
         }
+        updateCurrentOperation(current: identifier.isEmpty ? path : identifier)
         AppServer().postRequest(data: data, path: "\(prefix)/\(path)") { (successful, code, data) in
             self.handleRequest(from: from, path: path, primaryKey: primaryKey, keys: keys, successful: successful, code: code, data: data)
+        }
+    }
+    
+    private func updateCurrentOperation(current: String) {
+        let realm = try! Realm()
+        try! realm.write {
+            if let op = realm.object(ofType: CurrentOperation.self, forPrimaryKey: "sync") {
+                op.current = current
+            } else {
+                let op = CurrentOperation()
+                op.type = "sync"
+                op.current = current
+                realm.create(CurrentOperation.self, value: op)
+            }
         }
     }
     
@@ -163,20 +179,21 @@ class DownloadRequestOperation: Operation {
             case .zone:
                 getRQ(from: Zone.self, path: "zone", primaryKey: Zone.primaryCodingKey())
             case .concept_expense:
-                getRQ(from: ConceptExpense.self, path: "expense/concept", primaryKey: ConceptExpense.primaryCodingKey())
+                getRQ(from: ExpenseConcept.self, path: "expense/concept", primaryKey: ExpenseConcept.primaryCodingKey(), identifier: "expense-concept")
             case .day_request_reason:
                 getRQ(from: FreeDayReason.self, path: "free-day-reason", primaryKey: FreeDayReason.primaryCodingKey())
             case .line:
                 getRQ(from: Line.self, path: "line", primaryKey: Line.primaryCodingKey())
             case .material:
-                postRQ(from: AdvertisingMaterial.self, path: "material/filter", data: [String: Any](), primaryKey: AdvertisingMaterial.primaryCodingKey())
+                postRQ(from: AdvertisingMaterial.self, path: "material/filter", data: [String: Any](), primaryKey: AdvertisingMaterial.primaryCodingKey(), identifier: "advertising-material")
             case .product:
                 getRQ(from: Product.self, path: "product", primaryKey: Product.primaryCodingKey())
             case .activity:
-                postRQ(from: Activity.self, path: "activity/filter", data:
+                postRQ(from: DifferentToVisit.self, path: "activity/filter", data:
                         [
                             "id_usuario" : JWTUtils.sub()
-                        ], primaryKey: Activity.primaryCodingKey(),
+                        ], primaryKey: DifferentToVisit.primaryCodingKey(),
+                       identifier: "activities",
                        validate: true
                 )
             case .client:
@@ -184,13 +201,15 @@ class DownloadRequestOperation: Operation {
                         [
                             "user_ids" : JWTUtils.sub()
                         ], primaryKey: Client.primaryCodingKey(),
+                       identifier: "clients",
                        validate: true
                 )
             case .doctor:
-                postRQ(from: Doctor.self, path: "doctor/filter", data:
+                postRQ(from: Doctor.self, path: "bridge/doctor/filter", data:
                         [
                             "user_ids" : JWTUtils.sub()
                         ], primaryKey: Doctor.primaryCodingKey(),
+                       identifier: "doctors",
                        validate: true
                 )
             case .patient:
@@ -198,6 +217,7 @@ class DownloadRequestOperation: Operation {
                         [
                             "user_ids" : JWTUtils.sub()
                         ], primaryKey: Patient.primaryCodingKey(),
+                       identifier: "patients",
                        validate: true
                 )
             case .pharmacy:
@@ -205,6 +225,7 @@ class DownloadRequestOperation: Operation {
                         [
                             "user_ids" : JWTUtils.sub()
                         ], primaryKey: Pharmacy.primaryCodingKey(),
+                       identifier: "pharmacies",
                        validate: true
                 )
             case .potential:
@@ -212,10 +233,11 @@ class DownloadRequestOperation: Operation {
                         [
                             "user_ids" : JWTUtils.sub()
                         ], primaryKey: PotentialProfessional.primaryCodingKey(),
+                       identifier: "potentials",
                        validate: true
                 )
                 case .category:
-                    getRQ(from: Category.self, path: "panel-category", primaryKey: Category.primaryCodingKey())
+                    getRQ(from: PanelCategory.self, path: "panel-category", primaryKey: PanelCategory.primaryCodingKey())
                 case .college:
                     getRQ(from: College.self, path: "college", primaryKey: College.primaryCodingKey())
                 case .pharmacy_chain:

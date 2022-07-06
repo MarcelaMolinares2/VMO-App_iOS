@@ -10,6 +10,52 @@ import Combine
 import SwiftUI
 import RealmSwift
 
+class MasterRouter: ObservableObject {
+    let objectWillChange = PassthroughSubject<MasterRouter, Never>()
+    var date: Date = Date() {
+        didSet {
+            withAnimation() {
+                objectWillChange.send(self)
+            }
+        }
+    }
+    var search: String = "" {
+        didSet {
+            withAnimation() {
+                objectWillChange.send(self)
+            }
+        }
+    }
+    var slide: Int = 1 {
+        didSet {
+            withAnimation() {
+                objectWillChange.send(self)
+            }
+        }
+    }
+    var tabLeft: String = "" {
+        didSet {
+            withAnimation() {
+                objectWillChange.send(self)
+            }
+        }
+    }
+    var tabCenter: String = "home" {
+        didSet {
+            withAnimation() {
+                objectWillChange.send(self)
+            }
+        }
+    }
+    var tabRight: String = "dashboard" {
+        didSet {
+            withAnimation() {
+                objectWillChange.send(self)
+            }
+        }
+    }
+}
+
 class ModuleRouter: ObservableObject {
     let objectWillChange = PassthroughSubject<ModuleRouter, Never>()
     var currentPage: String = "LIST" {
@@ -63,4 +109,3 @@ class ViewRouter: ObservableObject {
         return defaultValue
     }
 }
-

@@ -30,8 +30,8 @@ class NetworkService {
         switch self.server {
         case .application:
             self.urlServer = Globals.APP_SERVER
-        case .media:
-            self.urlServer = Globals.MEDIA_SERVER
+        case .master:
+            self.urlServer = Globals.APP_SERVER
         default:
             break
         }
@@ -88,27 +88,28 @@ class NetworkService {
         //request.httpBody = jsonData
         
         switch server {
-        case .application:
-            request.addValue(Globals.APP_KEY, forHTTPHeaderField: "app-key")
-            if let laboratoryHash = defaults.string(forKey: Globals.LABORATORY_HASH) {
-                request.addValue(laboratoryHash, forHTTPHeaderField: "app-lab")
-            }
-            //print(defaults.string(forKey: Globals.ACCESS_TOKEN))
-            if let accessToken = defaults.string(forKey: Globals.ACCESS_TOKEN) {
-                if !accessToken.isEmpty {
-                    //print(accessToken)
-                    request.addValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+            case .application:
+                request.addValue(Globals.APP_KEY, forHTTPHeaderField: "app-key")
+                if let laboratoryHash = defaults.string(forKey: Globals.LABORATORY_HASH) {
+                    request.addValue(laboratoryHash, forHTTPHeaderField: "app-lab")
                 }
-            }
-        case .media:
-            request.addValue(Globals.MEDIA_KEY, forHTTPHeaderField: "app-key")
-            if let mediaToken = defaults.string(forKey: Globals.MEDIA_TOKEN) {
-                if !mediaToken.isEmpty {
-                    request.addValue("Bearer \(mediaToken)", forHTTPHeaderField: "Authorization")
+                //print(defaults.string(forKey: Globals.ACCESS_TOKEN))
+                if let accessToken = defaults.string(forKey: Globals.ACCESS_TOKEN) {
+                    if !accessToken.isEmpty {
+                        //print(accessToken)
+                        request.addValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+                    }
                 }
-            }
-        default:
-            break
+            case .master:
+                request.addValue(Globals.APP_KEY, forHTTPHeaderField: "app-key")
+                if let laboratoryHash = defaults.string(forKey: Globals.LABORATORY_HASH) {
+                    request.addValue(laboratoryHash, forHTTPHeaderField: "app-lab")
+                }
+                if let masterHash = defaults.string(forKey: Globals.MASTER_HASH) {
+                    request.addValue(masterHash, forHTTPHeaderField: "master-hash")
+                }
+            default:
+                break
         }
         
         request.setValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")

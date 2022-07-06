@@ -46,7 +46,7 @@ struct PharmacyFormView: View {
                                 }
                             }
                         }
-                        FAB(image: "ic-cloud", foregroundColor: .cPrimary) {
+                        FAB(image: "ic-cloud") {
                             self.save()
                         }
                     }
@@ -68,7 +68,7 @@ struct PharmacyFormView: View {
         } else {
             pharmacy = Pharmacy(value: try! PharmacyDao(realm: try! Realm()).by(objectId: ObjectId(string: viewRouter.data.objectId)) ?? Pharmacy())
             plainData = try! Utils.objToJSON(pharmacy)
-            additionalData = pharmacy?.additionalFields ?? "{}"
+            additionalData = pharmacy?.fields ?? "{}"
         }
         options.objectId = pharmacy?.objectId
         options.item = pharmacy?.id ?? 0
@@ -88,7 +88,7 @@ struct PharmacyFormView: View {
     func save() {
         if DynamicUtils.validate(form: form) && pharmacy != nil {
             DynamicUtils.cloneObject(main: pharmacy, temporal: try! JSONDecoder().decode(Pharmacy.self, from: DynamicUtils.toJSON(form: form).data(using: .utf8)!), skipped: ["objectId", "id", "type"])
-            pharmacy?.additionalFields = DynamicUtils.generateAdditional(form: form)
+            pharmacy?.fields = DynamicUtils.generateAdditional(form: form)
             PharmacyDao(realm: try! Realm()).store(pharmacy: pharmacy!)
             viewRouter.currentPage = "MASTER"
         } else {

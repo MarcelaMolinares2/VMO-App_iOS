@@ -15,7 +15,6 @@ class UserSettings: ObservableObject {
     
     func successfullAuth(data: [String: Any]) {
         UserDefaults.standard.setValue(Utils.castString(value: data["access_token"]), forKey: Globals.ACCESS_TOKEN)
-        UserDefaults.standard.setValue(Utils.castString(value: data["media_token"]), forKey: Globals.MEDIA_TOKEN)
         toggle(status: true)
     }
     
@@ -37,6 +36,7 @@ class UserSettings: ObservableObject {
         }
         toggle(status: false)
         toggleInit(value: false)
+        SyncUtils.clear()
     }
     
     func toggle(status: Bool) {
