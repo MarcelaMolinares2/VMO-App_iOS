@@ -29,7 +29,9 @@ struct MovementFormView: View {
     
     var body: some View {
         VStack {
-            HeaderToggleView(couldSearch: false, title: title, icon: Image(icon), color: color)
+            HeaderToggleView(title: "modVisit") {
+                
+            }
             Button(action: {
                 print(movement)
                 print(locationService.location ?? "")

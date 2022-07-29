@@ -184,7 +184,7 @@ struct CardStock: View {
         VStack{
             if let product = ProductDao(realm: try! Realm()).by(id: String(item.id)){
                 Toggle(isOn: $showReason){
-                    Text(product.name ?? "")
+                    Text(product.name )
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .foregroundColor(.cTextMedium)
                         .font(.system(size: 18))

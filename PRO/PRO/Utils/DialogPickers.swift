@@ -85,9 +85,9 @@ struct PanelDialogPicker: View {
                                     .ignoresSafeArea()
                                     .cornerRadius(15)
                             }
-                            PanelItem(panel: item.panel).onTapGesture {
+                            /*PanelItem(panel: item.panel).onTapGesture {
                                 self.onItemSelected(item: item)
-                            }
+                            }*/
                         }
                     }
                 }

@@ -39,23 +39,26 @@ struct MasterView: View {
                             Text("envVisualAids")
                             Spacer()
                         case 2:
-                            Spacer()
-                            Text(NSLocalizedString("env\(masterRouter.tabRight.capitalized)", comment: ""))
-                            Spacer()
+                            MasterHeaderDynamicView(date: $masterRouter.date, route: $masterRouter.tabRight, search: $masterRouter.search, searchBarOpen: $searchBarOpen)
                         default:
                             MasterHeaderDynamicView(date: $masterRouter.date, route: $masterRouter.tabCenter, search: $masterRouter.search, searchBarOpen: $searchBarOpen)
                     }
                     if !searchBarOpen {
-                        Button(action: {
-                            
-                        }) {
-                            Image("ic-notification")
-                                .resizable()
-                                .foregroundColor(.cPrimary)
-                                .aspectRatio(contentMode: .fit)
-                                .frame(width: 40, height: 40, alignment: .center)
-                                .padding(8)
+                        HStack {
+                            Spacer()
+                            Button(action: {
+                                
+                            }) {
+                                Image("ic-notification")
+                                    .resizable()
+                                    .foregroundColor(.cPrimary)
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(width: 32, height: 32, alignment: .center)
+                                    .padding(8)
+                            }
+                            .frame(width: 40, height: 40, alignment: .center)
                         }
+                        .frame(width: 70)
                     }
                 }
                 TabView(selection: $masterRouter.slide) {
@@ -94,7 +97,7 @@ struct MasterView: View {
                 }
             }
         }
-        .partialSheet(isPresented: self.$menuIsPresented) {
+        .sheet(isPresented: self.$menuIsPresented) {
             GlobalMenu(isPresented: self.$menuIsPresented)
         }
         .onAppear {
@@ -158,6 +161,10 @@ struct MasterHeaderDynamicView: View {
                             .padding(10)
                             .foregroundColor(.cIcon)
                     }
+                case "DASHBOARD", "INDICATORS", "MESSAGES", "BIRTHDAYS":
+                    Spacer()
+                    Text(NSLocalizedString("env\(route.capitalized)", comment: ""))
+                    Spacer()
                 default:
                     if searchBarOpen {
                         SearchBar(text: $search, placeholder: Text(NSLocalizedString("envSearch", comment: "") + " " + NSLocalizedString(self.title, comment: "").lowercased())) {

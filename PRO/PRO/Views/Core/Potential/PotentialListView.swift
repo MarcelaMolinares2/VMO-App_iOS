@@ -19,10 +19,12 @@ struct PotentialListView: View {
     @State var menuIsPresented = false
     @State var panel: Panel & SyncEntity = GenericPanel()
     
+    @State private var search = ""
+    
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
             VStack {
-                HeaderToggleView(couldSearch: true, title: "modPotential", icon: Image("ic-potential"), color: Color.cPanelPotential)
+                HeaderToggleView(search: $search, title: "modPotential")
                 ZStack(alignment: .trailing) {
                     Text(String(format: NSLocalizedString("envTotalPanel", comment: ""), String(potentials.count)))
                         .foregroundColor(.cTextMedium)
@@ -43,10 +45,10 @@ struct PotentialListView: View {
                             self.searchText.isEmpty ? true :
                                 ($0.name ?? "").lowercased().contains(self.searchText.lowercased())
                         }, id: \.objectId) { element in
-                            PanelItem(panel: element).onTapGesture {
+                            /*PanelItem(panel: element).onTapGesture {
                                 self.panel = element
                                 self.menuIsPresented = true
-                            }
+                            }*/
                         }
                     }
                 }

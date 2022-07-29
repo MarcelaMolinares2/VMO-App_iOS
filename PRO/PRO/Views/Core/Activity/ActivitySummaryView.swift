@@ -25,8 +25,7 @@ struct ActivitySummaryView: View {
     var body: some View {
         ZStack{
             VStack {
-                HeaderToggleView(couldSearch: false, title: "modSummaryActivity", icon: Image("ic-activity"), color: Color.cPanelActivity)
-                
+                HeaderToggleView(title: "modSummaryActivity")
                 if waitLoad {
                     if !viewForms {
                         ActivityMapSummaryView(activity: activity)
@@ -112,9 +111,9 @@ struct ActivityMapSummaryView: View {
             GoogleMapsView()
                 .edgesIgnoringSafeArea(.all)
                 //.frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
+            //options: [.noBottomPosition, .background(AnyView(Color.white))],
                 .bottomSheet(
                     bottomSheetPosition: self.$bottomSheetPosition,
-                    options: [.noBottomPosition, .background(AnyView(Color.white))],
                     content: {
                         VStack {
                             Text(NSLocalizedString("envComment", comment: ""))
@@ -402,7 +401,7 @@ struct ActivityListSummaryView: View {
                         default:
                             Text("default")
                     }
-                    PanelItem(panel: item)
+                    //PanelItem(panel: item)
                 }
             }
             Spacer()

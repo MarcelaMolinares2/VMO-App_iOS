@@ -7,6 +7,7 @@
 //
 
 import SwiftUI
+import RealmSwift
 
 struct PanelMenu: View {
     @EnvironmentObject var viewRouter: ViewRouter
@@ -231,6 +232,9 @@ struct GlobalMenu: View {
     @State var appVersion = ""
     @State var iconSize = CGFloat(30)
     
+    @State var topMenu: [Menu] = []
+    @State var bottomMenu: [Menu] = []
+    
     var body: some View {
         VStack {
             HStack {
@@ -255,7 +259,7 @@ struct GlobalMenu: View {
                     Image("ic-search")
                         .resizable()
                         .scaledToFit()
-                        .frame(width: 60, height: 30, alignment: .center)
+                        .frame(width: 50, height: 28, alignment: .center)
                         .foregroundColor(.cPrimary)
                 }
                 Button(action: {
@@ -264,7 +268,7 @@ struct GlobalMenu: View {
                     Image("ic-location")
                         .resizable()
                         .scaledToFit()
-                        .frame(width: 60, height: 30, alignment: .center)
+                        .frame(width: 50, height: 28, alignment: .center)
                         .foregroundColor(.cPrimary)
                 }
                 Button(action: {
@@ -273,11 +277,12 @@ struct GlobalMenu: View {
                     Image("ic-home")
                         .resizable()
                         .scaledToFit()
-                        .frame(width: 60, height: 30, alignment: .center)
+                        .frame(width: 50, height: 28, alignment: .center)
                         .foregroundColor(.cPrimary)
                 }
             }
             .frame(minWidth: 0, maxWidth: .infinity, minHeight: 30, maxHeight: 30)
+            .padding(.vertical, 10)
             HStack {
                 VStack {
                     Text(self.usrFullName)
@@ -299,223 +304,49 @@ struct GlobalMenu: View {
                 */
             }
             HStack {
-                Button(action: {
-                    
-                }) {
-                    VStack {
-                        Image("ic-diary")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
-                            .foregroundColor(.cPrimary)
-                        Text("modDiary")
-                            .foregroundColor(.cPrimary)
-                            .lineLimit(1)
-                    }
-                }
-                Spacer()
-                Button(action: {
-                    self.goTo(page: "ROUTE-VIEW")
-                }) {
-                    VStack {
-                        Image("ic-people-route")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
-                            .foregroundColor(.cPrimary)
-                        Text("modPeopleRoute")
-                            .foregroundColor(.cPrimary)
-                            .lineLimit(1)
-                    }
-                }
-                Spacer()
-                Button(action: {
-                    self.goTo(page: "PATIENT-LIST")
-                }) {
-                    VStack {
-                        Image("ic-patient")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
-                            .foregroundColor(.cPrimary)
-                        Text("modPatient")
-                            .foregroundColor(.cPrimary)
-                            .lineLimit(1)
-                    }
-                }
-                Spacer()
-                Button(action: {
-                    
-                }) {
-                    VStack {
-                        Image("ic-report")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
-                            .foregroundColor(.cPrimary)
-                        Text("modReports")
-                            .foregroundColor(.cPrimary)
-                            .lineLimit(1)
+                ForEach(topMenu, id: \.objectId) { menu in
+                    Button(action: {
+                        print(menu.routerLink)
+                        self.goTo(page: "\(menu.routerLink.uppercased())-VIEW")
+                    }) {
+                        VStack {
+                            Image(menu.icon.replacingOccurrences(of: "_", with: "-"))
+                                .resizable()
+                                .scaledToFit()
+                                .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
+                                .foregroundColor(.cPrimary)
+                            Text(NSLocalizedString("env\(menu.languageTag.capitalized.replacingOccurrences(of: "-", with: ""))", comment: ""))
+                                .foregroundColor(.cPrimary)
+                                .lineLimit(1)
+                        }
                     }
                 }
             }
-            .frame(maxHeight: 80)
             ScrollView {
                 VStack {
-                    Button(action: {
-                    }) {
-                        HStack {
-                            Image("ic-visit")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(maxWidth: iconSize, minHeight: iconSize, maxHeight: iconSize, alignment: .center)
-                                .foregroundColor(.cPrimary)
-                                .padding(6)
-                            Text("modBatchReport")
-                                .foregroundColor(.cPrimary)
-                                .frame(maxWidth: .infinity, minHeight: 36, maxHeight: 36, alignment: .leading)
+                    ForEach(bottomMenu, id: \.objectId) { menu in
+                        Button(action: {
+                            print(menu.routerLink)
+                            self.goTo(page: "\(menu.routerLink.uppercased())-VIEW")
+                        }) {
+                            HStack {
+                                Image(menu.icon.replacingOccurrences(of: "_", with: "-"))
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(maxWidth: iconSize, minHeight: iconSize, maxHeight: iconSize, alignment: .center)
+                                    .foregroundColor(.cPrimary)
+                                    .padding(6)
+                                Text(NSLocalizedString("env\(menu.languageTag.capitalized.replacingOccurrences(of: "-", with: ""))", comment: ""))
+                                    .foregroundColor(.cPrimary)
+                                    .frame(maxWidth: .infinity, minHeight: 36, maxHeight: 36, alignment: .leading)
+                            }
                         }
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 2)
                     }
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 2)
-                    Button(action: {
-                        self.goTo(page: "POTENTIAL-LIST")
-                    }) {
-                        HStack {
-                            Image("ic-medic")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(maxWidth: iconSize, minHeight: iconSize, maxHeight: iconSize, alignment: .center)
-                                .foregroundColor(.cPrimary)
-                                .padding(6)
-                            Text("modPotentialProfessional")
-                                .foregroundColor(.cPrimary)
-                                .frame(maxWidth: .infinity, minHeight: 36, maxHeight: 36, alignment: .leading)
-                        }
-                    }
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 2)
-                    Button(action: {
-                        self.goTo(page: "REQUEST-DAY")
-                    }) {
-                        HStack {
-                            Image("ic-day-request")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(maxWidth: iconSize, maxHeight: iconSize, alignment: .center)
-                                .foregroundColor(.cPrimary)
-                                .padding(6)
-                            Text("modRequestDays")
-                                .foregroundColor(.cPrimary)
-                                .frame(maxWidth: .infinity, minHeight: 36, maxHeight: 36, alignment: .leading)
-                        }
-                    }
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 2)
-                    Button(action: {
-                        self.goTo(page: "REQUEST-MATERIAL")
-                    }) {
-                        HStack {
-                            Image("ic-material")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(maxWidth: iconSize, maxHeight: iconSize, alignment: .center)
-                                .foregroundColor(.cPrimary)
-                                .padding(6)
-                            Text("modRequestMaterial")
-                                .foregroundColor(.cPrimary)
-                                .frame(maxWidth: .infinity, minHeight: 36, maxHeight: 36, alignment: .leading)
-                        }
-                    }
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 2)
-                    Button(action: {
-                        self.goTo(page: "MATERIAL-DELIVERY")
-                    }) {
-                        HStack {
-                            Image("ic-material-delivery")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(maxWidth: iconSize, maxHeight: iconSize, alignment: .center)
-                                .foregroundColor(.cPrimary)
-                                .padding(6)
-                            Text("modMaterialDelivery")
-                                .foregroundColor(.cPrimary)
-                                .frame(maxWidth: .infinity, minHeight: 36, maxHeight: 36, alignment: .leading)
-                        }
-                    }
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 2)
-                    Button(action: {
-                        self.goTo(page: "EXPENSES-VIEW")
-                    }) {
-                        HStack {
-                            Image("ic-expense")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(maxWidth: iconSize, maxHeight: iconSize, alignment: .center)
-                                .foregroundColor(.cPrimary)
-                                .padding(6)
-                            Text("modExpenses")
-                                .foregroundColor(.cPrimary)
-                                .frame(maxWidth: .infinity, minHeight: 36, maxHeight: 36, alignment: .leading)
-                        }
-                    }
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 2)
-                    Button(action: {
-                    }) {
-                        HStack {
-                            Image("ic-shopping-list")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(maxWidth: iconSize, maxHeight: iconSize, alignment: .center)
-                                .foregroundColor(.cPrimary)
-                                .padding(6)
-                            Text("modTransference")
-                                .foregroundColor(.cPrimary)
-                                .frame(maxWidth: .infinity, minHeight: 36, maxHeight: 36, alignment: .leading)
-                        }
-                    }
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 2)
-                    Button(action: {
-                        self.goTo(page: "MOVEMENTS-VIEW")
-                    }) {
-                        HStack {
-                            Image("ic-diary")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(maxWidth: iconSize, maxHeight: iconSize, alignment: .center)
-                                .foregroundColor(.cPrimary)
-                                .padding(6)
-                            Text("modMovements")
-                                .foregroundColor(.cPrimary)
-                                .frame(maxWidth: .infinity, minHeight: 36, maxHeight: 36, alignment: .leading)
-                        }
-                    }
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 2)
-                    Button(action: {
-                        self.goTo(page: "SUPPORT")
-                    }) {
-                        HStack {
-                            Image("ic-support")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(maxWidth: iconSize, maxHeight: iconSize, alignment: .center)
-                                .foregroundColor(.cPrimary)
-                                .padding(6)
-                            Text("modSupport")
-                                .foregroundColor(.cPrimary)
-                                .frame(maxWidth: .infinity, minHeight: 36, maxHeight: 36, alignment: .leading)
-                        }
-                    }
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 2)
                 }
             }
-            .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: 240)
+            .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
             Text(appVersion)
                 .frame(maxWidth: .infinity, alignment: .center)
                 .foregroundColor(.cPrimary)
@@ -527,12 +358,19 @@ struct GlobalMenu: View {
     
     func load() {
         if let user = userSettings.userData() {
-            self.usrFullName = user.name ?? ""
+            self.usrFullName = user.name
             self.usrEmail = user.email ?? ""
+            loadMenu(userType: user.type)
         }
         if let v = Utils.appVersion() {
             self.appVersion = "v. \(v)"
         }
+    }
+    
+    func loadMenu(userType: Int) {
+        let menu = MenuDao(realm: try! Realm()).by(userType: userType)
+        topMenu = Array(menu[..<4])
+        bottomMenu = Array(menu[4...])
     }
     
     func goTo(page: String) {

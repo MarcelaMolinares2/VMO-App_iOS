@@ -26,7 +26,9 @@ struct PotentialFormView: View {
     
     var body: some View {
         VStack {
-            HeaderToggleView(couldSearch: false, title: potential?.name ?? "modPotentialProfessional", icon: Image("ic-medic"), color: Color.cPanelMedic)
+            HeaderToggleView(title: "modPotentialProfessional") {
+                
+            }
             switch tabRouter.current {
             case "LOCATIONS":
                 PanelLocationView(panel: potential, couldAdd: true)

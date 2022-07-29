@@ -26,7 +26,9 @@ struct ClientFormView: View {
     
     var body: some View {
         VStack{
-            HeaderToggleView(couldSearch: false, title: client?.name ?? "modClient", icon: Image("ic-client"), color: Color.cPanelPharmacy)
+            HeaderToggleView(title: "modClient") {
+                
+            }
             switch tabRouter.current {
                 case "CONTACTS":
                     PanelContactView(panel: client, couldAdd: true)

@@ -25,8 +25,9 @@ struct PatientFormView: View {
     
     var body: some View {
         VStack {
-            HeaderToggleView(couldSearch: false, title: patient?.name ?? "modPatient", icon: Image("ic-patient"), color: Color.cPanelPatient)
-            
+            HeaderToggleView(title: "modPatient") {
+                
+            }
             switch tabRouter.current {
             case "LOCATIONS":
                 PanelLocationView(panel: patient, couldAdd: true)

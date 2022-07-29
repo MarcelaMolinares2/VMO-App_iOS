@@ -23,9 +23,9 @@ struct PharmacyListView: View {
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
             VStack {
-                PanelListHeader(total: pharmacies.count) {
+                /*PanelListHeader(total: pharmacies.count) {
                     
-                }
+                }*/
                 ScrollView {
                     LazyVStack {
                         ForEach(pharmacies.filter {
@@ -33,10 +33,10 @@ struct PharmacyListView: View {
                                 ($0.name ?? "").lowercased().contains(self.searchText.lowercased()) ||
                                 ($0.cityName(realm: self.realm)).lowercased().contains(self.searchText.lowercased())
                         }, id: \.objectId) { element in
-                            PanelItem(panel: element).onTapGesture {
+                            /*PanelItem(panel: element).onTapGesture {
                                 self.panel = element
                                 self.menuIsPresented = true
-                            }
+                            }*/
                         }
                     }
                 }

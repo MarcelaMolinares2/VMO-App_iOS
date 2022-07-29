@@ -3,14 +3,12 @@
 #define REALM_SYNC_CHANGESET_ENCODER_HPP
 
 #include <realm/sync/changeset.hpp>
-#include <realm/util/metered/unordered_map.hpp>
-#include <realm/util/metered/string.hpp>
 
 namespace realm {
 namespace sync {
 
 struct ChangesetEncoder : InstructionHandler {
-    using Buffer = util::AppendBuffer<char, util::MeteredAllocator>;
+    using Buffer = util::AppendBuffer<char>;
 
     Buffer release() noexcept;
     void reset() noexcept;
@@ -69,8 +67,8 @@ private:
     void append_value(UUID);
 
     Buffer m_buffer;
-    util::metered::map<std::string, uint32_t> m_intern_strings_rev;
-    StringData m_string_range;
+    std::map<std::string, uint32_t, std::less<>> m_intern_strings_rev;
+    std::string_view m_string_range;
 };
 
 // Implementation

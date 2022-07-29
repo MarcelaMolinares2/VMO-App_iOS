@@ -21,7 +21,9 @@ struct RouteFormView2: View {
     
     var body: some View {
         VStack {
-            HeaderToggleView(couldSearch: false, title: "modPeopleRoute", icon: Image("ic-people-route"), color: Color.cPanelRequestDay)
+            HeaderToggleView(title: "modPeopleRoute") {
+                
+            }
             ZStack(alignment: .bottomTrailing) {
                 VStack {
                     VStack {
@@ -34,7 +36,7 @@ struct RouteFormView2: View {
                     ScrollView {
                         LazyVStack {
                             ForEach(items, id: \.id) { element in
-                                PanelItem(panel: element)
+                                //PanelItem(panel: element)
                             }
                         }
                     }

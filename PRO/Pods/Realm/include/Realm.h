@@ -31,7 +31,6 @@
 #import <Realm/RLMProviderClient.h>
 #import <Realm/RLMRealm+Sync.h>
 #import <Realm/RLMRealm.h>
-#import <Realm/RLMRealmConfiguration+Sync.h>
 #import <Realm/RLMRealmConfiguration.h>
 #import <Realm/RLMResults.h>
 #import <Realm/RLMSchema.h>
@@ -43,7 +42,6 @@
 #import <Realm/RLMNetworkTransport.h>
 #import <Realm/RLMPushClient.h>
 #import <Realm/RLMRealm+Sync.h>
-#import <Realm/RLMRealmConfiguration+Sync.h>
 #import <Realm/RLMSyncConfiguration.h>
 #import <Realm/RLMSyncManager.h>
 #import <Realm/RLMSyncSession.h>
@@ -60,3 +58,4 @@
 #import <Realm/RLMUpdateResult.h>
 #import <Realm/RLMFindOptions.h>
 #import <Realm/RLMFindOneAndModifyOptions.h>
+#import <Realm/RLMSyncSubscription.h>

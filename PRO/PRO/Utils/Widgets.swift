@@ -21,30 +21,52 @@ struct SearchBar: View {
     var editingChanged: (Bool)->() = { _ in }
     var commit: ()->() = { }
     
+    enum FocusField: Hashable {
+        case field
+    }
+    
+    @FocusState private var focusedField: FocusField?
+    
     var body: some View {
-        ZStack(alignment: .leading) {
-            if text.isEmpty {
-                placeholder
-                    .foregroundColor(.cAccent)
+        HStack {
+            VStack(alignment: .center) {
+                Image("ic-search")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 20, height: 20, alignment: .center)
+                    .foregroundColor(.cIcon)
+                    .opacity(0.6)
             }
-            HStack {
-                TextField("", text: $text, onEditingChanged: editingChanged, onCommit: commit)
-                    .frame(maxWidth: .infinity, maxHeight: 40, alignment: .leading)
-                    .foregroundColor(.cTextHigh)
-                Button(action: {
-                    if self.text.isEmpty {
-                        onSearchClose()
-                    } else {
-                        self.text = ""
-                    }
-                }) {
-                    Image("ic-close")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 20, height: 20, alignment: .center)
-                        .foregroundColor(.cIcon)
+            .frame(width: 40, height: 40, alignment: .center)
+            ZStack(alignment: .leading) {
+                if text.isEmpty {
+                    placeholder
+                        .foregroundColor(.cAccent)
                 }
-                .frame(width: 60, height: 30, alignment: .center)
+                TextField("", text: $text, onEditingChanged: editingChanged, onCommit: commit)
+                    .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .leading)
+                    .foregroundColor(.cTextHigh)
+                    .focused($focusedField, equals: .field)
+            }
+            Button(action: {
+                if self.text.isEmpty {
+                    onSearchClose()
+                } else {
+                    self.text = ""
+                }
+            }) {
+                Image("ic-close")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 15, height: 15, alignment: .center)
+                    .foregroundColor(.cIcon)
+            }
+            .frame(width: 40, height: 40, alignment: .center)
+        }
+        .frame(height: 40)
+        .onAppear {
+            DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(200)) {
+                self.focusedField = .field
             }
         }
     }
@@ -142,7 +164,7 @@ struct FAB: View {
     
     var image: String
     var size: CGFloat = Globals.UI_FAB_SIZE
-    var margin: CGFloat = 24
+    var margin: CGFloat = 42
     var action: () -> Void
     
     var body: some View {

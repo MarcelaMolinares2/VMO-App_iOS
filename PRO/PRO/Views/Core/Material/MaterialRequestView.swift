@@ -37,7 +37,9 @@ struct MaterialRequestView: View {
     var body: some View {
         ZStack {
             VStack {
-                HeaderToggleView(couldSearch: false, title: "modMaterialDelivery", icon: Image("ic-material"), color: Color.cPanelMaterial)
+                HeaderToggleView(title: "modMaterialRequest") {
+                    
+                }
                 
                 HStack {
                     VStack{

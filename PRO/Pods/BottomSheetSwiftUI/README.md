@@ -1,10 +1,13 @@
 # BottomSheet
 
-[![GitHub tag (latest SemVer)](https://img.shields.io/github/v/release/LucasMucGH/BottomSheet?sort=semver)](https://github.com/LucasMucGH/BottomSheet/releases)
-[![License](https://img.shields.io/github/license/LucasMucGH/BottomSheet)](https://github.com/LucasMucGH/BottomSheet/blob/main/LICENSE.txt)
-[![Issues](https://img.shields.io/github/issues/LucasMucGH/BottomSheet)](https://github.com/LucasMucGH/BottomSheet/issues)
+[![SwiftPM compatible](https://img.shields.io/badge/SwiftPM-compatible-brightgreen.svg)](https://swift.org/package-manager/)
+[![GitHub version](https://img.shields.io/github/v/release/lucaszischka/BottomSheet?sort=semver)](https://github.com/lucaszischka/BottomSheet/releases)
+[![CocoaPods compatible](https://img.shields.io/badge/CocoaPods-compatible-brightgreen)](http://cocoapods.org/)
+[![CocoaPods version](https://img.shields.io/cocoapods/v/BottomSheetSwiftUI.svg)](https://cocoapods.org/pods/BottomSheetSwiftUI)
+[![License](https://img.shields.io/github/license/lucaszischka/BottomSheet)](https://github.com/lucaszischka/BottomSheet/blob/main/LICENSE.txt)
+[![Issues](https://img.shields.io/github/issues/lucaszischka/BottomSheet)](https://github.com/lucaszischka/BottomSheet/issues)
 
-A sliding Sheet from the bottom of the Screen with 3 States build with SwiftUI.
+A sliding sheet from the bottom of the screen with custom states build with SwiftUI.
 
 ## Why
 
@@ -27,7 +30,7 @@ There are also many implementations out there that **only have 2 states** - **no
 ## Requirements 
 
 - iOS 13
-- Swift 5.3
+- Swift 5.1
 - Xcode 12
 
 ## Installation
@@ -39,7 +42,7 @@ The preferred way of installing BottomSheet is via the [Swift Package Manager](h
 >Xcode 11 integrates with libSwiftPM to provide support for iOS, watchOS, and tvOS platforms.
 
 1. In Xcode, open your project and navigate to **File** → **Swift Packages** → **Add Package Dependency...**
-2. Paste the repository URL (`https://github.com/LucasMucGH/BottomSheet`) and click **Next**.
+2. Paste the repository URL (`https://github.com/lucaszischka/BottomSheet`) and click **Next**.
 3. For **Rules**, select **Branch** (with branch set to `main`).
 4. Click **Finish**.
 
@@ -48,7 +51,7 @@ The preferred way of installing BottomSheet is via the [Swift Package Manager](h
 BottomSheet is available through [CocoaPods](https://cocoapods.org). To install it, simply add the following line to your Podfile:
 
 ```ruby
-pod 'BottomSheet'
+pod 'BottomSheetSwiftUI'
 ```
 
 ## Usage
@@ -72,9 +75,9 @@ struct ContentView: View {
 ```
 
 `//1` The current State of the BottomSheet.
-- This is any `enum` that conforms to `CGFloat` and `CaseIterable`. For more information about custom enums see [Custom States](#custom-states).
+- This is any `enum` that conforms to `CGFloat`, `CaseIterable` and `Equatable`. For more information about custom enums see [Custom States](#custom-states).
 - The following states are posible when using the predefinded `BottomSheetPosition`: `.hidden`, `.bottom`, `.middle` and `.top`.
-- If you don't want the state to be changed, you can use `.constant(.middle)` (with the `.notResizeable` or `.noDragIndicator` option).
+- If you don't want the state to be changed, you can use `.constant(.middle)` for example (should be used with the `.notResizeable` or `.noDragIndicator` option).
 
 `//2` The view which the BottomSheet overlays.
 
@@ -94,7 +97,7 @@ struct ContentView: View {
 ```
 
 `bottomSheetPosition`: A binding that saves the current state of the BottomSheet.
-- This can be any `enum` that conforms to `CGFloat` and `CaseIterable`. For more information about custom enums see [Custom States](#custom-states).
+- This can be any `enum` that conforms to `CGFloat`, `CaseIterable` and `Equatable`. For more information about custom enums see [Custom States](#custom-states).
 - The following states are posible when using the predefinded `BottomSheetPosition`: `.hidden`, `.bottom`, `.middle` and `.top`.
 - If you don't want the state to be changed, you can use `.constant(.middle)` for example (should be used with the `.notResizeable` or `.noDragIndicator` option).
 
@@ -118,7 +121,7 @@ struct ContentView: View {
 ```
 
 `bottomSheetPosition`: A binding that saves the current state of the BottomSheet.
-- This can be any `enum` that conforms to `CGFloat` and `CaseIterable`. For more information about custom enums see [Custom States](#custom-states).
+- This can be any `enum` that conforms to `CGFloat`, `CaseIterable` and `Equatable`. For more information about custom enums see [Custom States](#custom-states).
 - The following states are posible when using the predefinded `BottomSheetPosition`: `.hidden`, `.bottom`, `.middle` and `.top`.
 - If you don't want the state to be changed, you can use `.constant(.middle)` for example (should be used with the `.notResizeable` or `.noDragIndicator` option).
 
@@ -133,20 +136,26 @@ struct ContentView: View {
 
 ### Options
 
+`.absolutePositionValue` Allows absolute values in pixels to be used as BottomSheetPosition values.
+
 `.allowContentDrag` Allows the BottomSheet to move when dragging the mainContent.
 
 - Do not use if the mainContent is packed into a ScrollView.
 
-`.animation(Animation)` Sets the animation for opening and closing the BottomSheet.
+`.animation(Animation)` Sets the animation for the BottomSheet.
 
 `.appleScrollBehavior` The mainView is packed into a ScrollView, which can only scrolled at the .top position.
 
-`.background(AnyView)` Changes the background of the BottomSheet.
+`.background(() -> AnyView)` Changes the background of the BottomSheet.
 - Must be erased to AnyView.
 
 `.backgroundBlur(UIBlurEffect.Style = .systemThinMaterial)` Enables and sets the blur effect of the background when pulling up the BottomSheet.
 
 `.cornerRadius(Double)` Changes the corener radius of the BottomSheet.
+
+`.disableBottomSafeAreaInsets` Disables the bottom safeAreaInsets.
+
+`.disableFlickThrough` Disables the flick through feature.
 
 `.dragIndicatorColor(Color)` Changes the color of the drag indicator.
 
@@ -166,49 +175,67 @@ struct ContentView: View {
  
  `.swipeToDismiss` Dismisses the BottomSheet when swiped down.
  
- `.tapToDissmiss` Dismisses the BottomSheet when the background is tapped.
+ `.tapToDismiss` Dismisses the BottomSheet when the background is tapped.
 
 ## Custom States
 
- 
 You can create your own custom BottomSheetPosition enum:
-   - The enum must be conforming to `CGFloat` and `CaseIterable`
-   - The case and enum name doesnt matter
+   - The enum must be conforming to `CGFloat`, `CaseIterable` and `Equatable`
+   - The enum and case names doesnt matter
    - The case/state with `rawValue == 0` is hiding the BottomSheet
-   - The value can be anythig between `0` and `1` (`x <= 1`, `x >= 0`)
-   - The value is the height of the BottomSheet propotional to the screen height (`1 == 100% == full screen`)
+   - The value can be anythig between `0` and `1` (`x <= 1`, `x >= 0`) or anything above `0` (`x >= 0`) when using the`.absolutePositionValue` option
+   - The value is the height of the BottomSheet propotional to the screen height (`1 == 100% == full screen`) or the height of the BottomSheet in pixel (`1 == 1px`) when using the`.absolutePositionValue` option
    - The lowest value (greater than 0) automaticly gets the `.bottom` behavior. To prevent this please use the option `.noBottomPosition`
 
+This BottomSheetPosition is provided and uses relative values:
 ```swift
-import SwiftUI
+public enum BottomSheetPosition: CGFloat, CaseIterable {
+    case top = 0.975, middle = 0.4, bottom = 0.125, hidden = 0
+}
+```
 
-enum CustomBottomSheetPosition: CGFloat, CaseIterable {
-    case top = 0.975, topMiddle = 0.7, middle = 0.4, middleBottom = 0.3, bottom = 0.125, hidden = 0
+This BottomSheetPositionAbsolute is provided and uses absolute values and requires the the`.absolutePositionValue` option:
+```swift
+public enum BottomSheetPositionAbsolute: CGFloat, CaseIterable {
+    case top = 750, middle = 300, bottom = 100, hidden = 0
+}
+```
+
+This CustomBottomSheetPosition is an example for a custom BottomSheetPosition with relative values:
+```swift
+public enum CustomBottomSheetPosition: CGFloat, CaseIterable {
+    case middle = 0.5, hidden = 0
 }
 ```
 
 ## Examples
 
+**PLEASE NOTE:** When installed via Cocoapods, please keep in mind that the pod is called `BottomSheetSwiftUI` and not `BottomSheet`; so please use `import BottomSheetSwiftUI` instead.
+
 ### Book Detail View
 
 This BottomSheet shows additional information about a book.
 You can close it by swiping it away, by tapping on the background or the close button.
-It also uses a custom `enum` for the states, since only the states `.middle`, `.bottom` and `.hidden` should exist.
+The drag indicator is hidden.
+It uses a custom `enum` for the states with absolute values, since only the states `.middle`, `.bottom` and `.hidden` should exist with a predefined absolute height.
 
-<img src="Assets/BookDetailView.gif" height="600">
+<img src="https://user-images.githubusercontent.com/63545066/132514316-c0d723c6-37fc-4104-b04c-6cf7bbcb0899.gif" height="600">
+
+<details>
+<summary>Source Code</summary>
 
 ```swift
 import SwiftUI
 import BottomSheet
 
-//The custom BottomSheetPosition enum.
+//The custom BottomSheetPosition enum with absolute values.
 enum BookBottomSheetPosition: CGFloat, CaseIterable {
-    case middle = 0.4, bottom = 0.125, hidden = 0
+    case middle = 325, bottom = 125, hidden = 0
 }
 
 struct BookDetailView: View {
     
-    @State private var bottomSheetPosition: BookBottomSheetPosition = .middle
+    @State var bottomSheetPosition: BookBottomSheetPosition = .middle
     
     let backgroundColors: [Color] = [Color(red: 0.2, green: 0.85, blue: 0.7), Color(red: 0.13, green: 0.55, blue: 0.45)]
     let readMoreColors: [Color] = [Color(red: 0.70, green: 0.22, blue: 0.22), Color(red: 1, green: 0.32, blue: 0.32)]
@@ -219,7 +246,7 @@ struct BookDetailView: View {
         LinearGradient(gradient: Gradient(colors: self.backgroundColors), startPoint: .topLeading, endPoint: .bottomTrailing)
             .edgesIgnoringSafeArea(.all)
             
-            .bottomSheet(bottomSheetPosition: self.$bottomSheetPosition, options: [.allowContentDrag, .showCloseButton(), .swipeToDismiss, .tapToDissmiss], headerContent: {
+            .bottomSheet(bottomSheetPosition: self.$bottomSheetPosition, options: [.noDragIndicator, .allowContentDrag, .showCloseButton(), .swipeToDismiss, .tapToDismiss, .absolutePositionValue], headerContent: {
                 //The name of the book as the heading and the author as the subtitle with a divider.
                 VStack(alignment: .leading) {
                     Text("Wuthering Heights")
@@ -274,14 +301,18 @@ struct BookButton: ButtonStyle {
     }
 }
 ```
+</details>
 
 ### Word Search View
 
 This BottomSheet shows nouns which can be filtered by searching.
-It adopts the scrolling behavior of apple, so that you can only scroll the  `ScrollView ` in the  `.top ` position.
+It adopts the scrolling behavior of apple, so that you can only scroll the `ScrollView` in the `.top` position.
 The higher the BottomSheet is dragged, the more blurry the background becomes (with the BlurEffect .dark) to move the focus to the BottomSheet.
 
-<img src="Assets/WordSearchView.gif" height="600">
+<img src="https://user-images.githubusercontent.com/63545066/132514347-57c5397b-ec03-4716-8e01-4e693082e844.gif" height="600">
+
+<details>
+<summary>Source Code</summary>
 
 ```swift
 import SwiftUI
@@ -289,11 +320,16 @@ import BottomSheet
 
 struct WordSearchView: View {
     
-    @State private var bottomSheetPosition: BottomSheetPosition = .middle
+    @State var bottomSheetPosition: BottomSheetPosition = .middle
+    @State var searchText: String = ""
     
-    @State private var searchText: String = ""
     let backgroundColors: [Color] = [Color(red: 0.28, green: 0.28, blue: 0.53), Color(red: 1, green: 0.69, blue: 0.26)]
     let words: [String] = ["birthday", "pancake", "expansion", "brick", "bushes", "coal", "calendar", "home", "pig", "bath", "reading", "cellar", "knot", "year", "ink"]
+    
+    var filteredWords: [String] {
+        self.words.filter({ $0.contains(self.searchText.lowercased()) || self.searchText.isEmpty })
+    }
+    
     
     var body: some View {
         //A green gradient as a background that ignores the safe area.
@@ -317,7 +353,7 @@ struct WordSearchView: View {
                 }
             }) {
             //The list of nouns that will be filtered by the searchText.
-                ForEach(self.words.filter({ $0.contains(self.searchText.lowercased()) || self.searchText.isEmpty}), id: \.self) { word in
+                ForEach(self.filteredWords, id: \.self) { word in
                     Text(word)
                         .font(.title)
                         .padding([.leading, .bottom])
@@ -325,19 +361,23 @@ struct WordSearchView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .transition(.opacity)
-                .animation(.easeInOut)
+                .animation(.easeInOut, value: self.filteredWords)
                 .padding(.top)
             }
     }
 }
 ```
+</details>
 
 ### Artist Songs View
 
 This BottomSheet shows the most popular songs by an artist.
 It has a custom animation and color for the drag indicator and the background, as well as it deactivates the bottom position behavior and uses an custom corner radius and shadow.
 
-<img src="Assets/ArtistSongsView.gif" height="600">
+<img src="https://user-images.githubusercontent.com/63545066/132514283-b14b2977-c5d1-4b49-96b1-19995cd5a41f.gif" height="600">
+
+<details>
+<summary>Source Code</summary>
 
 ```swift
 import SwiftUI
@@ -345,7 +385,7 @@ import BottomSheet
 
 struct ArtistSongsView: View {
     
-    @State private var bottomSheetPosition: BottomSheetPosition = .middle
+    @State var bottomSheetPosition: BottomSheetPosition = .middle
     
     let backgroundColors: [Color] = [Color(red: 0.17, green: 0.17, blue: 0.33), Color(red: 0.80, green: 0.38, blue: 0.2)]
     let songs: [String] = ["One Dance (feat. Wizkid & Kyla)", "God's Plan", "SICKO MODE", "In My Feelings", "Work (feat. Drake)", "Nice For What", "Hotline Bling", "Too Good (feat. Rihanna)", "Life Is Good (feat. Drake)"]
@@ -355,7 +395,7 @@ struct ArtistSongsView: View {
         LinearGradient(gradient: Gradient(colors: self.backgroundColors), startPoint: .topLeading, endPoint: .bottomTrailing)
             .edgesIgnoringSafeArea(.all)
             
-            .bottomSheet(bottomSheetPosition: self.$bottomSheetPosition, options: [.animation(.linear.speed(0.4)), .dragIndicatorColor(Color(red: 0.17, green: 0.17, blue: 0.33)), .background(AnyView(Color.black)), .noBottomPosition, .cornerRadius(30), .shadow(color: .white)], title: "Drake") {
+            .bottomSheet(bottomSheetPosition: self.$bottomSheetPosition, options: [.animation(.linear.speed(0.4)), .dragIndicatorColor(Color(red: 0.17, green: 0.17, blue: 0.33)), .background({ AnyView(Color.black) }), .noBottomPosition, .cornerRadius(30), .shadow(color: .white)], title: "Drake") {
                 //The list of the most popular songs of the artist.
                 ScrollView {
                     ForEach(self.songs, id: \.self) { song in
@@ -369,6 +409,7 @@ struct ArtistSongsView: View {
     }
 }
 ```
+</details>
 
 ## Contributing
 
@@ -380,4 +421,4 @@ BottomSheet is available under the MIT license. See [the LICENSE file](LICENSE.t
 
 ## Credits
 
-BottomSheet is a project of [@LucasMucGH](https://github.com/LucasMucGH).
+BottomSheet is a project of [@lucaszischka](https://github.com/lucaszischka).

@@ -58,6 +58,10 @@ class CategoryDao: GenericDao {
         return realm.objects(PanelCategory.self).filter("id == \(id)").first
     }
     
+    func by(id: Int?) -> PanelCategory? {
+        return by(id: String(describing: id ?? 0))
+    }
+    
 }
 
 class CityDao: GenericDao {
@@ -164,6 +168,24 @@ class FreeDayReasonDao: GenericDao {
     
     func by(id: String) -> FreeDayReason? {
         return realm.objects(FreeDayReason.self).filter("id == \(id)").first
+    }
+    
+}
+
+class MenuDao: GenericDao {
+    
+    func all() -> [Menu] {
+        return Array(realm.objects(Menu.self).sorted(byKeyPath: "name"))
+    }
+    
+    func by(userType: Int, parent: Int = 0) -> [Menu] {
+        return realm.objects(Menu.self).where {
+            $0.parent == 0
+        }
+        .sorted(byKeyPath: "order", ascending: true)
+        .filter { menu in
+            menu.userTypes.components(separatedBy: ",").contains(String(userType))
+        }
     }
     
 }
@@ -593,6 +615,10 @@ class SpecialtyDao: GenericDao {
     
     func by(id: String) -> Specialty? {
         return realm.objects(Specialty.self).filter("id == \(id)").first
+    }
+    
+    func by(id: Int?) -> Specialty? {
+        return by(id: String(describing: id ?? 0))
     }
     
 }

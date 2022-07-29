@@ -62,6 +62,9 @@
 "envPotential" = "Potential";
 "envPotentials" = "Potentials";
 
+//Lists
+
+"envShowingNResults" = "Showing %@ result(s)";
 
 //SLAID
 "envVisualAids" = "Visual Aids";

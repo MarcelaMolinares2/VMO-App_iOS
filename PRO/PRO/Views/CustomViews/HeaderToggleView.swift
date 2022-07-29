@@ -11,26 +11,68 @@ import SwiftUI
 struct HeaderToggleView: View {
     @StateObject var headerRouter = TabRouter()
     
-    @State var menuIsPresented = false
-    @State var couldSearch = false
+    @Binding private var searchText: String
+    private var title: String
     
-    @State var searchText = ""
+    private var couldSearch = false
+    private var couldBack = false
+    private var onBackPressed: () -> Void = {}
     
-    @State var title = ""
-    @State var icon = Image("ic-home")
-    @State var color = Color.cPrimary
+    @State private var menuIsPresented = false
+    
+    init(search: Binding<String>, title: String) {
+        self.couldSearch = true
+        self._searchText = search
+        self.title = title
+    }
+    
+    init(title: String) {
+        self._searchText = Binding(
+            get: { "" },
+            set: { _ in }
+        )
+        self.title = title
+        self.couldBack = false
+    }
+    
+    init(title: String, onBackPressed: @escaping () -> Void) {
+        self._searchText = Binding(
+            get: { "" },
+            set: { _ in }
+        )
+        self.title = title
+        self.couldBack = true
+        self.onBackPressed = onBackPressed
+    }
     
     var body: some View {
         HStack {
-            Button(action: {
-                self.menuIsPresented = true
-            }) {
-                Image("logo-header")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 70)
-            }
             if headerRouter.current == "TITLE" {
+                HStack {
+                    if couldBack {
+                        Button(action: {
+                            onBackPressed()
+                        }) {
+                            Image("ic-back")
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .foregroundColor(.cIcon)
+                                .frame(width: 32, height: 32, alignment: .center)
+                        }
+                        .frame(width: 44, height: 44, alignment: .center)
+                        Spacer()
+                    } else {
+                        Button(action: {
+                            self.menuIsPresented = true
+                        }) {
+                            Image("logo-header")
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 60)
+                        }
+                    }
+                }
+                .frame(width: 60)
                 Text((couldSearch ? NSLocalizedString("envSearch", comment: "") + " " + NSLocalizedString(title, comment: "").lowercased() : NSLocalizedString(title, comment: "")))
                     .foregroundColor(.cPrimaryDark)
                     .multilineTextAlignment(.center)
@@ -40,25 +82,31 @@ struct HeaderToggleView: View {
                             self.headerRouter.current = "SEARCH"
                         }
                     }
-                icon
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 70, alignment: .center)
-                    .padding(6)
-                    .foregroundColor(color)
+                HStack {
+                    Spacer()
+                    Button(action: {
+                        
+                    }) {
+                        Image("ic-notification")
+                            .resizable()
+                            .foregroundColor(.cIcon)
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 32, height: 32, alignment: .center)
+                            .padding(8)
+                    }
+                    .frame(width: 44, height: 44, alignment: .center)
+                }
+                .frame(width: 60)
             } else {
-                //SearchBar(headerRouter: self.headerRouter, text: $searchText, placeholder: Text(NSLocalizedString("envSearch", comment: "") + " " + NSLocalizedString(title, comment: "").lowercased()))
+                SearchBar(text: $searchText, placeholder: Text(NSLocalizedString("envSearch", comment: "") + " " + NSLocalizedString(title, comment: "").lowercased())) {
+                    self.headerRouter.current = "TITLE"
+                }
             }
         }
+        .padding(.horizontal, 8)
         .frame(minWidth: 0, maxWidth: .infinity, minHeight: 44, maxHeight: 44)
         .partialSheet(isPresented: self.$menuIsPresented) {
             GlobalMenu(isPresented: self.$menuIsPresented)
         }
-    }
-}
-
-struct HeaderToggleView_Previews: PreviewProvider {
-    static var previews: some View {
-        HeaderToggleView()
     }
 }

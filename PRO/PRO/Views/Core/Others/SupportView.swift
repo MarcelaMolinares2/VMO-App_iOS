@@ -11,7 +11,7 @@ import SwiftUI
 struct SupportView: View {
     var body: some View {
         VStack {
-            HeaderToggleView(couldSearch: false, title: "modSupport", icon: Image("ic-support"), color: Color.cPrimary)
+            HeaderToggleView(title: "modSupport")
             ScrollView {
                 VStack {
                     Button(action: {

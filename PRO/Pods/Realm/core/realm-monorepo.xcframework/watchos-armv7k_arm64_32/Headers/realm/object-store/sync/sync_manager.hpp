@@ -20,8 +20,8 @@
 #define REALM_OS_SYNC_MANAGER_HPP
 
 #include <realm/object-store/shared_realm.hpp>
-#include <realm/object-store/util/checked_mutex.hpp>
 
+#include <realm/util/checked_mutex.hpp>
 #include <realm/util/logger.hpp>
 #include <realm/util/optional.hpp>
 #include <realm/sync/config.hpp>
@@ -30,7 +30,8 @@
 #include <mutex>
 #include <unordered_map>
 
-struct TestSyncManager;
+class TestAppSession;
+class TestSyncManager;
 
 namespace realm {
 
@@ -71,7 +72,6 @@ struct SyncClientConfig {
     std::string base_file_path;
     MetadataMode metadata_mode = MetadataMode::Encryption;
     util::Optional<std::vector<char>> custom_encryption_key;
-    bool reset_metadata_on_error = false;
 
     using LoggerFactory = std::function<std::unique_ptr<util::Logger>(util::Logger::Level)>;
     LoggerFactory logger_factory;
@@ -90,7 +90,8 @@ struct SyncClientConfig {
 
 class SyncManager : public std::enable_shared_from_this<SyncManager> {
     friend class SyncSession;
-    friend struct ::TestSyncManager;
+    friend class ::TestSyncManager;
+    friend class ::TestAppSession;
 
 public:
     using MetadataMode = SyncClientConfig::MetadataMode;
@@ -137,6 +138,7 @@ public:
 
     util::Logger::Level log_level() const noexcept REQUIRES(!m_mutex);
 
+    std::vector<std::shared_ptr<SyncSession>> get_all_sessions() const REQUIRES(!m_session_mutex);
     std::shared_ptr<SyncSession> get_session(std::shared_ptr<DB> db, const SyncConfig& config)
         REQUIRES(!m_mutex, !m_session_mutex);
     std::shared_ptr<SyncSession> get_existing_session(const std::string& path) const REQUIRES(!m_session_mutex);
@@ -155,7 +157,7 @@ public:
     void wait_for_sessions_to_terminate() REQUIRES(!m_mutex);
 
     // If the metadata manager is configured, perform an update. Returns `true` iff the code was run.
-    bool perform_metadata_update(std::function<void(const SyncMetadataManager&)> update_function) const
+    bool perform_metadata_update(util::FunctionRef<void(const SyncMetadataManager&)> update_function) const
         REQUIRES(!m_file_system_mutex);
 
     // Get a sync user for a given identity, or create one if none exists yet, and set its token.
@@ -182,6 +184,9 @@ public:
     // Removes a user
     void remove_user(const std::string& user_id) REQUIRES(!m_user_mutex, !m_file_system_mutex);
 
+    // Permanently deletes a user.
+    void delete_user(const std::string& user_id) REQUIRES(!m_user_mutex, !m_file_system_mutex);
+
     // Get the default path for a Realm for the given configuration.
     // The default value is `<rootDir>/<appId>/<userId>/<partitionValue>.realm`.
     // If the file cannot be created at this location, for example due to path length restrictions,
@@ -201,6 +206,9 @@ public:
     // Get the app metadata for the active app.
     util::Optional<SyncAppMetadata> app_metadata() const REQUIRES(!m_file_system_mutex);
 
+    // Immediately closes any open sync sessions for this sync manager
+    void close_all_sessions() REQUIRES(!m_mutex, !m_session_mutex);
+
     void set_sync_route(std::string sync_route) REQUIRES(!m_mutex)
     {
         util::CheckedLockGuard lock(m_mutex);
@@ -219,7 +227,16 @@ public:
         return m_app;
     }
 
-    SyncManager() = default;
+    SyncClientConfig config() const REQUIRES(!m_mutex)
+    {
+        util::CheckedLockGuard lock(m_mutex);
+        return m_config;
+    }
+
+    // Create a new logger of the type which will be used by the sync client
+    std::unique_ptr<util::Logger> make_logger() const REQUIRES(!m_mutex);
+
+    SyncManager();
     SyncManager(const SyncManager&) = delete;
     SyncManager& operator=(const SyncManager&) = delete;
 
@@ -251,11 +268,11 @@ private:
 
     mutable util::CheckedMutex m_mutex;
 
-    bool run_file_action(const SyncFileActionMetadata&) REQUIRES(m_file_system_mutex);
+    bool run_file_action(SyncFileActionMetadata&) REQUIRES(m_file_system_mutex);
     void init_metadata(SyncClientConfig config, const std::string& app_id);
 
     // Create a new logger of the type which will be used by the sync client
-    std::unique_ptr<util::Logger> make_logger() const REQUIRES(m_mutex);
+    std::unique_ptr<util::Logger> do_make_logger() const REQUIRES(m_mutex);
 
     // Protects m_users
     mutable util::CheckedMutex m_user_mutex;

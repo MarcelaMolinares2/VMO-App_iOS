@@ -2,18 +2,18 @@
 //  RoundedCorner.swift
 //
 //  Created by Lucas Zischka.
-//  Copyright © 2021 Lucas Zischka. All rights reserved.
+//  Copyright © 2021-2022 Lucas Zischka. All rights reserved.
 //
 
 import SwiftUI
 
 fileprivate struct RoundedCorner: Shape {
-
-    fileprivate var radius: CGFloat = .infinity
-    fileprivate var corners: UIRectCorner = .allCorners
-
     
-    fileprivate func path(in rect: CGRect) -> Path {
+    var radius: CGFloat = .infinity
+    var corners: UIRectCorner = .allCorners
+    
+    
+    func path(in rect: CGRect) -> Path {
         let path = UIBezierPath(roundedRect: rect, byRoundingCorners: corners, cornerRadii: CGSize(width: radius, height: radius))
         return Path(path.cgPath)
     }

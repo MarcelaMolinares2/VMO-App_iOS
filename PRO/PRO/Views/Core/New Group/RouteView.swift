@@ -33,11 +33,12 @@ struct RouteListView: View {
     @State private var optionsModal = false
     @State private var groupSelected: Group = Group()
     
+    @State private var search = ""
+    
     var body: some View {
-        ZStack {
+        ZStack(alignment: .bottom) {
             VStack{
-                HeaderToggleView(couldSearch: true, title: "modPeopleRoute", icon: Image("ic-people-route"), color: Color.cPanelRequestDay)
-                Spacer()
+                HeaderToggleView(search: $search, title: "modPeopleRoute")
                 List {
                     ForEach (groups, id: \.objectId){ item in
                         VStack {
@@ -50,15 +51,14 @@ struct RouteListView: View {
                 }
                 .buttonStyle(PlainButtonStyle())
             }
-            VStack {
+            HStack {
                 Spacer()
-                HStack {
-                    Spacer()
-                    FAB(image: "ic-plus") {
-                        moduleRouter.currentPage = "FORM"
-                    }
+                FAB(image: "ic-plus") {
+                    moduleRouter.currentPage = "FORM"
                 }
             }
+            .padding(.bottom, Globals.UI_FAB_VERTICAL)
+            .padding(.horizontal, Globals.UI_FAB_HORIZONTAL)
         }
         .partialSheet(isPresented: $optionsModal) {
             RouteBottomMenu(onEdit: onEdit, onDelete: onDelete, group: groupSelected)
@@ -165,6 +165,7 @@ struct RouteListCardView: View {
 }
 
 struct RouteFormView: View {
+    @EnvironmentObject var viewRouter: ViewRouter
     @ObservedObject var moduleRouter: ModuleRouter
     @State private var name = ""
     @State private var items = [Panel & SyncEntity]()
@@ -191,9 +192,11 @@ struct RouteFormView: View {
             "C": BindingWrapper(binding: $slClients),
             "P": BindingWrapper(binding: $slPatients)
         ]
-        ZStack {
+        ZStack(alignment: .bottom) {
             VStack {
-                HeaderToggleView(couldSearch: false, title: "modPeopleRoute", icon: Image("ic-people-route"), color: Color.cPanelRequestDay)
+                HeaderToggleView(title: "modPeopleRoute") {
+                    viewRouter.currentPage = "GROUPS-VIEW"
+                }
                 VStack {
                     TextField(NSLocalizedString("envName", comment: ""), text: $name)
                     Divider()
@@ -241,7 +244,7 @@ struct RouteFormView: View {
                                 default:
                                     Text("default")
                             }
-                            PanelItem(panel: item)
+                            //PanelItem(panel: item)
                         }
                     }
                     .onDelete { (offsets: IndexSet) in
@@ -256,35 +259,30 @@ struct RouteFormView: View {
                     }
                 }
             }
-            VStack {
-                Spacer()
-                HStack {
-                    Spacer()
-                    FAB(image: "ic-cloud") {
-                        if !name.replacingOccurrences(of: " ", with: "").isEmpty {
-                            save()
-                        } else {
-                            colorWarning = Color.cWarning
-                            name = ""
-                            textNoName = true
-                        }
+            HStack(alignment: .bottom) {
+                VStack(spacing: 20) {
+                    FAB(image: "ic-map") {
+                        
                     }
-                }
-                .toast(isPresenting: $showToast){
-                    AlertToast(type: .regular, title: NSLocalizedString("noneGroups", comment: ""))
-                }
-            }
-            VStack {
-                Spacer()
-                HStack {
                     FAB(image: "ic-plus") {
                         cardShow.toggle()
                     }
-                    .padding(.horizontal, 20)
-                    Spacer()
+                }
+                Spacer()
+                FAB(image: "ic-cloud") {
+                    if !name.replacingOccurrences(of: " ", with: "").isEmpty {
+                        save()
+                    } else {
+                        colorWarning = Color.cWarning
+                        name = ""
+                        textNoName = true
+                    }
                 }
             }
-            if selectPanelModalToggle.status {
+            .padding(.bottom, Globals.UI_FAB_VERTICAL)
+            .padding(.horizontal, Globals.UI_FAB_HORIZONTAL)
+            //AlertToast(type: .regular, title: NSLocalizedString("noneGroups", comment: ""))
+            /*if selectPanelModalToggle.status {
                 GeometryReader {geo in
                     PanelDialogPicker(modalToggle: selectPanelModalToggle, selected: selected[self.type]?.$binding ?? $slDefault, type: self.type, multiple: true)
                 }
@@ -294,7 +292,7 @@ struct RouteFormView: View {
                         addPanelItems(type: self.type, it: it)
                     }
                 }
-            }
+            }*/
         }
         .partialSheet(isPresented: self.$cardShow) {
             PanelTypeMenu(onPanelSelected: onPanelSelected, panelTypes: ["M", "F", "C", "P"], isPresented: self.$cardShow)
@@ -382,10 +380,4 @@ struct RouteFormView: View {
         selectPanelModalToggle.status.toggle()
     }
     
-}
-
-struct RouteView_Previews: PreviewProvider {
-    static var previews: some View {
-        RouteView()
-    }
 }

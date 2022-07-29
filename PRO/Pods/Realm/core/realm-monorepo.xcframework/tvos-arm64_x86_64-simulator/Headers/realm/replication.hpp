@@ -28,7 +28,6 @@
 #include <realm/util/assert.hpp>
 #include <realm/util/safe_int_ops.hpp>
 #include <realm/util/buffer.hpp>
-#include <realm/util/string_buffer.hpp>
 #include <realm/impl/cont_transact_hist.hpp>
 #include <realm/impl/transact_log.hpp>
 
@@ -47,9 +46,9 @@ public:
     virtual ~Replication() = default;
 
     // Formerly Replication:
-    virtual void add_class(TableKey table_key, StringData table_name, bool is_embedded);
+    virtual void add_class(TableKey table_key, StringData table_name, Table::Type table_type);
     virtual void add_class_with_primary_key(TableKey, StringData table_name, DataType pk_type, StringData pk_field,
-                                            bool nullable);
+                                            bool nullable, Table::Type table_type);
     virtual void prepare_erase_class(TableKey table_key);
     virtual void erase_class(TableKey table_key, size_t num_tables);
     virtual void rename_class(TableKey table_key, StringData new_name);
@@ -62,7 +61,7 @@ public:
                      _impl::Instruction variant = _impl::instr_Set);
 
     virtual void list_set(const CollectionBase& list, size_t list_ndx, Mixed value);
-    virtual void list_insert(const CollectionBase& list, size_t list_ndx, Mixed value);
+    virtual void list_insert(const CollectionBase& list, size_t list_ndx, Mixed value, size_t prior_size);
     virtual void list_move(const CollectionBase&, size_t from_link_ndx, size_t to_link_ndx);
     virtual void list_erase(const CollectionBase&, size_t link_ndx);
     virtual void list_clear(const CollectionBase&);
@@ -96,7 +95,7 @@ public:
 
     // Be sure to keep this type aligned with what is actually used in DB.
     using version_type = _impl::History::version_type;
-    using InputStream = _impl::NoCopyInputStream;
+    using InputStream = util::NoCopyInputStream;
     class TransactLogApplier;
     class Interrupted; // Exception
     class SimpleIndexTranslator;
@@ -298,26 +297,35 @@ public:
     ///
     /// This function must return \ref hist_None when, and only when
     /// get_history() returns null.
-    virtual HistoryType get_history_type() const noexcept = 0;
+    virtual HistoryType get_history_type() const noexcept
+    {
+        return HistoryType::hist_None;
+    }
 
     /// Returns the schema version of the history maintained by this Replication
     /// implementation, or 0 if no history is maintained by it. All session
     /// participants must agree on history schema version.
     ///
     /// Must return 0 if get_history_type() returns \ref hist_None.
-    virtual int get_history_schema_version() const noexcept = 0;
+    virtual int get_history_schema_version() const noexcept
+    {
+        return 0;
+    }
 
     /// Implementation may assume that this function is only ever called with a
     /// stored schema version that is less than what was returned by
     /// get_history_schema_version().
-    virtual bool is_upgradable_history_schema(int stored_schema_version) const noexcept = 0;
+    virtual bool is_upgradable_history_schema(int /* stored_schema_version */) const noexcept
+    {
+        return false;
+    }
 
     /// The implementation may assume that this function is only ever called if
     /// is_upgradable_history_schema() was called with the same stored schema
     /// version, and returned true. This implies that the specified stored
     /// schema version is always strictly less than what was returned by
     /// get_history_schema_version().
-    virtual void upgrade_history_schema(int stored_schema_version) = 0;
+    virtual void upgrade_history_schema(int /* stored_schema_version */) {}
 
     /// Returns an object that gives access to the history of changesets
     /// used by writers. All writers can share the same object as all write
@@ -325,7 +333,10 @@ public:
     ///
     /// This function must return null when, and only when get_history_type()
     /// returns \ref hist_None.
-    virtual _impl::History* _get_history_write() = 0;
+    virtual _impl::History* _get_history_write()
+    {
+        return nullptr;
+    }
 
     /// Returns an object that gives access to the history of changesets in a
     /// way that allows for continuous transactions to work. All readers must
@@ -334,7 +345,10 @@ public:
     ///
     /// This function must return null when, and only when get_history_type()
     /// returns \ref hist_None.
-    virtual std::unique_ptr<_impl::History> _create_history_read() = 0;
+    virtual std::unique_ptr<_impl::History> _create_history_read()
+    {
+        return nullptr;
+    }
 
 protected:
     Replication() = default;
@@ -361,7 +375,10 @@ protected:
 
 
     // Formerly part of TrivialReplication:
-    virtual version_type prepare_changeset(const char* data, size_t size, version_type orig_version) = 0;
+    virtual version_type prepare_changeset(const char*, size_t, version_type orig_version)
+    {
+        return orig_version + 1;
+    }
     virtual void finalize_changeset() noexcept {}
 
 private:
@@ -523,14 +540,14 @@ inline void Replication::nullify_link(const Table* t, ColKey col_key, ObjKey key
 
 inline void Replication::list_set(const CollectionBase& list, size_t list_ndx, Mixed)
 {
-    select_collection(list);      // Throws
-    m_encoder.list_set(list_ndx); // Throws
+    select_collection(list);                            // Throws
+    m_encoder.list_set(list.translate_index(list_ndx)); // Throws
 }
 
-inline void Replication::list_insert(const CollectionBase& list, size_t list_ndx, Mixed)
+inline void Replication::list_insert(const CollectionBase& list, size_t list_ndx, Mixed, size_t)
 {
-    select_collection(list);         // Throws
-    m_encoder.list_insert(list_ndx); // Throws
+    select_collection(list);                               // Throws
+    m_encoder.list_insert(list.translate_index(list_ndx)); // Throws
 }
 
 inline void Replication::set_insert(const CollectionBase& set, size_t set_ndx, Mixed)
@@ -559,14 +576,14 @@ inline void Replication::remove_object(const Table* t, ObjKey key)
 
 inline void Replication::list_move(const CollectionBase& list, size_t from_link_ndx, size_t to_link_ndx)
 {
-    select_collection(list);                         // Throws
-    m_encoder.list_move(from_link_ndx, to_link_ndx); // Throws
+    select_collection(list);                                                                     // Throws
+    m_encoder.list_move(list.translate_index(from_link_ndx), list.translate_index(to_link_ndx)); // Throws
 }
 
 inline void Replication::list_erase(const CollectionBase& list, size_t link_ndx)
 {
-    select_collection(list);        // Throws
-    m_encoder.list_erase(link_ndx); // Throws
+    select_collection(list);                              // Throws
+    m_encoder.list_erase(list.translate_index(link_ndx)); // Throws
 }
 
 inline void Replication::typed_link_change(const Table* source_table, ColKey col, TableKey dest_table)

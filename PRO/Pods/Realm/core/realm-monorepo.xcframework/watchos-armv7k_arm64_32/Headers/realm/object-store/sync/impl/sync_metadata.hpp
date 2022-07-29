@@ -172,6 +172,7 @@ public:
     Action action() const;
     std::string url() const;
     void remove();
+    void set_action(Action new_action);
 
     // INTERNAL USE ONLY
     SyncFileActionMetadata(Schema schema, SharedRealm realm, const Obj& obj);
@@ -241,7 +242,8 @@ public:
 
     // Retrieve or create user metadata.
     // Note: if `make_is_absent` is true and the user has been marked for deletion, it will be unmarked.
-    util::Optional<SyncUserMetadata> get_or_make_user_metadata(const std::string& identity, const std::string& url,
+    util::Optional<SyncUserMetadata> get_or_make_user_metadata(const std::string& identity,
+                                                               const std::string& provider_type,
                                                                bool make_if_absent = true) const;
 
     // Retrieve file action metadata.
@@ -276,6 +278,9 @@ private:
     SyncAppMetadata::Schema m_app_metadata_schema;
 
     std::shared_ptr<Realm> get_realm() const;
+    std::shared_ptr<Realm> try_get_realm() const;
+    std::shared_ptr<Realm> open_realm(bool should_encrypt, bool caller_supplied_key);
+
 
     util::Optional<SyncAppMetadata> m_app_metadata;
 };

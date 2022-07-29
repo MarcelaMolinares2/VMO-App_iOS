@@ -26,7 +26,9 @@ struct MovementsView: View {
     
     var body: some View {
         VStack{
-            HeaderToggleView(couldSearch: false, title: "modExpenses", icon: Image("ic-expense"), color: Color.cPanelRequestDay)
+            HeaderToggleView(title: "") {
+                
+            }
             HStack{
                 Text(cycle)
                     .foregroundColor(.cTextHigh)

@@ -26,7 +26,9 @@ struct ActivityFormView: View {
     var body: some View {
         ZStack{
             VStack{
-                HeaderToggleView(couldSearch: false, title: "modAddActivity", icon: Image("ic-activity"), color: Color.cPanelActivity)
+                HeaderToggleView(title: "modActivity") {
+                    
+                }
                 if waitLoad {
                     if !viewForms {
                         ActivityBasicFormView(activity: activity)
@@ -437,7 +439,7 @@ struct AssistantsActivityFormView: View{
                                 default:
                                     Text("default")
                             }
-                            PanelItem(panel: item)
+                            //PanelItem(panel: item)
                         }
                     }
                     .onDelete { (offsets: IndexSet) in

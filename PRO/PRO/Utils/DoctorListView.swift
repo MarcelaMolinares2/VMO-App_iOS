@@ -8,63 +8,71 @@
 
 import SwiftUI
 import RealmSwift
-import GoogleMaps
 
 struct DoctorListView: View {
-    @EnvironmentObject var viewRouter: ViewRouter
-    @EnvironmentObject var masterRouter: MasterRouter
-    
-    //@ObservedObject var data = BindableResults(results: try! Realm().objects(Doctor.self).sorted(byKeyPath: "firstName"))
-    @ObservedResults(Doctor.self, sortDescriptor: SortDescriptor(keyPath: "firstName", ascending: true)) var doctors
-    @State var menuIsPresented = false
-    @State var panel: Panel & SyncEntity = GenericPanel()
-    
-    @State var layout: PanelLayout = .list
+    @ObservedResults(Doctor.self) var doctors
     
     let realm = try! Realm()
     
+    @State private var menuIsPresented = false
+    @State private var doctorTapped: Doctor = Doctor()
+    @State private var selected = [ObjectId]()
+    
     var body: some View {
-        ZStack(alignment: .bottom) {
-            VStack {
-                PanelListHeader(total: doctors.count) {
-                    
-                }
-                if layout == .list {
-                    ScrollView {
-                        LazyVStack {
-                            ForEach(doctors.filter {
-                                self.masterRouter.search.isEmpty ? true :
-                                ($0.name ?? "").lowercased().contains(self.masterRouter.search.lowercased()) ||
-                                ($0.institution ?? "").lowercased().contains(self.masterRouter.search.lowercased()) ||
-                                //($0.specialty?.name ?? "").lowercased().contains(self.searchText.lowercased()) ||
-                                $0.cityName(realm: self.realm).lowercased().contains(self.masterRouter.search.lowercased())
-                            }, id: \.objectId) { element in
-                                PanelItem(panel: element).onTapGesture {
-                                    self.panel = element
-                                    self.menuIsPresented = true
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    Text("---")
-                    //PanelListMapView(markers: <#T##Binding<[GMSMarker]>#>)
-                }
-            }
-            HStack {
-                FAB(image: "ic-map") {
-                    
-                }
-                Spacer()
-                FAB(image: "ic-plus") {
-                    FormEntity(objectId: "").go(path: PanelUtils.formByPanelType(type: "M"), router: viewRouter)
-                }
-            }
-            .padding(.bottom, 10)
-            .padding(.horizontal, 10)
+        CustomPanelDoctorView(realm: realm, results: $doctors, selected: $selected) { panel in
+            self.doctorTapped = panel
+            menuIsPresented = true
         }
         .partialSheet(isPresented: $menuIsPresented) {
-            PanelMenu(isPresented: self.$menuIsPresented, panel: panel)
+            PanelMenu(isPresented: self.$menuIsPresented, panel: doctorTapped)
         }
     }
+}
+
+struct DoctorSelectView: View {
+    @ObservedResults(Doctor.self) var doctors
+    
+    let realm = try! Realm()
+    
+    @State private var selected = [ObjectId]()
+    
+    var body: some View {
+        CustomPanelDoctorView(realm: realm, results: $doctors, selected: $selected) { panel in
+            selected.appendToggle(panel.objectId)
+        }
+    }
+}
+
+struct CustomPanelDoctorView: View {
+    @EnvironmentObject var masterRouter: MasterRouter
+    
+    var realm: Realm
+    @ObservedResults var results: Results<Doctor>
+    @Binding var selected: [ObjectId]
+    let onItemTapped: (_ doctor: Doctor) -> Void
+    
+    var body: some View {
+        if let filtered = filterRs() {
+            CustomPanelListView(realm: realm, totalPanel: results.count, filtered: filtered) {
+                ForEach(filtered, id: \.objectId) { element in
+                    PanelItemDoctor(realm: realm, userId: JWTUtils.sub(), doctor: element) {
+                        onItemTapped(element)
+                    }
+                    .background(selected.contains(element.objectId) ? Color.cBackground1dp : nil)
+                }
+            }
+        }
+    }
+    
+    func filterRs() -> [Doctor]? {
+        let rs: [Doctor] = results.filter {
+            self.masterRouter.search.isEmpty ? true :
+            ($0.name ?? "").lowercased().contains(self.masterRouter.search.lowercased()) ||
+            ($0.institution ?? "").lowercased().contains(self.masterRouter.search.lowercased()) ||
+            $0.specialtyName(realm: realm).lowercased().contains(self.masterRouter.search.lowercased()) ||
+            $0.cityName(realm: self.realm).lowercased().contains(self.masterRouter.search.lowercased())
+        }
+        return rs
+    }
+    
 }

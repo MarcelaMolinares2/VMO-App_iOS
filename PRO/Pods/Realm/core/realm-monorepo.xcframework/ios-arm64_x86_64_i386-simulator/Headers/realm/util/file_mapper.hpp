@@ -23,8 +23,7 @@
 #include <realm/utilities.hpp>
 #include <realm/util/thread.hpp>
 #include <realm/util/encrypted_file_mapping.hpp>
-
-#include <functional>
+#include <realm/util/functional.hpp>
 
 namespace realm {
 namespace util {
@@ -52,7 +51,7 @@ public:
     // must return the target load (also in bytes). Returns no_match if no
     // target can be set
     static constexpr int64_t no_match = -1;
-    virtual std::function<int64_t()> current_target_getter(size_t load) = 0;
+    virtual util::UniqueFunction<int64_t()> current_target_getter(size_t load) = 0;
     virtual void report_target_result(int64_t) = 0;
 };
 
@@ -75,18 +74,6 @@ inline void set_page_reclaim_governor_to_default()
 
 // Retrieves the number of in memory decrypted pages, across all open files.
 size_t get_num_decrypted_pages();
-
-// Retrieves the
-// - amount of memory used for decrypted pages, across all open files.
-// - current target for the reclaimer (desired number of decrypted pages)
-// - current workload size for the reclaimer, across all open files.
-struct decrypted_memory_stats_t {
-    size_t memory_size;
-    size_t reclaimer_target;
-    size_t reclaimer_workload;
-};
-
-decrypted_memory_stats_t get_decrypted_memory_stats();
 
 #if REALM_ENABLE_ENCRYPTION
 
@@ -126,6 +113,12 @@ void inline encryption_write_barrier(const void* addr, size_t size, EncryptedFil
 
 extern util::Mutex& mapping_mutex;
 
+void inline encryption_flush(EncryptedFileMapping* mapping)
+{
+    UniqueLock lock(mapping_mutex);
+    mapping->flush();
+}
+
 inline void do_encryption_read_barrier(const void* addr, size_t size, HeaderToSize header_to_size,
                                        EncryptedFileMapping* mapping)
 {
@@ -141,26 +134,18 @@ inline void do_encryption_write_barrier(const void* addr, size_t size, Encrypted
 
 #else
 
-void inline set_page_reclaim_governor(PageReclaimGovernor*)
-{
-}
+void inline set_page_reclaim_governor(PageReclaimGovernor*) {}
 
 size_t inline get_num_decrypted_pages()
 {
     return 0;
 }
 
-void inline encryption_read_barrier(const void*, size_t, EncryptedFileMapping*, HeaderToSize = nullptr)
-{
-}
+void inline encryption_read_barrier(const void*, size_t, EncryptedFileMapping*, HeaderToSize = nullptr) {}
 
-void inline encryption_write_barrier(const void*, size_t)
-{
-}
+void inline encryption_write_barrier(const void*, size_t) {}
 
-void inline encryption_write_barrier(const void*, size_t, EncryptedFileMapping*)
-{
-}
+void inline encryption_write_barrier(const void*, size_t, EncryptedFileMapping*) {}
 
 #endif
 
@@ -183,6 +168,6 @@ File::SizeType encrypted_size_to_data_size(File::SizeType size) noexcept;
 File::SizeType data_size_to_encrypted_size(File::SizeType size) noexcept;
 
 size_t round_up_to_page_size(size_t size) noexcept;
-}
-}
+} // namespace util
+} // namespace realm
 #endif

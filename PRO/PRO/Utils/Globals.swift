@@ -29,9 +29,9 @@ class Globals {
     static let BG_TASK_REFRESH = "com.vmo.PRO.refresh"
     
     
-    static let UI_FAB_SIZE = CGFloat(50)
-    static let UI_FAB_TRAILING = CGFloat(20)
-    static let UI_FAB_BOTTOM = CGFloat(10)
+    static let UI_FAB_SIZE = CGFloat(60)
+    static let UI_FAB_HORIZONTAL = CGFloat(10)
+    static let UI_FAB_VERTICAL = CGFloat(10)
     
 }
 
@@ -73,6 +73,13 @@ extension Color {
     static let cPanelPharmacy = Color("colorPanelPharmacy")
     static let cPanelPotential = Color("colorPanelPotential")
     static let cPanelRequestDay = Color("colorPanelRequestDay")
+    
+    static let cTrafficLightGreen = Color("colorTrafficLightGreen")
+    static let cTrafficLightRed = Color("colorTrafficLightRed")
+    static let cTrafficLightYellow = Color("colorTrafficLightYellow")
+    
+    static let cBackground1dp = Color("colorBackground1dp")
+    static let cBackground3dp = Color("colorBackground3dp")
     
     static let cSyncView = Color("colorSyncView")
     

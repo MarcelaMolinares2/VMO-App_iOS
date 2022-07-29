@@ -35,7 +35,7 @@ struct RequestDayView: View {
     var body: some View {
         ZStack {
             VStack {
-                HeaderToggleView(couldSearch: false, title: "modRequestDays", icon: Image("ic-day-request"), color: Color.cPanelRequestDay)
+                HeaderToggleView(title: "modRequestDays")
                 CustomForm {
                     CustomSection {
                         Button(action: {

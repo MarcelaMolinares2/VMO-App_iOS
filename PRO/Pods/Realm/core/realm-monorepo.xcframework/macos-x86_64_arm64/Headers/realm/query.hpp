@@ -41,6 +41,7 @@
 #include <realm/timestamp.hpp>
 #include <realm/handover_defs.hpp>
 #include <realm/util/serializer.hpp>
+#include <realm/util/bind_ptr.hpp>
 #include <realm/column_type_traits.hpp>
 
 namespace realm {
@@ -250,7 +251,7 @@ public:
 
     // Searching
     ObjKey find();
-    TableView find_all(size_t start = 0, size_t end = size_t(-1), size_t limit = size_t(-1));
+    TableView find_all(size_t limit = size_t(-1));
 
     // Aggregates
     size_t count() const;
@@ -324,8 +325,9 @@ public:
     std::string get_description(const std::string& class_prefix = "") const;
     std::string get_description(util::serializer::SerialisationState& state) const;
 
-    Query& set_ordering(std::unique_ptr<DescriptorOrdering> ordering);
-    std::shared_ptr<DescriptorOrdering> get_ordering();
+    Query& set_ordering(util::bind_ptr<DescriptorOrdering> ordering);
+    // This will remove the ordering from the Query object
+    util::bind_ptr<DescriptorOrdering> get_ordering();
 
     bool eval_object(const Obj& obj) const;
 
@@ -370,7 +372,7 @@ private:
     void aggregate_internal(ParentNode* pn, QueryStateBase* st, size_t start, size_t end,
                             ArrayPayload* source_column) const;
 
-    void find_all(TableView& tv, size_t start = 0, size_t end = size_t(-1), size_t limit = size_t(-1)) const;
+    void do_find_all(TableView& tv, size_t limit) const;
     size_t do_count(size_t limit = size_t(-1)) const;
     void delete_nodes() noexcept;
 
@@ -412,7 +414,7 @@ private:
     LinkCollectionPtr m_source_collection;         // collections are owned by the query.
     TableView* m_source_table_view = nullptr;      // table views are not refcounted, and not owned by the query.
     std::unique_ptr<TableView> m_owned_source_table_view; // <--- except when indicated here
-    std::shared_ptr<DescriptorOrdering> m_ordering;
+    util::bind_ptr<DescriptorOrdering> m_ordering;
 };
 
 // Implementation:

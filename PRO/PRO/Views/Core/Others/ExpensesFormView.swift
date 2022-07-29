@@ -32,7 +32,9 @@ struct ExpensesFormView: View {
     var body: some View {
         ZStack{
             VStack{
-                HeaderToggleView(couldSearch: false, title: "modExpenses", icon: Image("ic-expense"), color: Color.cPanelRequestDay)
+                HeaderToggleView(title: "modExpenses") {
+                    
+                }
                 HStack {
                     VStack{
                         Text(NSLocalizedString("envDate", comment: ""))

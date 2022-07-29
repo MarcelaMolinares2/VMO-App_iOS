@@ -680,7 +680,7 @@ void RLMDynamicValidatedSet(RLMObjectBase *obj, NSString *propName, id val) {
 
     // Because embedded objects cannot be created directly, we accept anything
     // that can be converted to an embedded object for dynamic link set operations.
-    bool is_embedded = prop.type == RLMPropertyTypeObject && obj->_info->linkTargetType(prop.index).objectSchema->is_embedded;
+    bool is_embedded = prop.type == RLMPropertyTypeObject && obj->_info->linkTargetType(prop.index).rlmObjectSchema.isEmbedded;
     RLMValidateValueForProperty(val, schema, prop, !is_embedded);
     RLMDynamicSet(obj, prop, RLMCoerceToNil(val));
 }
@@ -834,7 +834,9 @@ RLMAccessorContext::RLMAccessorContext(__unsafe_unretained RLMObjectBase *const 
 : _realm(parent->_realm)
 , _info(prop && prop->type == realm::PropertyType::Object ? parent->_info->linkTargetType(*prop)
                                                           : *parent->_info)
+, _parentObject(parent->_row)
 , _parentObjectInfo(parent->_info)
+, _colKey(prop ? prop->column_key : ColKey{})
 {
 }
 
@@ -855,8 +857,10 @@ id RLMAccessorContext::defaultValue(__unsafe_unretained NSString *const key) {
     return _defaultValues[key];
 }
 
-id RLMAccessorContext::propertyValue(__unsafe_unretained id const obj, size_t propIndex,
+id RLMAccessorContext::propertyValue(id obj, size_t propIndex,
                                      __unsafe_unretained RLMProperty *const prop) {
+    obj = RLMBridgeSwiftValue(obj) ?: obj;
+
     // Property value from an NSArray
     if ([obj respondsToSelector:@selector(objectAtIndex:)]) {
         return propIndex < [obj count] ? [obj objectAtIndex:propIndex] : nil;
@@ -868,15 +872,13 @@ id RLMAccessorContext::propertyValue(__unsafe_unretained id const obj, size_t pr
     }
 
     // Property value from an instance of this object type
-    id value;
     if ([obj isKindOfClass:_info.rlmObjectSchema.objectClass] && prop.swiftAccessor) {
         return [prop.swiftAccessor get:prop on:obj];
     }
-    else {
-        // Property value from some object that's KVC-compatible
-        value = RLMValidatedValueForProperty(obj, [obj respondsToSelector:prop.getterSel] ? prop.getterName : prop.name,
-                                             _info.rlmObjectSchema.className);
-    }
+
+    // Property value from some object that's KVC-compatible
+    id value = RLMValidatedValueForProperty(obj, [obj respondsToSelector:prop.getterSel] ? prop.getterName : prop.name,
+                                            _info.rlmObjectSchema.className);
     return value ?: NSNull.null;
 }
 
@@ -921,6 +923,13 @@ id RLMAccessorContext::box(realm::Object&& o) {
 }
 
 id RLMAccessorContext::box(realm::Obj&& r) {
+    if (!currentProperty) {
+        // If currentProperty is set, then we're reading from a Collection and
+        // that reported an audit read for us. If not, we need to report the
+        // audit read. This happens automatically when creating a
+        // `realm::Object`, but our object accessors don't wrap that type.
+        realm::Object(_realm->_realm, *_info.objectSchema, r, _parentObject, _colKey);
+    }
     return RLMCreateObjectAccessor(_info, std::move(r));
 }
 

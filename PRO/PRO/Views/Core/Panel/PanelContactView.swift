@@ -43,19 +43,19 @@ struct PanelContactListView: View {
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
             VStack {
-                PanelListHeader(total: contacts.count) {
+                /*PanelListHeader(total: contacts.count) {
                     
-                }
+                }*/
                 ScrollView {
                     LazyVStack {
                         ForEach(contacts.filter {
                             self.searchText.isEmpty ? true :
                                 ($0.name ?? "").lowercased().contains(self.searchText.lowercased())
                         }, id: \.objectId) { element in
-                            PanelItem(panel: element).onTapGesture {
+                            /*PanelItem(panel: element).onTapGesture {
                                 self.panel = element
                                 self.menuIsPresented = true
-                            }
+                            }*/
                         }
                     }
                 }
@@ -87,7 +87,9 @@ struct PanelContactFormView: View {
     
     var body: some View {
         VStack {
-            HeaderToggleView(couldSearch: false, title: contact?.name ?? "modContact", icon: Image("ic-contact"), color: Color.cPanelMedic)
+            HeaderToggleView(title: "modContact") {
+                
+            }
             switch tabRouter.current {
                 case "LOCATIONS":
                     PanelLocationView(panel: contact, couldAdd: true)

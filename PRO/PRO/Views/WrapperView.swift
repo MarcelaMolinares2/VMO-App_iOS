@@ -29,7 +29,7 @@ struct WrapperView: View {
             case "MOVEMENTS-VIEW":
                 MovementsView()
             case "PANEL-CARD":
-                PanelCardView(panel: viewRouter.panel(), defaultTab: viewRouter.option(key: "tab", default: "CARD"))
+                PanelSummaryView(panel: viewRouter.panel(), defaultTab: viewRouter.option(key: "tab", default: "CARD"))
             case "PATIENT-LIST":
                 PatientListView()
             case PanelUtils.formByPanelType(type: "F"):
@@ -40,11 +40,11 @@ struct WrapperView: View {
                 PotentialListView()
             case PanelUtils.formByPanelType(type: "T"):
                 PotentialFormView()
-            case "REQUEST-DAY":
+            case "REQUEST-DAYS-VIEW":
                 RequestDayView()
-            case "REQUEST-MATERIAL":
+            case "REQUEST-MATERIAL-VIEW":
                 MaterialRequestView()
-            case "ROUTE-VIEW":
+            case "GROUPS-VIEW":
                 RouteView()
             case "EXPENSES-VIEW":
                 ExpensesFormView()

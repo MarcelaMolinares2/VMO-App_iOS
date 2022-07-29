@@ -27,7 +27,7 @@ struct GoogleMapsView: UIViewRepresentable {
     
 }
 
-struct PanelListMapView: UIViewRepresentable {
+struct CustomMarkerMapView: UIViewRepresentable {
     
     @ObservedObject var locationManager = LocationManager()
     private let zoom: Float = 15.0//4.6187452,-74.1592274,15z
@@ -40,7 +40,7 @@ struct PanelListMapView: UIViewRepresentable {
     }
     
     func updateUIView(_ mapView: GMSMapView, context: Context) {
-        //markers.forEach { $0.map = uiViewController.map }
+        markers.forEach { $0.map = mapView }
     }
     
 }

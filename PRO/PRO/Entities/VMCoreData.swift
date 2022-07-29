@@ -344,6 +344,15 @@ protocol Panel {
 
 extension Panel {
     
+    func cityName(realm: Realm) -> String {
+        if let location = mainLocation() {
+            if let city = CityDao(realm: realm).by(id: location.cityId) {
+                return city.name ?? ""
+            }
+        }
+        return ""
+    }
+    
     func mainLocation() -> PanelLocation? {
         if !locations.isEmpty {
             let main = locations.filter { location in
@@ -354,13 +363,32 @@ extension Panel {
         return nil
     }
     
-    func cityName(realm: Realm) -> String {
-        if let location = mainLocation() {
-            if let city = CityDao(realm: realm).by(id: location.cityId) {
-                return city.name ?? ""
-            }
+    func mainCategory(realm: Realm, defaultValue: String = "") -> String {
+        print(categories)
+        if categories.isEmpty {
+            return defaultValue
         }
-        return ""
+        if let category = CategoryDao(realm: realm).by(id: categories.first?.categoryId) {
+            return category.name ?? defaultValue
+        }
+        return defaultValue
+    }
+    
+    func findUser(userId: Int) -> PanelUser? {
+        return users.first { panelUser in
+            panelUser.userId == userId
+        }
+    }
+    
+    func mainUser() -> PanelUser? {
+        return findUser(userId: JWTUtils.sub())
+    }
+    
+    func visitsInCycle() -> Int? {
+        if let user = mainUser() {
+            return user.visitsCycle
+        }
+        return nil
     }
     
 }
@@ -890,6 +918,13 @@ class Doctor: Object, Codable, Panel, SyncEntity, Identifiable {
         let codingKey: CodingKeys
         codingKey = .id
         return codingKey.rawValue
+    }
+    
+    func specialtyName(realm: Realm) -> String {
+        if let specialty = SpecialtyDao(realm: realm).by(id: specialtyId) {
+            return specialty.name
+        }
+        return ""
     }
 }
 

@@ -83,10 +83,12 @@ struct MaterialDeliveryListView: View {
     
     @State private var deliveries: [AdvertisingMaterialDeliveryReport] = []
     
+    @State private var search = ""
+    
     var body: some View {
         ZStack {
             VStack{
-                HeaderToggleView(couldSearch: false, title: "modMaterialDelivery", icon: Image("ic-material"), color: Color.cPanelMaterial)
+                HeaderToggleView(search: $search, title: "modMaterialDelivery")
                 Spacer()
                 List {
                     ForEach(deliveries, id: \.id) { item in
@@ -205,7 +207,9 @@ struct MaterialDeliveryFormView: View {
     var body: some View {
         ZStack {
             VStack {
-                HeaderToggleView(couldSearch: false, title: "modMaterialDelivery", icon: Image("ic-material"), color: Color.cPanelMaterial)
+                HeaderToggleView(title: "modMaterialDelivery") {
+                    
+                }
                 Button(action: {
                     selectMaterialsModalToggle.status.toggle()
                 }) {

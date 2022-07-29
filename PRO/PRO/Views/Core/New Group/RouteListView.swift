@@ -19,7 +19,7 @@ struct RouteListView2: View {
     
     var body: some View {
         VStack {
-            HeaderToggleView(couldSearch: true, title: "modPeopleRoute", icon: Image("ic-people-route"), color: Color.cPanelRequestDay)
+            //HeaderToggleView(couldSearch: true, title: "modPeopleRoute", icon: Image("ic-people-route"), color: Color.cPanelRequestDay)
             ZStack(alignment: .bottomTrailing) {
                 ScrollView {
                     

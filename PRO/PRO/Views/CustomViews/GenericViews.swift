@@ -37,67 +37,106 @@ struct PanelListView: View {
                         ($0.name ?? "").lowercased().contains(self.searchText.lowercased()) ||
                     ($0.cityName(realm: realm) ).lowercased().contains(self.searchText.lowercased())
                 }, id: \.id) { element in
-                    PanelItem(panel: element).onTapGesture {
-                        
-                    }
+                    
                 }
             }
         }
     }
 }
 
+struct PanelItemDoctorOld: View {
+    let realm: Realm
+    let userId: Int
+    var doctor: Doctor
+    
+    @State var menuIsPresented = false
+    
+    var body: some View {
+        PanelItem(realm: realm, userId: userId, panel: doctor, subtitle: SpecialtyDao(realm: realm).by(id: doctor.specialtyId)?.name ?? "", complement: doctor.institution ?? "") {
+            menuIsPresented = true
+        }
+            .partialSheet(isPresented: $menuIsPresented) {
+                PanelMenu(isPresented: self.$menuIsPresented, panel: doctor)
+            }
+    }
+    
+}
+
+struct PanelItemDoctor: View {
+    let realm: Realm
+    let userId: Int
+    var doctor: Doctor
+    let onItemTapped: () -> Void
+    
+    var body: some View {
+        PanelItem(realm: realm, userId: userId, panel: doctor, subtitle: SpecialtyDao(realm: realm).by(id: doctor.specialtyId)?.name ?? "", complement: doctor.institution ?? "", onItemTapped: onItemTapped)
+            .onTapGesture {
+                onItemTapped()
+            }
+    }
+    
+}
+
 struct PanelItem: View {
-    @State var panel: Panel & SyncEntity
-    @State var address = ""
-    @State var visitsFee = 0
-    @State var visitsCycle = 0
+    let realm: Realm
+    let userId: Int
+    var panel: Panel & SyncEntity
+    var subtitle = ""
+    var complement = ""
+    let onItemTapped: () -> Void
     
     var body: some View {
         VStack {
             HStack(alignment: .top) {
                 VStack {
-                    Text(panel.name ?? " -- ")
+                    Text(panel.name?.capitalized ?? " -- ")
                         .fontWeight(.bold)
                         .font(.system(size: 15))
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .lineLimit(2)
-                        .foregroundColor(.cPrimary)
-                    /*if panel.specialty?.name != nil {
-                        Text(panel.specialty?.name ?? " -- ")
-                            .font(.system(size: 14))
-                            .foregroundColor(.cPrimary)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                    }
-                    */
-                    /*Text(panel.type == "M" ? "\(address), \(panel.city?.name ?? " -- ")" : panel.city?.name ?? " -- ")
+                        .foregroundColor(.cTextHigh)
+                    Text(subtitle.isEmpty ? "--" : subtitle)
                         .font(.system(size: 14))
-                        .foregroundColor(.cPrimary)
+                        .foregroundColor(.cTextMedium)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    let mainLocation = panel.mainLocation()
+                    Text("\(mainLocation?.address ?? ""), \(CityDao(realm: realm).by(id: mainLocation?.cityId)?.name ?? " -- ")")
+                        .font(.system(size: 14))
+                        .foregroundColor(.cTextMedium)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .lineLimit(2)
-                    Text(panel.type == "M" ? panel.institution ?? " -- " : address)
-                        .font(.system(size: 14))
-                        .foregroundColor(.cPrimary)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .lineLimit(1)
-                    */
+                    if !complement.isEmpty {
+                        Text(complement)
+                            .font(.system(size: 14))
+                            .foregroundColor(.cTextMedium)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .lineLimit(1)
+                    }
                 }
                 .frame(maxWidth: .infinity)
                 VStack(alignment: .trailing, spacing: 2) {
                     VStack {
-                        /*Text(panel.category?.name ?? "")
+                        Text(panel.mainCategory(realm: realm, defaultValue: "--"))
                             .padding(.horizontal, 5)
                             .font(.system(size: 14))
-                            .foregroundColor(.cTextLight)
+                            .foregroundColor(.cTextMedium)
                             .frame(height: 20)
-                         */
                     }
                     .frame(minWidth: 30)
-                    .background(Color.cPrimary)
-                    Text("\(visitsCycle)/\(visitsFee)")
-                        .font(.system(size: 14))
-                        .frame(width: 30, height: 20, alignment: .center)
-                        .background(Color.red)
-                        .foregroundColor(.white)
+                    .background(Color.cBackground1dp)
+                    if let user = panel.findUser(userId: userId) {
+                        Text("\(user.visitsCycle)/\(user.visitsFee)")
+                            .font(.system(size: 14))
+                            .frame(width: 30, height: 20, alignment: .center)
+                            .background(PanelUtils.visitsBackground(user: user))
+                            .foregroundColor(.white)
+                    } else {
+                        Text("--/--")
+                            .font(.system(size: 14))
+                            .frame(width: 30, height: 20, alignment: .center)
+                            .background(Color.cBackground3dp)
+                            .foregroundColor(.white)
+                    }
                 }
                 .frame(minWidth: 30)
             }
@@ -105,24 +144,11 @@ struct PanelItem: View {
         .padding(.vertical, 10)
         .padding(.horizontal, 10)
         .contentShape(Rectangle())
-        .onAppear {
-            manage()
+        .onTapGesture {
+            onItemTapped()
         }
     }
     
-    func manage() {
-        if panel.locations.count > 0 {
-            let location = panel.locations[0]
-            address = location.address
-        }
-        let sub = JWTUtils.sub()
-        panel.users.forEach { item in
-            if item.userId == sub {
-                visitsFee = item.visitsFee
-                visitsCycle = item.visitsCycle
-            }
-        }
-    }
 }
 
 struct KeyInfoView: View {
@@ -176,7 +202,7 @@ struct CustomForm<Content: View>: CustomContainerView {
         ScrollView {
             VStack(content: content).padding()
         }
-        .background(Color.cForm)
+        .background(Color.white.opacity(0))
     }
 }
 
@@ -198,7 +224,7 @@ struct CustomSection<Content: View>: View {
             }
             VStack(content: content)
                 .padding()
-                .background(Color.white)
+                .background(Color.cBackground1dp)
                 .cornerRadius(5)
         }
         .padding(.top, 10)

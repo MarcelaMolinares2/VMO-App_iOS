@@ -7,27 +7,55 @@
 //
 
 import SwiftUI
+import RealmSwift
+import GoogleMaps
 
 struct PanelListHeader: View {
     
-    @State var total: Int
-    let onFiltersTapped: () -> Void
+    var total: Int
+    var filtered: Int
+    let onFilterTapped: () -> Void
+    let onSortTapped: () -> Void
     
     var body: some View {
-        ZStack(alignment: .trailing) {
-            Text(String(format: NSLocalizedString("envTotalPanel", comment: ""), String(total)))
-                .foregroundColor(.cTextMedium)
-                .font(.system(size: 12))
-                .frame(minWidth: 0, maxWidth: .infinity, alignment: .center)
-            Button(action: {
-                onFiltersTapped()
-            }) {
-                Text("envFilters")
-                    .font(.system(size: 13))
-                    .foregroundColor(.cTextLink)
-                    .padding(.horizontal, 10)
+        HStack {
+            VStack {
+                Text(String(format: NSLocalizedString("envTotalPanel", comment: ""), String(total)))
+                    .foregroundColor(.cTextMedium)
+                    .font(.system(size: 12))
+                    .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
+                if total != filtered {
+                    Text(String(format: NSLocalizedString("envShowingNResults", comment: ""), String(filtered)))
+                        .foregroundColor(.cTextHigh)
+                        .font(.system(size: 12))
+                        .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
+                }
+            }
+            Spacer()
+            HStack {
+                Button(action: {
+                    onFilterTapped()
+                }) {
+                    Text("envFilters")
+                        .font(.system(size: 15))
+                        .foregroundColor(.cTextLink)
+                        .padding(.horizontal, 10)
+                }
+                .frame(height: 44, alignment: .center)
+                Button(action: {
+                    onSortTapped()
+                }) {
+                    Image("ic-sort")
+                        .resizable()
+                        .foregroundColor(.cIcon)
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 30, height: 30, alignment: .center)
+                        .padding(8)
+                }
+                .frame(width: 44, height: 44, alignment: .center)
             }
         }
+        .frame(height: 44)
     }
     
 }
@@ -106,6 +134,77 @@ struct PanelInfoDialog: View {
     func initUI() {
         self.headerColor = PanelUtils.colorByPanelType(panel: panel)
         self.headerIcon = PanelUtils.imageByPanelType(panel: panel)
+    }
+    
+}
+
+struct CustomPanelListView<Content: View>: View {
+    @EnvironmentObject var viewRouter: ViewRouter
+    
+    var realm: Realm
+    var totalPanel: Int
+    var filtered: [Panel]
+    var content: () -> Content
+    @State var layout: PanelLayout = .list
+    @State private var filteredCount = 0
+    
+    var body: some View {
+        ZStack(alignment: .bottom) {
+            VStack {
+                PanelListHeader(total: totalPanel, filtered: filtered.count) {
+                    
+                } onSortTapped: {
+                    
+                }
+                if layout == .list {
+                    ScrollView {
+                        LazyVStack(content: content)
+                    }
+                } else {
+                    PanelListMapView(items: filtered)
+                }
+            }
+            HStack {
+                if layout == .map {
+                    FAB(image: "ic-list") {
+                        layout = .list
+                    }
+                } else {
+                    FAB(image: "ic-map") {
+                        layout = .map
+                    }
+                }
+                Spacer()
+                FAB(image: "ic-plus") {
+                    FormEntity(objectId: "").go(path: PanelUtils.formByPanelType(type: "M"), router: viewRouter)
+                }
+            }
+            .padding(.bottom, Globals.UI_FAB_VERTICAL)
+            .padding(.horizontal, Globals.UI_FAB_HORIZONTAL)
+        }
+    }
+    
+}
+
+struct PanelListMapView: View {
+    
+    var items: [Panel]
+    
+    @State private var markers = [GMSMarker]()
+    
+    var body: some View {
+        CustomMarkerMapView(markers: $markers)
+            .onAppear {
+                markers.removeAll()
+                items.forEach { panel in
+                    if let location = panel.mainLocation() {
+                        if let lat = location.latitude, let lng = location.longitude {
+                            let marker = GMSMarker(position: CLLocationCoordinate2D(latitude: Double(lat), longitude: Double(lng)))
+                            markers.append(marker)
+                        }
+                    }
+                }
+            }
     }
     
 }

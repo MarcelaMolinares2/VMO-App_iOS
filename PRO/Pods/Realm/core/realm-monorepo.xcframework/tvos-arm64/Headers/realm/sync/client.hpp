@@ -13,6 +13,7 @@
 #include <realm/util/functional.hpp>
 #include <realm/util/logger.hpp>
 #include <realm/sync/client_base.hpp>
+#include <realm/sync/subscriptions.hpp>
 
 namespace realm::sync {
 
@@ -167,7 +168,7 @@ public:
     using ProgressHandler = void(std::uint_fast64_t downloaded_bytes, std::uint_fast64_t downloadable_bytes,
                                  std::uint_fast64_t uploaded_bytes, std::uint_fast64_t uploadable_bytes,
                                  std::uint_fast64_t progress_version, std::uint_fast64_t snapshot_version);
-    using WaitOperCompletionHandler = std::function<void(std::error_code)>;
+    using WaitOperCompletionHandler = util::UniqueFunction<void(std::error_code)>;
     using SSLVerifyCallback = bool(const std::string& server_address, port_type server_port, const char* pem_data,
                                    size_t pem_size, int preverify_ok, int depth);
 
@@ -311,6 +312,16 @@ public:
         ///
         /// This feature exists exclusively for testing purposes at this time.
         bool simulate_integration_error = false;
+
+        // Will be called after a download message is received and validated by
+        // the client but befefore it's been transformed or applied. To be used in
+        // testing only.
+        std::function<void(const sync::SyncProgress&, int64_t, sync::DownloadBatchState)>
+            on_download_message_received_hook;
+        // Will be called after each bootstrap message is added to the pending bootstrap store,
+        // but before processing a finalized bootstrap. For testing only.
+        std::function<bool(const sync::SyncProgress&, int64_t, sync::DownloadBatchState)>
+            on_bootstrap_message_processed_hook;
     };
 
     /// \brief Start a new session for the specified client-side Realm.
@@ -318,7 +329,7 @@ public:
     /// Note that the session is not fully activated until you call bind().
     /// Also note that if you call set_sync_transact_callback(), it must be
     /// done before calling bind().
-    Session(Client&, std::shared_ptr<DB>, Config&& = {});
+    Session(Client&, std::shared_ptr<DB>, std::shared_ptr<SubscriptionStore>, Config&& = {});
 
     /// This leaves the right-hand side session object detached. See "Thread
     /// safety" section under detach().
@@ -380,7 +391,7 @@ public:
     /// to bind() returns, and it may get called (or continue to execute) after
     /// the session object is destroyed. Please see "Callback semantics" section
     /// under Session for more on this.
-    void set_sync_transact_callback(std::function<SyncTransactCallback>);
+    void set_sync_transact_callback(util::UniqueFunction<SyncTransactCallback>);
 
     /// \brief Set a handler to monitor the state of download and upload
     /// progress.
@@ -455,10 +466,10 @@ public:
     /// to bind() returns, and it may get called (or continue to execute) after
     /// the session object is destroyed. Please see "Callback semantics" section
     /// under Session for more on this.
-    void set_progress_handler(std::function<ProgressHandler>);
+    void set_progress_handler(util::UniqueFunction<ProgressHandler>);
 
 
-    using ConnectionStateChangeListener = void(ConnectionState, const SessionErrorInfo*);
+    using ConnectionStateChangeListener = void(ConnectionState, util::Optional<SessionErrorInfo>);
 
     /// \brief Install a connection state change listener.
     ///
@@ -493,12 +504,12 @@ public:
     /// to bind() returns, and it may get called (or continue to execute) after
     /// the session object is destroyed. Please see "Callback semantics" section
     /// under Session for more on this.
-    void set_connection_state_change_listener(std::function<ConnectionStateChangeListener>);
+    void set_connection_state_change_listener(util::UniqueFunction<ConnectionStateChangeListener>);
 
     //@{
     /// Deprecated! Use set_connection_state_change_listener() instead.
-    using ErrorHandler = void(std::error_code, bool is_fatal, const std::string& detailed_message);
-    void set_error_handler(std::function<ErrorHandler>);
+    using ErrorHandler = void(const SessionErrorInfo&);
+    void set_error_handler(util::UniqueFunction<ErrorHandler>);
     //@}
 
     /// @{ \brief Bind this session to the specified server side Realm.
@@ -574,7 +585,7 @@ public:
     ///
     /// \param signed_user_token A cryptographically signed token describing the
     /// identity and access rights of the current user. See ProtocolEnvelope.
-    void refresh(std::string signed_user_token);
+    void refresh(const std::string& signed_user_token);
 
     /// \brief Inform the synchronization agent about changes of local origin.
     ///
@@ -707,6 +718,8 @@ public:
     /// thread, and by multiple threads concurrently.
     void cancel_reconnect_delay();
 
+    void on_new_flx_sync_subscription(int64_t new_version);
+
 private:
     SessionWrapper* m_impl = nullptr;
 
@@ -756,16 +769,14 @@ inline void Session::detach() noexcept
     m_impl = nullptr;
 }
 
-inline void Session::set_error_handler(std::function<ErrorHandler> handler)
+inline void Session::set_error_handler(util::UniqueFunction<ErrorHandler> handler)
 {
-    auto handler_2 = [handler = std::move(handler)](ConnectionState state, const SessionErrorInfo* error_info) {
+    auto handler_2 = [handler = std::move(handler)](ConnectionState state,
+                                                    const util::Optional<SessionErrorInfo>& error_info) {
         if (state != ConnectionState::disconnected)
             return;
         REALM_ASSERT(error_info);
-        std::error_code ec = error_info->error_code;
-        bool is_fatal = error_info->is_fatal;
-        const std::string& detailed_message = error_info->detailed_message;
-        handler(ec, is_fatal, detailed_message); // Throws
+        handler(*error_info); // Throws
     };
     set_connection_state_change_listener(std::move(handler_2)); // Throws
 }

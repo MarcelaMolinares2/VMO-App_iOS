@@ -385,6 +385,15 @@ class PanelUtils {
         }
     }
     
+    static func visitsBackground(user: PanelUser) -> Color {
+        if user.visitsCycle == 0 {
+            return Color.cTrafficLightRed
+        } else if user.visitsCycle >= user.visitsFee {
+            return Color.cTrafficLightGreen
+        }
+        return Color.cTrafficLightYellow
+    }
+    
     enum PanelValueType {
         case color, icon, form, title
     }

@@ -19,8 +19,6 @@
 #import "RLMSyncManager_Private.hpp"
 
 #import "RLMApp_Private.hpp"
-#import "RLMRealmConfiguration+Sync.h"
-#import "RLMSyncConfiguration_Private.hpp"
 #import "RLMSyncSession_Private.hpp"
 #import "RLMUser_Private.hpp"
 #import "RLMSyncUtil_Private.hpp"
@@ -94,6 +92,13 @@ struct CallbackLogger : public realm::util::RootLogger {
 };
 
 } // anonymous namespace
+
+std::shared_ptr<realm::util::Logger> RLMWrapLogFunction(RLMSyncLogFunction fn) {
+    auto logger = std::make_shared<CallbackLogger>();
+    logger->logFn = fn;
+    logger->set_level_threshold(Level::all);
+    return logger;
+}
 
 #pragma mark - RLMSyncManager
 

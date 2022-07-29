@@ -255,6 +255,28 @@ class Line: Object, Codable {
     }
 }
 
+class Menu: Object, Codable, Identifiable {
+    @Persisted(primaryKey: true) var objectId: ObjectId
+    @Persisted var id = 0
+    @Persisted var languageTag: String
+    @Persisted var routerLink: String
+    @Persisted var parent: Int = 0
+    @Persisted var icon: String
+    @Persisted var order: Int = 0
+    @Persisted var module: String
+    @Persisted var userTypes: String
+    
+    private enum CodingKeys: String, CodingKey {
+        case id = "menu_id", languageTag = "language_tag", routerLink = "router_link", parent, icon, order = "order_", module, userTypes = "user_types"
+    }
+    
+    static func primaryCodingKey() -> String {
+        let codingKey: CodingKeys
+        codingKey = .id
+        return codingKey.rawValue
+    }
+}
+
 class PanelCategory: Object, Codable {
     @Persisted(primaryKey: true) var objectId: ObjectId
     @Persisted var id = 0
