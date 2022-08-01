@@ -51,9 +51,15 @@ struct CustomPanelDoctorView: View {
     @Binding var selected: [ObjectId]
     let onItemTapped: (_ doctor: Doctor) -> Void
     
+    private let sortOptions = ["name_form", "category", "city", "coverage", "institution", "specialty", "visits"]
+    private let filterOptions = ["brick", "category", "city", "join_date", "recently_added", "specialty", "style", "zone"]
+    
+    @State private var sort: SortModel = SortModel(key: "name_form", ascending: true)
+    @State private var filters: [DynamicFilter] = []
+    
     var body: some View {
         if let filtered = filterRs() {
-            CustomPanelListView(realm: realm, totalPanel: results.count, filtered: filtered) {
+            CustomPanelListView(realm: realm, totalPanel: results.count, filtered: filtered, filtersDynamic: filterOptions, sort: $sort, filters: $filters) {
                 ForEach(filtered, id: \.objectId) { element in
                     PanelItemDoctor(realm: realm, userId: JWTUtils.sub(), doctor: element) {
                         onItemTapped(element)

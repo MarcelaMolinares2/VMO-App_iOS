@@ -44,6 +44,48 @@ struct GenericGridItem: Hashable {
     var name: String
 }
 
+struct DynamicFilter: Identifiable {
+    let id = UUID()
+    var key: String
+    var label: String
+    var controlType: String
+    var sourceType: String
+    var values: [String]
+    var chips: [ChipItem] = []
+    var modalOpen: Bool = false
+    
+    init(key: String, label: String, controlType: String, sourceType: String, values: [String]) {
+        self.key = key
+        self.label = label
+        self.controlType = controlType
+        self.sourceType = sourceType
+        self.values = values
+    }
+}
+
+struct ChipItem: Identifiable {
+    let id = UUID()
+    var label: String
+    var image: String
+    var onApplyTapped: () -> Void
+    
+    init(label: String, image: String, onApplyTapped: @escaping () -> Void) {
+        self.label = label
+        self.image = image
+        self.onApplyTapped = onApplyTapped
+    }
+}
+
+struct SortModel {
+    var key: String
+    var ascending: Bool
+    
+    init(key: String, ascending: Bool) {
+        self.key = key
+        self.ascending = ascending
+    }
+}
+
 enum GenericListLayout {
     case list, map
 }

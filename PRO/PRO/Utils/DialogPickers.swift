@@ -197,14 +197,12 @@ struct GenericDialogItem: View {
     
 }
 
-struct SourceDynamicDialogPicker: View {
-    let onSelectionDone: (_ selected: [String]) -> Void
-    
+struct DialogPlainPickerView: View {
     @Binding var selected: [String]
     var data: String = ""
     var multiple: Bool = false
     var title: String = ""
-    var isSheet: Bool = false
+    let onSelectionDone: (_ selected: [String]) -> Void
     
     @ObservedObject var viewModel = ListGenericViewModel()
     @StateObject var headerRouter = TabRouter()
@@ -213,44 +211,14 @@ struct SourceDynamicDialogPicker: View {
     
     var body: some View {
         VStack {
-            HStack {
-                if !isSheet {
-                    Button(action: {
-                        done()
-                    }) {
-                        Image("ic-left-arrow")
-                            .resizable()
-                            .scaledToFit()
-                            .padding(5)
-                    }
-                }
-                if !isSheet ||  CGFloat(viewModel.items.count * 50) > CGFloat(UIScreen.main.bounds.height - (200 + (multiple ? 50 : 0))) {
-                    SearchBar(text: $searchText, placeholder: Text("envSearch")) {
-                        
-                    }
-                } else {
-                    Text(title)
-                }
+            SearchBar(text: $searchText, placeholder: Text("\(NSLocalizedString("envSearch", comment: "Search")) \(title.lowercased())")) {
+                
             }
-            .frame(height: headerHeight)
-            .padding([.leading, .trailing], 10)
-            .background(Color.white)
-            .zIndex(1)
-            if !isSheet ||  CGFloat(viewModel.items.count * 50) > CGFloat(UIScreen.main.bounds.height - (200 + (multiple ? 50 : 0))) {
-                List {
-                    ForEach(viewModel.items.filter {
-                        searchText.isEmpty ? true : $0.label.lowercased().contains(searchText.lowercased())
-                    }, id: \.id) { item in
-                        GenericDialogItem(item: item, alignment: .leading) {
-                            self.onItemSelected(item: item)
-                        }
-                    }
-                }
-            } else {
+            ScrollView {
                 ForEach(viewModel.items.filter {
                     searchText.isEmpty ? true : $0.label.lowercased().contains(searchText.lowercased())
                 }, id: \.id) { item in
-                    GenericDialogItem(item: item, alignment: .center) {
+                    GenericDialogItem(item: item, alignment: .leading) {
                         self.onItemSelected(item: item)
                     }
                 }
@@ -262,28 +230,29 @@ struct SourceDynamicDialogPicker: View {
                     }) {
                         Image("ic-done")
                             .resizable()
-                            .foregroundColor(.cTextHigh)
                             .scaledToFit()
                             .padding(5)
+                            .foregroundColor(.cIcon)
                     }
+                    .frame(minWidth: 0, maxWidth: .infinity, minHeight: headerHeight, maxHeight: headerHeight, alignment: .center)
                 }
                 .frame(height: headerHeight)
                 .padding([.leading, .trailing], 10)
-                .background(Color.white)
-                .zIndex(1)
             }
         }
-        .background(Color.white)
-        .padding(20)
-        .clipped()
-        .cornerRadius(20)
         .onAppear {
             loadData()
         }
     }
     
     func loadData() {
-        viewModel.put(list: Utils.genericList(data: data))
+        let list = Utils.genericList(data: data)
+        list.indices.forEach { ix in
+            if selected.contains(list[ix].id) {
+                list[ix].selected = true
+            }
+        }
+        viewModel.put(list: list)
     }
     
     func onItemSelected(item: GenericSelectableItem) {
@@ -301,14 +270,12 @@ struct SourceDynamicDialogPicker: View {
     
 }
 
-struct CustomDialogPicker: View {
-    let onSelectionDone: (_ selected: [String]) -> Void
-    
+struct DialogSourcePickerView: View {
     @Binding var selected: [String]
     var key: String = ""
     var multiple: Bool = false
     var title: String = ""
-    var isSheet: Bool = false
+    let onSelectionDone: (_ selected: [String]) -> Void
     
     @ObservedObject var viewModel = ListGenericViewModel()
     @StateObject var headerRouter = TabRouter()
@@ -317,44 +284,14 @@ struct CustomDialogPicker: View {
     
     var body: some View {
         VStack {
-            HStack {
-                if !isSheet {
-                    Button(action: {
-                        done()
-                    }) {
-                        Image("ic-left-arrow")
-                            .resizable()
-                            .scaledToFit()
-                            .padding(5)
-                    }
-                }
-                if !isSheet ||  CGFloat(viewModel.items.count * 50) > CGFloat(UIScreen.main.bounds.height - (200 + (multiple ? 50 : 0))) {
-                    SearchBar(text: $searchText, placeholder: Text("envSearch")) {
-                        
-                    }
-                } else {
-                    Text(title)
-                }
+            SearchBar(text: $searchText, placeholder: Text("\(NSLocalizedString("envSearch", comment: "Search")) \(title.lowercased())")) {
+                
             }
-            .frame(height: headerHeight)
-            .padding([.leading, .trailing], 10)
-            .background(Color.white)
-            .zIndex(1)
-            if !isSheet ||  CGFloat(viewModel.items.count * 50) > CGFloat(UIScreen.main.bounds.height - (200 + (multiple ? 50 : 0))) {
-                List {
-                    ForEach(viewModel.items.filter {
-                        searchText.isEmpty ? true : $0.label.lowercased().contains(searchText.lowercased())
-                    }, id: \.id) { item in
-                        GenericDialogItem(item: item, alignment: .leading) {
-                            self.onItemSelected(item: item)
-                        }
-                    }
-                }
-            } else {
+            ScrollView {
                 ForEach(viewModel.items.filter {
                     searchText.isEmpty ? true : $0.label.lowercased().contains(searchText.lowercased())
                 }, id: \.id) { item in
-                    GenericDialogItem(item: item, alignment: .center) {
+                    GenericDialogItem(item: item, alignment: .leading) {
                         self.onItemSelected(item: item)
                     }
                 }
@@ -366,68 +303,69 @@ struct CustomDialogPicker: View {
                     }) {
                         Image("ic-done")
                             .resizable()
-                            .foregroundColor(.cTextHigh)
                             .scaledToFit()
                             .padding(5)
+                            .foregroundColor(.cIcon)
                     }
+                    .frame(minWidth: 0, maxWidth: .infinity, minHeight: headerHeight, maxHeight: headerHeight, alignment: .center)
                 }
                 .frame(height: headerHeight)
                 .padding([.leading, .trailing], 10)
-                .background(Color.white)
-                .zIndex(1)
             }
         }
-        .background(Color.white)
-        .padding(20)
-        .clipped()
-        .cornerRadius(20)
         .onAppear {
             loadData()
         }
     }
     
     func loadData() {
-        print(key)
+        var list: [GenericSelectableItem] = []
         switch key.uppercased() {
             case "BRICK":
-                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).bricks())
+                list = GenericSelectableDao(realm: try! Realm()).bricks()
             case "CATEGORY":
-                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).categories())
+                list = GenericSelectableDao(realm: try! Realm()).categories()
             case "CITY":
-                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).cities())
+                list = GenericSelectableDao(realm: try! Realm()).cities()
             case "COLLEGE":
-                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).colleges())
+                list = GenericSelectableDao(realm: try! Realm()).colleges()
             case "COUNTRY":
-                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).countries())
+                list = GenericSelectableDao(realm: try! Realm()).countries()
             case "CYCLE":
-                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).cycles())
+                list = GenericSelectableDao(realm: try! Realm()).cycles()
             case "LINE":
-                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).lines())
+                list = GenericSelectableDao(realm: try! Realm()).lines()
             case "MATERIAL":
-                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).materials())
+                list = GenericSelectableDao(realm: try! Realm()).materials()
             case "PHARMACY-CHAIN":
-                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).pharmacyChains())
+                list = GenericSelectableDao(realm: try! Realm()).pharmacyChains()
             case "PHARMACY-TYPE":
-                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).pharmacyTypes())
+                list = GenericSelectableDao(realm: try! Realm()).pharmacyTypes()
             case "PRICES-LIST":
-                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).pricesLists())
+                list = GenericSelectableDao(realm: try! Realm()).pricesLists()
             case "PRODUCT-PROMOTED", "PRODUCT-TRANSFERENCE":
-                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).products())
+                list = GenericSelectableDao(realm: try! Realm()).products()
             case "PRODUCT-BY-BRAND":
-                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).productBrands())
+                list = GenericSelectableDao(realm: try! Realm()).productBrands()
             case "PRODUCT-SHOPPING":
-                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).productsWithCompetitors())
+                list = GenericSelectableDao(realm: try! Realm()).productsWithCompetitors()
             case "SPECIALTY":
-                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).specialties())
+                list = GenericSelectableDao(realm: try! Realm()).specialties()
             case "SECOND-SPECIALTY":
-                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).specialties(tp: "S"))
+                list = GenericSelectableDao(realm: try! Realm()).specialties(tp: "S")
             case "STYLE":
-                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).styles())
+                list = GenericSelectableDao(realm: try! Realm()).styles()
             case "ZONE":
-                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).zones())
+                list = GenericSelectableDao(realm: try! Realm()).zones()
             default:
                 break
         }
+        list.indices.forEach { ix in
+            if selected.contains(list[ix].id) {
+                list[ix].selected = true
+            }
+        }
+        viewModel.put(list: list)
     }
     
     func onItemSelected(item: GenericSelectableItem) {
@@ -693,4 +631,185 @@ extension View {
         //controller.view.removeFromSuperview()
         return image
     }
+}
+
+
+// DEPRECATED
+
+
+struct CustomDialogPicker: View {
+    let onSelectionDone: (_ selected: [String]) -> Void
+    
+    @Binding var selected: [String]
+    var key: String = ""
+    var multiple: Bool = false
+    var title: String = ""
+    var isSheet: Bool = false
+    
+    @ObservedObject var viewModel = ListGenericViewModel()
+    @StateObject var headerRouter = TabRouter()
+    @State var searchText = ""
+    let headerHeight = CGFloat(40)
+    
+    var body: some View {
+        VStack {
+            SearchBar(text: $searchText, placeholder: Text("\(NSLocalizedString("envSearch", comment: "Search")) \(title.lowercased())")) {
+                
+            }
+            ScrollView {
+                ForEach(viewModel.items.filter {
+                    searchText.isEmpty ? true : $0.label.lowercased().contains(searchText.lowercased())
+                }, id: \.id) { item in
+                    GenericDialogItem(item: item, alignment: .leading) {
+                        self.onItemSelected(item: item)
+                    }
+                }
+            }
+            if multiple {
+                VStack {
+                    Button(action: {
+                        self.done()
+                    }) {
+                        Image("ic-done")
+                            .resizable()
+                            .scaledToFit()
+                            .padding(5)
+                            .foregroundColor(.cIcon)
+                    }
+                    .frame(minWidth: 0, maxWidth: .infinity, minHeight: headerHeight, maxHeight: headerHeight, alignment: .center)
+                }
+                .frame(height: headerHeight)
+                .padding([.leading, .trailing], 10)
+            }
+        }
+        .onAppear {
+            loadData()
+        }
+    }
+    
+    func loadData() {
+        print(key)
+        switch key.uppercased() {
+            case "BRICK":
+                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).bricks())
+            case "CATEGORY":
+                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).categories())
+            case "CITY":
+                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).cities())
+            case "COLLEGE":
+                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).colleges())
+            case "COUNTRY":
+                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).countries())
+            case "CYCLE":
+                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).cycles())
+            case "LINE":
+                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).lines())
+            case "MATERIAL":
+                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).materials())
+            case "PHARMACY-CHAIN":
+                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).pharmacyChains())
+            case "PHARMACY-TYPE":
+                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).pharmacyTypes())
+            case "PRICES-LIST":
+                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).pricesLists())
+            case "PRODUCT-PROMOTED", "PRODUCT-TRANSFERENCE":
+                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).products())
+            case "PRODUCT-BY-BRAND":
+                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).productBrands())
+            case "PRODUCT-SHOPPING":
+                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).productsWithCompetitors())
+            case "SPECIALTY":
+                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).specialties())
+            case "SECOND-SPECIALTY":
+                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).specialties(tp: "S"))
+            case "STYLE":
+                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).styles())
+            case "ZONE":
+                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).zones())
+            default:
+                break
+        }
+    }
+    
+    func onItemSelected(item: GenericSelectableItem) {
+        item.selected = !item.selected
+        viewModel.toggle()
+        if !multiple {
+            done()
+        }
+    }
+    
+    func done() {
+        selected = viewModel.items.filter { item in item.selected }.map { $0.id }
+        onSelectionDone(selected)
+    }
+}
+
+struct SourceDynamicDialogPicker: View {
+    let onSelectionDone: (_ selected: [String]) -> Void
+    
+    @Binding var selected: [String]
+    var data: String = ""
+    var multiple: Bool = false
+    var title: String = ""
+    var isSheet: Bool = false
+    
+    @ObservedObject var viewModel = ListGenericViewModel()
+    @StateObject var headerRouter = TabRouter()
+    @State var searchText = ""
+    let headerHeight = CGFloat(40)
+    
+    var body: some View {
+        VStack {
+            SearchBar(text: $searchText, placeholder: Text("\(NSLocalizedString("envSearch", comment: "Search")) \(title.lowercased())")) {
+                
+            }
+            ScrollView {
+                ForEach(viewModel.items.filter {
+                    searchText.isEmpty ? true : $0.label.lowercased().contains(searchText.lowercased())
+                }, id: \.id) { item in
+                    GenericDialogItem(item: item, alignment: .leading) {
+                        self.onItemSelected(item: item)
+                    }
+                }
+            }
+            if multiple {
+                VStack {
+                    Button(action: {
+                        self.done()
+                    }) {
+                        Image("ic-done")
+                            .resizable()
+                            .scaledToFit()
+                            .padding(5)
+                            .foregroundColor(.cIcon)
+                    }
+                    .frame(minWidth: 0, maxWidth: .infinity, minHeight: headerHeight, maxHeight: headerHeight, alignment: .center)
+                }
+                .frame(height: headerHeight)
+                .padding([.leading, .trailing], 10)
+            }
+        }
+        .onAppear {
+            loadData()
+        }
+    }
+    
+    func loadData() {
+        viewModel.put(list: Utils.genericList(data: data))
+    }
+    
+    func onItemSelected(item: GenericSelectableItem) {
+        item.selected = !item.selected
+        viewModel.toggle()
+        if !multiple {
+            done()
+        }
+    }
+    
+    func done() {
+        selected = viewModel.items.filter { item in item.selected }.map { $0.id }
+        onSelectionDone(selected)
+    }
+    
 }

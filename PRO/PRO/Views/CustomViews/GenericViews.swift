@@ -260,3 +260,75 @@ struct LottieView: UIViewRepresentable {
     
     func updateUIView(_ uiView: UIView, context: UIViewRepresentableContext<LottieView>) {}
 }
+
+struct ChipView: View {
+    
+    var chip: ChipItem
+    
+    var body: some View {
+        HStack {
+            if !chip.image.isEmpty {
+                Image.init(systemName: chip.image).font(.title3)
+                    .onTapGesture {
+                        
+                    }
+            }
+            Text(chip.label)
+                .font(.system(size: 13))
+                .lineLimit(1)
+        }.padding(.all, 5)
+            .foregroundColor(.cTextHigh)
+            .background(Color.cUnselected)
+            .cornerRadius(40)
+            .overlay(
+                RoundedRectangle(cornerRadius: 40)
+                    .stroke(Color.cSelected, lineWidth: 1)
+            )
+    }
+    
+}
+
+struct ChipsContainerView: View {
+    
+    @Binding var chips: [ChipItem]
+    
+    @State private var containerHeight = CGFloat(0)
+    
+    var body: some View {
+        var width = CGFloat.zero
+        var height = CGFloat.zero
+        return GeometryReader { geo in
+            ZStack(alignment: .topLeading) {
+                ForEach(chips, id: \.id) { chip in
+                    ChipView(chip: chip)
+                    .padding(.all, 5)
+                    .alignmentGuide(.leading) { dimension in
+                        if (abs(width - dimension.width) > geo.size.width) {
+                            width = 0
+                            height -= dimension.height
+                        }
+                        
+                        let result = width
+                        if chip.id == chips.last!.id {
+                            width = 0
+                        } else {
+                            width -= dimension.width
+                        }
+                        return result
+                    }
+                    .alignmentGuide(.top) { dimension in
+                        let result = height
+                        if chip.id == chips.last!.id {
+                            height = 0
+                            DispatchQueue.main.async {
+                                containerHeight = result * -1
+                            }
+                        }
+                        return result
+                    }
+                }
+            }
+        }
+        .frame(height: containerHeight + 20)
+    }
+}

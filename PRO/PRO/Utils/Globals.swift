@@ -56,6 +56,7 @@ extension Color {
     static let cTextDisabled = Color("colorTextDisabled")
     static let cTextLink = Color("colorTextLink")
     static let cSelected = Color("colorSelected")
+    static let cUnselected = Color("colorUnselected")
     static let cFieldBorder = Color("colorFieldBorder")
     static let cToggleActive = Color("colorToggleActive")
     static let cFABBackground = Color("colorFABBackground")

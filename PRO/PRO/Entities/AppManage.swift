@@ -90,5 +90,5 @@ enum ContentType {
 }
 
 enum PanelLayout {
-    case list, map
+    case list, map, filter
 }
