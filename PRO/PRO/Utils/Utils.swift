@@ -688,3 +688,25 @@ class DynamicUtils {
     }
     
 }
+
+class TextUtils {
+    
+    static func dateRange(values: [String]) -> String {
+        if values.count > 1 {
+            return dateRange(values: [Utils.strToDate(value: values[0]), Utils.strToDate(value: values[1])])
+        }
+        return ""
+    }
+    
+    static func dateRange(values: [Date]) -> String {
+        if values.count > 1 {
+            return String(format: NSLocalizedString("envFromTo", comment: "From %@ to %@"), Utils.dateFormat(date: values[0], format: "dd MMM yyy"), Utils.dateFormat(date: values[1], format: "dd MMM yyy"))
+        }
+        return ""
+    }
+    
+    static func serializeEnv(s: String) -> String {
+        return NSLocalizedString("env\(s.replacingOccurrences(of: "-", with: "_").components(separatedBy: "_").map { $0.capitalized }.joined(separator: ""))", comment: s)
+    }
+    
+}

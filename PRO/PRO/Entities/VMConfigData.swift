@@ -11,6 +11,7 @@ import RealmSwift
 class AdvertisingMaterial: Object, Codable {
     @Persisted(primaryKey: true) var objectId: ObjectId
     @Persisted var id = 0
+    @Persisted var code: String?
     @Persisted var name: String?
     @Persisted var type: Int?
     @Persisted var countryId: Int?
@@ -24,7 +25,30 @@ class AdvertisingMaterial: Object, Codable {
     @Persisted var sets = List<AdvertisingMaterialSet>()
     
     private enum CodingKeys: String, CodingKey {
-        case id = "id_material", name = "nombre", type = "tipo", countryId = "id_pais", isSample = "muestra_m", isActive = "activo", isOrderAvailable = "disponible_pedidos", isTransferenceAvailable = "transferencia", color, price = "costo", description_ = "descripcion", sets
+        case id = "id_material", code = "codigo", name = "nombre", type = "tipo", countryId = "id_pais", isSample = "muestra_m", isActive = "activo", isOrderAvailable = "disponible_pedidos", isTransferenceAvailable = "transferencia", color, price = "costo", description_ = "descripcion", sets
+    }
+    
+    override init() {
+        super.init()
+    }
+    
+    required init(from decoder: Decoder) throws {
+        super.init()
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        self.id = try DynamicUtils.intTypeDecoding(container: container, key: .id)
+        self.code = try DynamicUtils.stringTypeDecoding(container: container, key: .code)
+        self.name = try DynamicUtils.stringTypeDecoding(container: container, key: .name)
+        self.type = try DynamicUtils.intTypeDecoding(container: container, key: .type)
+        self.countryId = try DynamicUtils.intTypeDecoding(container: container, key: .countryId)
+        self.isSample = try DynamicUtils.stringTypeDecoding(container: container, key: .isSample)
+        self.isActive = try DynamicUtils.intTypeDecoding(container: container, key: .isActive)
+        self.isOrderAvailable = try DynamicUtils.intTypeDecoding(container: container, key: .isOrderAvailable)
+        self.isTransferenceAvailable = try DynamicUtils.intTypeDecoding(container: container, key: .isTransferenceAvailable)
+        self.color = try DynamicUtils.stringTypeDecoding(container: container, key: .color)
+        self.price = try DynamicUtils.floatTypeDecoding(container: container, key: .price)
+        self.description_ = try DynamicUtils.stringTypeDecoding(container: container, key: .description_)
+        self.sets = try DynamicUtils.listTypeDecoding(container: container, key: .sets)
     }
     
     static func primaryCodingKey() -> String {
@@ -44,6 +68,42 @@ class AdvertisingMaterialSet: Object, Codable {
     
     private enum CodingKeys: String, CodingKey {
         case id = "material_set_id", label = "set_id", dueDate = "due_date", stock, delivered
+    }
+    
+    override init() {
+        super.init()
+    }
+    
+    required init(from decoder: Decoder) throws {
+        super.init()
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        self.id = try DynamicUtils.intTypeDecoding(container: container, key: .id)
+        self.label = try DynamicUtils.stringTypeDecoding(container: container, key: .label)
+        self.stock = try DynamicUtils.intTypeDecoding(container: container, key: .stock)
+        self.delivered = try DynamicUtils.intTypeDecoding(container: container, key: .delivered)
+        self.dueDate = try DynamicUtils.stringTypeDecoding(container: container, key: .dueDate)
+    }
+}
+
+class AdvertisingMaterialPlain: Object, Codable {
+    @Persisted(primaryKey: true) var objectId: ObjectId
+    @Persisted var id = 0
+    @Persisted var code: String?
+    @Persisted var name: String?
+    @Persisted var type: Int?
+    @Persisted var countryId: Int?
+    @Persisted var isActive: Int?
+    @Persisted var description_: String?
+    
+    private enum CodingKeys: String, CodingKey {
+        case id = "id_material", code = "codigo", name = "nombre", type = "tipo", countryId = "id_pais", isActive = "activo", description_ = "descripcion"
+    }
+    
+    static func primaryCodingKey() -> String {
+        let codingKey: CodingKeys
+        codingKey = .id
+        return codingKey.rawValue
     }
 }
 
@@ -485,8 +545,31 @@ class User: Object, Codable {
     @Persisted var permissionsInCharge: List<UserPermissionInCharge>
     
     private enum CodingKeys: String, CodingKey {
-        case id = "id_usuario", dni = "identificacion", name = "nombre", type = "tipo", countryId = "id_pais", regionId = "id_region",
+        case id = "id_usuario", dni = "identificacion", name = "nombre", email, type = "tipo", countryId = "id_pais", regionId = "id_region",
              cityId = "id_ciudad", zoneId = "id_zona", lineId = "id_linea", hierarchy, permissions, permissionsInCharge = "permissions_in_charge"
+    }
+    
+    override init() {
+        super.init()
+    }
+    
+    required init(from decoder: Decoder) throws {
+        super.init()
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        self.id = try DynamicUtils.intTypeDecoding(container: container, key: .id)
+        self.dni = try DynamicUtils.stringTypeDecoding(container: container, key: .dni)
+        self.name = try DynamicUtils.stringTypeDecoding(container: container, key: .name)
+        self.email = try DynamicUtils.stringTypeDecoding(container: container, key: .email)
+        self.type = try DynamicUtils.intTypeDecoding(container: container, key: .type)
+        self.countryId = try DynamicUtils.intTypeDecoding(container: container, key: .countryId)
+        self.regionId = try DynamicUtils.intTypeDecoding(container: container, key: .regionId)
+        self.cityId = try DynamicUtils.intTypeDecoding(container: container, key: .cityId)
+        self.zoneId = try DynamicUtils.intTypeDecoding(container: container, key: .zoneId)
+        self.lineId = try DynamicUtils.intTypeDecoding(container: container, key: .lineId)
+        self.hierarchy = try DynamicUtils.listTypeDecoding(container: container, key: .hierarchy)
+        self.permissions = try DynamicUtils.listTypeDecoding(container: container, key: .permissions)
+        self.permissionsInCharge = try DynamicUtils.listTypeDecoding(container: container, key: .permissionsInCharge)
     }
     
     static func primaryCodingKey() -> String {

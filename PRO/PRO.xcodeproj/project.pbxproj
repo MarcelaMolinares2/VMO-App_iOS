@@ -66,6 +66,7 @@
 		AC6F1F3A24FF297B005E57DC /* PROTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC6F1F3924FF297B005E57DC /* PROTests.swift */; };
 		AC6F1F4524FF297B005E57DC /* PROUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC6F1F4424FF297B005E57DC /* PROUITests.swift */; };
 		AC6F86DA285AC99100A5C135 /* BottomSheet in Frameworks */ = {isa = PBXBuildFile; productRef = AC6F86D9285AC99100A5C135 /* BottomSheet */; };
+		AC716E22289A20F6008944C7 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = AC716E21289A20F6008944C7 /* Alamofire */; };
 		AC7892FE27AC4030002EBEBB /* amplifyconfiguration.json in Resources */ = {isa = PBXBuildFile; fileRef = AC7892FC27AC402F002EBEBB /* amplifyconfiguration.json */; };
 		AC7892FF27AC4030002EBEBB /* awsconfiguration.json in Resources */ = {isa = PBXBuildFile; fileRef = AC7892FD27AC402F002EBEBB /* awsconfiguration.json */; };
 		AC78D2E726D54A2D00674A4F /* EnvObjects.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC78D2E626D54A2D00674A4F /* EnvObjects.swift */; };
@@ -264,6 +265,7 @@
 				AC2840C528519C4B00669892 /* Lottie in Frameworks */,
 				AC56227E274FDF1A00098C3A /* AWSS3StoragePlugin in Frameworks */,
 				AC56227A274FDF1A00098C3A /* Amplify in Frameworks */,
+				AC716E22289A20F6008944C7 /* Alamofire in Frameworks */,
 				AC5B9762256CAE0F0007500D /* PartialSheet in Frameworks */,
 				ACB1C263285269AC000D3AD2 /* AlertToast in Frameworks */,
 				AC56227C274FDF1A00098C3A /* AWSCognitoAuthPlugin in Frameworks */,
@@ -729,6 +731,7 @@
 				AC2840C428519C4B00669892 /* Lottie */,
 				ACB1C262285269AC000D3AD2 /* AlertToast */,
 				AC6F86D9285AC99100A5C135 /* BottomSheet */,
+				AC716E21289A20F6008944C7 /* Alamofire */,
 			);
 			productName = PRO;
 			productReference = AC6F1F1F24FF2978005E57DC /* PRO.app */;
@@ -812,6 +815,7 @@
 				AC2840C328519C4B00669892 /* XCRemoteSwiftPackageReference "lottie-ios" */,
 				ACB1C261285269AC000D3AD2 /* XCRemoteSwiftPackageReference "AlertToast" */,
 				AC6F86D8285AC99100A5C135 /* XCRemoteSwiftPackageReference "BottomSheet" */,
+				AC716E20289A20F6008944C7 /* XCRemoteSwiftPackageReference "Alamofire" */,
 			);
 			productRefGroup = AC6F1F2024FF2978005E57DC /* Products */;
 			projectDirPath = "";
@@ -1465,6 +1469,14 @@
 				minimumVersion = 2.0.0;
 			};
 		};
+		AC716E20289A20F6008944C7 /* XCRemoteSwiftPackageReference "Alamofire" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Alamofire/Alamofire.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.0.0;
+			};
+		};
 		ACB1C261285269AC000D3AD2 /* XCRemoteSwiftPackageReference "AlertToast" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/elai950/AlertToast.git";
@@ -1510,6 +1522,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = AC6F86D8285AC99100A5C135 /* XCRemoteSwiftPackageReference "BottomSheet" */;
 			productName = BottomSheet;
+		};
+		AC716E21289A20F6008944C7 /* Alamofire */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AC716E20289A20F6008944C7 /* XCRemoteSwiftPackageReference "Alamofire" */;
+			productName = Alamofire;
 		};
 		ACB1C262285269AC000D3AD2 /* AlertToast */ = {
 			isa = XCSwiftPackageProductDependency;

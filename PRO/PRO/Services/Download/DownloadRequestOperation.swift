@@ -12,7 +12,7 @@ import Amplify
 
 enum DownloadRequestServices {
     case brick, category, city, college, config, country, cycle, day_request_reason, pharmacy_chain, pharmacy_type, prices_list, specialty, style, user, zone, concept_expense, menu,//Tertiary
-         material, product, line,//Secondary
+         material, material_plain, product, line,//Secondary
          activity, client, doctor, patient, pharmacy, potential//Primary
 }
 
@@ -185,7 +185,7 @@ class DownloadRequestOperation: Operation {
             case .line:
                 getRQ(from: Line.self, path: "line", primaryKey: Line.primaryCodingKey())
             case .material:
-                postRQ(from: AdvertisingMaterial.self, path: "material/filter", data: [String: Any](), primaryKey: AdvertisingMaterial.primaryCodingKey(), identifier: "advertising-material")
+                postRQ(from: AdvertisingMaterial.self, path: "advertising-material/stock", data: [String: Any](), primaryKey: AdvertisingMaterial.primaryCodingKey(), identifier: "advertising-material")
             case .product:
                 getRQ(from: Product.self, path: "product", primaryKey: Product.primaryCodingKey())
             case .activity:
@@ -197,7 +197,7 @@ class DownloadRequestOperation: Operation {
                        validate: true
                 )
             case .client:
-                postRQ(from: Client.self, path: "bridge/client/filter", data:
+                postRQ(from: Client.self, path: "client/filter", data:
                         [
                             "user_ids" : JWTUtils.sub()
                         ], primaryKey: Client.primaryCodingKey(),
@@ -205,7 +205,7 @@ class DownloadRequestOperation: Operation {
                        validate: true
                 )
             case .doctor:
-                postRQ(from: Doctor.self, path: "bridge/doctor/filter", data:
+                postRQ(from: Doctor.self, path: "doctor/filter", data:
                         [
                             "user_ids" : JWTUtils.sub()
                         ], primaryKey: Doctor.primaryCodingKey(),
@@ -213,7 +213,7 @@ class DownloadRequestOperation: Operation {
                        validate: true
                 )
             case .patient:
-                postRQ(from: Patient.self, path: "bridge/patient/filter", data:
+                postRQ(from: Patient.self, path: "patient/filter", data:
                         [
                             "user_ids" : JWTUtils.sub()
                         ], primaryKey: Patient.primaryCodingKey(),
@@ -221,7 +221,7 @@ class DownloadRequestOperation: Operation {
                        validate: true
                 )
             case .pharmacy:
-                postRQ(from: Pharmacy.self, path: "bridge/pharmacy/filter", data:
+                postRQ(from: Pharmacy.self, path: "pharmacy/filter", data:
                         [
                             "user_ids" : JWTUtils.sub()
                         ], primaryKey: Pharmacy.primaryCodingKey(),
@@ -229,7 +229,7 @@ class DownloadRequestOperation: Operation {
                        validate: true
                 )
             case .potential:
-                postRQ(from: PotentialProfessional.self, path: "bridge/potential/filter", data:
+                postRQ(from: PotentialProfessional.self, path: "potential/filter", data:
                         [
                             "user_ids" : JWTUtils.sub()
                         ], primaryKey: PotentialProfessional.primaryCodingKey(),
@@ -237,7 +237,7 @@ class DownloadRequestOperation: Operation {
                        validate: true
                 )
                 case .category:
-                    getRQ(from: PanelCategory.self, path: "panel-category", primaryKey: PanelCategory.primaryCodingKey())
+                    getRQ(from: PanelCategory.self, path: "panel/category", primaryKey: PanelCategory.primaryCodingKey())
                 case .college:
                     getRQ(from: College.self, path: "college", primaryKey: College.primaryCodingKey())
                 case .pharmacy_chain:
@@ -252,6 +252,8 @@ class DownloadRequestOperation: Operation {
                     getRQ(from: Style.self, path: "style", primaryKey: Style.primaryCodingKey())
                 case .menu:
                     getRQ(from: Menu.self, path: "menu/environment/M", primaryKey: Menu.primaryCodingKey())
+                case .material_plain:
+                    getRQ(from: AdvertisingMaterialPlain.self, path: "advertising-material", primaryKey: AdvertisingMaterial.primaryCodingKey())
             }
         } else {
             debugPrint("Sync Process End")

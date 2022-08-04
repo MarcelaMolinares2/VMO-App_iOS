@@ -261,7 +261,7 @@ class AdvertisingMaterialDeliveryReport: Codable {
     var transactionType: String = "D"
     var operationType: String = "O"
     var quantity: Int = 0
-    var comment: String = ""
+    var comment: String? = ""
     var date: String = ""
     
     var material: AdvertisingMaterial?

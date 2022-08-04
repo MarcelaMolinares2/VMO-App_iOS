@@ -49,6 +49,16 @@
 
 //Generic
 "envValidate" = "Validate";
+"envFromTo" = "From %@ to %@";
+"envCodeArg" = "Code: %@";
+"envQuantity" = "Quantity";
+"envQuantityAbb" = "Q: %@";
+"envObservations" = "Observations";
+"envMaterialAndSamples" = "Material and Samples";
+"envMaterial" = "Material";
+"envSuccessfullySaved" = "Date successfully saved";
+"envExpDate" = "(Exp.: %@)";
+"envRemainder" = "(Remainder: %@ units)";
 
 //Panels
 "envClient" = "Client";
@@ -76,8 +86,10 @@
 "errServerConection" = "Server error connection";
 "errMasterPassword" = "Password is incorrect";
 "errCognitoConfirm" = "The entered code is wrong";
+"errMaterialDeliveryEmpty" = "Please select at least one material/sample";
 
-
+//Modules
+"modMaterialRequest" = "Material Request";
 
 
 
@@ -114,10 +126,7 @@
 "modReports" = "Reports";
 "modSupport" = "Support";
 
-"materialRemainder" = "(Remainder: %@ units)";
-"expDate" = "(Exp.: %@)";
 "noneMaterialDelivery" = "Please add material";
-"materialQuantity" = "Q: %@";
 "envObservations" = "Observations";
 "addMaterialDelivery" = "Material and samples";
 

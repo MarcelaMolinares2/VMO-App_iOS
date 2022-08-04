@@ -57,7 +57,7 @@ class SyncSecondaryService: DownloadRequestOperation {
         self.prefix = "vm/config"
         
         step = 0
-        services = [.material, .product, .line, .cycle]
+        services = [.material, .material_plain, .product, .line, .cycle]
         get()
     }
     

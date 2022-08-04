@@ -85,7 +85,7 @@ struct MasterLaboratoryUserView: View {
     private func loadUsers() {
         UserDefaults.standard.setValue(laboratory.hash, forKey: Globals.LABORATORY_HASH)
         UserDefaults.standard.setValue(laboratory.path, forKey: Globals.LABORATORY_PATH)
-        MasterServer().getRequest(path: "master/bridge/users") { success, code, data in
+        MasterServer().getRequest(path: "master/users") { success, code, data in
             if success {
                 if let rs = data as? [String] {
                     for item in rs {

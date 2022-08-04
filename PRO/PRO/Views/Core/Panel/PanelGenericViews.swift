@@ -144,12 +144,14 @@ struct CustomPanelListView<Content: View>: View {
     var realm: Realm
     var totalPanel: Int
     var filtered: [Panel]
+    var sortOptions: [String]
     var filtersDynamic: [String]
     @Binding var sort: SortModel
     @Binding var filters: [DynamicFilter]
     var content: () -> Content
     @State var layout: PanelLayout = .list
     @State private var filteredCount = 0
+    @State private var modalSort = false
     
     var body: some View {
         if layout == .filter {
@@ -162,7 +164,7 @@ struct CustomPanelListView<Content: View>: View {
                     PanelListHeader(total: totalPanel, filtered: filtered.count) {
                         layout = .filter
                     } onSortTapped: {
-                        
+                        modalSort = true
                     }
                     if layout == .list {
                         ScrollView {
@@ -189,6 +191,12 @@ struct CustomPanelListView<Content: View>: View {
                 }
                 .padding(.bottom, Globals.UI_FAB_VERTICAL)
                 .padding(.horizontal, Globals.UI_FAB_HORIZONTAL)
+            }
+            .partialSheet(isPresented: $modalSort) {
+                DialogSortPickerView(data: sortOptions) { selected in
+                    sort = selected
+                    modalSort = false
+                }
             }
         }
     }
@@ -346,21 +354,19 @@ struct PanelFilterView: View {
                         let f = filters[i]
                         if !filterStaticAdded(key: f.key) {
                             Button(action: {
-                                if f.controlType == "date-range" {
-                                    
-                                } else {
-                                    filters[i].modalOpen = true
-                                }
+                                filters[i].modalOpen = true
                             }) {
                                 HStack {
                                     VStack(alignment: .leading) {
-                                        Text("env\(f.key.components(separatedBy: "_").map { $0.capitalized }.joined(separator: ""))")
+                                        Text(TextUtils.serializeEnv(s: f.key))
                                             .foregroundColor(.cTextMedium)
                                             .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
                                         VStack {
                                             if hasValues(key: f.key) {
                                                 if f.controlType == "date-range" {
-                                                    
+                                                    Text(TextUtils.dateRange(values: f.values))
+                                                        .foregroundColor(.cTextHigh)
+                                                        .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
                                                 } else {
                                                     ChipsContainerView(chips: $filters[i].chips)
                                                 }
@@ -393,15 +399,21 @@ struct PanelFilterView: View {
                                 .padding(.vertical, 6)
                             }
                             .sheet(isPresented: $filters[i].modalOpen) {
-                                DialogSourcePickerView(selected: $filters[i].values, key: f.key, multiple: true, title: NSLocalizedString("env\(f.key.components(separatedBy: "_").map { $0.capitalized }.joined(separator: ""))", comment: "")) { selected in
-                                    filters[i].modalOpen = false
-                                    filters[i].chips.removeAll()
-                                    selected.forEach { s in
-                                        let label = DynamicUtils.tableValue(key: f.key, selected: [s]) ?? ""
-                                        if !label.isEmpty {
-                                            filters[i].chips.append(ChipItem(label: label, image: "", onApplyTapped: {
-                                                
-                                            }))
+                                if f.controlType == "date-range" {
+                                    DialogDateRangePicker(selected: $filters[i].values) { _ in
+                                        filters[i].modalOpen = false
+                                    }
+                                } else {
+                                    DialogSourcePickerView(selected: $filters[i].values, key: f.key, multiple: true, title: TextUtils.serializeEnv(s: f.key)) { selected in
+                                        filters[i].modalOpen = false
+                                        filters[i].chips.removeAll()
+                                        selected.forEach { s in
+                                            let label = DynamicUtils.tableValue(key: f.key, selected: [s]) ?? ""
+                                            if !label.isEmpty {
+                                                filters[i].chips.append(ChipItem(label: label, image: "", onApplyTapped: {
+                                                    
+                                                }))
+                                            }
                                         }
                                     }
                                 }

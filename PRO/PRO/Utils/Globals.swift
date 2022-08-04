@@ -10,7 +10,7 @@ import SwiftUI
 
 class Globals {
     
-    static let APP_SERVER = "https://vmo-app.appspot.com/v2/"
+    static let APP_SERVER = "https://api-gcloud-run-ujaspmx5nq-uc.a.run.app/"
     static let APP_KEY = "lV4N1yq1lmRFwDPlH0btR1igODXrBWUL"
     static let ACCESS_TOKEN = "ACCESS_TOKEN"
     static let LABORATORY_HASH = "LABORATORY_HASH"
@@ -32,6 +32,10 @@ class Globals {
     static let UI_FAB_SIZE = CGFloat(60)
     static let UI_FAB_HORIZONTAL = CGFloat(10)
     static let UI_FAB_VERTICAL = CGFloat(10)
+    static let UI_SC_PADDING_HORIZONTAL = CGFloat(15)
+    static let UI_FORM_PADDING_HORIZONTAL = CGFloat(15)
+    
+    static let ENV_SAVE_DELAY = CGFloat(1)
     
 }
 
@@ -61,6 +65,8 @@ extension Color {
     static let cToggleActive = Color("colorToggleActive")
     static let cFABBackground = Color("colorFABBackground")
     static let cFABForeground = Color("colorFABForeground")
+    static let cDone = Color("colorDone")
+    static let cHighlighted = Color("colorHighlighted")
     
     static let cPanelActivity = Color("colorPanelActivity")
     static let cPanelClient = Color("colorPanelClient")

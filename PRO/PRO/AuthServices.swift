@@ -56,7 +56,7 @@ class AppAuthService: ObservableObject {
                     "type": "M",
                     "fcmToken": token,
                     "platform": "iOS"
-                ], path: "auth/bridge/login") { (successful, code, data) in
+                ], path: "auth/login") { (successful, code, data) in
                     print(successful, code, data)
                     if successful {
                         let d = data as! [String : Any]
@@ -179,7 +179,7 @@ class MasterAuthService: ObservableObject {
                     "type": "M",
                     "fcmToken": token,
                     "platform": "iOS"
-                ], path: "master/bridge/auth") { (successful, code, data) in
+                ], path: "master/auth") { (successful, code, data) in
                     print(successful, code, data)
                     if successful {
                         self.isProcesing = false
@@ -243,7 +243,7 @@ class RecoverPasswordAuthService: ObservableObject {
                 print(token)
                 AppServer().postRequest(data: [
                     "username": username
-                ], path: "master/bridge/auth") { (successful, code, data) in
+                ], path: "master/auth") { (successful, code, data) in
                     print(successful, code, data)
                     /*if successful {
                         self.isProcesing = false
@@ -308,7 +308,7 @@ class MasterAppAuthService: ObservableObject {
                     "type": "M",
                     "fcmToken": token,
                     "platform": "iOS"
-                ], path: "master/bridge/login") { (successful, code, data) in
+                ], path: "master/login") { (successful, code, data) in
                     print(successful, code, data)
                     if successful {
                         self.isProcesing = false

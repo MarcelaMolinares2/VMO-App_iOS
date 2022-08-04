@@ -44,24 +44,6 @@ struct PanelListView: View {
     }
 }
 
-struct PanelItemDoctorOld: View {
-    let realm: Realm
-    let userId: Int
-    var doctor: Doctor
-    
-    @State var menuIsPresented = false
-    
-    var body: some View {
-        PanelItem(realm: realm, userId: userId, panel: doctor, subtitle: SpecialtyDao(realm: realm).by(id: doctor.specialtyId)?.name ?? "", complement: doctor.institution ?? "") {
-            menuIsPresented = true
-        }
-            .partialSheet(isPresented: $menuIsPresented) {
-                PanelMenu(isPresented: self.$menuIsPresented, panel: doctor)
-            }
-    }
-    
-}
-
 struct PanelItemDoctor: View {
     let realm: Realm
     let userId: Int
@@ -70,6 +52,66 @@ struct PanelItemDoctor: View {
     
     var body: some View {
         PanelItem(realm: realm, userId: userId, panel: doctor, subtitle: SpecialtyDao(realm: realm).by(id: doctor.specialtyId)?.name ?? "", complement: doctor.institution ?? "", onItemTapped: onItemTapped)
+            .onTapGesture {
+                onItemTapped()
+            }
+    }
+    
+}
+
+struct PanelItemPharmacy: View {
+    let realm: Realm
+    let userId: Int
+    var pharmacy: Pharmacy
+    let onItemTapped: () -> Void
+    
+    var body: some View {
+        PanelItem(realm: realm, userId: userId, panel: pharmacy, subtitle: PharmacyChainDao(realm: realm).by(id: pharmacy.pharmacyChainId)?.name ?? "", complement: "", onItemTapped: onItemTapped)
+            .onTapGesture {
+                onItemTapped()
+            }
+    }
+    
+}
+
+struct PanelItemClient: View {
+    let realm: Realm
+    let userId: Int
+    var client: Client
+    let onItemTapped: () -> Void
+    
+    var body: some View {
+        PanelItem(realm: realm, userId: userId, panel: client, subtitle: "", complement: "", onItemTapped: onItemTapped)
+            .onTapGesture {
+                onItemTapped()
+            }
+    }
+    
+}
+
+struct PanelItemPatient: View {
+    let realm: Realm
+    let userId: Int
+    var patient: Patient
+    let onItemTapped: () -> Void
+    
+    var body: some View {
+        PanelItem(realm: realm, userId: userId, panel: patient, subtitle: "", complement: "", onItemTapped: onItemTapped)
+            .onTapGesture {
+                onItemTapped()
+            }
+    }
+    
+}
+
+struct PanelItemPotential: View {
+    let realm: Realm
+    let userId: Int
+    var potential: PotentialProfessional
+    let onItemTapped: () -> Void
+    
+    var body: some View {
+        PanelItem(realm: realm, userId: userId, panel: potential, subtitle: "", complement: "", onItemTapped: onItemTapped)
             .onTapGesture {
                 onItemTapped()
             }
@@ -231,6 +273,24 @@ struct CustomSection<Content: View>: View {
     }
 }
 
+struct CustomCard<Content: View>: View {
+    var content: () -> Content
+    
+    init(@ViewBuilder content: @escaping () -> Content) {
+        self.content = content
+    }
+    
+    var body: some View {
+        VStack {
+            VStack(content: content)
+                .padding()
+                .background(Color.cBackground1dp)
+                .cornerRadius(5)
+        }
+        .padding(.top, 10)
+    }
+}
+
 struct LottieView: UIViewRepresentable {
     var name: String
     var loopMode: LottieLoopMode = .playOnce
@@ -331,4 +391,17 @@ struct ChipsContainerView: View {
         }
         .frame(height: containerHeight + 20)
     }
+}
+
+struct ScrollViewFABBottom: View {
+    
+    var height: CGFloat = 70
+    
+    var body: some View {
+        VStack {
+            
+        }
+        .frame(height: height)
+    }
+    
 }

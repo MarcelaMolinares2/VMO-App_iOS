@@ -66,26 +66,47 @@ class NetworkService {
                 let escapedParam = String(describing: d.value).addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)
                 params.append("\(d.key)=\(escapedParam!)")
             }
-            q = "?\(params.joined(separator: "&"))"
+            q = params.joined(separator: "&")
         }
         
         return q
     }
     
+    /*
+     func queryItems(data: [String:Any]) -> [URLQueryItem] {
+     var items = [URLQueryItem]()
+     data.forEach { (key: String, value: Any) in
+     items.append(URLQueryItem(name: key, value: Utils.castString(value: value)))
+     }
+     print(items)
+     return items
+     }
+     let dataURL = URL(string: "\(urlServer!)\(path)")!
+     let url = dataURL.appending(queryItems(data: data))!
+     */
+    
     func generateRequest(data: [String:Any], method: String, path: String) -> URLRequest {
         let defaults = UserDefaults.standard
-        //let jsonData = try? JSONSerialization.data(withJSONObject: data)
         
-        var dataURL = "\(urlServer!)\(path)"
-        if !data.isEmpty {
-            dataURL = "\(dataURL)\(params(data: data))"
+        var request: URLRequest
+        if method == "GET" {
+            var dataURL = "\(urlServer!)\(path)"
+            if !data.isEmpty {
+                dataURL = "\(dataURL)?\(params(data: data))"
+            }
+            let url = URL(string: dataURL)!
+            request = URLRequest(url: url)
+            
+            request.setValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
+        } else {
+            let dataEncoded : Data = params(data: data).data(using: .utf8)!
+            request = URLRequest(url: URL(string: "\(urlServer!)\(path)")!)
+            request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField:"Content-Type")
+            request.httpBody = dataEncoded
         }
-        print(method, dataURL)
-        let url = URL(string: dataURL)!
         
-        var request = URLRequest(url: url)
+        request.setValue("application/json; charset=utf-8", forHTTPHeaderField: "Accept")
         request.httpMethod = method
-        //request.httpBody = jsonData
         
         switch server {
             case .application:
@@ -111,9 +132,6 @@ class NetworkService {
             default:
                 break
         }
-        
-        request.setValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
-        request.setValue("application/json; charset=utf-8", forHTTPHeaderField: "Accept")
         
         return request
     }

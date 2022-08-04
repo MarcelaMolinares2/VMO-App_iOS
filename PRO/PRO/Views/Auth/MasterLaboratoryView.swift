@@ -36,7 +36,7 @@ struct MasterLaboratoryView: View {
     }
     
     private func loadLabs() {
-        MasterServer().getRequest(path: "master/bridge/laboratories") { success, code, data in
+        MasterServer().getRequest(path: "master/laboratories") { success, code, data in
             if success {
                 if let rs = data as? [String] {
                     for item in rs {

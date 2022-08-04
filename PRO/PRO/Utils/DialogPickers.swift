@@ -39,6 +39,70 @@ class ListPanelViewModel: ObservableObject {
 
 }
 
+struct DialogDateRangePicker: View {
+    @Binding var selected: [String]
+    let onSelectionDone: (_ selected: [String]) -> Void
+    
+    @State private var dateStart = Date()
+    @State private var dateEnd = Date()
+    
+    var body: some View {
+        VStack {
+            ScrollView {
+                VStack {
+                    Text("envFrom")
+                        .foregroundColor(.cTextMedium)
+                    DatePicker("envFrom", selection: $dateStart, displayedComponents: [.date])
+                        .datePickerStyle(.graphical)
+                }
+                .padding(.top, 5)
+                VStack {
+                    Text("envTo")
+                        .foregroundColor(.cTextMedium)
+                    DatePicker("envTo", selection: $dateEnd, in: dateStart..., displayedComponents: [.date])
+                        .datePickerStyle(.graphical)
+                }
+            }
+            VStack {
+                Button(action: {
+                    self.done()
+                }) {
+                    Image("ic-done")
+                        .resizable()
+                        .scaledToFit()
+                        .padding(5)
+                        .foregroundColor(.cIcon)
+                }
+                .frame(minWidth: 0, maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
+            }
+            .frame(height: 40)
+            .padding([.leading, .trailing], 10)
+        }
+        .onAppear {
+            loadData()
+        }
+    }
+    
+    func loadData() {
+        if !selected.isEmpty {
+            if !selected[0].isEmpty {
+                dateStart = Utils.strToDate(value: selected[0])
+            }
+        }
+        if selected.count > 1 {
+            if !selected[1].isEmpty {
+                dateEnd = Utils.strToDate(value: selected[1])
+            }
+        }
+    }
+    
+    func done() {
+        selected = [Utils.dateFormat(date: dateStart), Utils.dateFormat(date: dateEnd)]
+        onSelectionDone(selected)
+    }
+    
+}
+
 struct PanelDialogPicker: View {
     
     @ObservedObject var modalToggle: ModalToggle
@@ -197,6 +261,63 @@ struct GenericDialogItem: View {
     
 }
 
+struct DialogSortPickerView: View {
+    var data: [String]
+    
+    @ObservedObject var viewModel = ListGenericViewModel()
+    let onSelectionDone: (_ selected: SortModel) -> Void
+    
+    var body: some View {
+        VStack {
+            Text("envSortBy")
+                .foregroundColor(.cTextMedium)
+            ForEach(viewModel.items, id: \.id) { item in
+                GenericDialogItem(item: item, alignment: .center) {
+                    self.onItemSelected(item: item)
+                }
+            }
+            HStack {
+                Button(action: {
+                    done(asc: false)
+                }) {
+                    Text("envDescending")
+                        .foregroundColor(.cTextHigh)
+                }
+                .frame(minWidth: 0, maxWidth: .infinity, minHeight: 44, maxHeight: 44, alignment: .center)
+                Button(action: {
+                    done(asc: true)
+                }) {
+                    Text("envAscending")
+                        .foregroundColor(.cTextHigh)
+                }
+                .frame(minWidth: 0, maxWidth: .infinity, minHeight: 44, maxHeight: 44, alignment: .center)
+            }
+        }
+        .onAppear {
+            loadData()
+        }
+    }
+    
+    func loadData() {
+        let list = data.map { GenericSelectableItem(id: $0, label: TextUtils.serializeEnv(s: $0)) }
+        viewModel.put(list: list)
+    }
+    
+    func onItemSelected(item: GenericSelectableItem) {
+        viewModel.items.forEach { item in
+            item.selected = false
+        }
+        item.selected = !item.selected
+        viewModel.toggle()
+    }
+    
+    func done(asc: Bool) {
+        let selected = viewModel.items.first { item in item.selected }
+        onSelectionDone(SortModel(key: selected?.id ?? "", ascending: asc))
+    }
+    
+}
+
 struct DialogPlainPickerView: View {
     @Binding var selected: [String]
     var data: String = ""
@@ -337,6 +458,8 @@ struct DialogSourcePickerView: View {
                 list = GenericSelectableDao(realm: try! Realm()).lines()
             case "MATERIAL":
                 list = GenericSelectableDao(realm: try! Realm()).materials()
+            case "MATERIAL-PLAIN":
+                list = GenericSelectableDao(realm: try! Realm()).materialsPlain()
             case "PHARMACY-CHAIN":
                 list = GenericSelectableDao(realm: try! Realm()).pharmacyChains()
             case "PHARMACY-TYPE":

@@ -10,160 +10,158 @@ import SwiftUI
 import RealmSwift
 import AlertToast
 
-struct Materials: Hashable{
-    var id: String
-    var name: String
+
+class AdvertisingMaterialRequestDetailModel: ObservableObject, Identifiable {
+    var materialId: Int = 0
+    @Published var quantity: Int = 0
+    @Published var comment: String = ""
 }
 
+
 struct MaterialRequestView: View {
-    
-    @ObservedObject private var selectMaterialsModalToggle = ModalToggle()
     @EnvironmentObject var viewRouter: ViewRouter
     
-    @State private var selectedMaterials = [String]()
-    @State private var materialRequest = AdvertisingMaterialRequest()
-    @State private var dateStart = Date()
-    @State private var comment = ""
-    @State var materials: [Materials] = []
-    
-    var realm = try? Realm()
-    
-    let date = Date()
-    
-    @State var obs = ""
-    
+    @State private var selected = [String]()
+    @State private var details = [AdvertisingMaterialRequestDetailModel]()
+    @State private var modalOpen = false
     @State private var showToast = false
+    @State private var savedToast = false
+    
+    var realm = try! Realm()
     
     var body: some View {
-        ZStack {
+        ZStack(alignment: .bottom) {
             VStack {
-                HeaderToggleView(title: "modMaterialRequest") {
-                    
-                }
-                
-                HStack {
-                    VStack{
-                        Text(NSLocalizedString("envDate", comment: ""))
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .foregroundColor(.cTextHigh)
-                        HStack{
-                            DatePicker("", selection: $dateStart, in: Date()..., displayedComponents: .date)
-                                .labelsHidden()
-                                .clipped()
-                                .accentColor(.cTextHigh)
-                                .background(Color.white)
-                            Spacer()
+                HeaderToggleView(title: "modMaterialRequest")
+                VStack {
+                    Button(action: {
+                        modalOpen = true
+                    }) {
+                        ZStack(alignment: .center) {
+                            HStack {
+                                Spacer()
+                                Image("ic-plus-circle")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 40, height: 40, alignment: .center)
+                                    .foregroundColor(.cIcon)
+                            }
+                            VStack {
+                                Text("envMaterialAndSamples")
+                                    .foregroundColor(.cTextHigh)
+                            }
                         }
                     }
-                    
-                    Spacer()
-                    Image("ic-day-request")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(height: 30)
-                        .foregroundColor(Color.cPrimaryLight)
-                }
-                .padding(15)
-                
-                TextField(NSLocalizedString("envObservations", comment: ""), text: $comment)
-                    .frame(height: 30)
-                    .padding([.leading, .trailing], 10)
-                    .foregroundColor(.black)
-                Divider()
-                    .frame(width: UIScreen.main.bounds.size.width * 0.95, height: 1)
-                    .background(Color.gray)
-                List {
-                    ForEach(materials, id: \.self) { item in
-                        HStack{
-                            Text(item.name)
-                                .padding([.leading, .trailing], 15)
-                                .padding([.top, .bottom], 10)
-                            Spacer()
+                    ScrollView {
+                        ForEach($details) { $detail in
+                            let material = MaterialPlainDao(realm: realm).by(id: detail.materialId)
+                            VStack {
+                                CustomCard {
+                                    HStack {
+                                        Text(material?.name ?? "")
+                                            .foregroundColor(.cTextHigh)
+                                            .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
+                                            .lineLimit(2)
+                                        Button(action: {
+                                            delete(detail: detail)
+                                        }) {
+                                            Image("ic-delete")
+                                                .resizable()
+                                                .foregroundColor(.cDanger)
+                                                .aspectRatio(contentMode: .fit)
+                                                .frame(width: 22, height: 22, alignment: .center)
+                                                .padding(8)
+                                        }
+                                        .frame(width: 44, height: 44, alignment: .center)
+                                    }
+                                    Text("envQuantity")
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .foregroundColor((detail.quantity < 0) ? Color.cDanger : .cTextMedium)
+                                    TextField("envQuantity", value: $detail.quantity, formatter: NumberFormatter())
+                                        .cornerRadius(CGFloat(4))
+                                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    Text("envObservations")
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .foregroundColor(.cTextMedium)
+                                    TextField("envObservations", text: $detail.comment)
+                                        .cornerRadius(CGFloat(4))
+                                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                                }
+                            }
+                            .padding(.horizontal, Globals.UI_SC_PADDING_HORIZONTAL)
                         }
-                        .background(Color.white)
-                        .frame(alignment: Alignment.center)
-                        .clipped()
-                        .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
+                        ScrollViewFABBottom()
                     }
-                    .onDelete(perform: self.delete)
-                }
-                .buttonStyle(PlainButtonStyle())
-            }
-            
-            VStack {
-                Spacer()
-                HStack {
-                    FAB(image: "ic-plus") {
-                        selectMaterialsModalToggle.status.toggle()
-                    }
-                    .padding(.horizontal, 20)
-                    Spacer()
                 }
             }
-            
-            VStack {
+            HStack {
                 Spacer()
-                HStack {
-                    Spacer()
+                if !savedToast {
                     FAB(image: "ic-cloud") {
-                        let formatter = DateFormatter()
-                        formatter.dateStyle = .short
-                        formatter.timeStyle = .none
-                        let datetime = formatter.string(from: dateStart)
-                        if materials.count > 0 {
-                            materialRequest.date = datetime
-                            //materialRequest.materials = materials.map { $0.id }.joined(separator: ",")
-                            AdvertisingMaterialRequestDao(realm: try! Realm()).store(advertisingMaterialRequest: materialRequest)
-                            goTo(page: "MASTER")
-                        } else {
-                            self.showToast.toggle()
-                        }
+                        validate()
                     }
                 }
-                .toast(isPresenting: $showToast) {
-                    AlertToast(type: .regular, title: NSLocalizedString("noneMaterialDelivery", comment: ""))
-                }
             }
-            
-            if selectMaterialsModalToggle.status {
-                GeometryReader {geo in
-                    CustomDialogPicker(onSelectionDone: onSelectionDone, selected: $selectedMaterials, key: "MATERIAL", multiple: true)
-                }
-                .background(Color.black.opacity(0.45))
+            .padding(.bottom, Globals.UI_FAB_VERTICAL)
+            .padding(.horizontal, Globals.UI_FAB_HORIZONTAL)
+        }
+        .sheet(isPresented: $modalOpen) {
+            DialogSourcePickerView(selected: $selected, key: "MATERIAL-PLAIN", multiple: true, title: "envMaterial") { selected in
+                onSelectionDone(selected)
             }
         }
+        .toast(isPresenting: $showToast) {
+            AlertToast(type: .error(.cWarning), title: NSLocalizedString("errMaterialDeliveryEmpty", comment: ""))
+        }
+        .toast(isPresenting: $savedToast) {
+            AlertToast(type: .complete(.cDone), title: NSLocalizedString("envSuccessfullySaved", comment: ""))
+        }
+    }
+    
+    func validate() {
+        if details.isEmpty {
+            showToast = true
+            return
+        }
+        save()
+    }
+    
+    func save() {
+        let materialRequest = AdvertisingMaterialRequest()
+        materialRequest.date = Utils.currentDateTime()
+        details.forEach { d in
+            let detail = AdvertisingMaterialRequestDetail()
+            detail.materialId = d.materialId
+            detail.quantity = d.quantity
+            detail.comment = d.comment
+            materialRequest.details.append(detail)
+        }
+        AdvertisingMaterialRequestDao(realm: realm).store(advertisingMaterialRequest: materialRequest)
+        goTo(page: "MASTER")
     }
     
     func goTo(page: String) {
-        viewRouter.currentPage = page
+        savedToast = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + Globals.ENV_SAVE_DELAY) {
+            viewRouter.currentPage = page
+        }
     }
     
-    private func delete(at offsets: IndexSet) {
-        self.materials.remove(atOffsets: offsets)
+    private func delete(detail: AdvertisingMaterialRequestDetailModel) {
+        selected = selected.filter { $0 != String(detail.materialId) }
+        details = details.filter { $0.materialId != detail.materialId }
     }
     
     func onSelectionDone(_ selected: [String]) {
-        selectMaterialsModalToggle.status.toggle()
-        
-        selectedMaterials.forEach { id in
-            if let material = MaterialDao(realm: try! Realm()).by(id: id) {
-                var exists = false
-                for i in materials {
-                    if i.name == material.name {
-                        exists = true
-                        break
-                    }
-                }
-                if !exists {
-                    materials.append(Materials(id: id, name: material.name ?? "" ))
-                }
+        modalOpen = false
+        selected.forEach { s in
+            if details.filter({ d in
+                d.materialId == Utils.castInt(value: s)
+            }).count <= 0 {
+                let detail = AdvertisingMaterialRequestDetailModel()
+                detail.materialId = Utils.castInt(value: s)
+                details.append(detail)
             }
         }
-    }
-}
-
-struct MaterialRequestView_Previews: PreviewProvider {
-    static var previews: some View {
-        MaterialRequestView()
     }
 }

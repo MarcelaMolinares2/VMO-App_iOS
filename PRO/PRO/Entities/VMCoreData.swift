@@ -64,7 +64,7 @@ class AdvertisingMaterialDelivery: Object, Encodable, SyncEntity {
     }
 }
 
-class AdvertisingMaterialDeliveryMaterial: Object, Encodable {
+class AdvertisingMaterialDeliveryMaterial: Object, Encodable, Identifiable {
     @Persisted var materialId: Int = 0
     @Persisted var materialCategoryId: Int = 0
     @Persisted var sets = List<AdvertisingMaterialDeliveryMaterialSet>()
@@ -351,6 +351,16 @@ extension Panel {
             }
         }
         return ""
+    }
+    
+    func coverage(userId: Int) -> Float {
+        if let user = findUser(userId: userId <= 0 ? JWTUtils.sub() : userId) {
+            if user.visitsFee <= 0 {
+                return 0
+            }
+            return Float(((user.visitsCycle * 100) / user.visitsFee))
+        }
+        return 0
     }
     
     func mainLocation() -> PanelLocation? {

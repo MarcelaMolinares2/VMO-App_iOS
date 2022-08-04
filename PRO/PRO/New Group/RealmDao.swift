@@ -36,6 +36,16 @@ class AdvertisingMaterialRequestDao: GenericDao {
     
 }
 
+class AdvertisingMaterialDeliveryDao: GenericDao {
+    
+    func store(advertisingMaterialDelivery: AdvertisingMaterialDelivery) {
+        try! realm.write {
+            realm.add(advertisingMaterialDelivery, update: .all)
+        }
+    }
+    
+}
+
 class BrickDao: GenericDao {
     
     func all() -> [Brick] {
@@ -344,7 +354,11 @@ class GenericSelectableDao: GenericDao {
     }
     
     func materials() -> [GenericSelectableItem] {
-        MaterialDao(realm: self.realm).all().map { GenericSelectableItem(id: "\($0.id)", label: $0.name ?? "") }
+        MaterialDao(realm: self.realm).all().map { GenericSelectableItem(id: "\($0.id)", label: $0.name ?? "", complement: String(format: NSLocalizedString("envCodeArg", comment: "Code: %@"), $0.code ?? "--")) }
+    }
+    
+    func materialsPlain() -> [GenericSelectableItem] {
+        MaterialPlainDao(realm: self.realm).all().map { GenericSelectableItem(id: "\($0.id)", label: $0.name ?? "", complement: String(format: NSLocalizedString("envCodeArg", comment: "Code: %@"), $0.code ?? "--")) }
     }
     
     func pharmacyChains() -> [GenericSelectableItem] {
@@ -414,6 +428,34 @@ class MaterialDao: GenericDao {
     }
     
     func by(id: Int) -> AdvertisingMaterial? {
+        return by(id: String(describing: id))
+    }
+    
+}
+
+class MaterialPlainDao: GenericDao {
+    
+    func all() -> [AdvertisingMaterialPlain] {
+        return Array(realm.objects(AdvertisingMaterialPlain.self).sorted(byKeyPath: "name"))
+    }
+    
+    func by(id: String) -> AdvertisingMaterialPlain? {
+        return realm.objects(AdvertisingMaterialPlain.self).filter("id == \(id)").first
+    }
+    
+    func by(id: Int) -> AdvertisingMaterialPlain? {
+        return by(id: String(describing: id))
+    }
+    
+}
+
+class MaterialSetDao: GenericDao {
+    
+    func by(id: String) -> AdvertisingMaterialSet? {
+        return realm.objects(AdvertisingMaterialSet.self).filter("id == \(id)").first
+    }
+    
+    func by(id: Int) -> AdvertisingMaterialSet? {
         return by(id: String(describing: id))
     }
     
@@ -523,6 +565,10 @@ class PharmacyChainDao: GenericDao {
     
     func by(id: String) -> PharmacyChain? {
         return realm.objects(PharmacyChain.self).filter("id == \(id)").first
+    }
+    
+    func by(id: Int?) -> PharmacyChain? {
+        return by(id: String(describing: id ?? 0))
     }
     
 }
