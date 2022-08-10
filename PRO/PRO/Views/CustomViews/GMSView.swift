@@ -32,15 +32,67 @@ struct CustomMarkerMapView: UIViewRepresentable {
     @ObservedObject var locationManager = LocationManager()
     private let zoom: Float = 15.0//4.6187452,-74.1592274,15z
     @Binding var markers: [GMSMarker]
+    @Binding var goToMyLocation: Bool
+    @Binding var fitToBounds: Bool
+    
+    var onMarkerTapped: (GMSMarker) -> ()
     
     func makeUIView(context: Context) -> GMSMapView {
         let camera = GMSCameraPosition.camera(withLatitude: locationManager.latitude, longitude: locationManager.longitude, zoom: zoom)
         let mapView = GMSMapView.map(withFrame: CGRect.zero, camera: camera)
+        mapView.isMyLocationEnabled = true
+        if EnvironmentUtils.osTheme == .dark {
+            do {
+                if let styleURL = Bundle.main.url(forResource: "map_style_dark", withExtension: "json") {
+                    mapView.mapStyle = try GMSMapStyle(contentsOfFileURL: styleURL)
+                } else {
+                    NSLog("Unable to find style.json")
+                }
+            } catch {
+                NSLog("One or more of the map styles failed to load. \(error)")
+            }
+        }
+        mapView.delegate = context.coordinator
         return mapView
     }
     
     func updateUIView(_ mapView: GMSMapView, context: Context) {
-        markers.forEach { $0.map = mapView }
+        mapView.clear()
+        var bounds = GMSCoordinateBounds()
+        markers.forEach { marker in
+            marker.map = mapView
+            bounds = bounds.includingCoordinate(marker.position)
+        }
+        if fitToBounds {
+            mapView.animate(with: GMSCameraUpdate.fit(bounds))
+            DispatchQueue.main.async {
+                fitToBounds = false
+            }
+        }
+        if goToMyLocation {
+            let camera = GMSCameraPosition.camera(withLatitude: locationManager.latitude, longitude: locationManager.longitude, zoom: zoom)
+            mapView.animate(to: camera)
+            DispatchQueue.main.async {
+                goToMyLocation = false
+            }
+        }
+    }
+    
+    func makeCoordinator() -> MapViewCoordinator {
+        return MapViewCoordinator(self)
+    }
+    
+    final class MapViewCoordinator: NSObject, GMSMapViewDelegate {
+        var mapViewControllerBridge: CustomMarkerMapView
+        
+        init(_ mapViewControllerBridge: CustomMarkerMapView) {
+            self.mapViewControllerBridge = mapViewControllerBridge
+        }
+        
+        func mapView(_ mapView: GMSMapView, didTap marker: GMSMarker) -> Bool {
+            self.mapViewControllerBridge.onMarkerTapped(marker)
+            return true
+        }
     }
     
 }

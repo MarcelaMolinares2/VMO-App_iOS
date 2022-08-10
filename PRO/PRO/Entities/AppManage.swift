@@ -89,6 +89,10 @@ enum ContentType {
     case text, email, phone, image, url
 }
 
-enum PanelLayout {
+enum ViewLayout {
     case list, map, filter
+}
+
+enum PanelLayout {
+    case doctor, pharmacy, client, patient, potential, none
 }

@@ -239,7 +239,7 @@ struct MaterialDeliveryFormView: View {
             .padding(.horizontal, Globals.UI_FAB_HORIZONTAL)
         }
         .toast(isPresenting: $showToast){
-            AlertToast(type: .error(.cWarning), title: NSLocalizedString("errMaterialDeliveryEmpty", comment: ""))
+            AlertToast(type: .error(.cError), title: NSLocalizedString("errMaterialDeliveryEmpty", comment: ""))
         }
         .toast(isPresenting: $savedToast) {
             AlertToast(type: .complete(.cDone), title: NSLocalizedString("envSuccessfullySaved", comment: ""))
@@ -330,7 +330,7 @@ struct MaterialDeliverySetFormItemSetView: View {
                     .foregroundColor(.cTextHigh)
                 Spacer()
                 Text(String(format: NSLocalizedString("envExpDate", comment: ""), Utils.dateFormat(date: Utils.strToDate(value: set?.dueDate ?? ""), format: "dd MMM yy")))
-                    .foregroundColor(expiredLimitSurpassed ? .cWarning : .cTextHigh)
+                    .foregroundColor(expiredLimitSurpassed ? .cError : .cTextHigh)
             }
             HStack {
                 Button(action: {

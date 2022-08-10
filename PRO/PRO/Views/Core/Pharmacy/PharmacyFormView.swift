@@ -72,7 +72,7 @@ struct PharmacyFormView: View {
             plainData = try! Utils.objToJSON(pharmacy)
             additionalData = pharmacy?.fields ?? "{}"
         }
-        options.objectId = pharmacy?.objectId
+        options.objectId = pharmacy!.objectId
         options.item = pharmacy?.id ?? 0
         options.op = viewRouter.data.objectId.isEmpty ? "create" : "update"
         dynamicData = Utils.jsonDictionary(string: Config.get(key: "P_PHA_DYNAMIC_FORM").complement ?? "")

@@ -59,6 +59,57 @@
 "envSuccessfullySaved" = "Date successfully saved";
 "envExpDate" = "(Exp.: %@)";
 "envRemainder" = "(Remainder: %@ units)";
+"envCurrency" = "%@: %@";
+"envTotal" = "Total";
+"envValue" = "Value";
+"envRemoveResource" = "Remove resource";
+"envChoose" = "Choose...";
+"envSelect" = "Select...";
+"envDone" = "Done";
+"envLoading" = "Loading...";
+"envAgent" = "Agent";
+"envSortBy" = "Sort by";
+"envCategory" = "Category";
+"envCity" = "City";
+"envCoverage" = "Coverage";
+"envInstitution" = "Institution";
+"envSpecialty" = "Specialty";
+"envVisits" = "Visits";
+"envAscending" = "Ascending";
+"envDescending" = "Descending";
+"envClean" = "Clean";
+"envApply" = "Apply";
+"envNotVisited" = "Not visited";
+"envToVisit" = "To visit";
+"envVisited" = "Visited";
+"envFTFVisit" = "FTF";
+"envVirtualVisit" = "Virtual";
+"envBrick" = "Brick";
+"envCategory" = "Category";
+"envCity" = "City";
+"envJoinDate" = "Join date";
+"envRecentlyAdded" = "Recently added";
+"envSpecialty" = "Specialty";
+"envStyle" = "Style";
+"envZone" = "Zone";
+"envContactType" = "Contact type";
+
+"envValueTransference" = "Value transference";
+"envToReport" = "To report";
+"envConsent" = "Consent";
+"envOpenConsent" = "Open consent";
+
+//Expense
+"envOriginDestiny" = "Origin - Destiny";
+"envCompanyNIT" = "Company NIT";
+"envCompanyName" = "Company Name";
+"envConcept" = "Concept";
+
+//Day
+"envAllDay" = "Complete";
+"envTimeAM" = "AM";
+"envTimePM" = "PM";
+"envDayRequestReason" = "Reason for authorized day";
 
 //Panels
 "envClient" = "Client";
@@ -71,6 +122,15 @@
 "envPharmacies" = "Pharmacies";
 "envPotential" = "Potential";
 "envPotentials" = "Potentials";
+"envMarkedForDelete" = "Marked for inactivation";
+"envMaximumVisits" = "Maximum visits (%@/%@)";
+"envVisitedToday" = "The panel member was visited today";
+"envVisitNotAllowed" = "Visit not allowed";
+"envStartVisit" = "Start visit";
+"envVisit" = "Visit";
+"envSendContactDetail" = "Send contact detail";
+"envHabeasData" = "Habeas Data";
+"envHabeasDataNR" = "HD not registered";
 
 //Lists
 
@@ -87,10 +147,34 @@
 "errMasterPassword" = "Password is incorrect";
 "errCognitoConfirm" = "The entered code is wrong";
 "errMaterialDeliveryEmpty" = "Please select at least one material/sample";
+"errRecordExpenseEmpty" = "Please select at least one concept";
+"errFormEmpty" = "Please fill the required fields";
+"errFreeDayRequestEmpty" = "Please select at least one date";
 
 //Modules
 "modMaterialRequest" = "Material Request";
+"modMaterialDelivery" = "Material Delivery";
+"modRecordExpense" = "Record Expenses";
 
+
+
+
+
+"modDoctor" = "Doctor";
+"modPharmacy" = "Pharmacy";
+"modClient" = "Client";
+"modPatient" = "Patient";
+"modDiary" = "Diary";
+"modActivity" = "Activity";
+"modPeopleRoute" = "Routes";
+"modBatchReport" = "Batch report";
+"modPotentialProfessional" = "Potential professional";
+"modRequestDays" = "Request days";
+"modRequestMaterial" = "Request marketing stuff";
+"modTransference" = "Transference";
+"modMovements" = "Movements";
+"modReports" = "Reports";
+"modSupport" = "Support";
 
 
 
@@ -108,23 +192,6 @@
 
 "msgSyncError" = "Data can't be downloaded. You need this to start to working in the platform.";
 
-"modMedic" = "Medic";
-"modPharmacy" = "Pharmacy";
-"modClient" = "Client";
-"modPatient" = "Patient";
-"modDiary" = "Diary";
-"modActivity" = "Activity";
-"modPeopleRoute" = "Routes";
-"modBatchReport" = "Batch report";
-"modPotentialProfessional" = "Potential professional";
-"modRequestDays" = "Request days";
-"modRequestMaterial" = "Request marketing stuff";
-"modMaterialDelivery" = "Material Delivery";
-"modExpenses" = "Expenses";
-"modTransference" = "Transference";
-"modMovements" = "Movements";
-"modReports" = "Reports";
-"modSupport" = "Support";
 
 "noneMaterialDelivery" = "Please add material";
 "envObservations" = "Observations";
@@ -138,7 +205,6 @@
 "envDelete" = "Delete";
 "envDate" = "Date";
 
-"envChoose" = "Choose...";
 "envReason" = "Reason";
 "envComment" = "Comment";
 "envCycle" = "Cycle";
@@ -162,5 +228,4 @@
 
 "activityRequestDay" = "Request authorized day";
 "envRequestedDayPercentage" = "Percentage of the requested day (%@)%";
-"envDayRequestReason" = "Reason for authorized day";
 

@@ -21,6 +21,12 @@ class ListGenericViewModel: ObservableObject {
         let tmp = items
         items = tmp
     }
+    
+    func clear() {
+        items.indices.forEach { ix in
+            items[ix].selected = false
+        }
+    }
 
 }
 
@@ -37,6 +43,31 @@ class ListPanelViewModel: ObservableObject {
         items = tmp
     }
 
+}
+
+struct DialogDatePicker: View {
+    let onSelectionDone: (_ selected: Date) -> Void
+    
+    @State private var date = Date()
+    
+    var body: some View {
+        VStack {
+            HStack {
+                Spacer()
+                Button(action: {
+                    onSelectionDone(date)
+                }) {
+                    Text("envDone")
+                        .foregroundColor(.cHighlighted)
+                }
+            }
+            .padding(.vertical, 5)
+            .padding(.horizontal, 10)
+            DatePicker("", selection: $date, displayedComponents: [.date])
+                .datePickerStyle(.graphical)
+        }
+    }
+    
 }
 
 struct DialogDateRangePicker: View {
@@ -454,6 +485,10 @@ struct DialogSourcePickerView: View {
                 list = GenericSelectableDao(realm: try! Realm()).countries()
             case "CYCLE":
                 list = GenericSelectableDao(realm: try! Realm()).cycles()
+            case "EXPENSE-CONCEPT":
+                list = GenericSelectableDao(realm: try! Realm()).expenseConcepts()
+            case "FREE-DAY-REASON":
+                list = GenericSelectableDao(realm: try! Realm()).freeDayReasons()
             case "LINE":
                 list = GenericSelectableDao(realm: try! Realm()).lines()
             case "MATERIAL":
@@ -478,6 +513,8 @@ struct DialogSourcePickerView: View {
                 list = GenericSelectableDao(realm: try! Realm()).specialties(tp: "S")
             case "STYLE":
                 list = GenericSelectableDao(realm: try! Realm()).styles()
+            case "USER-HIERARCHY":
+                list = GenericSelectableDao(realm: try! Realm()).usersHierarchy()
             case "ZONE":
                 list = GenericSelectableDao(realm: try! Realm()).zones()
             default:
@@ -492,6 +529,9 @@ struct DialogSourcePickerView: View {
     }
     
     func onItemSelected(item: GenericSelectableItem) {
+        if !multiple {
+            viewModel.clear()
+        }
         item.selected = !item.selected
         viewModel.toggle()
         if !multiple {

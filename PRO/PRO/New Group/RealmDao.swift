@@ -170,14 +170,38 @@ class CycleDao: GenericDao {
     
 }
 
+class ExpenseReportDao: GenericDao {
+    
+    func store(expenseReport: ExpenseReport) {
+        try! realm.write {
+            realm.add(expenseReport, update: .all)
+        }
+    }
+    
+}
+
+class FreeDayRequestDao: GenericDao {
+    
+    func store(freeDayRequest: FreeDayRequest) {
+        try! realm.write {
+            realm.add(freeDayRequest, update: .all)
+        }
+    }
+    
+}
+
 class FreeDayReasonDao: GenericDao {
     
     func all() -> [FreeDayReason] {
-        return Array(realm.objects(FreeDayReason.self).sorted(byKeyPath: "cycle").sorted(byKeyPath: "year"))
+        return Array(realm.objects(FreeDayReason.self).sorted(byKeyPath: "content"))
     }
     
     func by(id: String) -> FreeDayReason? {
         return realm.objects(FreeDayReason.self).filter("id == \(id)").first
+    }
+    
+    func by(id: Int?) -> FreeDayReason? {
+        return by(id: String(describing: id ?? 0))
     }
     
 }
@@ -349,6 +373,14 @@ class GenericSelectableDao: GenericDao {
         CycleDao(realm: self.realm).all().map { GenericSelectableItem(id: "\($0.id)", label: $0.displayName) }
     }
     
+    func expenseConcepts() -> [GenericSelectableItem] {
+        ExpenseConceptDao(realm: self.realm).all().map { GenericSelectableItem(id: "\($0.id)", label: $0.name) }
+    }
+    
+    func freeDayReasons() -> [GenericSelectableItem] {
+        FreeDayReasonDao(realm: self.realm).all().map { GenericSelectableItem(id: "\($0.id)", label: $0.content) }
+    }
+    
     func lines() -> [GenericSelectableItem] {
         LineDao(realm: self.realm).all().map { GenericSelectableItem(id: "\($0.id)", label: $0.name) }
     }
@@ -399,6 +431,10 @@ class GenericSelectableDao: GenericDao {
         StyleDao(realm: self.realm).all().map { GenericSelectableItem(id: "\($0.id)", label: $0.name) }
     }
     
+    func usersHierarchy() -> [GenericSelectableItem] {
+        UserDao(realm: self.realm).hierarchy().map { GenericSelectableItem(id: "\($0.id)", label: $0.name.capitalized) }
+    }
+    
     func zones() -> [GenericSelectableItem] {
         ZoneDao(realm: self.realm).all().map { GenericSelectableItem(id: "\($0.id)", label: $0.name ?? "") }
     }
@@ -428,6 +464,22 @@ class MaterialDao: GenericDao {
     }
     
     func by(id: Int) -> AdvertisingMaterial? {
+        return by(id: String(describing: id))
+    }
+    
+}
+
+class ExpenseConceptDao: GenericDao {
+    
+    func all() -> [ExpenseConcept] {
+        return Array(realm.objects(ExpenseConcept.self).sorted(byKeyPath: "name"))
+    }
+    
+    func by(id: String) -> ExpenseConcept? {
+        return realm.objects(ExpenseConcept.self).filter("id == \(id)").first
+    }
+    
+    func by(id: Int) -> ExpenseConcept? {
         return by(id: String(describing: id))
     }
     
@@ -490,11 +542,9 @@ class MaterialDeliveryDao: GenericDao {
 class MediaItemDao: GenericDao {
     
     func store(mediaItem: MediaItem) {
-        if let exists = realm.objects(MediaItem.self)
-            .filter("table == '\(mediaItem.table)'")
-            .filter("field == '\(mediaItem.field)'")
-            .filter("localItem == '\(mediaItem.localItem)'")
-            .first {
+        if let exists = realm.objects(MediaItem.self).where({ q in
+            q.table == mediaItem.table && q.field == mediaItem.field && q.localId == mediaItem.localId
+        }).first {
             try! realm.write {
                 exists.date = Utils.currentDateTime()
             }
@@ -505,9 +555,19 @@ class MediaItemDao: GenericDao {
         }
     }
     
+    func remove(mediaItem: MediaItem) {
+        if let exists = realm.objects(MediaItem.self).where({ q in
+            q.table == mediaItem.table && q.field == mediaItem.field && q.localId == mediaItem.localId
+        }).first {
+            try! realm.write {
+                realm.delete(exists)
+            }
+        }
+    }
+    
     func by(table: String, item: ObjectId) -> [MediaItem] {
         return Array(realm.objects(MediaItem.self).where {
-            $0.table == table && $0.localItem == item.stringValue
+            $0.table == table && $0.localId == item
         })
     }
     
@@ -581,6 +641,10 @@ class PharmacyTypeDao: GenericDao {
     
     func by(id: String) -> PharmacyType? {
         return realm.objects(PharmacyType.self).filter("id == \(id)").first
+    }
+    
+    func by(id: Int?) -> PharmacyType? {
+        return by(id: String(describing: id ?? 0))
     }
     
 }
@@ -689,6 +753,13 @@ class UserDao: GenericDao {
     
     func by(id: Int) -> User? {
         return realm.objects(User.self).filter("id == \(id)").first
+    }
+    
+    func hierarchy() -> [User] {
+        let usersHierarchy = logged()?.hierarchy.map { $0.userId } ?? []
+        return Array(realm.objects(User.self).where {
+            $0.id.in(usersHierarchy)
+        }.sorted(byKeyPath: "name"))
     }
     
     func logged() -> User? {

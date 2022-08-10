@@ -49,14 +49,14 @@ struct DashboardTabContentWrapperView: View {
     
     var body: some View {
         switch key {
-            /*case "client":
-                ClientListView()*/
+            case "client":
+                ClientListView()
             case "doctor":
                 DoctorListView()
             case "patient":
                 PatientListView()
-            /*case "pharmacy":
-                PharmacyListView()*/
+            case "pharmacy":
+                PharmacyListView()
             case "potential":
                 PotentialListView()
             case "dashboard":

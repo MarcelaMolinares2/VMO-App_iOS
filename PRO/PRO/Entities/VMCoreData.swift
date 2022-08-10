@@ -374,7 +374,6 @@ extension Panel {
     }
     
     func mainCategory(realm: Realm, defaultValue: String = "") -> String {
-        print(categories)
         if categories.isEmpty {
             return defaultValue
         }
@@ -399,6 +398,55 @@ extension Panel {
             return user.visitsCycle
         }
         return nil
+    }
+    
+    func hasDeleteRequest() -> Bool {
+        return !requests.filter { gr in
+            return gr.type == "DELETE"
+        }.isEmpty
+    }
+    
+    func couldVisitByNumber() -> Bool {
+        if let mainUser = mainUser() {
+            if mainUser.visitsCycle >= mainUser.visitsFee {
+                var restrict = true
+                switch type {
+                    case "M":
+                        restrict = Config.get(key: "MOV_RES_NUM_MED").value == 1
+                    case "F":
+                        restrict = Config.get(key: "MOV_RES_NUM_FAR").value == 1
+                    case "C":
+                        restrict = Config.get(key: "MOV_RES_NUM_CLI").value == 1
+                    case "P":
+                        restrict = Config.get(key: "MOV_RES_NUM_PAT").value == 1
+                    default:
+                        break
+                }
+                return !restrict
+            }
+            return true
+        }
+        return false
+    }
+    
+    func couldVisitToday() -> Bool {
+        if visitDates.map { $0.date }.contains(Utils.currentDate()) {
+            var restrict = true
+            switch type {
+                case "M":
+                    restrict = Config.get(key: "MOV_RES_DAY_MED").value == 1
+                case "F":
+                    restrict = Config.get(key: "MOV_RES_DAY_FAR").value == 1
+                case "C":
+                    restrict = Config.get(key: "MOV_RES_DAY_CLI").value == 1
+                case "P":
+                    restrict = Config.get(key: "MOV_RES_DAY_PAT").value == 1
+                default:
+                    break
+            }
+            return !restrict
+        }
+        return true
     }
     
 }
@@ -972,10 +1020,10 @@ class MediaItem: Object, Decodable, SyncEntity {
     
     @Persisted var table: String = ""
     @Persisted var field: String = ""
-    @Persisted var item: Int = 0
     @Persisted var date: String = ""
     @Persisted var ext: String = ""
-    @Persisted var localItem: String = ""
+    @Persisted var serverId: Int = 0
+    @Persisted var localId: ObjectId
 }
 
 class Movement: Object, Codable, SyncEntity {
@@ -1393,6 +1441,20 @@ class Pharmacy: Object, Codable, Panel, SyncEntity, Identifiable {
         return codingKey.rawValue
     }
     
+    func pharmacyTypeName(realm: Realm) -> String {
+        if let pharmacyType = PharmacyTypeDao(realm: realm).by(id: pharmacyTypeId) {
+            return pharmacyType.name
+        }
+        return ""
+    }
+    
+    func pharmacyChainName(realm: Realm) -> String {
+        if let pharmacyChain = PharmacyChainDao(realm: realm).by(id: pharmacyChainId) {
+            return pharmacyChain.name ?? ""
+        }
+        return ""
+    }
+    
 }
 
 class PotentialProfessional: Object, Codable, Panel, SyncEntity, Identifiable {
@@ -1523,6 +1585,122 @@ class PotentialProfessional: Object, Codable, Panel, SyncEntity, Identifiable {
         let codingKey: CodingKeys
         codingKey = .id
         return codingKey.rawValue
+    }
+}
+
+class FreeDayRequest: Object, Codable, SyncEntity {
+    @Persisted(primaryKey: true) var objectId: ObjectId
+    @Persisted(indexed: true) var id = 0
+    @Persisted var transactionStatus: String = ""
+    @Persisted var transactionType: String = ""
+    @Persisted var transactionResponse: String = ""
+    
+    @Persisted var reasonId: Int = 0
+    @Persisted var requestedAt: String = ""
+    @Persisted var observations: String = ""
+    @Persisted var solved: Bool = false
+    @Persisted var solvedAt: String = ""
+    @Persisted var solvedBy: Int = 0
+    @Persisted var details: List<FreeDayRequestDetail> = List<FreeDayRequestDetail>()
+    
+    private enum CodingKeys: String, CodingKey {
+        case id = "free_day_request_id", reasonId = "free_day_reason_id", requestedAt = "requested_at", observations, solved, solvedAt = "solved_at", solvedBy = "solved_by", details
+    }
+    
+    private enum EncodingKeys: String, CodingKey {
+        case id = "free_day_request_id", reasonId = "free_day_reason_id", requestedAt = "requested_at", observations, solved, solvedAt = "solved_at", solvedBy = "solved_by", details
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: EncodingKeys.self)
+        
+        try container.encode(id, forKey: .id)
+    }
+    
+    static func primaryCodingKey() -> String {
+        let codingKey: CodingKeys
+        codingKey = .id
+        return codingKey.rawValue
+    }
+}
+
+class FreeDayRequestDetail: Object, Codable {
+    @Persisted var date: String = ""
+    @Persisted var dayFull: Bool = false
+    @Persisted var dayOnlyAM: Bool = false
+    @Persisted var dayOnlyPM: Bool = false
+    @Persisted var dayCustom: Bool = false
+    @Persisted var percentage: Float = 0
+    @Persisted var authorized: Bool = false
+    
+    private enum CodingKeys: String, CodingKey {
+        case date = "date_", dayFull = "day_full", dayOnlyAM = "day_only_am", dayOnlyPM = "day_only_pm", dayCustom = "day_custom", percentage, authorized
+    }
+    
+    private enum EncodingKeys: String, CodingKey {
+        case date = "date_", dayFull = "day_full", dayOnlyAM = "day_only_am", dayOnlyPM = "day_only_pm", dayCustom = "day_custom", percentage, authorized
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: EncodingKeys.self)
+        
+        try container.encode(date, forKey: .date)
+    }
+}
+
+class ExpenseReport: Object, Codable, SyncEntity {
+    @Persisted(primaryKey: true) var objectId: ObjectId
+    @Persisted(indexed: true) var id = 0
+    @Persisted var transactionStatus: String = ""
+    @Persisted var transactionType: String = ""
+    @Persisted var transactionResponse: String = ""
+    
+    @Persisted var date: String = ""
+    @Persisted var originDestiny: String = ""
+    @Persisted var observations: String = ""
+    @Persisted var details: List<ExpenseReportDetail> = List<ExpenseReportDetail>()
+    
+    private enum CodingKeys: String, CodingKey {
+        case id = "id", date = "date_", originDestiny = "origin_destiny", observations, details
+    }
+    
+    private enum EncodingKeys: String, CodingKey {
+        case id = "id", date = "date_", originDestiny = "origin_destiny", observations, details
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: EncodingKeys.self)
+        
+        try container.encode(id, forKey: .id)
+    }
+    
+    static func primaryCodingKey() -> String {
+        let codingKey: CodingKeys
+        codingKey = .id
+        return codingKey.rawValue
+    }
+}
+
+class ExpenseReportDetail: Object, Codable {
+    @Persisted var objectId: ObjectId
+    @Persisted var conceptId: Int = 0
+    @Persisted var total: Float = 0
+    @Persisted var companyNIT: String = ""
+    @Persisted var companyName: String = ""
+    @Persisted var supportingDocument: Bool = false
+    
+    private enum CodingKeys: String, CodingKey {
+        case conceptId = "concept_id", total, companyNIT = "company_nit", companyName = "company_name", supportingDocument = "supporting_document"
+    }
+    
+    private enum EncodingKeys: String, CodingKey {
+        case conceptId = "concept_id", total, companyNIT = "company_nit", companyName = "company_name", supportingDocument = "supporting_document"
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: EncodingKeys.self)
+        
+        try container.encode(conceptId, forKey: .conceptId)
     }
 }
 

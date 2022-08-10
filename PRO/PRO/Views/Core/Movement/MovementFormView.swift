@@ -151,7 +151,7 @@ struct MovementFormTabBasicView: View {
                             .aspectRatio(contentMode: .fit)
                             .padding(5)
                             .frame(width: geometry.size.width / CGFloat(5), alignment: .center)
-                            .foregroundColor(.cWarning)
+                            .foregroundColor(.cError)
                             .onTapGesture {
                                 
                             }

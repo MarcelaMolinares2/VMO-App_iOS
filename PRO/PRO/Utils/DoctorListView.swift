@@ -9,22 +9,37 @@
 import SwiftUI
 import RealmSwift
 
+struct DoctorListWrapperView: View {
+    @EnvironmentObject var masterRouter: MasterRouter
+    
+    var body: some View {
+        VStack {
+            HeaderToggleView(search: $masterRouter.search, title: "modDoctors")
+            DoctorListView()
+        }
+    }
+    
+}
+
 struct DoctorListView: View {
     @ObservedResults(Doctor.self) var doctors
     
     let realm = try! Realm()
     
     @State private var menuIsPresented = false
-    @State private var doctorTapped: Doctor = Doctor()
+    @State private var doctorTapped: Panel = GenericPanel()
+    @State private var complementaryData: [String: Any] = [:]
     @State private var selected = [ObjectId]()
     
     var body: some View {
         CustomPanelDoctorView(realm: realm, results: $doctors, selected: $selected) { panel in
+            complementaryData["hd"] = panel.habeasData
+            complementaryData["tv"] = panel.tvConsent
             self.doctorTapped = panel
             menuIsPresented = true
         }
-        .partialSheet(isPresented: $menuIsPresented) {
-            PanelMenu(isPresented: self.$menuIsPresented, panel: doctorTapped)
+        .sheet(isPresented: $menuIsPresented) {
+            PanelMenu(isPresented: self.$menuIsPresented, panel: $doctorTapped, complementaryData: complementaryData)
         }
     }
 }
@@ -32,13 +47,24 @@ struct DoctorListView: View {
 struct DoctorSelectView: View {
     @ObservedResults(Doctor.self) var doctors
     
+    @Binding var selected: [ObjectId]
+    let onSelectionDone: () -> Void
+    
     let realm = try! Realm()
     
-    @State private var selected = [ObjectId]()
-    
     var body: some View {
-        CustomPanelDoctorView(realm: realm, results: $doctors, selected: $selected) { panel in
-            selected.appendToggle(panel.objectId)
+        ZStack(alignment: .bottom) {
+            CustomPanelDoctorView(realm: realm, results: $doctors, selected: $selected, couldToggleMap: false, couldSelectAgent: false, couldGoToForm: false) { panel in
+                selected.appendToggle(panel.objectId)
+            }
+            HStack(alignment: .bottom) {
+                Spacer()
+                FAB(image: "ic-done") {
+                    onSelectionDone()
+                }
+            }
+            .padding(.bottom, Globals.UI_FAB_VERTICAL)
+            .padding(.horizontal, Globals.UI_FAB_HORIZONTAL)
         }
     }
 }
@@ -49,6 +75,9 @@ struct CustomPanelDoctorView: View {
     var realm: Realm
     @ObservedResults var results: Results<Doctor>
     @Binding var selected: [ObjectId]
+    var couldToggleMap = true
+    var couldSelectAgent = true
+    var couldGoToForm = true
     let onItemTapped: (_ doctor: Doctor) -> Void
     
     private let sortOptions = ["name", "category", "city", "coverage", "institution", "specialty", "visits"]
@@ -56,27 +85,56 @@ struct CustomPanelDoctorView: View {
     
     @State private var sort: SortModel = SortModel(key: "name_form", ascending: true)
     @State private var filters: [DynamicFilter] = []
+    @State private var userSelected = 0
+    
+    @State private var serverLoading = false
+    @State private var serverResults = [Doctor]()
     
     var body: some View {
         if let filtered = filterRs() {
-            CustomPanelListView(realm: realm, totalPanel: results.count, filtered: filtered, sortOptions: sortOptions, filtersDynamic: filterOptions, sort: $sort, filters: $filters) {
-                ForEach(filtered, id: \.objectId) { element in
-                    PanelItemDoctor(realm: realm, userId: JWTUtils.sub(), doctor: element) {
-                        onItemTapped(element)
+            if serverLoading {
+                VStack {
+                    Spacer()
+                    ProgressView("envLoading")
+                    Spacer()
+                }
+            } else {
+                CustomPanelListView(realm: realm, panelType: "M", totalPanel: userSelected > 0 ? serverResults.count : results.count, filtered: filtered, sortOptions: sortOptions, filtersDynamic: filterOptions, sort: $sort, filters: $filters, userSelected: $userSelected, couldToggleMap: couldToggleMap, couldSelectAgent: couldSelectAgent, couldGoToForm: couldGoToForm, onAgentChanged: {
+                    loadAgentPanel()
+                }) {
+                    ForEach(filtered, id: \.objectId) { element in
+                        PanelItemDoctor(realm: realm, userId: userSelected <= 0 ? JWTUtils.sub() : userSelected, doctor: element) {
+                            onItemTapped(element)
+                        }
+                        .background(selected.contains(element.objectId) ? Color.cBackground3dp : nil)
                     }
-                    .background(selected.contains(element.objectId) ? Color.cBackground1dp : nil)
+                }
+            }
+        }
+    }
+    
+    func loadAgentPanel() {
+        serverLoading = true
+        serverResults.removeAll()
+        AppServer().postRequest(data: ["user_ids" : userSelected], path: "vm/doctor/filter") { success, code, data in
+            serverLoading = false
+            if success {
+                if let rs = data as? [String] {
+                    for item in rs {
+                        let decoded = try! JSONDecoder().decode(Doctor.self, from: item.data(using: .utf8)!)
+                        serverResults.append(decoded)
+                    }
                 }
             }
         }
     }
     
     func filterRs() -> [Doctor]? {
-        var rs: [Doctor] = results.filter {
-            self.masterRouter.search.isEmpty ? true :
-            ($0.name ?? "").lowercased().contains(self.masterRouter.search.lowercased()) ||
-            ($0.institution ?? "").lowercased().contains(self.masterRouter.search.lowercased()) ||
-            $0.specialtyName(realm: realm).lowercased().contains(self.masterRouter.search.lowercased()) ||
-            $0.cityName(realm: self.realm).lowercased().contains(self.masterRouter.search.lowercased())
+        var rs: [Doctor]
+        if userSelected > 0 {
+            rs = serverResults
+        } else {
+            rs = Array(results)
         }
         filters.forEach { df in
             if !df.values.isEmpty {
@@ -128,6 +186,14 @@ struct CustomPanelDoctorView: View {
                     default:
                         break
                 }
+            }
+        }
+        if !masterRouter.search.isEmpty {
+            rs = rs.filter {
+                ($0.name ?? "").lowercased().contains(self.masterRouter.search.lowercased()) ||
+                ($0.institution ?? "").lowercased().contains(self.masterRouter.search.lowercased()) ||
+                $0.specialtyName(realm: realm).lowercased().contains(self.masterRouter.search.lowercased()) ||
+                $0.cityName(realm: self.realm).lowercased().contains(self.masterRouter.search.lowercased())
             }
         }
         rs.sort { d1, d2 in

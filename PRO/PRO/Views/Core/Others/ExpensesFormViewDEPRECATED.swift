@@ -11,7 +11,7 @@ import RealmSwift
 import UIKit
 import Combine
 
-struct ExpensesFormView: View {
+struct ExpensesFormViewDEPRECATED: View {
     
     @EnvironmentObject var viewRouter: ViewRouter
     
@@ -32,9 +32,7 @@ struct ExpensesFormView: View {
     var body: some View {
         ZStack{
             VStack{
-                HeaderToggleView(title: "modExpenses") {
-                    
-                }
+                HeaderToggleView(title: "modExpenses")
                 HStack {
                     VStack{
                         Text(NSLocalizedString("envDate", comment: ""))
@@ -298,17 +296,7 @@ struct ExpensesFormCardView: View {
     
     func onSelectionDone(_ done: Bool) {
         self.isSheet = false
-        if selectedPhoto == "EDIT" {
-            if done {
-                MediaUtils.store(uiImage: uiImage, table: options.table, field: conceptExpenseSimple.objectId.description, id: options.item, localId: options.objectId?.stringValue ?? "")
-            }
-            selectedPhoto = "OK"
-        } else {
-            if done {
-                MediaUtils.store(uiImage: uiImage, table: options.table, field: conceptExpenseSimple.objectId.description, id: options.item, localId: options.objectId?.stringValue ?? "")
-                selectedPhoto = "OK"
-            }
-        }
+        
     }
     
     func onEdit(_ uiImage: UIImage) {
@@ -320,10 +308,4 @@ struct ExpensesFormCardView: View {
         selectedPhoto = ""
     }
     
-}
-
-struct ExpensesFormView_Previews: PreviewProvider {
-    static var previews: some View {
-        ExpensesFormView()
-    }
 }

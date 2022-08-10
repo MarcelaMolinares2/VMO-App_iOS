@@ -8,13 +8,14 @@
 
 import Foundation
 import SwiftUI
+import RealmSwift
 
 struct ImageViewerDialog: View {
     
     var table: String
     var field: String
     var id: Int
-    var localId: String
+    var localId: ObjectId
     
     @State private var image: Image? = Image("ic-gallery")
     

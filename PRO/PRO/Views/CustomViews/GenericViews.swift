@@ -287,7 +287,7 @@ struct CustomCard<Content: View>: View {
                 .background(Color.cBackground1dp)
                 .cornerRadius(5)
         }
-        .padding(.top, 10)
+        .padding(.top, 5)
     }
 }
 

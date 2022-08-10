@@ -111,7 +111,7 @@ struct MaterialRequestView: View {
             }
         }
         .toast(isPresenting: $showToast) {
-            AlertToast(type: .error(.cWarning), title: NSLocalizedString("errMaterialDeliveryEmpty", comment: ""))
+            AlertToast(type: .error(.cError), title: NSLocalizedString("errMaterialDeliveryEmpty", comment: ""))
         }
         .toast(isPresenting: $savedToast) {
             AlertToast(type: .complete(.cDone), title: NSLocalizedString("envSuccessfullySaved", comment: ""))

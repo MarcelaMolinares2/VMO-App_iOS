@@ -206,11 +206,12 @@ class DynamicFormFieldOptions {
     var type: String = ""
     var panelType: String = ""
     var item: Int = 0
-    var objectId: ObjectId?
+    var objectId: ObjectId
     
     init(table: String, op: String) {
         self.table = table
         self.op = op
+        self.objectId = ObjectId()
     }
 }
 

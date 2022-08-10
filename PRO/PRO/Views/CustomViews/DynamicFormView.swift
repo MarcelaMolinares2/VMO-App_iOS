@@ -434,7 +434,7 @@ struct DynamicFormImage: View {
                 case .picker:
                     CustomImagePickerView(sourceType: sourceType, uiImage: self.$uiImage, onSelectionDone: onSelectionDone)
                 case .viewer:
-                    ImageViewerDialog(table: options.table, field: field.key, id: options.item, localId: options.objectId?.stringValue ?? "")
+                    ImageViewerDialog(table: options.table, field: field.key, id: options.item, localId: options.objectId)
             }
         }
     }
@@ -448,7 +448,7 @@ struct DynamicFormImage: View {
                 table: options.table,
                 field: field.key,
                 id: options.item,
-                localId: options.objectId?.stringValue ?? ""
+                localId: options.objectId
             )
             print(uiImage ?? "")
         }
@@ -533,7 +533,7 @@ struct DynamicFormHabeasData: View {
                             CustomImagePickerView(sourceType: sourceType, uiImage: self.$uiImage, onSelectionDone: onSelectionDone)
                     }
                 case .viewer:
-                    ImageViewerDialog(table: options.table, field: field.key, id: options.item, localId: options.objectId?.stringValue ?? "")
+                    ImageViewerDialog(table: options.table, field: field.key, id: options.item, localId: options.objectId)
             }
         }
     }
@@ -542,7 +542,7 @@ struct DynamicFormHabeasData: View {
         self.shouldPresentSheet = false
         field.value = done ? "Y" : field.value
         if done {
-            MediaUtils.store(uiImage: uiImage, table: options.table, field: field.key, id: options.item, localId: options.objectId?.stringValue ?? "")
+            MediaUtils.store(uiImage: uiImage, table: options.table, field: field.key, id: options.item, localId: options.objectId)
         }
     }
     
@@ -578,7 +578,7 @@ struct DynamicFormCanvas: View {
                 .frame(height: 40)
                 .buttonStyle(BorderlessButtonStyle())
                 .popover(isPresented: $shouldPresentImageViewer) {
-                    ImageViewerDialog(table: options.table, field: field.key, id: options.item, localId: options.objectId?.stringValue ?? "")
+                    ImageViewerDialog(table: options.table, field: field.key, id: options.item, localId: options.objectId)
                 }
             }
         }
@@ -591,7 +591,7 @@ struct DynamicFormCanvas: View {
         self.drawDialog = false
         field.value = done ? "Y" : field.value
         if done {
-            MediaUtils.store(uiImage: uiImage, table: options.table, field: field.key, id: options.item, localId: options.objectId?.stringValue ?? "")
+            MediaUtils.store(uiImage: uiImage, table: options.table, field: field.key, id: options.item, localId: options.objectId)
         }
     }
     

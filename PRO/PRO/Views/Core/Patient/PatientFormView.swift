@@ -70,7 +70,7 @@ struct PatientFormView: View {
             plainData = try! Utils.objToJSON(patient)
             additionalData = patient?.fields ?? "{}"
         }
-        options.objectId = patient?.objectId
+        options.objectId = patient!.objectId
         options.item = patient?.id ?? 0
         options.op = viewRouter.data.objectId.isEmpty ? "create" : "update"
         dynamicData = Utils.jsonDictionary(string: Config.get(key: "P_PAT_DYNAMIC_FORM").complement ?? "")

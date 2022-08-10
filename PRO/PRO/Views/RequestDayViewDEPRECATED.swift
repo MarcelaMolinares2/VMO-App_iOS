@@ -10,7 +10,7 @@ import SwiftUI
 import RealmSwift
 import AlertToast
 
-struct RequestDayView: View {
+struct RequestDayViewDEPRECATED: View {
     
     @EnvironmentObject var viewRouter: ViewRouter
     
@@ -267,6 +267,6 @@ struct RequestDayView: View {
 
 struct RequestDayView_Previews: PreviewProvider {
     static var previews: some View {
-        RequestDayView()
+        RequestDayViewDEPRECATED()
     }
 }

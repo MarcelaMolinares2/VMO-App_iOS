@@ -164,7 +164,136 @@ struct RouteListCardView: View {
     }
 }
 
+class PanelItemModel: Identifiable {
+    var objectId: ObjectId
+    var type: String = ""
+    
+    init(objectId: ObjectId, type: String) {
+        self.objectId = objectId
+        self.type = type
+    }
+}
+
 struct RouteFormView: View {
+    @ObservedObject var moduleRouter: ModuleRouter
+    
+    @State private var modalPanelType = false
+    @State private var modalPanelSelect = false
+    @State private var routeName = ""
+    
+    @State private var layout: ViewLayout = .list
+    @State private var panelLayout: PanelLayout = .none
+    @State private var slDoctors = [ObjectId]()
+    @State private var slPharmacies = [ObjectId]()
+    @State private var slClients = [ObjectId]()
+    @State private var slPatients = [ObjectId]()
+    @State private var slPotentials = [ObjectId]()
+    
+    @State private var members = [PanelItemModel]()
+    
+    var realm = try! Realm()
+    
+    var body: some View {
+        ZStack(alignment: .bottom) {
+            VStack {
+                HeaderToggleView(title: "modRoute") {
+                    moduleRouter.currentPage = "LIST"
+                }
+                VStack {
+                    CustomCard {
+                        Text("envName")
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .foregroundColor(routeName.isEmpty ? Color.cDanger : .cTextMedium)
+                        TextField("envName", text: $routeName)
+                            .cornerRadius(CGFloat(4))
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                    }
+                }
+                .padding(.horizontal, Globals.UI_FORM_PADDING_HORIZONTAL)
+                PanelItemGenericSwitchView(realm: realm, members: $members) { ixs in
+                    
+                }
+            }
+            HStack(alignment: .bottom) {
+                VStack(spacing: 10) {
+                    FAB(image: "ic-map") {
+                        
+                    }
+                    FAB(image: "ic-plus") {
+                        modalPanelType = true
+                    }
+                }
+                Spacer()
+                FAB(image: "ic-cloud") {
+                    validate()
+                }
+            }
+            .padding(.bottom, Globals.UI_FAB_VERTICAL)
+            .padding(.horizontal, Globals.UI_FAB_HORIZONTAL)
+        }
+        .sheet(isPresented: $modalPanelSelect) {
+            switch panelLayout {
+                case .doctor:
+                    DoctorSelectView(selected: $slDoctors, onSelectionDone: refreshItems)
+                case .pharmacy:
+                    PharmacySelectView(selected: $slPharmacies, onSelectionDone: refreshItems)
+                case .client:
+                    ClientSelectView(selected: $slClients, onSelectionDone: refreshItems)
+                case .patient:
+                    PatientSelectView(selected: $slPatients, onSelectionDone: refreshItems)
+                case .potential:
+                    PotentialSelectView(selected: $slPotentials, onSelectionDone: refreshItems)
+                case .none:
+                    Text("")
+            }
+        }
+        .partialSheet(isPresented: $modalPanelType) {
+            PanelTypeSelectView(types: ["M", "F", "C", "P"]) { type in
+                switch type {
+                    case "F":
+                        panelLayout = .pharmacy
+                    case "C":
+                        panelLayout = .client
+                    case "P":
+                        panelLayout = .patient
+                    default:
+                        panelLayout = .doctor
+                }
+                print(type)
+                print(panelLayout)
+                modalPanelType = false
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                    modalPanelSelect = true
+                }
+            }
+        }
+    }
+    
+    func validate() {
+        
+    }
+    
+    func refreshItems() {
+        print(slDoctors)
+        members.removeAll()
+        slDoctors.forEach { el in
+            members.append(PanelItemModel(objectId: el, type: "M"))
+        }
+        slPharmacies.forEach { el in
+            members.append(PanelItemModel(objectId: el, type: "F"))
+        }
+        slClients.forEach { el in
+            members.append(PanelItemModel(objectId: el, type: "C"))
+        }
+        slPatients.forEach { el in
+            members.append(PanelItemModel(objectId: el, type: "P"))
+        }
+        modalPanelSelect = false
+    }
+    
+}
+
+struct RouteFormViewDEPRECATED: View {
     @EnvironmentObject var viewRouter: ViewRouter
     @ObservedObject var moduleRouter: ModuleRouter
     @State private var name = ""
@@ -259,28 +388,6 @@ struct RouteFormView: View {
                     }
                 }
             }
-            HStack(alignment: .bottom) {
-                VStack(spacing: 20) {
-                    FAB(image: "ic-map") {
-                        
-                    }
-                    FAB(image: "ic-plus") {
-                        cardShow.toggle()
-                    }
-                }
-                Spacer()
-                FAB(image: "ic-cloud") {
-                    if !name.replacingOccurrences(of: " ", with: "").isEmpty {
-                        save()
-                    } else {
-                        colorWarning = Color.cWarning
-                        name = ""
-                        textNoName = true
-                    }
-                }
-            }
-            .padding(.bottom, Globals.UI_FAB_VERTICAL)
-            .padding(.horizontal, Globals.UI_FAB_HORIZONTAL)
             //AlertToast(type: .regular, title: NSLocalizedString("noneGroups", comment: ""))
             /*if selectPanelModalToggle.status {
                 GeometryReader {geo in

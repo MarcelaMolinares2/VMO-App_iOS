@@ -91,6 +91,7 @@ extension Color {
     static let cSyncView = Color("colorSyncView")
     
     static let cBlueDark = Color("colorBlueDark")
+    static let cError = Color("colorError")
     static let cWarning = Color("colorWarning")
     static let cInfo = Color("colorInfo")
     static let cForm = Color("colorForm")

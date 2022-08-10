@@ -68,7 +68,7 @@ struct PotentialFormView: View {
             plainData = try! Utils.objToJSON(potential)
             additionalData = potential?.fields ?? "{}"
         }
-        options.objectId = potential?.objectId
+        options.objectId = potential!.objectId
         options.item = potential?.id ?? 0
         options.op = viewRouter.data.objectId.isEmpty ? "create" : "update"
         dynamicData = Utils.jsonDictionary(string: Config.get(key: "P_PPT_DYNAMIC_FORM").complement ?? "")

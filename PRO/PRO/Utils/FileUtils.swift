@@ -12,30 +12,36 @@ import RealmSwift
 
 class MediaUtils {
     
-    static func store(file: String, table: String, field: String, id: Int, localId: String) {
+    static func store(file: String, table: String, field: String, id: Int, localId: ObjectId) {
         let media = item(table: table, field: field, id: id, localId: localId)
         media.date = Utils.currentDateTime()
     }
     
-    static func item(table: String, field: String, id: Int, localId: String) -> MediaItem {
+    static func item(table: String, field: String, id: Int, localId: ObjectId) -> MediaItem {
         let media = MediaItem()
         media.table = table
         media.field = field
-        media.item = id
-        media.localItem = localId
+        media.serverId = id
+        media.localId = localId
         return media
     }
     
-    static func store(uiImage: UIImage?, table: String, field: String, id: Int, localId: String) {
+    static func store(uiImage: UIImage?, table: String, field: String, id: Int, localId: ObjectId) {
         let media = item(table: table, field: field, id: id, localId: localId)
         media.date = Utils.currentDateTime()
         media.ext = "jpg"
         
-        if let data = uiImage?.jpegData(compressionQuality: 0.9) {
-            FileUtils.create(path: "media/\(media.table)/\(media.localItem)/\(media.field)")
+        if let data = uiImage?.jpegData(compressionQuality: 0.3) {
+            FileUtils.create(path: "media/\(media.table)/\(media.localId.stringValue)/\(media.field)")
             try? data.write(to: mediaURL(media: media))
             MediaItemDao(realm: try! Realm()).store(mediaItem: media)
         }
+    }
+    
+    static func remove(table: String, field: String, id: Int, localId: ObjectId) {
+        let media = item(table: table, field: field, id: id, localId: localId)
+        MediaItemDao(realm: try! Realm()).remove(mediaItem: media)
+        FileUtils.remove(media: media)
     }
     
     static func mediaURL(media: MediaItem) -> URL {
@@ -50,7 +56,7 @@ class MediaUtils {
         if let pathComponent = url
             .appendingPathComponent("media")?
             .appendingPathComponent("\(media.table)")
-            .appendingPathComponent("\(media.localItem)")
+            .appendingPathComponent("\(media.localId.stringValue)")
             .appendingPathComponent("\(media.field)") {
             return pathComponent
         }
@@ -91,6 +97,17 @@ class FileUtils {
             return true
         }
         return false
+    }
+    
+    static func remove(media: MediaItem) {
+        if exists(media: media) {
+            let pathComponent = MediaUtils.mediaURL(media: media)
+            do {
+                try FileManager.default.removeItem(at: pathComponent)
+            } catch {
+                print("\(pathComponent.path): \(error.localizedDescription)")
+            }
+        }
     }
     
 }

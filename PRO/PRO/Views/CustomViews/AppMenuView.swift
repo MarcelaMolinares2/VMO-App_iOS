@@ -12,7 +12,9 @@ import RealmSwift
 struct PanelMenu: View {
     @EnvironmentObject var viewRouter: ViewRouter
     @Binding var isPresented: Bool
-    @State var panel: Panel & SyncEntity
+    @Binding var panel: Panel
+    var complementaryData: [String: Any] = [:]
+    
     @State var infoIsPresented = false
     
     @State var headerColor = Color.cPrimary
@@ -26,6 +28,18 @@ struct PanelMenu: View {
         GridItem(.flexible()),
         GridItem(.flexible())
     ]
+    
+    let reportType = Config.get(key: "MOV_REPORT_TYPE", defaultValue: 1)
+    let allowExtra = Config.get(key: "MOV_ALLOW_EXTRA")
+    let extraAlwaysOn = Config.get(key: "MOV_EXTRA_ALWAYS_ON")
+    let moduleTV = Config.get(key: "MOD_TV")
+    let moduleCC = Config.get(key: "VM-MOD-CC")
+    
+    @State private var couldVisit = false
+    @State private var couldVisitExtra = false
+    @State private var visitError = false
+    @State private var visitText = ""
+    @State private var visitErrorText = ""
 
     var body: some View {
         VStack {
@@ -35,168 +49,238 @@ struct PanelMenu: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .lineLimit(1)
                     .padding(.horizontal, 5)
-                    .foregroundColor(.white)
+                    .foregroundColor(.cTextHigh)
                 Image(headerIcon)
                     .resizable()
                     .scaledToFit()
-                    .foregroundColor(.white)
+                    .foregroundColor(headerColor)
                     .frame(width: 34, height: 34, alignment: .center)
                     .padding(4)
             }
-            .background(headerColor)
             .frame(maxWidth: .infinity)
-            LazyVGrid(columns: layout, spacing: 20) {
-                Button(action: {
-                    //self.isPresented = false
-                    //FormEntity(id: panel.id, type: "C").go(path: "PANEL-CARD", router: viewRouter)
-                    self.infoIsPresented = true
-                }) {
-                    VStack {
-                        Image("ic-info")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
-                            .foregroundColor(.cPrimary)
-                        Text("envKeyInfo")
-                            .foregroundColor(.cPrimary)
-                            .lineLimit(1)
-                            .font(.system(size: fontSize))
+            if visitError {
+                VStack {
+                    Text(visitErrorText)
+                        .foregroundColor(.cTextHigh)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 7)
+                }
+                .frame(maxWidth: .infinity)
+                .background(Color.cWarning)
+            }
+            if panel.hasDeleteRequest() {
+                VStack {
+                    Text("envMarkedForDelete")
+                        .foregroundColor(.cTextHigh)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 7)
+                }
+                .frame(maxWidth: .infinity)
+                .background(Color.cError)
+            }
+            PanelItemMapView(item: panel)
+            VStack {
+                LazyVGrid(columns: layout, spacing: 20) {
+                    Button(action: {
+                        //self.isPresented = false
+                        //FormEntity(id: panel.id, type: "C").go(path: "PANEL-CARD", router: viewRouter)
+                        self.infoIsPresented = true
+                    }) {
+                        VStack {
+                            Image("ic-info")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
+                                .foregroundColor(.cIcon)
+                            Text("envKeyInfo")
+                                .foregroundColor(.cTextMedium)
+                                .lineLimit(2)
+                                .font(.system(size: fontSize))
+                        }
                     }
-                }
-                .sheet(isPresented: $infoIsPresented) {
-                    //KeyInfoView(panel: panel, headerColor: headerColor, headerIcon: headerIcon)
-                }
-                Button(action: {
-                    self.isPresented = false
-                    FormEntity(objectId: panel.objectId.stringValue, type: panel.type, options: [ "tab": "CARD" ]).go(path: "PANEL-CARD", router: viewRouter)
-                }) {
-                    VStack {
-                        Image("ic-summary")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
-                            .foregroundColor(.cPrimary)
-                        Text("envDetail")
-                            .foregroundColor(.cPrimary)
-                            .lineLimit(1)
-                            .font(.system(size: fontSize))
+                    .sheet(isPresented: $infoIsPresented) {
+                        //KeyInfoView(panel: panel, headerColor: headerColor, headerIcon: headerIcon)
                     }
-                }
-                Button(action: {
-                    self.isPresented = false
-                    FormEntity(objectId: panel.objectId.stringValue, type: panel.type, options: [ "visitType": "normal" ]).go(path: "MOVEMENT-FORM", router: viewRouter)
-                }) {
-                    VStack {
-                        Image("ic-visit")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
-                            .foregroundColor(.cPrimary)
-                        Text("envVisit")
-                            .foregroundColor(.cPrimary)
-                            .lineLimit(1)
-                            .font(.system(size: fontSize))
+                    Button(action: {
+                        self.isPresented = false
+                        FormEntity(objectId: panel.objectId.stringValue, type: panel.type, options: [ "tab": "CARD" ]).go(path: "PANEL-CARD", router: viewRouter)
+                    }) {
+                        VStack {
+                            Image("ic-summary")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
+                                .foregroundColor(.cIcon)
+                            Text("envDetail")
+                                .foregroundColor(.cTextMedium)
+                                .lineLimit(2)
+                                .font(.system(size: fontSize))
+                        }
                     }
-                }
-                if Config.get(key: "MOV_ALLOW_EXTRA").value == 1 {
+                    Button(action: {
+                        self.isPresented = false
+                        FormEntity(objectId: panel.objectId.stringValue, type: panel.type, options: [ "tab": "BASIC" ])
+                            .go(path: PanelUtils.formByPanelType(panel: panel), router: viewRouter)
+                    }) {
+                        VStack {
+                            Image("ic-edit")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
+                                .foregroundColor(.cIcon)
+                            Text("envEdit")
+                                .foregroundColor(.cTextMedium)
+                                .lineLimit(2)
+                                .font(.system(size: fontSize))
+                        }
+                    }
                     Button(action: {
                         
                     }) {
                         VStack {
-                            Image("ic-visit")
+                            Image("ic-forbidden")
                                 .resizable()
                                 .scaledToFit()
                                 .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
-                                .foregroundColor(.cPrimary)
-                            Text("envExtraVisit")
-                                .foregroundColor(.cPrimary)
-                                .lineLimit(1)
+                                .foregroundColor(.cIcon)
+                            Text("envDeactivate")
+                                .foregroundColor(.cTextMedium)
+                                .lineLimit(2)
                                 .font(.system(size: fontSize))
                         }
                     }
-                }
-                Button(action: {
-                    self.isPresented = false
-                    FormEntity(objectId: panel.objectId.stringValue, type: panel.type, options: [ "tab": "RECORD" ]).go(path: "PANEL-CARD", router: viewRouter)
-                }) {
-                    VStack {
-                        Image("ic-medical-history")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
-                            .foregroundColor(.cPrimary)
-                        Text("envRecord")
-                            .foregroundColor(.cPrimary)
-                            .lineLimit(1)
-                            .font(.system(size: fontSize))
+                    if panel.type == "M" {
+                        if moduleCC.value == 1 {
+                            Button(action: {
+                                
+                            }) {
+                                VStack {
+                                    Image("ic-send")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
+                                        .foregroundColor(.cIcon)
+                                    Text("envSendContactDetail")
+                                        .foregroundColor(.cTextMedium)
+                                        .lineLimit(2)
+                                        .font(.system(size: fontSize))
+                                }
+                            }
+                        }
+                        Button(action: {
+                            if Utils.castInt(value: complementaryData["hd"]) == 1 {
+                                
+                            } else {
+                                
+                            }
+                        }) {
+                            VStack {
+                                Image("ic-signature")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
+                                    .foregroundColor(.cIcon)
+                                Text(Utils.castInt(value: complementaryData["hd"]) == 1 ? NSLocalizedString("envHabeasData", comment: "Habeas Data") : NSLocalizedString("envHabeasDataNR", comment: "HD not registered"))
+                                    .foregroundColor(.cTextMedium)
+                                    .lineLimit(2)
+                                    .font(.system(size: fontSize))
+                            }
+                        }
                     }
-                }
-                if panel.type != "M" {
-                    Button(action: {
-                        self.isPresented = false
-                        FormEntity(objectId: panel.objectId.stringValue, type: panel.type, options: [ "tab": "CONTACTS" ]).go(path: "PANEL-CARD", router: viewRouter)
-                    }) {
-                        VStack {
-                            Image("ic-client")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
-                                .foregroundColor(.cPrimary)
-                            Text("envContacts")
-                                .foregroundColor(.cPrimary)
-                                .lineLimit(1)
-                                .font(.system(size: fontSize))
+                    if couldVisit {
+                        Button(action: {
+                            self.isPresented = false
+                            FormEntity(objectId: panel.objectId.stringValue, type: panel.type, options: [ "visitType": "normal" ]).go(path: "MOVEMENT-FORM", router: viewRouter)
+                        }) {
+                            VStack {
+                                Image("ic-visit")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
+                                    .foregroundColor(.cIcon)
+                                Text(visitText)
+                                    .foregroundColor(.cTextMedium)
+                                    .lineLimit(2)
+                                    .font(.system(size: fontSize))
+                            }
+                        }
+                    }
+                    if couldVisitExtra {
+                        Button(action: {
+                            
+                        }) {
+                            VStack {
+                                Image("ic-visit")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
+                                    .foregroundColor(.cIcon)
+                                Text("envExtraVisit")
+                                    .foregroundColor(.cTextMedium)
+                                    .lineLimit(2)
+                                    .font(.system(size: fontSize))
+                            }
                         }
                     }
                 }
-                Button(action: {
-                    self.isPresented = false
-                    FormEntity(objectId: panel.objectId.stringValue, type: panel.type, options: [ "tab": "BASIC" ])
-                        .go(path: PanelUtils.formByPanelType(panel: panel), router: viewRouter)
-                }) {
-                    VStack {
-                        Image("ic-edit")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
-                            .foregroundColor(.cPrimary)
-                        Text("envEdit")
-                            .foregroundColor(.cPrimary)
-                            .lineLimit(1)
-                            .font(.system(size: fontSize))
-                    }
-                }
-                Button(action: {
-                    
-                }) {
-                    VStack {
-                        Image("ic-forbidden")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
-                            .foregroundColor(.cPrimary)
-                        Text("envDeactivate")
-                            .foregroundColor(.cPrimary)
-                            .lineLimit(1)
-                            .font(.system(size: fontSize))
-                    }
-                }
-                if panel.type == "M" {
-                    Button(action: {
-                    }) {
-                        VStack {
-                            Image("ic-signature")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
-                                .foregroundColor(.cPrimary)
-                            Text("envHData")
-                                .foregroundColor(.cPrimary)
-                                .lineLimit(1)
-                                .font(.system(size: fontSize))
+            }
+            .padding(.vertical, 10)
+            if panel.type == "M" && moduleTV.value == 1 {
+                VStack {
+                    Text("envValueTransference")
+                        .foregroundColor(.cTextMedium)
+                        .font(.system(size: 13))
+                    LazyVGrid(columns: layout, spacing: 20) {
+                        Button(action: {
+                            
+                        }) {
+                            VStack {
+                                Image("ic-tv-report")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
+                                    .foregroundColor(.cIcon)
+                                Text("envToReport")
+                                    .foregroundColor(.cTextMedium)
+                                    .lineLimit(2)
+                                    .font(.system(size: fontSize))
+                            }
+                        }
+                        Button(action: {
+                            
+                        }) {
+                            VStack {
+                                Image("ic-tv-signature")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
+                                    .foregroundColor(.cIcon)
+                                Text("envConsent")
+                                    .foregroundColor(.cTextMedium)
+                                    .lineLimit(2)
+                                    .font(.system(size: fontSize))
+                            }
+                        }
+                        if Utils.castInt(value: complementaryData["tv"]) == 1 {
+                            Button(action: {
+                                
+                            }) {
+                                VStack {
+                                    Image("ic-gallery")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
+                                        .foregroundColor(.cIcon)
+                                    Text("envOpenConsent")
+                                        .foregroundColor(.cTextMedium)
+                                        .lineLimit(2)
+                                        .font(.system(size: fontSize))
+                                }
+                            }
                         }
                     }
                 }
+                .padding(.vertical, 6)
             }
         }
         .onAppear {
@@ -205,20 +289,50 @@ struct PanelMenu: View {
     }
     
     func initUI() {
-        switch panel.type {
-        case "M":
-            self.headerColor = .cPanelMedic
-            self.headerIcon = "ic-medic"
-        case "F":
-            self.headerColor = .cPanelPharmacy
-            self.headerIcon = "ic-pharmacy"
-        case "C":
-            self.headerColor = .cPanelClient
-            self.headerIcon = "ic-client"
-        default:
-            self.headerColor = .cPrimary
+        self.headerColor = PanelUtils.colorByPanelType(panel: panel)
+        self.headerIcon = PanelUtils.iconByPanelType(panel: panel)
+        
+        var couldStartVisit = false
+        if reportType.value == 2 {
+            if MovementUtils.existsMovementOpen(objectId: panel.objectId, type: panel.type) {
+                couldVisit = true
+                visitText = "envResumeVisit"
+            } else {
+                couldStartVisit = true
+            }
+        } else {
+            couldStartVisit = true
+        }
+        if couldStartVisit {
+            let couldVisitByNumber = panel.couldVisitByNumber()
+            let couldVisitToday = panel.couldVisitToday()
+            if couldVisitToday && couldVisitByNumber {
+                couldVisit = true
+                visitText = reportType.value == 2 ? NSLocalizedString("envStartVisit", comment: "Start visit") : NSLocalizedString("envVisit", comment: "Visit")
+            } else {
+                visitError = true
+                if !couldVisitToday {
+                    visitErrorText = NSLocalizedString("envVisitedToday", comment: "The panel member was visited today")
+                } else if !couldVisitByNumber {
+                    visitErrorText = String(format: NSLocalizedString("envMaximumVisits", comment: "Maximum visits (%@/%@)"), String(panel.mainUser()?.visitsCycle ?? 0), String(panel.mainUser()?.visitsFee ?? 0))
+                } else {
+                    visitErrorText = NSLocalizedString("envVisitNotAllowed", comment: "Visit not allowed")
+                }
+            }
+        }
+        
+        if allowExtra.value == 1 {
+            let mainUser = panel.mainUser()
+            if (mainUser?.visitsCycle ?? 0) < (mainUser?.visitsFee ?? 0) {
+                if extraAlwaysOn.value == 1 {
+                    couldVisitExtra = true
+                }
+            } else {
+                couldVisitExtra = true
+            }
         }
     }
+    
 }
 
 struct GlobalMenu: View {
@@ -379,20 +493,19 @@ struct GlobalMenu: View {
     }
 }
 
-struct PanelTypeMenu: View {
-    let onPanelSelected: (_ type: String) -> Void
+struct PanelTypeSelectView: View {
+    @State var types: [String]
+    let onPanelTypeSelected: (_ type: String) -> Void
     
-    @State var panelTypes: [String]
-    @Binding var isPresented: Bool
     @State private var customGridItems: [GenericGridItem] = []
-    @State var columns: [GridItem] = []
+    @State private var columns: [GridItem] = []
     
     var body: some View {
         VStack {
             LazyVGrid(columns: columns, spacing: 0) {
                 ForEach(customGridItems, id: \.id) { item in
                     Button(action: {
-                        onPanelSelected(item.id)
+                        onPanelTypeSelected(item.id)
                     }) {
                         VStack {
                             Image(item.icon)
@@ -417,30 +530,8 @@ struct PanelTypeMenu: View {
     }
     
     func loadData() {
-        var card = GenericGridItem(id: "", color: .cPrimary, icon: "none", name: "none")
-        for item in panelTypes {
-            card.id = item
-            switch item {
-                case "M":
-                    card.color = .cPanelMedic
-                    card.icon = "ic-medic"
-                    card.name = "modMedic"
-                case "F":
-                    card.color = .cPanelPharmacy
-                    card.icon = "ic-pharmacy"
-                    card.name = "modPharmacy"
-                case "C":
-                    card.color = .cPanelClient
-                    card.icon = "ic-client"
-                    card.name = "modClient"
-                case "P":
-                    card.color = .cPanelPatient
-                    card.icon = "ic-patient"
-                    card.name = "modPatient"
-                default:
-                    print("default")
-            }
-            customGridItems.append(card)
+        for item in types {
+            customGridItems.append(GenericGridItem(id: item, color: PanelUtils.colorByPanelType(panelType: item), icon: PanelUtils.iconByPanelType(panelType: item), name: PanelUtils.titleByPanelType(panelType: item)))
             if columns.count < 4 {
                 columns.append(GridItem(.flexible()))
             }
@@ -628,6 +719,61 @@ struct ExpensePhotoBottomMenu: View {
                 }
             }
             //.frame(height: UIScreen.main.bounds.size.height / 4)
+        }
+    }
+}
+
+//DEPRECATED
+
+
+struct PanelTypeMenu: View {
+    let onPanelSelected: (_ type: String) -> Void
+    
+    @State var panelTypes: [String]
+    @Binding var isPresented: Bool
+    @State private var customGridItems: [GenericGridItem] = []
+    @State var columns: [GridItem] = []
+    
+    var body: some View {
+        VStack {
+            LazyVGrid(columns: columns, spacing: 0) {
+                ForEach(customGridItems, id: \.id) { item in
+                    Button(action: {
+                        onPanelSelected(item.id)
+                    }) {
+                        VStack {
+                            Image(item.icon)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
+                                .foregroundColor(item.color)
+                            Text(NSLocalizedString(item.name, comment: ""))
+                                .foregroundColor(.cPrimary)
+                                .lineLimit(1)
+                                .font(.system(size: CGFloat(15)))
+                        }
+                    }
+                    .padding([.top, .bottom], 10)
+                }
+            }
+        }
+        .padding(.bottom, 2)
+        .onAppear {
+            loadData()
+        }
+    }
+    
+    func loadData() {
+        var card = GenericGridItem(id: "", color: .cPrimary, icon: "none", name: "none")
+        for item in panelTypes {
+            card.id = item
+            card.color = PanelUtils.colorByPanelType(panelType: item)
+            card.icon = PanelUtils.iconByPanelType(panelType: item)
+            card.name = PanelUtils.titleByPanelType(panelType: item)
+            customGridItems.append(card)
+            if columns.count < 4 {
+                columns.append(GridItem(.flexible()))
+            }
         }
     }
 }

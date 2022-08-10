@@ -73,7 +73,7 @@ struct ClientFormView: View {
             plainData = try! Utils.objToJSON(client)
             additionalData = client?.fields ?? "{}"
         }
-        options.objectId = client?.objectId
+        options.objectId = client!.objectId
         options.item = client?.id ?? 0
         options.op = viewRouter.data.objectId.isEmpty ? "create" : "update"
         dynamicData = Utils.jsonDictionary(string: Config.get(key: "P_CLI_DYNAMIC_FORM").complement ?? "")

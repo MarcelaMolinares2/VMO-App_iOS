@@ -65,7 +65,7 @@ struct PanelContactListView: View {
             }
         }
         .partialSheet(isPresented: $menuIsPresented) {
-            PanelMenu(isPresented: self.$menuIsPresented, panel: panel)
+            //PanelMenu(isPresented: self.$menuIsPresented, panel: panel)
         }
     }
     
@@ -126,7 +126,7 @@ struct PanelContactFormView: View {
             plainData = try! Utils.objToJSON(contact)
             additionalData = contact?.fields ?? "{}"
         }
-        options.objectId = contact?.objectId
+        options.objectId = contact!.objectId
         options.item = contact?.id ?? 0
         options.op = viewRouter.data.objectId.isEmpty ? "create" : "update"
         dynamicData = Utils.jsonDictionary(string: Config.get(key: "P_CTC_DYNAMIC_FORM").complement ?? "")

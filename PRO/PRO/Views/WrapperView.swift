@@ -14,8 +14,24 @@ struct WrapperView: View {
         switch viewRouter.currentPage {
             case PanelUtils.formByPanelType(type: "C"):
                 ClientFormView()
+            case PanelUtils.formByPanelType(type: "F"):
+                PharmacyFormView()
             case PanelUtils.formByPanelType(type: "M"):
                 DoctorFormView()
+            case PanelUtils.formByPanelType(type: "P"):
+                PatientFormView()
+            case PanelUtils.formByPanelType(type: "T"):
+                PotentialFormView()
+            case "CLIENT-VIEW":
+                ClientListWrapperView()
+            case "DOCTOR-VIEW":
+                DoctorListWrapperView()
+            case "PHARMACY-VIEW":
+                PharmacyListWrapperView()
+            case "PATIENTS-VIEW":
+                PatientListWrapperView()
+            case "POTENTIAL-VIEW":
+                PotentialListWrapperView()
             case "DTV-FORM":
                 ActivityFormView()
             case "DTV-SUMMARY":
@@ -28,24 +44,14 @@ struct WrapperView: View {
                 MovementsView()
             case "PANEL-CARD":
                 PanelSummaryView(panel: viewRouter.panel(), defaultTab: viewRouter.option(key: "tab", default: "CARD"))
-            case "PATIENT-LIST":
-                PatientListView()
-            case PanelUtils.formByPanelType(type: "F"):
-                PharmacyFormView()
-            case PanelUtils.formByPanelType(type: "P"):
-                PatientFormView()
-            case "POTENTIAL-LIST":
-                PotentialListView()
-            case PanelUtils.formByPanelType(type: "T"):
-                PotentialFormView()
-            case "REQUEST-DAYS-VIEW":
-                RequestDayView()
             case "REQUEST-MATERIAL-VIEW":
                 MaterialRequestView()
             case "GROUPS-VIEW":
                 RouteView()
-            case "EXPENSES-VIEW":
-                ExpensesFormView()
+            case "RECORD-EXPENSES-VIEW":
+                RecordExpenseView()
+            case "REQUEST-DAYS-VIEW":
+                RequestDayView()
             /*
             case "ROUTE-FORM":
                 RouteFormView()
