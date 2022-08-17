@@ -59,16 +59,16 @@ struct DoctorFormView: View {
     }
     
     func initForm() {
-        if viewRouter.data.objectId.isEmpty {
+        if viewRouter.data.objectId == nil {
             doctor = Doctor()
         } else {
-            doctor = Doctor(value: try! DoctorDao(realm: try! Realm()).by(objectId: ObjectId(string: viewRouter.data.objectId)) ?? Doctor())
+            doctor = Doctor(value: DoctorDao(realm: try! Realm()).by(objectId: viewRouter.data.objectId!) ?? Doctor())
             plainData = try! Utils.objToJSON(doctor)
             additionalData = doctor?.fields ?? "{}"
         }
         options.objectId = doctor!.objectId
         options.item = doctor?.id ?? 0
-        options.op = viewRouter.data.objectId.isEmpty ? "create" : "update"
+        options.op = viewRouter.data.objectId == nil ? "create" : "update"
         dynamicData = Utils.jsonDictionary(string: Config.get(key: "P_DOC_DYNAMIC_FORM").complement ?? "")
         
         initDynamic(data: dynamicData)

@@ -106,6 +106,8 @@ struct CustomPanelDoctorView: View {
                         PanelItemDoctor(realm: realm, userId: userSelected <= 0 ? JWTUtils.sub() : userSelected, doctor: element) {
                             onItemTapped(element)
                         }
+                        .padding(.vertical, 10)
+                        .padding(.horizontal, 10)
                         .background(selected.contains(element.objectId) ? Color.cBackground3dp : nil)
                     }
                 }

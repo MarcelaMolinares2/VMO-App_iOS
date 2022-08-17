@@ -11,480 +11,92 @@ import RealmSwift
 import CoreLocation
 import AlertToast
 
+
+class DifferentToVisitModel: ObservableObject {
+    @Published var dateFrom: Date = Date()
+    @Published var dateTo: Date = Date()
+    @Published var hourFrom: Date = Date()
+    @Published var hourTo: Date = Date()
+    @Published var comment: String = ""
+    @Published var fields: String = ""
+    
+    @Published var fdr: Bool = false
+    @Published var fdrAvailable: Bool = true
+    @Published var fdrPercentage: Float = 100
+    @Published var fdrReasonId: Int = 0
+}
+
+
 struct ActivityFormView: View {
     
     @EnvironmentObject var viewRouter: ViewRouter
     
-    @State private var activity: DifferentToVisit = DifferentToVisit()
-    @ObservedObject var dashboardRouter = DashboardRouter()
+    var realm = try! Realm()
     
-    @State var viewForms = false
-    @State var waitLoad = false
-    @State var searchText = ""
+    private var dtvModel = DifferentToVisitModel()
+    @State private var assistants = [PanelItemModel]()
+    @State private var materials = [AdvertisingMaterialDeliveryMaterial]()
+    
+    @State var differentToVisit: DifferentToVisit?
+    
+    @State private var route = 0
+    @State private var modalPanelType = false
     @State private var showToast = false
+    @State private var savedToast = false
     
     var body: some View {
-        ZStack{
-            VStack{
-                HeaderToggleView(title: "modActivity") {
-                    
-                }
-                if waitLoad {
-                    if !viewForms {
-                        ActivityBasicFormView(activity: activity)
-                    } else {
-                        AssistantsActivityFormView(activity: activity)
-                    }
-                }
-                GeometryReader { geometry in
-                    HStack{
-                        Image("ic-signature-paper")
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .padding(5)
-                            .frame(width: geometry.size.width / 2, alignment: .center)
-                            .foregroundColor(viewForms ? .cAccent : .cPrimary)
-                            .onTapGesture {
-                                viewForms = false
-                            }
-                        Image("ic-client")
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .padding(5)
-                            .frame(width: geometry.size.width / 2, alignment: .center)
-                            .foregroundColor(viewForms ? .cPrimary : .cAccent)
-                            .onTapGesture {
-                                viewForms = true
-                            }
-                    }
-                    .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
-                }
-                .frame(minWidth: 0, maxWidth: .infinity, minHeight: 46, maxHeight: 46)
+        VStack {
+            HeaderToggleView(title: "modActivity") {
+                viewRouter.currentPage = "ACTIVITIES-VIEW"
             }
-            
-            VStack {
-                Spacer()
-                HStack {
+            ZStack(alignment: .bottom) {
+                TabView(selection: $route) {
+                    ActivityFormBasicView(realm: realm)
+                        .tag(0)
+                        .tabItem {
+                            Text("envBasic")
+                            Image("ic-basic")
+                        }
+                    ZStack(alignment: .bottom) {
+                        PanelSelectWrapperView(realm: realm, types: ["M", "F", "C", "P", "T"], members: $assistants, modalPanelType: $modalPanelType)
+                        HStack(alignment: .bottom) {
+                            FAB(image: "ic-plus") {
+                                modalPanelType = true
+                            }
+                            Spacer()
+                        }
+                        .padding(.bottom, Globals.UI_FAB_VERTICAL)
+                        .padding(.horizontal, Globals.UI_FAB_HORIZONTAL)
+                    }
+                        .tag(1)
+                        .tabItem {
+                            Text("envAssistants")
+                            Image("ic-client")
+                        }
+                    MaterialDeliveryFormWrapperView(realm: realm, details: $materials)
+                        .tag(2)
+                        .tabItem {
+                            Text("envMaterial")
+                            Image("ic-material")
+                        }
+                }
+                .tabViewStyle(DefaultTabViewStyle())
+                HStack(alignment: .bottom) {
                     Spacer()
                     FAB(image: "ic-cloud") {
                         validate()
                     }
                 }
+                .padding(.bottom, Globals.UI_FAB_VERTICAL + 50)
+                .padding(.horizontal, Globals.UI_FAB_HORIZONTAL)
             }
-            .padding(.bottom, 56)
         }
+        .environmentObject(dtvModel)
         .toast(isPresenting: $showToast) {
-            AlertToast(type: .regular, title: NSLocalizedString("envRequireItems", comment: ""))
+            AlertToast(type: .error(.cError), title: NSLocalizedString("errFormEmpty", comment: ""))
         }
-        .onAppear{
-            load()
-        }
-    }
-    
-    func load() {
-        if !viewRouter.data.objectId.isEmpty {
-            if let activityItem = try? ActivityDao(realm: try! Realm()).by(objectId: ObjectId(string: viewRouter.data.objectId)) {
-                activity = DifferentToVisit(value: activityItem)
-            }
-        }
-        waitLoad = true
-    }
-    
-    func validate() {
-        if activity.comment.isEmpty {
-            self.showToast.toggle()
-            return
-        }
-        if activity.requestFreeDay == 1 {
-            
-        }
-        
-        save()
-    }
-    
-    func save() {
-        ActivityDao(realm: try! Realm()).store(activity: activity)
-        self.goTo(page: "MASTER")
-        if activity.requestFreeDay == 1 {
-            
-        }
-    }
-    
-    func goTo(page: String) {
-        viewRouter.currentPage = page
-    }
-}
-
-struct ActivityBasicFormView: View {
-    
-    @State var activity: DifferentToVisit
-    
-    @EnvironmentObject var viewRouter: ViewRouter
-    
-    @State private var isSheetCycle = false
-    @State private var idsCycle = [String]()
-    @State private var cycle = ""
-    
-    var visitType = "NORMAL"
-    @State private var dynamicData = Utils.jsonDictionary(string: Config.get(key: "P_OTHER_FORM_ADDITIONAL").complement ?? "")
-    @State private var form = DynamicForm(tabs: [DynamicFormTab]())
-    @State private var options = DynamicFormFieldOptions(table: "activity", op: "")
-    @State private var showDayAuth = false
-    @State private var showSectionRequestDay = false
-    @State private var dateStart : Date = Date()
-    @State private var dateEnd : Date = Date()
-    @State private var percentageValue = Double(100)
-    @State private var commentActivity = ""
-    @State private var reasonActivity = ""
-    
-    var body: some View {
-        VStack {
-            CustomForm {
-                /*
-                CustomSection{
-                    VStack{
-                        Button(action: {
-                            isSheetCycle = true
-                        }, label: {
-                            HStack{
-                                VStack{
-                                    Text(NSLocalizedString("envCycle", comment: ""))
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                        .foregroundColor(.cTextMedium)
-                                        .font(.system(size: 14))
-                                    Text((cycle == "") ? NSLocalizedString("envChoose", comment: "") : cycle)
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                        .foregroundColor(.cTextMedium)
-                                        .font(.system(size: 16))
-                                }
-                                Spacer()
-                                Image("ic-arrow-expand-more")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 35)
-                                    .foregroundColor(.cTextMedium)
-                            }
-                            .padding(10)
-                        })
-                        VStack{
-                            VStack{
-                                HStack{
-                                    VStack{
-                                        Text(NSLocalizedString("envFrom", comment: ""))
-                                            .frame(maxWidth: .infinity, alignment: .leading)
-                                            .foregroundColor(.cTextMedium)
-                                            .font(.system(size: 14))
-                                        DatePicker("", selection: $dateStart, in: dateStart..., displayedComponents: [.date, .hourAndMinute])
-                                            .datePickerStyle(CompactDatePickerStyle())
-                                            .labelsHidden()
-                                            .clipped()
-                                            .accentColor(.cTextHigh)
-                                            .background(Color.white)
-                                            .onChange(of: dateStart, perform: { value in
-                                                activity.dateStart = Utils.dateFormat(date: value)
-                                                activity.hourStart = Utils.dateFormat(date: value, format: "HH:mm:ss")
-                                                if dateStart >= dateEnd {
-                                                    dateEnd = dateStart
-                                                    activity.dateEnd = Utils.dateFormat(date: value)
-                                                    activity.hourEnd = Utils.dateFormat(date: value, format: "HH:mm:ss")
-                                                }
-                                            })
-                                    }
-                                        .padding(10)
-                                    Spacer()
-                                    Image("ic-day-request")
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(height: 35)
-                                        .foregroundColor(.cTextMedium)
-                                        .padding(10)
-                                }
-                                .background(Color.white)
-                                .frame(alignment: Alignment.center)
-                                .clipped()
-                                .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
-                                HStack{
-                                    VStack{
-                                        Text(NSLocalizedString("envTo", comment: ""))
-                                            .frame(maxWidth: .infinity, alignment: .leading)
-                                            .foregroundColor(.cTextMedium)
-                                            .font(.system(size: 14))
-                                        DatePicker("", selection: $dateEnd, in: dateStart..., displayedComponents: [.date, .hourAndMinute])
-                                            .datePickerStyle(CompactDatePickerStyle())
-                                            .labelsHidden()
-                                            .clipped()
-                                            .accentColor(.cTextHigh)
-                                            .background(Color.white)
-                                            .onChange(of: dateEnd, perform: { value in
-                                                activity.dateEnd = Utils.dateFormat(date: value)
-                                                activity.hourEnd = Utils.dateFormat(date: value, format: "HH:mm:ss")
-                                            })
-                                    }
-                                        .padding(10)
-                                    Spacer()
-                                    Image("ic-day-request")
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(height: 35)
-                                        .foregroundColor(.cTextMedium)
-                                        .padding(10)
-                                }
-                                .background(Color.white)
-                                .frame(alignment: Alignment.center)
-                                .clipped()
-                                .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
-                            }
-                            Text(NSLocalizedString("envComment", comment: ""))
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .foregroundColor((commentActivity == "") ? .cDanger : .cTextMedium)
-                                .font(.system(size: 14))
-                            VStack{
-                                TextEditor(text: $commentActivity)
-                                .frame(height: 80)
-                                .onChange(of: commentActivity, perform: { value in
-                                    activity.description_ = value
-                                })
-                            }
-                            .background(Color.white)
-                            .frame(alignment: Alignment.center)
-                            .clipped()
-                            .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
-                        }
-                        .padding(10)
-                    }
-                }
-                if showSectionRequestDay {
-                    CustomSection {
-                        VStack{
-                            HStack{
-                                Toggle(isOn: $showDayAuth){
-                                    Text(NSLocalizedString("activityRequestDay", comment: ""))
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                        .foregroundColor(.cTextMedium)
-                                        .font(.system(size: 18))
-                                        .fixedSize(horizontal: false, vertical: true)
-                                }
-                                .onChange(of: showDayAuth, perform: { value in
-                                    if value {
-                                        activity.dayPercentage = 100
-                                        activity.requestFreeDay = 1
-                                    } else {
-                                        activity.dayPercentage = nil
-                                        activity.requestFreeDay = 0
-                                        activity.dayReason = nil
-                                        reasonActivity = ""
-                                    }
-                                })
-                                .toggleStyle(SwitchToggleStyle(tint: .cBlueDark))
-                            }
-                            if showDayAuth {
-                                Text(String(format: NSLocalizedString("envRequestedDayPercentage", comment: ""), String(percentageValue)))
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .foregroundColor(.cTextMedium)
-                                    .font(.system(size: 14))
-                                Slider(value: $percentageValue, in: 0.0...100, step: 10)
-                                .onChange(of: percentageValue, perform: { value in
-                                    activity.dayPercentage = Float(value)
-                                })
-                                Button(action: {
-                                    reasonActivity = (reasonActivity == "") ? "reason": "reason"
-                                    activity.dayReason = reasonActivity
-                                }, label: {
-                                    HStack{
-                                        VStack{
-                                            Text(NSLocalizedString("envDayRequestReason", comment: ""))
-                                                .frame(maxWidth: .infinity, alignment: .leading)
-                                                .foregroundColor((reasonActivity == "") ? .cDanger : .cTextMedium)
-                                                .font(.system(size: 14))
-                                            Text((reasonActivity != "") ? reasonActivity: NSLocalizedString("envChoose", comment: ""))
-                                                .frame(maxWidth: .infinity, alignment: .leading)
-                                                .foregroundColor(.cTextMedium)
-                                                .font(.system(size: 16))
-                                        }
-                                        Spacer()
-                                        Image("ic-arrow-expand-more")
-                                            .resizable()
-                                            .scaledToFit()
-                                            .frame(width: 35)
-                                            .foregroundColor(.cTextMedium)
-                                    }
-                                    .padding(10)
-                                    .background(Color.white)
-                                    .frame(alignment: Alignment.center)
-                                    .clipped()
-                                    .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
-                                })
-                            }
-                        }
-                        .padding(10)
-                    }
-                }
-                */
-                CustomSection{
-                    VStack{
-                        ForEach(form.tabs, id: \.id) { tab in
-                            DynamicFormView(form: $form, tab: $form.tabs[0], options: options)
-                        }
-                    }
-                }
-            }
-            .buttonStyle(PlainButtonStyle())
-            Spacer()
-        }.sheet(isPresented: $isSheetCycle, content: {
-            CustomDialogPicker(onSelectionDone: onSelectionCycleDone, selected: $idsCycle, key: "CYCLE", multiple: false, isSheet: true)
-        })
-        .onAppear{
-            load()
-        }
-    }
-    
-    func load(){
-        /*options.objectId = activity.objectId
-        options.item = activity.id
-        options.op = ""
-        options.type = visitType.lowercased()
-        options.panelType = viewRouter.data.type
-        form.tabs = DynamicUtils.initForm(data: dynamicData).sorted(by: { $0.key > $1.key })
-        self.dateStart = Utils.strToDate(value: (activity.dateStart ?? "") + " " + (activity.hourStart ?? ""))
-        if let date_MDY: String = activity.dateFrom {
-            if let date_HMS: String = activity.hourStart {
-                self.dateStart = Utils.strToDate(value : date_MDY + " " + date_HMS)
-            }
-        } else {
-            activity.dateStart = Utils.dateFormat(date: Date())
-            activity.hourStart = Utils.dateFormat(date: Date(), format: "HH:mm:ss")
-        }
-        if let date_MDY: String = activity.dateEnd {
-            if let date_HMS: String = activity.hourEnd {
-                self.dateEnd = Utils.strToDate(value : date_MDY + " " + date_HMS)
-            }
-        } else {
-            activity.dateEnd = Utils.dateFormat(date: Date())
-            activity.hourEnd = Utils.dateFormat(date: Date(), format: "HH:mm:ss")
-        }
-        showSectionRequestDay = (activity.requestFreeDay == 0) ? false: true
-        showDayAuth = (activity.requestFreeDay == 1) ? true: false
-        
-        self.percentageValue = (activity.dayPercentage != nil) ? Double(activity.dayPercentage ?? 100): Double(100)
-        
-        reasonActivity = activity.dayReason ?? ""
-        commentActivity = activity.description_ ?? ""
-        if let itemCycle = CycleDao(realm: try! Realm()).by(id: "1"){
-            cycle = itemCycle.displayName
-            activity.cycle = itemCycle
-        }*/
-    }
-    
-    func onSelectionCycleDone(_ selected: [String]) {
-        isSheetCycle = false
-        if let itemCycle = CycleDao(realm: try! Realm()).by(id: idsCycle[0]){
-            cycle = itemCycle.displayName
-            //activity.cycle = itemCycle
-        }
-    }
-}
-
-struct AssistantsActivityFormView: View{
-    
-    @State var activity: DifferentToVisit
-    
-    @ObservedObject private var selectPanelModalToggle = ModalToggle()
-    @State private var cardShow = false
-    @State private var type = ""
-    @State private var items = [Panel & SyncEntity]()
-    
-    @State private var slDefault = [String]()
-    @State private var slDoctors = [String]()
-    @State private var slPharmacies = [String]()
-    @State private var slClients = [String]()
-    @State private var slPatients = [String]()
-    
-    var body: some View {
-        let selected = [
-            "M": BindingWrapper(binding: $slDoctors),
-            "F": BindingWrapper(binding: $slPharmacies),
-            "C": BindingWrapper(binding: $slClients),
-            "P": BindingWrapper(binding: $slPatients)
-        ]
-        ZStack{
-            VStack{
-                List {
-                    ForEach(items, id: \.objectId) { item in
-                        HStack(alignment: .center, spacing: 10){
-                            switch item.type {
-                                case "M":
-                                    Image("ic-medic")
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(height: 27)
-                                        .foregroundColor(Color.cPanelMedic)
-                                case "F":
-                                    Image("ic-pharmacy")
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(height: 27)
-                                        .foregroundColor(Color.cPanelPharmacy)
-                                case "C":
-                                    Image("ic-client")
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(height: 27)
-                                        .foregroundColor(Color.cPanelClient)
-                                case "P":
-                                    Image("ic-patient")
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(height: 27)
-                                        .foregroundColor(Color.cPanelPatient)
-                                default:
-                                    Text("default")
-                            }
-                            //PanelItem(panel: item)
-                        }
-                    }
-                    .onDelete { (offsets: IndexSet) in
-                        var its: Int = 0
-                        var type: String = ""
-                        offsets.forEach{ it in
-                            type = items[it].type
-                            its = items[it].id
-                        }
-                        selected[type]?.binding.removeAll(where: { $0 == String(its) })
-                        self.items.remove(atOffsets: offsets)
-                        //activity.medics = slDoctors.joined(separator: ",")
-                        //activity.pharmacies = slPharmacies.joined(separator: ",")
-                        //activity.clients = slClients.joined(separator: ",")
-                        //activity.patients = slPatients.joined(separator: ",")
-                    }
-                }
-                Spacer()
-            }
-            VStack {
-                Spacer()
-                HStack {
-                    FAB(image: "ic-plus") {
-                        print("plus raton")
-                        cardShow.toggle()
-                    }
-                    .padding(.horizontal, 20)
-                    Spacer()
-                }
-            }
-            if selectPanelModalToggle.status {
-                GeometryReader {geo in
-                    PanelDialogPicker(modalToggle: selectPanelModalToggle, selected: selected[self.type]?.$binding ?? $slDefault, type: self.type, multiple: true)
-                }
-                .background(Color.black.opacity(0.45))
-                .onDisappear {
-                    selected[self.type]?.binding.forEach{ it in
-                        addActivitysPanels(type: self.type)
-                        addPanelItems(type: self.type, it: it)
-                    }
-                }
-            }
-        }
-        .partialSheet(isPresented: self.$cardShow) {
-            PanelTypeMenu(onPanelSelected: onPanelSelected, panelTypes: ["M", "F", "C", "P"], isPresented: self.$cardShow)
+        .toast(isPresenting: $savedToast) {
+            AlertToast(type: .complete(.cDone), title: NSLocalizedString("envSuccessfullySaved", comment: ""))
         }
         .onAppear {
             load()
@@ -492,83 +104,255 @@ struct AssistantsActivityFormView: View{
     }
     
     func load() {
-        /*activity.medics?.split(separator: ",").forEach{ it in
-            addPanelItems(type: "M", it: String(it))
-            slDoctors.append(String(it))
-        }
-        activity.pharmacies?.split(separator: ",").forEach{ it in
-            addPanelItems(type: "F", it: String(it))
-            slPharmacies.append(String(it))
-        }
-        activity.clients?.split(separator: ",").forEach{ it in
-            addPanelItems(type: "C", it: String(it))
-            slClients.append(String(it))
-        }
-        activity.patients?.split(separator: ",").forEach{ it in
-            addPanelItems(type: "P", it: String(it))
-            slPatients.append(String(it))
-        }*/
-    }
-    
-    func addActivitysPanels(type: String){
-        /*switch type {
-        case "M":
-            activity.medics = slDoctors.joined(separator: ",")
-        case "F":
-            activity.pharmacies = slPharmacies.joined(separator: ",")
-        case "C":
-            activity.clients = slClients.joined(separator: ",")
-        case "P":
-            activity.patients = slPatients.joined(separator: ",")
-        default:
-            break
-        }*/
-    }
-    
-    func addPanelItems(type: String, it: String){
-        switch type {
-        case "M":
-            if let doctor = DoctorDao(realm: try! Realm()).by(id: it){
-                if !validate(items: items, it: it, type: type) {
-                    items.append(doctor)
+        if let oId = viewRouter.data.objectId {
+            differentToVisit = ActivityDao(realm: try! Realm()).by(objectId: oId)
+            dtvModel.dateFrom = Utils.strToDate(value: differentToVisit?.dateFrom ?? "")
+            dtvModel.dateTo = Utils.strToDate(value: differentToVisit?.dateTo ?? "")
+            dtvModel.hourFrom = Utils.strToDate(value: differentToVisit?.hourFrom ?? "", format: "HH:mm")
+            dtvModel.hourTo = Utils.strToDate(value: differentToVisit?.hourTo ?? "", format: "HH:mm")
+            dtvModel.comment = differentToVisit?.comment ?? ""
+            dtvModel.fields = differentToVisit?.fields ?? "{}"
+            
+            if differentToVisit?.requestFreeDay == 1 {
+                dtvModel.fdrAvailable = false
+            }
+            
+            assistants.removeAll()
+            differentToVisit?.assistants.forEach{ assistant in
+                if assistant.panelId <= 0 {
+                    assistants.append(PanelItemModel(objectId: assistant.panelObjectId, type: assistant.panelType))
+                } else {
+                    if let panel = PanelUtils.panel(type: assistant.panelType, id: assistant.panelId) {
+                        assistants.append(PanelItemModel(objectId: panel.objectId, type: assistant.panelType))
+                    }
                 }
             }
-        case "F":
-            if let pharmacy = PharmacyDao(realm: try! Realm()).by(id: it){
-                if !validate(items: items, it: it, type: type) {
-                    items.append(pharmacy)
-                }
-            }
-        case "C":
-            if let client = ClientDao(realm: try! Realm()).by(id: it){
-                if !validate(items: items, it: it, type: type) {
-                    items.append(client)
-                }
-            }
-        case "P":
-            if let patient = PatientDao(realm: try! Realm()).by(id: it){
-                if !validate(items: items, it: it, type: type) {
-                    items.append(patient)
-                }
-            }
-        default:
-            break
         }
     }
     
-    func validate(items: [Panel & SyncEntity], it: String, type: String) -> Bool {
-        var exists: Bool = false
-        items.forEach{ i in
-            if String(i.id) == it && i.type == type{
-                exists = true
+    func validate() {
+        if dtvModel.comment.isEmpty {
+            self.showToast.toggle()
+            return
+        }
+        if dtvModel.fdr {
+            if dtvModel.fdrReasonId <= 0 {
+                self.showToast.toggle()
+                return
             }
         }
-        return exists
+        save()
     }
     
-    func onPanelSelected(_ type: String) {
-        self.cardShow.toggle()
-        self.type = type
-        selectPanelModalToggle.status.toggle()
+    func save() {
+        differentToVisit?.comment = dtvModel.comment
+        differentToVisit?.dateFrom = Utils.dateFormat(date: dtvModel.dateFrom)
+        differentToVisit?.dateTo = Utils.dateFormat(date: dtvModel.dateTo)
+        differentToVisit?.hourFrom = Utils.hourFormat(date: dtvModel.hourFrom)
+        differentToVisit?.hourTo = Utils.hourFormat(date: dtvModel.hourTo)
+        //differentToVisit?.fields = dtvModel.comment
+        differentToVisit?.assistants.removeAll()
+        assistants.forEach { pim in
+            let assistant = DifferentToVisitAssistant()
+            assistant.panelObjectId = pim.objectId
+            assistant.panelId = PanelUtils.panel(type: pim.type, objectId: pim.objectId)?.id ?? 0
+            assistant.panelType = pim.type
+            differentToVisit?.assistants.append(assistant)
+        }
+        differentToVisit?.materials.removeAll()
+        materials.forEach { material in
+            let dtvMaterial = DifferentToVisitMaterial()
+            dtvMaterial.materialId = material.materialId
+            material.sets.forEach { materialSet in
+                let dtvMaterialSet = DifferentToVisitMaterialSet()
+                dtvMaterialSet.id = materialSet.id
+                dtvMaterialSet.quantity = materialSet.quantity
+                dtvMaterial.sets.append(dtvMaterialSet)
+            }
+            differentToVisit?.materials.append(dtvMaterial)
+        }
+        if dtvModel.fdr {
+            saveFreeDayRequest()
+        }
+        ActivityDao(realm: try! Realm()).store(activity: differentToVisit!)
+        self.goTo(page: "ACTIVITIES-VIEW")
     }
+    
+    func saveFreeDayRequest() {
+        let freeDayRequest = FreeDayRequest()
+        freeDayRequest.reasonId = dtvModel.fdrReasonId
+        freeDayRequest.observations = dtvModel.comment
+        freeDayRequest.requestedAt = Utils.currentDateTime()
+        let dayDurationInSeconds: TimeInterval = 60*60*24
+        for date in stride(from: dtvModel.dateFrom, to: dtvModel.dateTo, by: dayDurationInSeconds) {
+            let detail = FreeDayRequestDetail()
+            detail.date = Utils.dateFormat(date: date)
+            detail.dayFull = false
+            detail.dayOnlyAM = false
+            detail.dayOnlyPM = false
+            detail.dayCustom = true
+            detail.percentage = dtvModel.fdrPercentage
+            freeDayRequest.details.append(detail)
+        }
+        FreeDayRequestDao(realm: realm).store(freeDayRequest: freeDayRequest)
+    }
+    
+    func goTo(page: String) {
+        viewRouter.currentPage = page
+    }
+}
+
+struct ActivityFormBasicView: View {
+    var realm: Realm
+    @EnvironmentObject var dtvModel: DifferentToVisitModel
+    
+    @State private var dynamicData = Utils.jsonDictionary(string: Config.get(key: "P_OTHER_FORM_ADDITIONAL").complement ?? "")
+    @State private var dynamicForm = DynamicForm(tabs: [DynamicFormTab]())
+    @State private var dynamicOptions = DynamicFormFieldOptions(table: "activity", op: "")
+
+    @State private var modalRequestDayReason = false
+    @State private var selectedReason = [String]()
+    @State private var reasonContent = NSLocalizedString("envChoose", comment: "Choose...")
+    
+    var body: some View {
+        VStack {
+            CustomForm {
+                CustomSection {
+                    Text("envDTVComment")
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .foregroundColor((dtvModel.comment.isEmpty) ? .cDanger : .cTextMedium)
+                        .font(.system(size: 14))
+                    VStack{
+                        TextEditor(text: $dtvModel.comment)
+                            .frame(height: 80)
+                    }
+                }
+                CustomSection {
+                    HStack {
+                        VStack{
+                            Text(NSLocalizedString("envFrom", comment: "From"))
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .foregroundColor(.cTextMedium)
+                                .font(.system(size: 13))
+                            DatePicker("", selection: $dtvModel.dateFrom, displayedComponents: [.date])
+                                .fixedSize()
+                        }
+                        .frame(maxWidth: .infinity)
+                        VStack{
+                            Text(NSLocalizedString("envTo", comment: "To"))
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .foregroundColor(.cTextMedium)
+                                .font(.system(size: 13))
+                            DatePicker("", selection: $dtvModel.dateTo, in: dtvModel.dateFrom..., displayedComponents: [.date])
+                                .fixedSize()
+                        }
+                        .frame(maxWidth: .infinity)
+                        Image("ic-calendar")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(height: 26)
+                            .foregroundColor(.cIcon)
+                    }
+                }
+                CustomSection {
+                    HStack {
+                        VStack{
+                            Text(NSLocalizedString("envFrom", comment: "From"))
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .foregroundColor(.cTextMedium)
+                                .font(.system(size: 13))
+                            DatePicker("", selection: $dtvModel.hourFrom, displayedComponents: [.hourAndMinute])
+                                .fixedSize()
+                        }
+                        .frame(maxWidth: .infinity)
+                        VStack{
+                            Text(NSLocalizedString("envTo", comment: "To"))
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .foregroundColor(.cTextMedium)
+                                .font(.system(size: 13))
+                            DatePicker("", selection: $dtvModel.hourTo, in: dtvModel.hourFrom..., displayedComponents: [.hourAndMinute])
+                                .fixedSize()
+                        }
+                        .frame(maxWidth: .infinity)
+                        Image("ic-clock")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(height: 26)
+                            .foregroundColor(.cIcon)
+                    }
+                }
+                ForEach($dynamicForm.tabs) { $tab in
+                    DynamicFormView(form: $dynamicForm, tab: $tab, options: dynamicOptions)
+                }
+                if dtvModel.fdrAvailable {
+                    CustomSection {
+                        Toggle(isOn: $dtvModel.fdr) {
+                            Text(NSLocalizedString("envRequestAuthorizedDay", comment: ""))
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .foregroundColor(.cTextHigh)
+                        }
+                        if dtvModel.fdr {
+                            VStack {
+                                Text("envRequestedDayPercentage")
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .foregroundColor(.cTextMedium)
+                                HStack {
+                                    Slider(value: $dtvModel.fdrPercentage, in: 0.0...100, step: 10)
+                                    Text("\(Int(dtvModel.fdrPercentage))%")
+                                }
+                            }
+                            .padding(.vertical, 5)
+                            VStack {
+                                Button(action: {
+                                    modalRequestDayReason = true
+                                }, label: {
+                                    HStack{
+                                        VStack{
+                                            Text(NSLocalizedString("envDayRequestReason", comment: ""))
+                                                .frame(maxWidth: .infinity, alignment: .leading)
+                                                .foregroundColor(dtvModel.fdrReasonId <= 0 ? Color.cDanger : .cTextMedium)
+                                                .font(.system(size: 14))
+                                            Text(reasonContent)
+                                                .frame(maxWidth: .infinity, alignment: .leading)
+                                                .foregroundColor(.cTextHigh)
+                                                .font(.system(size: 16))
+                                        }
+                                        Spacer()
+                                        Image("ic-arrow-expand-more")
+                                            .resizable()
+                                            .scaledToFit()
+                                            .frame(width: 35)
+                                            .foregroundColor(.cIcon)
+                                    }
+                                    .sheet(isPresented: $modalRequestDayReason, content: {
+                                        DialogSourcePickerView(selected: $selectedReason, key: "FREE-DAY-REASON", multiple: false, title: NSLocalizedString("envDayRequestReason", comment: "Reason for authorized day")) { selected in
+                                            modalRequestDayReason = false
+                                            if !selected.isEmpty {
+                                                dtvModel.fdrReasonId = Utils.castInt(value: selected[0])
+                                                let reason = FreeDayReasonDao(realm: realm).by(id: dtvModel.fdrReasonId)
+                                                reasonContent = reason?.content ?? NSLocalizedString("envChoose", comment: "")
+                                            }
+                                        }
+                                    })
+                                    .padding(.vertical, 10)
+                                })
+                            }
+                        }
+                    }
+                    ScrollViewFABBottom()
+                }
+            }
+        }
+        .onAppear{
+            initDynamic()
+        }
+    }
+    
+    func initDynamic() {
+        dynamicForm.tabs = DynamicUtils.initForm(data: dynamicData).sorted(by: { $0.key > $1.key })
+        if !dtvModel.fields.isEmpty {
+            DynamicUtils.fillForm(form: &dynamicForm, base: dtvModel.fields)
+        }
+    }
+    
 }

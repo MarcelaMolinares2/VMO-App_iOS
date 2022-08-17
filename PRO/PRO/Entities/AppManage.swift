@@ -10,11 +10,11 @@ import Foundation
 import RealmSwift
 
 class FormEntity {
-    var objectId = ""
+    var objectId: ObjectId? = nil
     var type = ""
     var options = [String: Any]()
     
-    init(objectId: String, type: String = "", options: [String: Any] = [String: Any]() ) {
+    init(objectId: ObjectId?, type: String = "", options: [String: Any] = [String: Any]() ) {
         self.objectId = objectId
         self.type = type
         self.options = options
@@ -22,7 +22,6 @@ class FormEntity {
     
     func go(path: String, router: ViewRouter) {
         router.data = self
-        print(router.data.type)
         router.currentPage = path
     }
 }

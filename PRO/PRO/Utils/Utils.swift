@@ -154,6 +154,13 @@ class Utils {
         return formatter.string(from: date)
     }
     
+    static func hourFormat(date: Date, format: String = "HH:mm") -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = format
+        formatter.timeZone = TimeZone.current
+        return formatter.string(from: date)
+    }
+    
     static func dateFormat(value: String, toFormat: String = "yyyy-MM-dd", fromFormat: String = "yyyy-MM-dd HH:mm:ss") -> String {
         let date = strToDate(value: value, format: fromFormat)
         let formatter = DateFormatter()
@@ -188,7 +195,7 @@ class Utils {
         var filesToShare = [Any]()
         filesToShare.append(textURL!)
         let activityViewController = UIActivityViewController(activityItems: filesToShare, applicationActivities: nil)
-        UIApplication.shared.windows.first?.rootViewController?.present(activityViewController, animated: true, completion: nil)
+        UIApplication.shared.keyWindow?.rootViewController?.present(activityViewController, animated: true, completion: nil)
     }
     
     static func appVersion() -> String? {

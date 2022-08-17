@@ -346,7 +346,7 @@ struct CardShopping: View {
         VStack{
             VStack{
                 if let product = ProductDao(realm: try! Realm()).by(id: String(item.id)){
-                    Text(product.name ?? "")
+                    Text(product.name)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .foregroundColor(.cTextMedium)
                         .font(.system(size: 18))
@@ -487,7 +487,7 @@ struct CardTransference: View{
         VStack (alignment: .leading, spacing: 15){
             VStack {
                 if let product = ProductDao(realm: try! Realm()).by(id: String(item.id)){
-                    Text(product.name ?? "")
+                    Text(product.name)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .foregroundColor(.cTextMedium)
                         .font(.system(size: 18))
@@ -557,7 +557,7 @@ struct CardTransference: View{
                                                         .font(.system(size: 14))
                                                 }
                                                 if let product = ProductDao(realm: try! Realm()).by(id: String(item.bonusProduct)){
-                                                    Text(product.name ?? "")
+                                                    Text(product.name)
                                                         .frame(maxWidth: .infinity, alignment: .leading)
                                                         .foregroundColor(.cTextMedium)
                                                         .font(.system(size: 14))

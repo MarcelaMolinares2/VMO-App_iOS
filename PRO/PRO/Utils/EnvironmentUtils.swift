@@ -104,20 +104,40 @@ class MovementUtils {
 
 class PanelUtils {
     
-    static func panel(type: String, objectId: String) -> Panel? {
+    static func panel(type: String, objectId: ObjectId) -> Panel? {
         switch type {
             case "M":
-                return try? DoctorDao(realm: try! Realm()).by(objectId: ObjectId(string: objectId))
+                return DoctorDao(realm: try! Realm()).by(objectId: objectId)
             case "F":
-                return try? PharmacyDao(realm: try! Realm()).by(objectId: ObjectId(string: objectId))
+                return PharmacyDao(realm: try! Realm()).by(objectId: objectId)
             case "C":
-                return try? ClientDao(realm: try! Realm()).by(objectId: ObjectId(string: objectId))
+                return ClientDao(realm: try! Realm()).by(objectId: objectId)
             case "P":
-                return try? PatientDao(realm: try! Realm()).by(objectId: ObjectId(string: objectId))
+                return PatientDao(realm: try! Realm()).by(objectId: objectId)
             case "T":
-                return try? PotentialDao(realm: try! Realm()).by(objectId: ObjectId(string: objectId))
+                return PotentialDao(realm: try! Realm()).by(objectId: objectId)
             case "CT":
-                return try? ContactDao(realm: try! Realm()).by(objectId: ObjectId(string: objectId))
+                return ContactDao(realm: try! Realm()).by(objectId: objectId)
+            default:
+                break
+        }
+        return nil
+    }
+    
+    static func panel(type: String, id: Int) -> Panel? {
+        switch type {
+            case "M":
+                return DoctorDao(realm: try! Realm()).by(id: String(id))
+            case "F":
+                return PharmacyDao(realm: try! Realm()).by(id: String(id))
+            case "C":
+                return ClientDao(realm: try! Realm()).by(id: String(id))
+            case "P":
+                return PatientDao(realm: try! Realm()).by(id: String(id))
+            case "T":
+                return PotentialDao(realm: try! Realm()).by(id: String(id))
+            case "CT":
+                return ContactDao(realm: try! Realm()).by(id: String(id))
             default:
                 break
         }
@@ -179,7 +199,7 @@ class PanelUtils {
                 "D": "MASTER"
             ],
             [
-                "M": "modMedic",
+                "M": "modDoctor",
                 "F": "modPharmacy",
                 "C": "modClient",
                 "P": "modPatient",

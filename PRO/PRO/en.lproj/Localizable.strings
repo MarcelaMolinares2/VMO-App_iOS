@@ -132,6 +132,10 @@
 "envHabeasData" = "Habeas Data";
 "envHabeasDataNR" = "HD not registered";
 
+//Activities
+"envRequestAuthorizedDay" = "Request authorized day";
+"envRequestedDayPercentage" = "Percentage of the requested day";
+
 //Lists
 
 "envShowingNResults" = "Showing %@ result(s)";
@@ -155,6 +159,7 @@
 "modMaterialRequest" = "Material Request";
 "modMaterialDelivery" = "Material Delivery";
 "modRecordExpense" = "Record Expenses";
+"modActivities" = "Activities";
 
 
 
@@ -226,6 +231,4 @@
 
 "envStock" = "Stock";
 
-"activityRequestDay" = "Request authorized day";
-"envRequestedDayPercentage" = "Percentage of the requested day (%@)%";
 

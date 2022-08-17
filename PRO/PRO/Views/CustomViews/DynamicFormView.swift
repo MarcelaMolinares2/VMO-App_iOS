@@ -15,8 +15,8 @@ struct DynamicFormView: View {
     var options: DynamicFormFieldOptions
     
     var body: some View {
-        ForEach(tab.groups.indices) { index in
-            DynamicFormSection(form: $form, group: $tab.groups[index], options: options)
+        ForEach($tab.groups) { $group in
+            DynamicFormSection(form: $form, group: $group, options: options)
         }
     }
 }
@@ -29,9 +29,9 @@ struct DynamicFormSection: View {
     
     var body: some View {
         CustomSection(group.title) {
-            ForEach(group.fields.indices) { index in
-                if group.fields[index].localVisible {
-                    DynamicFieldView(form: $form, field: $group.fields[index], options: options)
+            ForEach($group.fields) { $field in
+                if field.localVisible {
+                    DynamicFieldView(form: $form, field: $field, options: options)
                 }
             }
         }

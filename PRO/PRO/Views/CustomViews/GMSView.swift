@@ -130,7 +130,7 @@ struct PanelLocationMapsView: UIViewRepresentable {
         let position = CLLocationCoordinate2D(latitude: Utils.castDouble(value: panelLocation.latitude), longitude: Utils.castDouble(value: panelLocation.longitude))
         let marker = GMSMarker(position: position)
         let city = try! Realm().object(ofType: City.self, forPrimaryKey: panelLocation.cityId)
-        marker.title = "\(panelLocation.address ?? ""), \(city?.name ?? "")"
+        marker.title = "\(panelLocation.address), \(city?.name ?? "")"
         marker.map = mapView
     }
     

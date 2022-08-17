@@ -64,7 +64,7 @@ struct MovementFormView: View {
                         case "TRANSFERENCE":
                             MovementFormTabTransferenceView(selected: $movement.dataTransference, visitType: visitType)
                         default:
-                            MovementFormTabBasicView(movement: $movement, location: locationService.location, panel: panel!, op: viewRouter.data.objectId.isEmpty ? "create" : "update", visitType: visitType)
+                            MovementFormTabBasicView(movement: $movement, location: locationService.location, panel: panel!, op: viewRouter.data.objectId == nil ? "create" : "update", visitType: visitType)
                     }
                     MovementBottomNavigationView(tabRouter: tabRouter)
                 }
@@ -80,10 +80,10 @@ struct MovementFormView: View {
     }
     
     func initForm() {
-        panel = PanelUtils.panel(type: viewRouter.data.type, objectId: viewRouter.data.objectId)
-        if viewRouter.data.objectId.isEmpty {
+        //panel = PanelUtils.panel(type: viewRouter.data.type, objectId: viewRouter.data.objectId)
+        if viewRouter.data.objectId != nil {
             movement.panelId = panel?.id ?? 0
-            movement.panelObjectId = viewRouter.data.objectId
+            movement.panelObjectId = viewRouter.data.objectId!
             movement.panelType = viewRouter.data.type
         } else {
             //doctor = Movement(value: try! MovementDao(realm: try! Realm()).by(objectId: ObjectId(string: viewRouter.data.objectId)) ?? Doctor())

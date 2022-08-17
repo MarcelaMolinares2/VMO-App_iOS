@@ -61,7 +61,7 @@ struct PanelContactListView: View {
                 }
             }
             FAB(image: "ic-plus") {
-                FormEntity(objectId: "").go(path: PanelUtils.formByPanelType(type: "CT"), router: viewRouter)
+                FormEntity(objectId: nil).go(path: PanelUtils.formByPanelType(type: "CT"), router: viewRouter)
             }
         }
         .partialSheet(isPresented: $menuIsPresented) {
@@ -119,16 +119,16 @@ struct PanelContactFormView: View {
     }
     
     func initForm() {
-        if viewRouter.data.objectId.isEmpty {
+        if viewRouter.data.objectId == nil {
             contact = PanelContact()
         } else {
-            contact = PanelContact(value: try! ContactDao(realm: try! Realm()).by(objectId: ObjectId(string: viewRouter.data.objectId)) ?? PanelContact())
+            contact = PanelContact(value: ContactDao(realm: try! Realm()).by(objectId: viewRouter.data.objectId!) ?? PanelContact())
             plainData = try! Utils.objToJSON(contact)
             additionalData = contact?.fields ?? "{}"
         }
         options.objectId = contact!.objectId
         options.item = contact?.id ?? 0
-        options.op = viewRouter.data.objectId.isEmpty ? "create" : "update"
+        options.op = viewRouter.data.objectId == nil ? "create" : "update"
         dynamicData = Utils.jsonDictionary(string: Config.get(key: "P_CTC_DYNAMIC_FORM").complement ?? "")
         
         initDynamic(data: dynamicData)

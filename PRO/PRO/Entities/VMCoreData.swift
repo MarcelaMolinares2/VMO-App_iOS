@@ -279,7 +279,7 @@ class DifferentToVisitMaterialSet: Object, Codable {
 }
 
 class DifferentToVisitAssistant: Object, Codable {
-    @Persisted var panelObjectId: ObjectId?
+    @Persisted var panelObjectId: ObjectId
     @Persisted var panelId: Int = 0
     @Persisted var panelType: String = ""
     
@@ -430,7 +430,7 @@ extension Panel {
     }
     
     func couldVisitToday() -> Bool {
-        if visitDates.map { $0.date }.contains(Utils.currentDate()) {
+        if visitDates.map({ $0.date }).contains(Utils.currentDate()) {
             var restrict = true
             switch type {
                 case "M":
@@ -994,21 +994,29 @@ class Group: Object, Codable, SyncEntity, ObjectKeyIdentifiable {
     @Persisted var transactionType: String = ""
     @Persisted var transactionResponse: String = ""
     
-    @Persisted var name: String? = ""
-    @Persisted var groupMemberList = List<GroupMember>()
+    @Persisted var name: String = ""
+    @Persisted var members = List<GroupMember>()
     
     private enum CodingKeys: String, CodingKey {
-        case id = "id"
+        case id = "id_grupo", name = "grupo", members
+    }
+    
+    static func primaryCodingKey() -> String {
+        let codingKey: CodingKeys
+        codingKey = .id
+        return codingKey.rawValue
     }
     
 }
 
-class GroupMember: Object {
-    @Persisted(primaryKey: true) var objectId: ObjectId
-    @Persisted var id: Int = 0
-    @Persisted var type: String?
-    @Persisted var idPanel: Int
+class GroupMember: Object, Codable {
+    @Persisted var panelObjectId: ObjectId
+    @Persisted var panelId: Int
+    @Persisted var panelType: String
     
+    private enum CodingKeys: String, CodingKey {
+        case panelId = "id", panelType = "type"
+    }
 }
 
 class MediaItem: Object, Decodable, SyncEntity {
@@ -1034,7 +1042,7 @@ class Movement: Object, Codable, SyncEntity {
     @Persisted var transactionResponse: String = ""
     
     @Persisted var panelId: Int = 0
-    @Persisted var panelObjectId: String = ""
+    @Persisted var panelObjectId: ObjectId
     @Persisted var panelType: String = ""
     @Persisted var date: String = ""
     @Persisted var realDate: String = ""

@@ -183,8 +183,6 @@ struct PanelItem: View {
                 .frame(minWidth: 30)
             }
         }
-        .padding(.vertical, 10)
-        .padding(.horizontal, 10)
         .contentShape(Rectangle())
         .onTapGesture {
             onItemTapped()

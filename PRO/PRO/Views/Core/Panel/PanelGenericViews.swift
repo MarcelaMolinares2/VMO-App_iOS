@@ -235,7 +235,7 @@ struct CustomPanelListView<Content: View>: View {
                     Spacer()
                     if couldGoToForm {
                         FAB(image: "ic-plus") {
-                            FormEntity(objectId: "").go(path: PanelUtils.formByPanelType(type: panelType), router: viewRouter)
+                            FormEntity(objectId: nil).go(path: PanelUtils.formByPanelType(type: panelType), router: viewRouter)
                         }
                     }
                 }
@@ -616,44 +616,84 @@ struct PanelItemGenericSwitchView: View {
                 switch detail.type {
                     case "F":
                         if let pharmacy = PharmacyDao(realm: realm).by(objectId: detail.objectId) {
-                            PanelItemPharmacy(realm: realm, userId: JWTUtils.sub(), pharmacy: pharmacy) {
-                                self.panelTapped = pharmacy
-                                menuIsPresented = true
+                            HStack(alignment: .top) {
+                                Image("ic-pharmacy")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(height: 32)
+                                    .foregroundColor(Color.cPanelPharmacy)
+                                PanelItemPharmacy(realm: realm, userId: JWTUtils.sub(), pharmacy: pharmacy) {
+                                    self.panelTapped = pharmacy
+                                    menuIsPresented = true
+                                }
                             }
+                            .padding(.vertical, 5)
                             .listRowBackground(Color.clear)
                         }
                     case "C":
                         if let client = ClientDao(realm: realm).by(objectId: detail.objectId) {
-                            PanelItemClient(realm: realm, userId: JWTUtils.sub(), client: client) {
-                                self.panelTapped = client
-                                menuIsPresented = true
+                            HStack(alignment: .top) {
+                                Image("ic-client")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(height: 32)
+                                    .foregroundColor(Color.cPanelClient)
+                                PanelItemClient(realm: realm, userId: JWTUtils.sub(), client: client) {
+                                    self.panelTapped = client
+                                    menuIsPresented = true
+                                }
                             }
+                            .padding(.vertical, 5)
                             .listRowBackground(Color.clear)
                         }
                     case "P":
                         if let patient = PatientDao(realm: realm).by(objectId: detail.objectId) {
-                            PanelItemPatient(realm: realm, userId: JWTUtils.sub(), patient: patient) {
-                                self.panelTapped = patient
-                                menuIsPresented = true
+                            HStack(alignment: .top) {
+                                Image("ic-patient")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(height: 32)
+                                    .foregroundColor(Color.cPanelPatient)
+                                PanelItemPatient(realm: realm, userId: JWTUtils.sub(), patient: patient) {
+                                    self.panelTapped = patient
+                                    menuIsPresented = true
+                                }
                             }
+                            .padding(.vertical, 5)
                             .listRowBackground(Color.clear)
                         }
                     case "T":
                         if let potential = PotentialDao(realm: realm).by(objectId: detail.objectId) {
-                            PanelItemPotential(realm: realm, userId: JWTUtils.sub(), potential: potential) {
-                                self.panelTapped = potential
-                                menuIsPresented = true
+                            HStack(alignment: .top) {
+                                Image("ic-potential")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(height: 32)
+                                    .foregroundColor(Color.cPanelPotential)
+                                PanelItemPotential(realm: realm, userId: JWTUtils.sub(), potential: potential) {
+                                    self.panelTapped = potential
+                                    menuIsPresented = true
+                                }
                             }
+                            .padding(.vertical, 5)
                             .listRowBackground(Color.clear)
                         }
                     default:
                         if let doctor = DoctorDao(realm: realm).by(objectId: detail.objectId) {
-                            PanelItemDoctor(realm: realm, userId: JWTUtils.sub(), doctor: doctor) {
-                                complementaryData["hd"] = doctor.habeasData
-                                complementaryData["tv"] = doctor.tvConsent
-                                self.panelTapped = doctor
-                                menuIsPresented = true
+                            HStack(alignment: .top) {
+                                Image("ic-doctor")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(height: 32)
+                                    .foregroundColor(Color.cPanelMedic)
+                                PanelItemDoctor(realm: realm, userId: JWTUtils.sub(), doctor: doctor) {
+                                    complementaryData["hd"] = doctor.habeasData
+                                    complementaryData["tv"] = doctor.tvConsent
+                                    self.panelTapped = doctor
+                                    menuIsPresented = true
+                                }
                             }
+                            .padding(.vertical, 5)
                             .listRowBackground(Color.clear)
                         }
                 }
@@ -661,6 +701,10 @@ struct PanelItemGenericSwitchView: View {
             .onDelete { ixs in
                 onDelete(ixs)
             }
+            ScrollViewFABBottom()
+                .deleteDisabled(true)
+            ScrollViewFABBottom()
+                .deleteDisabled(true)
         }
         .padding(0)
         .listStyle(.plain)
@@ -668,6 +712,94 @@ struct PanelItemGenericSwitchView: View {
         .sheet(isPresented: $menuIsPresented) {
             PanelMenu(isPresented: self.$menuIsPresented, panel: $panelTapped, complementaryData: complementaryData)
         }
+    }
+    
+}
+
+struct PanelSelectWrapperView: View {
+    var realm: Realm
+    var types: [String]
+    @Binding var members: [PanelItemModel]
+    
+    @Binding var modalPanelType: Bool
+    
+    @State private var slDoctors = [ObjectId]()
+    @State private var slPharmacies = [ObjectId]()
+    @State private var slClients = [ObjectId]()
+    @State private var slPatients = [ObjectId]()
+    @State private var slPotentials = [ObjectId]()
+    
+    @State private var modalPanelDoctor = false
+    @State private var modalPanelPharmacy = false
+    @State private var modalPanelClient = false
+    @State private var modalPanelPatient = false
+    @State private var modalPanelPotential = false
+    
+    var body: some View {
+        PanelItemGenericSwitchView(realm: realm, members: $members) { ixs in
+            members.remove(atOffsets: ixs)
+        }
+        .sheet(isPresented: $modalPanelDoctor) {
+            DoctorSelectView(selected: $slDoctors, onSelectionDone: refreshItems)
+        }
+        .sheet(isPresented: $modalPanelPharmacy) {
+            PharmacySelectView(selected: $slPharmacies, onSelectionDone: refreshItems)
+        }
+        .sheet(isPresented: $modalPanelClient) {
+            ClientSelectView(selected: $slClients, onSelectionDone: refreshItems)
+        }
+        .sheet(isPresented: $modalPanelPatient) {
+            PatientSelectView(selected: $slPatients, onSelectionDone: refreshItems)
+        }
+        .sheet(isPresented: $modalPanelPotential) {
+            PotentialSelectView(selected: $slPotentials, onSelectionDone: refreshItems)
+        }
+        .partialSheet(isPresented: $modalPanelType) {
+            PanelTypeSelectView(types: types) { type in
+                slDoctors = members.filter { $0.type == "M" }.map { $0.objectId }
+                slPharmacies = members.filter { $0.type == "F" }.map { $0.objectId }
+                slClients = members.filter { $0.type == "C" }.map { $0.objectId }
+                slPatients = members.filter { $0.type == "P" }.map { $0.objectId }
+                slPotentials = members.filter { $0.type == "T" }.map { $0.objectId }
+                switch type {
+                    case "F":
+                        modalPanelPharmacy = true
+                    case "C":
+                        modalPanelClient = true
+                    case "P":
+                        modalPanelPatient = true
+                    case "T":
+                        modalPanelPotential = true
+                    default:
+                        modalPanelDoctor = true
+                }
+                modalPanelType = false
+            }
+        }
+    }
+    
+    func refreshItems() {
+        members.removeAll()
+        slDoctors.forEach { el in
+            members.append(PanelItemModel(objectId: el, type: "M"))
+        }
+        slPharmacies.forEach { el in
+            members.append(PanelItemModel(objectId: el, type: "F"))
+        }
+        slClients.forEach { el in
+            members.append(PanelItemModel(objectId: el, type: "C"))
+        }
+        slPatients.forEach { el in
+            members.append(PanelItemModel(objectId: el, type: "P"))
+        }
+        slPotentials.forEach { el in
+            members.append(PanelItemModel(objectId: el, type: "T"))
+        }
+        modalPanelDoctor = false
+        modalPanelPharmacy = false
+        modalPanelClient = false
+        modalPanelPatient = false
+        modalPanelPotential = false
     }
     
 }

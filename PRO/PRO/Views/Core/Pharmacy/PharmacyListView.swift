@@ -57,7 +57,7 @@ struct PharmacySelectView: View {
             }
             HStack(alignment: .bottom) {
                 Spacer()
-                FAB(image: "ic-done-all") {
+                FAB(image: "ic-done") {
                     onSelectionDone()
                 }
             }
@@ -104,6 +104,8 @@ struct CustomPanelPharmacyView: View {
                         PanelItemPharmacy(realm: realm, userId: userSelected <= 0 ? JWTUtils.sub() : userSelected, pharmacy: element) {
                             onItemTapped(element)
                         }
+                        .padding(.vertical, 10)
+                        .padding(.horizontal, 10)
                         .background(selected.contains(element.objectId) ? Color.cBackground3dp : nil)
                     }
                 }

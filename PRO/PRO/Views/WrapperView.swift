@@ -22,6 +22,8 @@ struct WrapperView: View {
                 PatientFormView()
             case PanelUtils.formByPanelType(type: "T"):
                 PotentialFormView()
+            case "ACTIVITIES-VIEW":
+                ActivityListWrapperView()
             case "CLIENT-VIEW":
                 ClientListWrapperView()
             case "DOCTOR-VIEW":

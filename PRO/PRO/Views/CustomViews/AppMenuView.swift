@@ -103,7 +103,7 @@ struct PanelMenu: View {
                     }
                     Button(action: {
                         self.isPresented = false
-                        FormEntity(objectId: panel.objectId.stringValue, type: panel.type, options: [ "tab": "CARD" ]).go(path: "PANEL-CARD", router: viewRouter)
+                        FormEntity(objectId: panel.objectId, type: panel.type, options: [ "tab": "CARD" ]).go(path: "PANEL-CARD", router: viewRouter)
                     }) {
                         VStack {
                             Image("ic-summary")
@@ -119,7 +119,7 @@ struct PanelMenu: View {
                     }
                     Button(action: {
                         self.isPresented = false
-                        FormEntity(objectId: panel.objectId.stringValue, type: panel.type, options: [ "tab": "BASIC" ])
+                        FormEntity(objectId: panel.objectId, type: panel.type, options: [ "tab": "BASIC" ])
                             .go(path: PanelUtils.formByPanelType(panel: panel), router: viewRouter)
                     }) {
                         VStack {
@@ -190,7 +190,7 @@ struct PanelMenu: View {
                     if couldVisit {
                         Button(action: {
                             self.isPresented = false
-                            FormEntity(objectId: panel.objectId.stringValue, type: panel.type, options: [ "visitType": "normal" ]).go(path: "MOVEMENT-FORM", router: viewRouter)
+                            FormEntity(objectId: panel.objectId, type: panel.type, options: [ "visitType": "normal" ]).go(path: "MOVEMENT-FORM", router: viewRouter)
                         }) {
                             VStack {
                                 Image("ic-visit")
@@ -494,7 +494,7 @@ struct GlobalMenu: View {
 }
 
 struct PanelTypeSelectView: View {
-    @State var types: [String]
+    var types: [String]
     let onPanelTypeSelected: (_ type: String) -> Void
     
     @State private var customGridItems: [GenericGridItem] = []
@@ -544,20 +544,21 @@ struct RouteBottomMenu: View {
     let onDelete: (_ group: Group) -> Void
     
     @State var group: Group
-    @State private var customGridItems: [GenericGridItem] = []
-    @State var columns: [GridItem] = []
+    
+    let layout = [
+        GridItem(.flexible()),
+        GridItem(.flexible())
+    ]
     
     var body: some View {
         VStack {
             HStack {
-                Text(group.name ?? "")
-                Spacer()
+                Text(group.name)
+                    .foregroundColor(.cTextHigh)
+                    .frame(maxWidth: .infinity, alignment: .leading)
             }
             .padding(10)
-            .foregroundColor(.white)
-            .background(Color.cPrimaryLight.opacity(1))
-            HStack {
-                Spacer()
+            LazyVGrid(columns: layout, spacing: 20) {
                 Button(action: {
                     onEdit(group)
                 }) {
@@ -566,15 +567,13 @@ struct RouteBottomMenu: View {
                             .resizable()
                             .scaledToFit()
                             .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
-                            .foregroundColor(.cPrimaryLight)
+                            .foregroundColor(.cIcon)
                         Text(NSLocalizedString("envEdit", comment: ""))
-                            .foregroundColor(.cPrimary)
-                            .lineLimit(1)
+                            .foregroundColor(.cTextMedium)
+                            .lineLimit(2)
                             .font(.system(size: CGFloat(15)))
                     }
                 }
-                .padding([.top, .bottom], 10)
-                Spacer()
                 Button(action: {
                     onDelete(group)
                 }) {
@@ -583,17 +582,14 @@ struct RouteBottomMenu: View {
                             .resizable()
                             .scaledToFit()
                             .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
-                            .foregroundColor(.cPrimaryLight)
+                            .foregroundColor(.cIcon)
                         Text(NSLocalizedString("Delete", comment: ""))
-                            .foregroundColor(.cPrimary)
-                            .lineLimit(1)
+                            .foregroundColor(.cTextMedium)
+                            .lineLimit(2)
                             .font(.system(size: CGFloat(15)))
                     }
                 }
-                .padding([.top, .bottom], 10)
-                Spacer()
             }
-            .padding(.bottom, 2)
         }
     }
 }
@@ -603,37 +599,41 @@ struct ActivityBottomMenu: View {
     let onDetail: (_ group: DifferentToVisit) -> Void
     
     @State var activity: DifferentToVisit
-    @State private var customGridItems: [GenericGridItem] = []
-    @State var columns: [GridItem] = []
+    
+    let layout = [
+        GridItem(.flexible()),
+        GridItem(.flexible())
+    ]
     
     var body: some View {
         VStack {
-            HStack {
-                Text(NSLocalizedString("envComment", comment: ""))
-                Spacer()
+            VStack {
+                Text("envComment")
+                    .foregroundColor(.cTextMedium)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .font(.system(size: 13))
+                Text(activity.comment)
+                    .foregroundColor(.cTextHigh)
+                    .lineLimit(3)
+                    .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .padding(10)
-            .foregroundColor(.white)
-            .background(Color.cPrimaryLight.opacity(1))
-            HStack {
-                Spacer()
+            .padding(.horizontal, 10)
+            LazyVGrid(columns: layout, spacing: 20) {
                 Button(action: {
                     onDetail(activity)
                 }) {
                     VStack {
-                        Image("ic-diary")
+                        Image("ic-summary")
                             .resizable()
                             .scaledToFit()
                             .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
-                            .foregroundColor(.cPrimaryLight)
+                            .foregroundColor(.cIcon)
                         Text(NSLocalizedString("envDetail", comment: ""))
-                            .foregroundColor(.cPrimary)
-                            .lineLimit(1)
+                            .foregroundColor(.cTextMedium)
+                            .lineLimit(2)
                             .font(.system(size: CGFloat(15)))
                     }
                 }
-                .padding([.top, .bottom], 10)
-                Spacer()
                 Button(action: {
                     onEdit(activity)
                 }) {
@@ -642,17 +642,14 @@ struct ActivityBottomMenu: View {
                             .resizable()
                             .scaledToFit()
                             .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
-                            .foregroundColor(.cPrimaryLight)
+                            .foregroundColor(.cIcon)
                         Text(NSLocalizedString("envEdit", comment: ""))
-                            .foregroundColor(.cPrimary)
-                            .lineLimit(1)
+                            .foregroundColor(.cTextMedium)
+                            .lineLimit(2)
                             .font(.system(size: CGFloat(15)))
                     }
                 }
-                .padding([.top, .bottom], 10)
-                Spacer()
             }
-            .padding(.bottom, 2)
         }
     }
 }

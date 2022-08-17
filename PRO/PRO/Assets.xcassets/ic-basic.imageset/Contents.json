@@ -6,10 +6,12 @@
       "scale" : "1x"
     },
     {
+      "filename" : "signature-1.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
+      "filename" : "signature-2.png",
       "idiom" : "universal",
       "scale" : "3x"
     }

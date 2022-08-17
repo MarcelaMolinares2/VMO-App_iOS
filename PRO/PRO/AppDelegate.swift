@@ -66,10 +66,6 @@ extension UIApplication {
             vc.changeStatusBarStyle(style)
         }*/
     }
-
-    private class func getKeyWindow() -> UIWindow? {
-        return UIApplication.shared.windows.first{ $0.isKeyWindow }
-    }
 }
 
 @available(iOS 10, *)

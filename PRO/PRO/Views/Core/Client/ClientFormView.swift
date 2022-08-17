@@ -54,7 +54,7 @@ struct ClientFormView: View {
                         }
                     }
             }
-            BottomNavigationBarDynamic(onTabSelected: onTabSelected, currentTab: $tabRouter.current, tabs: $form.tabs, staticTabs: [viewRouter.data.objectId.isEmpty ? "" : "CONTACTS", "LOCATIONS", "STOCK"])
+            BottomNavigationBarDynamic(onTabSelected: onTabSelected, currentTab: $tabRouter.current, tabs: $form.tabs, staticTabs: [viewRouter.data.objectId == nil ? "" : "CONTACTS", "LOCATIONS", "STOCK"])
         }
         .onAppear {
             tabRouter.current = "BASIC"
@@ -66,16 +66,16 @@ struct ClientFormView: View {
     }
     
     func initForm() {
-        if viewRouter.data.objectId.isEmpty {
+        if viewRouter.data.objectId == nil {
             client = Client()
         } else {
-            client = Client(value: try! ClientDao(realm: try! Realm()).by(objectId: ObjectId(string: viewRouter.data.objectId)) ?? Client())
+            client = Client(value: ClientDao(realm: try! Realm()).by(objectId: viewRouter.data.objectId!) ?? Client())
             plainData = try! Utils.objToJSON(client)
             additionalData = client?.fields ?? "{}"
         }
         options.objectId = client!.objectId
         options.item = client?.id ?? 0
-        options.op = viewRouter.data.objectId.isEmpty ? "create" : "update"
+        options.op = viewRouter.data.objectId == nil ? "create" : "update"
         dynamicData = Utils.jsonDictionary(string: Config.get(key: "P_CLI_DYNAMIC_FORM").complement ?? "")
         
         initDynamic(data: dynamicData)

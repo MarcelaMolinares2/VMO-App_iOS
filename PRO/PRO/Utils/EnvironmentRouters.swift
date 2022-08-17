@@ -65,7 +65,7 @@ class ModuleRouter: ObservableObject {
             }
         }
     }
-    var objectId: String = "" {
+    var objectId: ObjectId? = nil {
         didSet {
             withAnimation() {
                 objectWillChange.send(self)
@@ -83,7 +83,7 @@ class ViewRouter: ObservableObject {
             }
         }
     }
-    var data: FormEntity = FormEntity(objectId: "") {
+    var data: FormEntity = FormEntity(objectId: nil) {
         didSet {
             withAnimation() {
                 objectWillChange.send(self)

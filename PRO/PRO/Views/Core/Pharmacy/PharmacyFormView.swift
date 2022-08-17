@@ -53,7 +53,7 @@ struct PharmacyFormView: View {
                         }
                     }
             }
-            BottomNavigationBarDynamic(onTabSelected: onTabSelected, currentTab: $tabRouter.current, tabs: $form.tabs, staticTabs: [viewRouter.data.objectId.isEmpty ? "" : "CONTACTS", "LOCATIONS", "STOCK"])
+            BottomNavigationBarDynamic(onTabSelected: onTabSelected, currentTab: $tabRouter.current, tabs: $form.tabs, staticTabs: [viewRouter.data.objectId == nil ? "" : "CONTACTS", "LOCATIONS", "STOCK"])
         }
         .onAppear {
             tabRouter.current = "BASIC"
@@ -65,16 +65,16 @@ struct PharmacyFormView: View {
     }
     
     func initForm() {
-        if viewRouter.data.objectId.isEmpty {
+        if viewRouter.data.objectId == nil {
             pharmacy = Pharmacy()
         } else {
-            pharmacy = Pharmacy(value: try! PharmacyDao(realm: try! Realm()).by(objectId: ObjectId(string: viewRouter.data.objectId)) ?? Pharmacy())
+            pharmacy = Pharmacy(value: PharmacyDao(realm: try! Realm()).by(objectId: viewRouter.data.objectId!) ?? Pharmacy())
             plainData = try! Utils.objToJSON(pharmacy)
             additionalData = pharmacy?.fields ?? "{}"
         }
         options.objectId = pharmacy!.objectId
         options.item = pharmacy?.id ?? 0
-        options.op = viewRouter.data.objectId.isEmpty ? "create" : "update"
+        options.op = viewRouter.data.objectId == nil ? "create" : "update"
         dynamicData = Utils.jsonDictionary(string: Config.get(key: "P_PHA_DYNAMIC_FORM").complement ?? "")
         
         initDynamic(data: dynamicData)

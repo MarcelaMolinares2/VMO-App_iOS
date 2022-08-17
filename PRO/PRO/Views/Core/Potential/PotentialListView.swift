@@ -104,6 +104,8 @@ struct CustomPanelPotentialView: View {
                         PanelItemPotential(realm: realm, userId: userSelected <= 0 ? JWTUtils.sub() : userSelected, potential: element) {
                             onItemTapped(element)
                         }
+                        .padding(.vertical, 10)
+                        .padding(.horizontal, 10)
                         .background(selected.contains(element.objectId) ? Color.cBackground3dp : nil)
                     }
                 }

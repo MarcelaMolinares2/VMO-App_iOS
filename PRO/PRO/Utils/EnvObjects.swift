@@ -274,3 +274,8 @@ class AdvertisingMaterialDeliveryReport: Codable {
     }
     
 }
+
+class PanelTypeToggleModel: ObservableObject {
+    @Published var doctor = false
+    @Published var pharmacy = false
+}

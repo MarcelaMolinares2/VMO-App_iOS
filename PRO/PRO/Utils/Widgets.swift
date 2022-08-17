@@ -130,7 +130,7 @@ struct Loader: View {
                 .stroke(AngularGradient(gradient: .init(colors: [.cPrimary, .cAccent]), center: .center), style: StrokeStyle(lineWidth: 8, lineCap: .round))
                 .frame(width: 45, height: 45)
                 .rotationEffect(.init(degrees: self.animate ? 360 : 0))
-                .animation(Animation.linear(duration: 0.7).repeatForever(autoreverses: false))
+                .animation(Animation.linear(duration: 0.7).repeatForever(autoreverses: false), value: animate)
         }
         .padding(20)
         .background(Color.white)
@@ -150,7 +150,7 @@ struct InlineLoader: View {
                 .stroke(AngularGradient(gradient: .init(colors: [.white, .cAccent]), center: .center), style: StrokeStyle(lineWidth: 8, lineCap: .round))
                 .frame(width: 45, height: 45)
                 .rotationEffect(.init(degrees: self.animate ? 360 : 0))
-                .animation(Animation.linear(duration: 0.7).repeatForever(autoreverses: false))
+                .animation(Animation.linear(duration: 0.7).repeatForever(autoreverses: false), value: animate)
         }
         .padding(20)
         .cornerRadius(10)

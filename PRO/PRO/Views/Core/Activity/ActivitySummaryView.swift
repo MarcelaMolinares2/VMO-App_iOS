@@ -71,7 +71,7 @@ struct ActivitySummaryView: View {
                 HStack {
                     Spacer()
                     FAB(image: "ic-edit") {
-                        FormEntity(objectId: activity.objectId.stringValue).go(path: "DTV-FORM", router: viewRouter)
+                        FormEntity(objectId: activity.objectId).go(path: "DTV-FORM", router: viewRouter)
                         print("Edit")
                     }
                 }
@@ -84,8 +84,8 @@ struct ActivitySummaryView: View {
     }
     
     func load() {
-        if !viewRouter.data.objectId.isEmpty {
-            if let activityItem = try? ActivityDao(realm: try! Realm()).by(objectId: ObjectId(string: viewRouter.data.objectId)) {
+        if viewRouter.data.objectId != nil {
+            if let activityItem = ActivityDao(realm: try! Realm()).by(objectId: viewRouter.data.objectId!) {
                 activity = DifferentToVisit(value: activityItem)
             }
         }
