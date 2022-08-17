@@ -11,7 +11,6 @@
 		2E11FEA9278F635D0087AA66 /* ActivitySummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E11FEA8278F635D0087AA66 /* ActivitySummaryView.swift */; };
 		2E28EF4727A2E86A00658855 /* MovementsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E28EF4627A2E86A00658855 /* MovementsView.swift */; };
 		2E5431D4272B540E00B99B2A /* RouteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E5431D3272B540E00B99B2A /* RouteView.swift */; };
-		76900EE4C2D9C9D1BCC38AA3 /* amplifyconfiguration.json in Resources */ = {isa = PBXBuildFile; fileRef = 727D1891CD0D9128FF9FFABA /* amplifyconfiguration.json */; };
 		AC13263C25B737E5007CF049 /* MovementFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC13263B25B737E5007CF049 /* MovementFormView.swift */; };
 		AC17AD86274426DB002A376B /* ViewerDialogs.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC17AD85274426DA002A376B /* ViewerDialogs.swift */; };
 		AC1AF8C4274DEC67002658B6 /* MovementFormTabsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC1AF8C3274DEC67002658B6 /* MovementFormTabsView.swift */; };
@@ -71,7 +70,6 @@
 		AC716E28289F78E1008944C7 /* CustomSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC716E27289F78E1008944C7 /* CustomSheetView.swift */; };
 		AC716E2A28A17158008944C7 /* map_style_dark.json in Resources */ = {isa = PBXBuildFile; fileRef = AC716E2928A17158008944C7 /* map_style_dark.json */; };
 		AC7892FE27AC4030002EBEBB /* amplifyconfiguration.json in Resources */ = {isa = PBXBuildFile; fileRef = AC7892FC27AC402F002EBEBB /* amplifyconfiguration.json */; };
-		AC7892FF27AC4030002EBEBB /* awsconfiguration.json in Resources */ = {isa = PBXBuildFile; fileRef = AC7892FD27AC402F002EBEBB /* awsconfiguration.json */; };
 		AC78D2E726D54A2D00674A4F /* EnvObjects.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC78D2E626D54A2D00674A4F /* EnvObjects.swift */; };
 		AC78D2EC26D54FA900674A4F /* DialogPickers.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC78D2EB26D54FA900674A4F /* DialogPickers.swift */; };
 		AC78D2F126D5551D00674A4F /* RealmDao.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC78D2F026D5551D00674A4F /* RealmDao.swift */; };
@@ -110,13 +108,11 @@
 		ACC128312581184E00595078 /* MovementListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACC128302581184E00595078 /* MovementListView.swift */; };
 		ACC1963925A4CAA200C5EE3E /* RouteListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACC1963825A4CAA200C5EE3E /* RouteListView.swift */; };
 		ACC49D1B2750881E0078F7CA /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACC49D1A2750881E0078F7CA /* LocationService.swift */; };
-		ACD8262A27D8FD80002EE5D9 /* amplifyconfiguration.json in Resources */ = {isa = PBXBuildFile; fileRef = ACD8262827D8FD80002EE5D9 /* amplifyconfiguration.json */; };
 		ACD8262B27D8FD80002EE5D9 /* awsconfiguration.json in Resources */ = {isa = PBXBuildFile; fileRef = ACD8262927D8FD80002EE5D9 /* awsconfiguration.json */; };
 		ACD8262E27D902B1002EE5D9 /* MasterLoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACD8262D27D902B1002EE5D9 /* MasterLoginView.swift */; };
 		ACD8263027D90376002EE5D9 /* MasterLaboratoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACD8262F27D90376002EE5D9 /* MasterLaboratoryView.swift */; };
 		ACDD64B7274C0FDA00D2C340 /* PanelStockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACDD64B6274C0FDA00D2C340 /* PanelStockView.swift */; };
 		ACDD64BC274C104D00D2C340 /* PanelContactView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACDD64BB274C104D00D2C340 /* PanelContactView.swift */; };
-		BDFA1EC1EA0C8934704614E0 /* awsconfiguration.json in Resources */ = {isa = PBXBuildFile; fileRef = 01C38C1E1CEFD504B2BF9AED /* awsconfiguration.json */; };
 		CC510354CB9F28A36520850B /* Pods_PRO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CFC01546F1522F390E2F88C8 /* Pods_PRO.framework */; };
 		F5611DF20337BE4FBA3B7AAA /* Pods_PROTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7F3BD16F28FB1FF3FBAF3FB3 /* Pods_PROTests.framework */; };
 /* End PBXBuildFile section */
@@ -787,7 +783,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 1160;
-				LastUpgradeCheck = 1220;
+				LastUpgradeCheck = 1340;
 				ORGANIZATIONNAME = VMO;
 				TargetAttributes = {
 					AC6F1F1E24FF2978005E57DC = {
@@ -843,11 +839,7 @@
 				AC7892FE27AC4030002EBEBB /* amplifyconfiguration.json in Resources */,
 				AC6F1F2924FF297A005E57DC /* Assets.xcassets in Resources */,
 				ACD8262B27D8FD80002EE5D9 /* awsconfiguration.json in Resources */,
-				AC7892FF27AC4030002EBEBB /* awsconfiguration.json in Resources */,
 				AC893F792549BD07009E1C43 /* GoogleService-Info.plist in Resources */,
-				ACD8262A27D8FD80002EE5D9 /* amplifyconfiguration.json in Resources */,
-				BDFA1EC1EA0C8934704614E0 /* awsconfiguration.json in Resources */,
-				76900EE4C2D9C9D1BCC38AA3 /* amplifyconfiguration.json in Resources */,
 				AC716E2A28A17158008944C7 /* map_style_dark.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
