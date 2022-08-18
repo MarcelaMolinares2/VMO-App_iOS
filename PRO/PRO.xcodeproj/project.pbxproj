@@ -87,7 +87,6 @@
 		ACA106DD2575966B00FDD7E4 /* HeaderToggleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACA106DC2575966B00FDD7E4 /* HeaderToggleView.swift */; };
 		ACA106E22575E8D000FDD7E4 /* SupportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACA106E12575E8D000FDD7E4 /* SupportView.swift */; };
 		ACA106F52575F77800FDD7E4 /* RealmMVVM.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACA106F42575F77800FDD7E4 /* RealmMVVM.swift */; };
-		ACA15F462591AB2300E92FF2 /* PanelLocationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACA15F452591AB2300E92FF2 /* PanelLocationView.swift */; };
 		ACA15F4C25923BF700E92FF2 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACA15F4B25923BF700E92FF2 /* LocationManager.swift */; };
 		ACB1C2602852643B000D3AD2 /* AuthRecoverPasswordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACB1C25F2852643B000D3AD2 /* AuthRecoverPasswordView.swift */; };
 		ACB1C263285269AC000D3AD2 /* AlertToast in Frameworks */ = {isa = PBXBuildFile; productRef = ACB1C262285269AC000D3AD2 /* AlertToast */; };
@@ -220,7 +219,6 @@
 		ACA106DC2575966B00FDD7E4 /* HeaderToggleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeaderToggleView.swift; sourceTree = "<group>"; };
 		ACA106E12575E8D000FDD7E4 /* SupportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupportView.swift; sourceTree = "<group>"; };
 		ACA106F42575F77800FDD7E4 /* RealmMVVM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealmMVVM.swift; sourceTree = "<group>"; };
-		ACA15F452591AB2300E92FF2 /* PanelLocationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PanelLocationView.swift; sourceTree = "<group>"; };
 		ACA15F4B25923BF700E92FF2 /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LocationManager.swift; path = PRO/Views/Core/Panel/LocationManager.swift; sourceTree = SOURCE_ROOT; };
 		ACB1C25F2852643B000D3AD2 /* AuthRecoverPasswordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthRecoverPasswordView.swift; sourceTree = "<group>"; };
 		ACB1C2642852AAFA000D3AD2 /* MasterLaboratoryUserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MasterLaboratoryUserView.swift; sourceTree = "<group>"; };
@@ -672,7 +670,6 @@
 			children = (
 				ACDD64BB274C104D00D2C340 /* PanelContactView.swift */,
 				ACC128302581184E00595078 /* MovementListView.swift */,
-				ACA15F452591AB2300E92FF2 /* PanelLocationView.swift */,
 				AC82D63926D3E3D100701D3D /* ContactListView.swift */,
 				AC60C1FE274750E200294834 /* PanelGenericViews.swift */,
 				ACDD64B6274C0FDA00D2C340 /* PanelStockView.swift */,
@@ -1018,7 +1015,6 @@
 				AC3E5C1B25AB78CE00C70FC2 /* DoctorFormView.swift in Sources */,
 				AC716E24289C33E4008944C7 /* RecordExpenseView.swift in Sources */,
 				2E11FEA9278F635D0087AA66 /* ActivitySummaryView.swift in Sources */,
-				ACA15F462591AB2300E92FF2 /* PanelLocationView.swift in Sources */,
 				AC60C1F0274749C400294834 /* PotentialFormView.swift in Sources */,
 				AC78D2EC26D54FA900674A4F /* DialogPickers.swift in Sources */,
 				AC59E9A7257B425F00121387 /* ClientFormView.swift in Sources */,

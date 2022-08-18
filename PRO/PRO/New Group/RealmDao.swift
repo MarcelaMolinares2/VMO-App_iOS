@@ -146,6 +146,22 @@ class ContactDao: GenericDao {
     
 }
 
+class ContactControlTypeDao: GenericDao {
+    
+    func all() -> [ContactControlType] {
+        return Array(realm.objects(ContactControlType.self).sorted(byKeyPath: "name"))
+    }
+    
+    func by(id: String) -> ContactControlType? {
+        return realm.objects(ContactControlType.self).filter("id == \(id)").first
+    }
+    
+    func by(id: Int?) -> ContactControlType? {
+        return by(id: String(describing: id ?? 0))
+    }
+    
+}
+
 class CountryDao: GenericDao {
     
     func all() -> [Country] {

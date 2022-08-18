@@ -33,8 +33,6 @@ struct PharmacyFormView: View {
             switch tabRouter.current {
                 case "CONTACTS":
                     PanelContactView(panel: pharmacy, couldAdd: true)
-                case "LOCATIONS":
-                    PanelLocationView(panel: pharmacy, couldAdd: true)
                 case "STOCK":
                     PanelStockView(selected: $productsStock, couldAdd: true)
                 default:

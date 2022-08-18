@@ -45,6 +45,49 @@ class ListPanelViewModel: ObservableObject {
 
 }
 
+struct DialogTimeRangePicker: View {
+    @Binding var hourStart: Date
+    @Binding var hourEnd: Date
+    var minHour = Utils.strToDate(value: "00:00", format: "HH:mm")
+    var maxHour = Utils.strToDate(value: "23:59", format: "HH:mm")
+    let onSelectionDone: (_ selected: [Date]) -> Void
+    
+    var body: some View {
+        VStack {
+            HStack {
+                Spacer()
+                Button(action: {
+                    onSelectionDone([hourStart, hourEnd])
+                }) {
+                    Text("envDone")
+                        .foregroundColor(.cHighlighted)
+                }
+            }
+            .padding(.vertical, 5)
+            .padding(.horizontal, 10)
+            HStack {
+                VStack {
+                    Text("envFrom")
+                        .foregroundColor(.cTextMedium)
+                        .font(.system(size: 14))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    DatePicker("", selection: $hourStart, in: minHour...maxHour, displayedComponents: [.hourAndMinute])
+                        .fixedSize()
+                }
+                VStack {
+                    Text("envTo")
+                        .foregroundColor(.cTextMedium)
+                        .font(.system(size: 14))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    DatePicker("", selection: $hourEnd, in: hourStart...maxHour, displayedComponents: [.hourAndMinute])
+                        .fixedSize()
+                }
+            }
+        }
+    }
+    
+}
+
 struct DialogDatePicker: View {
     let onSelectionDone: (_ selected: Date) -> Void
     

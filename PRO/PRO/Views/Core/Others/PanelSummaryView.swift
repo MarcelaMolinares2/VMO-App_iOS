@@ -24,8 +24,6 @@ struct PanelSummaryView: View {
             switch tabRouter.current {
             case "CONTACTS":
                 ContactListView(panel: panel)
-            case "LOCATIONS":
-                PanelLocationView(panel: panel)
             case "RECORD":
                 MovementListView()
             default:

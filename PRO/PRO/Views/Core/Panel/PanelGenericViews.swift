@@ -10,6 +10,375 @@ import SwiftUI
 import RealmSwift
 import GoogleMaps
 
+struct PanelFormHeaderView: View {
+    var panel: Panel
+    
+    @State var headerColor = Color.cPrimary
+    @State var headerIcon = "ic-home"
+    
+    var body: some View {
+        HStack {
+            Text(panel.name ?? "")
+                .fontWeight(.bold)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .lineLimit(1)
+                .padding(.horizontal, 5)
+                .foregroundColor(.cTextHigh)
+            Image(headerIcon)
+                .resizable()
+                .scaledToFit()
+                .foregroundColor(headerColor)
+                .frame(width: 34, height: 34, alignment: .center)
+                .padding(4)
+        }
+        .frame(maxWidth: .infinity)
+        .onAppear {
+            initUI()
+        }
+    }
+    
+    func initUI() {
+        self.headerColor = PanelUtils.colorByPanelType(panel: panel)
+        self.headerIcon = PanelUtils.iconByPanelType(panel: panel)
+    }
+    
+}
+
+class PanelFormLocationModel: ObservableObject {
+    @Published var attachCurrentLocation = false
+    @Published var address = ""
+    @Published var complement = ""
+}
+
+struct PanelFormLocationView: View {
+    
+    @Binding var items: [PanelLocationModel]
+    
+    @ObservedObject private var locationManager = LocationManager()
+    @ObservedObject private var panelFormLocationModel = PanelFormLocationModel()
+    
+    @State private var markers = [GMSMarker]()
+    @State private var goToMyLocation = false
+    @State private var fitToBounds = false
+    
+    @State private var layout: WrapperLayout = .list
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            ZStack(alignment: .topTrailing) {
+                CustomMarkerMapView(markers: $markers, goToMyLocation: $goToMyLocation, fitToBounds: $fitToBounds) { marker in }
+                    .onAppear {
+                        refresh()
+                    }
+                VStack(spacing: 10) {
+                    FAB(image: "ic-my-location") {
+                        goToMyLocation = true
+                    }
+                    FAB(image: "ic-bounds") {
+                        fitToBounds = true
+                    }
+                }
+                .padding(.top, Globals.UI_FAB_VERTICAL)
+                .padding(.horizontal, Globals.UI_FAB_HORIZONTAL)
+            }
+            VStack {
+                Text("envAddresses")
+                    .foregroundColor(.cTextMedium)
+                    .font(.system(size: 14))
+                    .frame(maxWidth: .infinity, minHeight: 30)
+                    .background(Color.cBackground1dp)
+                if layout == .form {
+                    VStack(spacing: 10) {
+                        if locationManager.location != nil {
+                            VStack {
+                                Toggle(isOn: $panelFormLocationModel.attachCurrentLocation) {
+                                    Text("envAttachCurrentLocation")
+                                        .foregroundColor(.cTextHigh)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                }
+                            }
+                            .padding(.horizontal, Globals.UI_FORM_PADDING_HORIZONTAL)
+                        }
+                        VStack {
+                            Text("envAddress")
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .foregroundColor(panelFormLocationModel.address.isEmpty ? Color.cDanger : .cTextMedium)
+                            TextField("envAddress", text: $panelFormLocationModel.address)
+                                .cornerRadius(CGFloat(4))
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                        }
+                        .padding(.horizontal, Globals.UI_FORM_PADDING_HORIZONTAL)
+                        VStack {
+                            Text("envComplement")
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .foregroundColor(.cTextMedium)
+                            TextField("envComplementPlaceholder", text: $panelFormLocationModel.complement)
+                                .cornerRadius(CGFloat(4))
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                        }
+                        .padding(.horizontal, Globals.UI_FORM_PADDING_HORIZONTAL)
+                        HStack {
+                            Button(action: {
+                                clearForm()
+                                layout = .list
+                            }) {
+                                Text("envDiscard")
+                                    .foregroundColor(.cDanger)
+                                    .font(.system(size: 15))
+                                    .frame(maxWidth: .infinity, minHeight: 40)
+                            }
+                            Button(action: {
+                                addItem()
+                            }) {
+                                Text("envAddItem")
+                                    .foregroundColor(panelFormLocationModel.address.isEmpty ? .cTextDisabled : .cTextMedium)
+                                    .font(.system(size: 15))
+                                    .frame(maxWidth: .infinity, minHeight: 40)
+                            }
+                            .disabled(panelFormLocationModel.address.isEmpty)
+                        }
+                        .padding(.bottom, 5)
+                    }
+                } else {
+                    VStack {
+                        VStack(spacing: 10) {
+                            ForEach($items) { $item in
+                                HStack {
+                                    Button(action: {
+                                        items.forEach { plm in
+                                            plm.type = ""
+                                        }
+                                        item.type = "DEFAULT"
+                                    }) {
+                                        Image("ic-done")
+                                            .resizable()
+                                            .scaledToFit()
+                                            .foregroundColor(item.type == "DEFAULT" ? .cDone : .cIconLight)
+                                            .frame(width: 24, height: 24, alignment: .center)
+                                    }
+                                    .frame(width: 44, height: 44, alignment: .center)
+                                    VStack {
+                                        Text(item.address)
+                                            .frame(maxWidth: .infinity, alignment: .leading)
+                                            .foregroundColor(.cTextHigh)
+                                        Text(item.complement.isEmpty ? "--" : item.complement)
+                                            .frame(maxWidth: .infinity, alignment: .leading)
+                                            .foregroundColor(.cTextMedium)
+                                    }
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    Button(action: {
+                                        delete(model: item)
+                                    }) {
+                                        Image("ic-delete")
+                                            .resizable()
+                                            .scaledToFit()
+                                            .foregroundColor(.cDanger)
+                                            .frame(width: 24, height: 24, alignment: .center)
+                                    }
+                                    .frame(width: 44, height: 44, alignment: .center)
+                                }
+                            }
+                        }
+                        .padding(.horizontal, Globals.UI_SC_PADDING_HORIZONTAL)
+                        Button(action: {
+                            layout = .form
+                        }) {
+                            Text("envNewAddress")
+                                .foregroundColor(.cTextMedium)
+                                .font(.system(size: 15))
+                                .frame(maxWidth: .infinity, minHeight: 44)
+                        }
+                    }
+                    .padding(.bottom, 5)
+                }
+            }
+        }
+    }
+    
+    func addItem() {
+        let location = PanelLocationModel()
+        location.address = panelFormLocationModel.address
+        location.complement = panelFormLocationModel.complement
+        if panelFormLocationModel.attachCurrentLocation {
+            if let lat = locationManager.location?.coordinate.latitude {
+                location.latitude = Float(lat)
+            }
+            if let lng = locationManager.location?.coordinate.longitude {
+                location.longitude = Float(lng)
+            }
+        }
+        if items.isEmpty {
+            location.type = "DEFAULT"
+        }
+        items.append(location)
+        layout = .list
+        clearForm()
+        refresh()
+    }
+    
+    func clearForm() {
+        panelFormLocationModel.attachCurrentLocation = false
+        panelFormLocationModel.address = ""
+        panelFormLocationModel.complement = ""
+    }
+    
+    func delete(model: PanelLocationModel) {
+        items = items.filter { $0.uuid != model.uuid }
+        if !items.isEmpty {
+            if !items.contains(where: { plm in
+                plm.type == "DEFAULT"
+            }) {
+                items.first!.type = "DEFAULT"
+            }
+        }
+        refresh()
+    }
+    
+    func refresh() {
+        markers.removeAll()
+        items.forEach { location in
+            if location.latitude != 0 && location.longitude != 0 {
+                let marker = GMSMarker(position: CLLocationCoordinate2D(latitude: Double(location.latitude), longitude: Double(location.longitude)))
+                marker.title = location.address
+                markers.append(marker)
+            }
+        }
+        if items.isEmpty {
+            goToMyLocation = true
+        } else {
+            fitToBounds = true
+        }
+    }
+    
+}
+
+struct PanelFormVisitingHoursItemView: View {
+    
+    @ObservedObject var item: PanelVisitingHourModel
+    
+    @State private var modalHourAM = false
+    @State private var modalHourPM = false
+    
+    var body: some View {
+        HStack {
+            Text(TimeUtils.day(item.dayOfWeek))
+                .foregroundColor(.cTextHigh)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            Button(action: {
+                
+            }) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 5.0)
+                        .foregroundColor(item.amStatus ? .cDone : .cUnselected)
+                    Text(String(format: NSLocalizedString("sepTo", comment: "%@ to %@"), Utils.hourFormat(date: item.amHourStart), Utils.hourFormat(date: item.amHourEnd)))
+                        .frame(width: 100, height: 50)
+                        .padding(.horizontal, 5)
+                        .font(.system(size: 14))
+                        .foregroundColor(item.amStatus ? .cTextOverColor : .cTextMedium)
+                        .cornerRadius(5.0)
+                }
+            }
+            .simultaneousGesture(
+                LongPressGesture()
+                    .onEnded { _ in
+                        modalHourAM = true
+                    }
+            )
+            .highPriorityGesture(
+                TapGesture()
+                    .onEnded {
+                        item.amStatus.toggle()
+                    }
+            )
+            .partialSheet(isPresented: $modalHourAM) {
+                DialogTimeRangePicker(hourStart: $item.amHourStart, hourEnd: $item.amHourEnd, minHour: Utils.strToDate(value: "06:00", format: "HH:mm"), maxHour: Utils.strToDate(value: "13:00", format: "HH:mm")) { selected in
+                    item.amHourStart = selected.first!
+                    item.amHourEnd = selected.last!
+                    modalHourAM = false
+                    item.amStatus = true
+                }
+            }
+            Button(action: {
+                
+            }) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 5.0)
+                        .foregroundColor(item.pmStatus ? .cDone : .cUnselected)
+                    Text(String(format: NSLocalizedString("sepTo", comment: "%@ to %@"), Utils.hourFormat(date: item.pmHourStart), Utils.hourFormat(date: item.pmHourEnd)))
+                        .frame(width: 100, height: 50)
+                        .padding(.horizontal, 5)
+                        .font(.system(size: 14))
+                        .foregroundColor(item.pmStatus ? .cTextOverColor : .cTextMedium)
+                        .cornerRadius(5.0)
+                }
+            }
+            .simultaneousGesture(
+                LongPressGesture()
+                    .onEnded { _ in
+                        modalHourPM = true
+                    }
+            )
+            .highPriorityGesture(
+                TapGesture()
+                    .onEnded {
+                        item.pmStatus.toggle()
+                    }
+            )
+            .partialSheet(isPresented: $modalHourPM) {
+                DialogTimeRangePicker(hourStart: $item.pmHourStart, hourEnd: $item.pmHourEnd, minHour: Utils.strToDate(value: "13:00", format: "HH:mm"), maxHour: Utils.strToDate(value: "22:00", format: "HH:mm")) { selected in
+                    item.pmHourStart = selected.first!
+                    item.pmHourEnd = selected.last!
+                    modalHourPM = false
+                    item.pmStatus = true
+                }
+            }
+        }
+    }
+    
+}
+
+struct PanelFormVisitingHoursView: View {
+    
+    @Binding var items: [PanelVisitingHourModel]
+    
+    var body: some View {
+        VStack(spacing: 10) {
+            Text("envVistingHoursMessageToggle")
+                .foregroundColor(.cTextMedium)
+                .font(.system(size: 14))
+            Text("envVistingHoursMessageEdit")
+                .foregroundColor(.cTextMedium)
+                .font(.system(size: 14))
+            ScrollView {
+                ForEach($items) { $item in
+                    PanelFormVisitingHoursItemView(item: item)
+                }
+                ScrollViewFABBottom()
+            }
+        }
+    }
+    
+}
+
+struct PanelFormContactControlView: View {
+    
+    @Binding var items: [PanelContactControlModel]
+    
+    var body: some View {
+        ScrollView {
+            ForEach($items) { $item in
+                HStack {
+                    Toggle(isOn: $item.status) {
+                        Text(item.contactControlType.name)
+                            .foregroundColor(.cTextHigh)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                }
+            }
+        }
+    }
+    
+}
 
 struct PanelListHeader: View {
     

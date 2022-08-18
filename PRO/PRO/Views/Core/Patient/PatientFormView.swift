@@ -29,8 +29,6 @@ struct PatientFormView: View {
                 
             }
             switch tabRouter.current {
-            case "LOCATIONS":
-                PanelLocationView(panel: patient, couldAdd: true)
             default:
                 ZStack(alignment: .bottomTrailing) {
                     

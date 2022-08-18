@@ -91,8 +91,6 @@ struct PanelContactFormView: View {
                 
             }
             switch tabRouter.current {
-                case "LOCATIONS":
-                    PanelLocationView(panel: contact, couldAdd: true)
                 default:
                     ZStack(alignment: .bottomTrailing) {
                         ForEach(form.tabs, id: \.id) { tab in

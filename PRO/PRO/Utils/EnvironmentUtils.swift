@@ -257,3 +257,20 @@ class PanelUtils {
     }
     
 }
+
+class TimeUtils {
+    
+    static func day(_ by: Int) -> String {
+        let days = [
+            NSLocalizedString("envMonday", comment: "Monday"),
+            NSLocalizedString("envTuesday", comment: "Tuesday"),
+            NSLocalizedString("envWednesday", comment: "Wednesday"),
+            NSLocalizedString("envThursday", comment: "Thursday"),
+            NSLocalizedString("envFriday", comment: "Friday"),
+            NSLocalizedString("envSaturday", comment: "Saturday"),
+            NSLocalizedString("envSunday", comment: "Sunday")
+        ]
+        return days[by]
+    }
+    
+}

@@ -32,8 +32,6 @@ struct ClientFormView: View {
             switch tabRouter.current {
                 case "CONTACTS":
                     PanelContactView(panel: client, couldAdd: true)
-                case "LOCATIONS":
-                    PanelLocationView(panel: client, couldAdd: true)
                 /*
                 case "STOCK":
                     PanelStockView(panel: client, couldAdd: true)

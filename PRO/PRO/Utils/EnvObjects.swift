@@ -275,7 +275,64 @@ class AdvertisingMaterialDeliveryReport: Codable {
     
 }
 
-class PanelTypeToggleModel: ObservableObject {
-    @Published var doctor = false
-    @Published var pharmacy = false
+class PanelLocationModel: ObservableObject, Identifiable {
+    var uuid = UUID()
+    @Published var address: String = ""
+    @Published var latitude: Float = 0
+    @Published var longitude: Float = 0
+    @Published var type: String = ""
+    @Published var cityId: Int = 0
+    @Published var complement: String = ""
+    
+    init() {
+    }
+    
+    init(address: String, latitude: Float, longitude: Float, type: String, cityId: Int, complement: String) {
+        self.address = address
+        self.latitude = latitude
+        self.longitude = longitude
+        self.type = type
+        self.cityId = cityId
+        self.complement = complement
+    }
+}
+
+class PanelContactControlModel: ObservableObject, Identifiable {
+    var contactControlType: ContactControlType
+    @Published var status: Bool = false
+    
+    init(contactControlType: ContactControlType, status: Bool) {
+        self.contactControlType = contactControlType
+        self.status = status
+    }
+}
+
+class PanelVisitingHourModel: ObservableObject, Identifiable {
+    @Published var dayOfWeek: Int = 0
+    @Published var amHourStart: Date
+    @Published var amHourEnd: Date
+    @Published var pmHourStart: Date
+    @Published var pmHourEnd: Date
+    @Published var amStatus: Bool = false
+    @Published var pmStatus: Bool = false
+    
+    init(dayOfWeek: Int) {
+        self.dayOfWeek = dayOfWeek
+        self.amHourStart = Utils.strToDate(value: "08:00", format: "HH:mm")
+        self.amHourEnd = Utils.strToDate(value: "12:30", format: "HH:mm")
+        self.pmHourStart = Utils.strToDate(value: "13:30", format: "HH:mm")
+        self.pmHourEnd = Utils.strToDate(value: "18:00", format: "HH:mm")
+        self.amStatus = false
+        self.pmStatus = false
+    }
+    
+    init(dayOfWeek: Int, amHourStart: String, amHourEnd: String, pmHourStart: String, pmHourEnd: String, amStatus: Bool, pmStatus: Bool) {
+        self.dayOfWeek = dayOfWeek
+        self.amHourStart = Utils.strToDate(value: amHourStart, format: "HH:mm")
+        self.amHourEnd = Utils.strToDate(value: amHourEnd, format: "HH:mm")
+        self.pmHourStart = Utils.strToDate(value: pmHourStart, format: "HH:mm")
+        self.pmHourEnd = Utils.strToDate(value: pmHourEnd, format: "HH:mm")
+        self.amStatus = amStatus
+        self.pmStatus = pmStatus
+    }
 }

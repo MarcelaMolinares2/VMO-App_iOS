@@ -67,6 +67,7 @@ extension Color {
     static let cFABForeground = Color("colorFABForeground")
     static let cDone = Color("colorDone")
     static let cHighlighted = Color("colorHighlighted")
+    static let cTextOverColor = Color("colorTextOverColor")
     
     static let cPanelActivity = Color("colorPanelActivity")
     static let cPanelClient = Color("colorPanelClient")

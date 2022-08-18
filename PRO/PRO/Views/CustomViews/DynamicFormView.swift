@@ -684,31 +684,31 @@ struct DynamicFormList: View {
                 VStack(alignment: .leading) {
                     Text(NSLocalizedString("env\(field.label.capitalized)", comment: field.label))
                         .font(selected.isEmpty ? .none : .system(size: 14.0))
-                        .foregroundColor((field.localRequired && field.value.isEmpty) ? Color.cDanger : (selected.isEmpty ? .cTextMedium : .cTextHigh))
+                        .foregroundColor((field.localRequired && field.value.isEmpty) ? Color.cDanger : .cTextMedium)
                     if !selected.isEmpty {
                         Text(selectedLabel)
                             .foregroundColor(.cTextHigh)
                     }
                 }
                 Spacer()
-                Image("ic-right-arrow")
+                Image("ic-arrow-expand-more")
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 16, height: 16, alignment: .center)
-                    .foregroundColor(.cAccent)
+                    .frame(width: 24, height: 24, alignment: .center)
+                    .foregroundColor(.cIcon)
             }
         }
         .onAppear {
             load()
         }
-        .partialSheet(isPresented: $selectSourceDynamic) {
-            SourceDynamicDialogPicker(onSelectionDone: onSelectionDone, selected: $selected, data: field.source, multiple: field.multiple, title: NSLocalizedString("env\(field.label.capitalized)", comment: field.label), isSheet: true)
+        .sheet(isPresented: $selectSourceTableAuto) {
+            DialogSourcePickerView(selected: $selected, key: field.source, multiple: field.multiple, title: NSLocalizedString("env\(field.label.capitalized)", comment: field.label), onSelectionDone: onSelectionDone)
         }
-        .partialSheet(isPresented: $selectSourceTableAuto) {
-            CustomDialogPicker(onSelectionDone: onSelectionDone, selected: $selected, key: field.source, multiple: field.multiple, title: NSLocalizedString("env\(field.label.capitalized)", comment: field.label), isSheet: true)
-        }
+        .sheet(isPresented: $selectSourceDynamic, content: {
+            DialogPlainPickerView(selected: $selected, data: field.source, multiple: field.multiple, title: NSLocalizedString("env\(field.label.capitalized)", comment: field.label), onSelectionDone: onSelectionDone)
+        })
         .sheet(isPresented: $selectSourceTableFull, content: {
-            CustomDialogPicker(onSelectionDone: onSelectionDone, selected: $selected, key: field.source, multiple: field.multiple, title: NSLocalizedString("env\(field.label.capitalized)", comment: field.label), isSheet: true)
+            DialogSourcePickerView(selected: $selected, key: field.source, multiple: field.multiple, title: NSLocalizedString("env\(field.label.capitalized)", comment: field.label), onSelectionDone: onSelectionDone)
         })
     }
     

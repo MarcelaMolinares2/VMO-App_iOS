@@ -93,11 +93,17 @@
 "envStyle" = "Style";
 "envZone" = "Zone";
 "envContactType" = "Contact type";
-
 "envValueTransference" = "Value transference";
 "envToReport" = "To report";
 "envConsent" = "Consent";
 "envOpenConsent" = "Open consent";
+"envMonday" = "Monday";
+"envTuesday" = "Tuesday";
+"envWednesday" = "Wednesday";
+"envThursday" = "Thursday";
+"envFriday" = "Friday";
+"envSaturday" = "Saturday";
+"envSunday" = "Sunday";
 
 //Expense
 "envOriginDestiny" = "Origin - Destiny";
@@ -131,13 +137,27 @@
 "envSendContactDetail" = "Send contact detail";
 "envHabeasData" = "Habeas Data";
 "envHabeasDataNR" = "HD not registered";
+"envTabBasic" = "Basic";
+"envTabAdditional" = "Additional";
+"envTabVisitingHours" = "Schedule";
+"envTabLocations" = "Locations";
+"envTabContactControl" = "Contact control";
+"envVistingHoursMessageToggle" = "Press to activate/inactivate";
+"envVistingHoursMessageEdit" = "Long press to edit hours";
+"envAddresses" = "Addresses";
+"envNewAddress" = "New address";
+"envAttachCurrentLocation" = "Attach current location";
+"envAddress" = "Address";
+"envComplement" = "Complement";
+"envComplementPlaceholder" = "Office, Tower, etc";
+"envDiscard" = "Discard";
+"envAddItem" = "Add item";
 
 //Activities
 "envRequestAuthorizedDay" = "Request authorized day";
 "envRequestedDayPercentage" = "Percentage of the requested day";
 
 //Lists
-
 "envShowingNResults" = "Showing %@ result(s)";
 
 //SLAID
@@ -162,7 +182,8 @@
 "modActivities" = "Activities";
 
 
-
+//Separators
+"sepTo" = "%@ to %@";
 
 
 "modDoctor" = "Doctor";

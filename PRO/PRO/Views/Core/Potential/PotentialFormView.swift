@@ -30,8 +30,6 @@ struct PotentialFormView: View {
                 
             }
             switch tabRouter.current {
-            case "LOCATIONS":
-                PanelLocationView(panel: potential, couldAdd: true)
             default:
                 ZStack(alignment: .bottomTrailing) {
                     ForEach(form.tabs, id: \.id) { tab in

@@ -11,7 +11,7 @@ import RealmSwift
 import Amplify
 
 enum DownloadRequestServices {
-    case brick, category, city, college, config, country, cycle, day_request_reason, pharmacy_chain, pharmacy_type, prices_list, specialty, style, user, zone, concept_expense, menu,//Tertiary
+    case brick, category, city, college, config, contactControlType, country, cycle, day_request_reason, pharmacy_chain, pharmacy_type, prices_list, specialty, style, user, zone, concept_expense, menu,//Tertiary
          material, material_plain, product, line,//Secondary
          activity, client, doctor, patient, pharmacy, potential//Primary
 }
@@ -254,6 +254,8 @@ class DownloadRequestOperation: Operation {
                     getRQ(from: Menu.self, path: "menu/environment/M", primaryKey: Menu.primaryCodingKey())
                 case .material_plain:
                     getRQ(from: AdvertisingMaterialPlain.self, path: "advertising-material", primaryKey: AdvertisingMaterial.primaryCodingKey())
+                case .contactControlType:
+                    getRQ(from: ContactControlType.self, path: "contact-control/type", primaryKey: ContactControlType.primaryCodingKey())
             }
         } else {
             debugPrint("Sync Process End")

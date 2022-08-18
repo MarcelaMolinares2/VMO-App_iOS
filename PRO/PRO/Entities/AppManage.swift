@@ -95,3 +95,7 @@ enum ViewLayout {
 enum PanelLayout {
     case doctor, pharmacy, client, patient, potential, none
 }
+
+enum WrapperLayout {
+    case list, form
+}
