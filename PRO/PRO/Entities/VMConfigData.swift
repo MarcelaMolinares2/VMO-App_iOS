@@ -344,15 +344,42 @@ class PanelCategory: Object, Codable {
     @Persisted var scoreStart: Float?
     @Persisted var scoreEnd: Float?
     @Persisted var isDefault: Int?
+    @Persisted var categoryTypeId: Int?
+    @Persisted var visitsFeeDoctor: Int = 1
+    @Persisted var visitsFeePharmacy: Int = 1
+    @Persisted var visitsFeeClient: Int = 1
+    @Persisted var visitsFeePatient: Int = 1
+    @Persisted var visitsFeePotential: Int = 1
     
     private enum CodingKeys: String, CodingKey {
-        case id = "id_categoria", name = "categorias", scoreStart = "puntaje_i", scoreEnd = "puntaje_f", isDefault = "predefinida"
+        case id = "id_categoria", name = "categorias", scoreStart = "puntaje_i", scoreEnd = "puntaje_f", isDefault = "predefinida", categoryTypeId = "category_type_id", visitsFeeDoctor = "num_visitas_m", visitsFeePharmacy = "num_visitas_f", visitsFeeClient = "num_visitas_c", visitsFeePatient = "num_visitas_p", visitsFeePotential = "num_visitas_t"
     }
     
     static func primaryCodingKey() -> String {
         let codingKey: CodingKeys
         codingKey = .id
         return codingKey.rawValue
+    }
+    
+    override init() {
+        super.init()
+    }
+    
+    required init(from decoder: Decoder) throws {
+        super.init()
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        self.id = try DynamicUtils.intTypeDecoding(container: container, key: .id)
+        self.name = try DynamicUtils.stringTypeDecoding(container: container, key: .name)
+        self.scoreStart = try DynamicUtils.floatTypeDecoding(container: container, key: .scoreStart)
+        self.scoreEnd = try DynamicUtils.floatTypeDecoding(container: container, key: .scoreEnd)
+        self.isDefault = try DynamicUtils.intTypeDecoding(container: container, key: .isDefault)
+        self.categoryTypeId = try DynamicUtils.intTypeDecoding(container: container, key: .categoryTypeId)
+        self.visitsFeeDoctor = try DynamicUtils.intTypeDecoding(container: container, key: .visitsFeeDoctor)
+        self.visitsFeePharmacy = try DynamicUtils.intTypeDecoding(container: container, key: .visitsFeePharmacy)
+        self.visitsFeeClient = try DynamicUtils.intTypeDecoding(container: container, key: .visitsFeeClient)
+        self.visitsFeePatient = try DynamicUtils.intTypeDecoding(container: container, key: .visitsFeePatient)
+        self.visitsFeePotential = try DynamicUtils.intTypeDecoding(container: container, key: .visitsFeePotential)
     }
     
 }

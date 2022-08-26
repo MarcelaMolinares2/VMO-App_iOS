@@ -208,7 +208,7 @@ struct ActivityFormBasicView: View {
     
     @State private var dynamicData = Utils.jsonDictionary(string: Config.get(key: "P_OTHER_FORM_ADDITIONAL").complement ?? "")
     @State private var dynamicForm = DynamicForm(tabs: [DynamicFormTab]())
-    @State private var dynamicOptions = DynamicFormFieldOptions(table: "activity", op: "")
+    @State private var dynamicOptions = DynamicFormFieldOptions(table: "activity", op: .view)
 
     @State private var modalRequestDayReason = false
     @State private var selectedReason = [String]()

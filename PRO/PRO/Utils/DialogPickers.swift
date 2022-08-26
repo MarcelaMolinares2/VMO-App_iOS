@@ -301,6 +301,7 @@ struct PanelDialogPicker: View {
 struct GenericDialogItem: View {
     var item: GenericSelectableItem
     var alignment: Alignment
+    var capitalized: Bool = true
     let onItemTapped: () -> Void
     
     var body: some View {
@@ -316,12 +317,14 @@ struct GenericDialogItem: View {
                         .frame(minWidth: 0, maxWidth: .infinity, minHeight: 40, maxHeight: .infinity)
                 }
                 VStack(alignment: .leading) {
-                    Text("\(item.label)")
+                    Text("\(capitalized ? item.label.capitalized : item.label)")
                         .foregroundColor(.cTextHigh)
+                        .multilineTextAlignment(.leading)
                     if !item.complement.isEmpty {
                         Text("\(item.complement)")
                             .foregroundColor(.cTextMedium)
                             .lineLimit(2)
+                            .multilineTextAlignment(.leading)
                     }
                 }
                 .frame(minWidth: 0, maxWidth: .infinity, alignment: alignment)
@@ -451,6 +454,9 @@ struct DialogPlainPickerView: View {
     }
     
     func onItemSelected(item: GenericSelectableItem) {
+        if !multiple {
+            viewModel.clear()
+        }
         item.selected = !item.selected
         viewModel.toggle()
         if !multiple {
@@ -470,11 +476,13 @@ struct DialogSourcePickerView: View {
     var key: String = ""
     var multiple: Bool = false
     var title: String = ""
+    var extraData: [String: Any] = [:]
     let onSelectionDone: (_ selected: [String]) -> Void
     
     @ObservedObject var viewModel = ListGenericViewModel()
     @StateObject var headerRouter = TabRouter()
     @State var searchText = ""
+    @State private var capitalized = true
     let headerHeight = CGFloat(40)
     
     var body: some View {
@@ -486,7 +494,7 @@ struct DialogSourcePickerView: View {
                 ForEach(viewModel.items.filter {
                     searchText.isEmpty ? true : $0.label.lowercased().contains(searchText.lowercased())
                 }, id: \.id) { item in
-                    GenericDialogItem(item: item, alignment: .leading) {
+                    GenericDialogItem(item: item, alignment: .leading, capitalized: capitalized) {
                         self.onItemSelected(item: item)
                     }
                 }
@@ -519,7 +527,8 @@ struct DialogSourcePickerView: View {
             case "BRICK":
                 list = GenericSelectableDao(realm: try! Realm()).bricks()
             case "CATEGORY":
-                list = GenericSelectableDao(realm: try! Realm()).categories()
+                capitalized = false
+                list = GenericSelectableDao(realm: try! Realm()).categories(categoryType: Utils.castInt(value: extraData["categoryType"]))
             case "CITY":
                 list = GenericSelectableDao(realm: try! Realm()).cities()
             case "COLLEGE":
@@ -588,76 +597,114 @@ struct DialogSourcePickerView: View {
     }
 }
 
-struct DayMonthDialogPicker: View {
-    let onSelectionDone: (_ selected: [String]) -> Void
+struct DialogMonthPickerView: View {
+    let onSelectionDone: (_ selected: Int) -> Void
     
-    @Binding var selected: [String]
-    @State var month: Int = 1
-    @State var day: Int = 1
-    @State var maxDays = 31
+    @State var months = TimeUtils.months()
+    
+    let layout = [
+        GridItem(.flexible()),
+        GridItem(.flexible()),
+        GridItem(.flexible())
+    ]
     
     var body: some View {
         VStack {
             HStack {
-                Picker("envMonth", selection: $month.onChange(monthChange)) {
-                    ForEach(1...12, id: \.self) {
-                        Text(Utils.castString(value: CommonUtils.months[$0 - 1]["name"]))
-                    }
-                }
-                .pickerStyle(WheelPickerStyle())
-                .fixedSize(horizontal: true, vertical: true)
-                .frame(width: (UIScreen.main.bounds.width / 2) - 20)
-                .compositingGroup()
-                .clipped(antialiased: true)
-                Picker("envDay", selection: $day) {
-                    ForEach(1...maxDays, id: \.self) {
-                        Text("\($0)")
-                    }
-                }
-                .pickerStyle(WheelPickerStyle())
-                .fixedSize(horizontal: true, vertical: true)
-                .frame(width: (UIScreen.main.bounds.width / 2) - 20)
-                .compositingGroup()
-                .clipped(antialiased: true)
-            }
-            .padding([.leading, .trailing], 20)
-            VStack {
+                Text("envMonth")
+                    .foregroundColor(.cTextHigh)
+                    .font(.system(size: 14))
+                Spacer()
                 Button(action: {
-                    self.done()
+                    onSelectionDone(0)
                 }) {
-                    Image("ic-done")
-                        .resizable()
-                        .foregroundColor(.cTextHigh)
-                        .scaledToFit()
-                        .padding(5)
+                    Text("envClear")
+                        .foregroundColor(.cHighlighted)
                 }
             }
-            .frame(height: 50)
-            .padding([.leading, .trailing], 10)
-            .background(Color.white)
-            .zIndex(1)
+            .padding(.vertical, 5)
+            .padding(.horizontal, 10)
+            LazyVGrid(columns: layout, spacing: 20) {
+                ForEach(months) { month in
+                    Button(action: {
+                        onSelectionDone(month.value)
+                    }) {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 5.0)
+                                .foregroundColor(.cBackground1dp)
+                            Text(month.label)
+                                .frame(maxWidth: .infinity, minHeight: 50, maxHeight: 50)
+                                .font(.system(size: 14))
+                                .foregroundColor(.cTextHigh)
+                                .cornerRadius(5.0)
+                        }
+                    }
+                }
+            }
         }
+        .padding(.horizontal, 10)
+    }
+    
+}
+
+struct DialogMonthDayPickerView: View {
+    @Binding var month: Int
+    let onSelectionDone: (_ selected: Int) -> Void
+    
+    @State var days = [GenericPickerItem]()
+    
+    let layout = [
+        GridItem(.flexible()),
+        GridItem(.flexible()),
+        GridItem(.flexible()),
+        GridItem(.flexible()),
+        GridItem(.flexible()),
+        GridItem(.flexible()),
+        GridItem(.flexible())
+    ]
+    
+    var body: some View {
+        VStack {
+            HStack {
+                Text("envDay")
+                    .foregroundColor(.cTextHigh)
+                    .font(.system(size: 14))
+                Spacer()
+                Button(action: {
+                    onSelectionDone(0)
+                }) {
+                    Text("envClear")
+                        .foregroundColor(.cHighlighted)
+                }
+            }
+            .padding(.vertical, 5)
+            .padding(.horizontal, 10)
+            LazyVGrid(columns: layout, spacing: 20) {
+                ForEach(days) { day in
+                    Button(action: {
+                        onSelectionDone(day.value)
+                    }) {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 5.0)
+                                .foregroundColor(.cBackground1dp)
+                            Text(day.label)
+                                .frame(maxWidth: .infinity, minHeight: 50, maxHeight: 50)
+                                .font(.system(size: 14))
+                                .foregroundColor(.cTextHigh)
+                                .cornerRadius(5.0)
+                        }
+                    }
+                }
+            }
+        }
+        .padding(.horizontal, 10)
         .onAppear {
             load()
         }
     }
     
     func load() {
-        if selected.count < 2 {
-            selected = ["1", "1"]
-        } else {
-            month = Utils.castInt(value: selected[0])
-            day = Utils.castInt(value: selected[1])
-        }
-    }
-    
-    func monthChange(_ month: Int) {
-        maxDays = Utils.castInt(value: CommonUtils.months[month - 1]["days"])
-    }
-    
-    func done() {
-        selected = [String(month), String(day)]
-        onSelectionDone(selected)
+        days = TimeUtils.monthDays(m: month)
     }
     
 }

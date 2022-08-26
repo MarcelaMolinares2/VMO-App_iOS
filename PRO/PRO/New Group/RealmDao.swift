@@ -64,6 +64,10 @@ class CategoryDao: GenericDao {
         return Array(realm.objects(PanelCategory.self).sorted(byKeyPath: "name"))
     }
     
+    func all(categoryType: Int) -> [PanelCategory] {
+        return Array(realm.objects(PanelCategory.self).filter("categoryTypeId == \(categoryType)").sorted(byKeyPath: "name"))
+    }
+    
     func by(id: String) -> PanelCategory? {
         return realm.objects(PanelCategory.self).filter("id == \(id)").first
     }
@@ -371,6 +375,10 @@ class GenericSelectableDao: GenericDao {
     
     func categories() -> [GenericSelectableItem] {
         CategoryDao(realm: self.realm).all().map { GenericSelectableItem(id: "\($0.id)", label: $0.name ?? "") }
+    }
+    
+    func categories(categoryType: Int) -> [GenericSelectableItem] {
+        CategoryDao(realm: self.realm).all(categoryType: categoryType).map { GenericSelectableItem(id: "\($0.id)", label: $0.name ?? "") }
     }
     
     func cities() -> [GenericSelectableItem] {

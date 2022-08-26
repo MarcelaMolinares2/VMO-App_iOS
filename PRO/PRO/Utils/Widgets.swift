@@ -11,6 +11,38 @@ import SwiftUI
 
 class Widgets {
     
+    static func mediaSourcePickerButtons(available: String, action: @escaping (String) -> ()) -> [ActionSheet.Button] {
+        var buttons = [ActionSheet.Button]()
+        available.components(separatedBy: ",").forEach { s in
+            switch s {
+                case "D":
+                    buttons.append(
+                        .default(Text("envDraw"), action: {
+                            action(s)
+                        })
+                    )
+                case "C":
+                    buttons.append(
+                        .default(Text("envCamera"), action: {
+                            action(s)
+                        })
+                    )
+                case "G":
+                    buttons.append(
+                        .default(Text("envGallery"), action: {
+                            action(s)
+                        })
+                    )
+                default:
+                    break
+            }
+        }
+        buttons.append(
+            .cancel()
+        )
+        return buttons
+    }
+    
 }
 
 struct SearchBar: View {
@@ -177,6 +209,7 @@ struct FAB: View {
                         .foregroundColor(.cFABBackground)
                     Image(image)
                         .resizable()
+                        .scaledToFit()
                         .frame(width: size - margin, height: size - margin)
                         .foregroundColor(.cFABForeground)
                 }

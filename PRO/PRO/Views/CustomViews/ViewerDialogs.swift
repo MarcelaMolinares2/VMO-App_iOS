@@ -40,3 +40,49 @@ struct ImageViewerDialog: View {
     }
     
 }
+
+struct ImageViewerWrapperView: View {
+    
+    var table: String
+    var field: String
+    var id: Int
+    var localId: ObjectId
+    var height: CGFloat = 180
+    
+    @State private var image: Image? = Image("ic-gallery")
+    
+    var body: some View {
+        VStack {
+            if let i = image {
+                i
+                    .resizable()
+                    .scaledToFit()
+                    .foregroundColor(.cAccent)
+                    .frame(maxWidth: .infinity, minHeight: height, maxHeight: height)
+            } else {
+                Button(action: {
+                    //shouldPresentImageViewer = true
+                }) {
+                    Text("envPreviewResource")
+                }
+                .frame(height: 40)
+                .buttonStyle(BorderlessButtonStyle())
+                /*.popover(isPresented: $shouldPresentImageViewer) {
+                    ImageViewerDialog(table: options.table, field: field.key, id: options.item, localId: options.objectId)
+                }*/
+            }
+        }
+        .onAppear {
+            load()
+        }
+    }
+    
+    func load() {
+        let media = MediaUtils.item(table: table, field: field, id: id, localId: localId)
+        media.ext = "jpg"
+        if FileUtils.exists(media: media) {
+            image = Image(uiImage: UIImage(contentsOfFile: MediaUtils.mediaURL(media: media).path) ?? UIImage())
+        }
+    }
+    
+}

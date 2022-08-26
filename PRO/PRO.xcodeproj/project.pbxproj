@@ -36,6 +36,8 @@
 		AC34454D25638B5C00C0D668 /* PharmacyListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC34454C25638B5C00C0D668 /* PharmacyListView.swift */; };
 		AC34455225638B6B00C0D668 /* ClientListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC34455125638B6B00C0D668 /* ClientListView.swift */; };
 		AC3E5C1B25AB78CE00C70FC2 /* DoctorFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC3E5C1A25AB78CE00C70FC2 /* DoctorFormView.swift */; };
+		AC496F6E28B6B8DA002D508B /* location_animation.json in Resources */ = {isa = PBXBuildFile; fileRef = AC496F6D28B6B8DA002D508B /* location_animation.json */; };
+		AC496F7028B85C3B002D508B /* DiaryFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC496F6F28B85C3A002D508B /* DiaryFormView.swift */; };
 		AC56227A274FDF1A00098C3A /* Amplify in Frameworks */ = {isa = PBXBuildFile; productRef = AC562279274FDF1A00098C3A /* Amplify */; };
 		AC56227C274FDF1A00098C3A /* AWSCognitoAuthPlugin in Frameworks */ = {isa = PBXBuildFile; productRef = AC56227B274FDF1A00098C3A /* AWSCognitoAuthPlugin */; };
 		AC56227E274FDF1A00098C3A /* AWSS3StoragePlugin in Frameworks */ = {isa = PBXBuildFile; productRef = AC56227D274FDF1A00098C3A /* AWSS3StoragePlugin */; };
@@ -167,6 +169,8 @@
 		AC34454C25638B5C00C0D668 /* PharmacyListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PharmacyListView.swift; sourceTree = "<group>"; };
 		AC34455125638B6B00C0D668 /* ClientListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClientListView.swift; sourceTree = "<group>"; };
 		AC3E5C1A25AB78CE00C70FC2 /* DoctorFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoctorFormView.swift; sourceTree = "<group>"; };
+		AC496F6D28B6B8DA002D508B /* location_animation.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = location_animation.json; sourceTree = "<group>"; };
+		AC496F6F28B85C3A002D508B /* DiaryFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DiaryFormView.swift; path = PRO/Lottie/DiaryFormView.swift; sourceTree = SOURCE_ROOT; };
 		AC59E95B2576B82F00121387 /* GenericViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenericViews.swift; sourceTree = "<group>"; };
 		AC59E99C257B400800121387 /* AppManage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppManage.swift; sourceTree = "<group>"; };
 		AC59E9A1257B424000121387 /* PanelSummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PanelSummaryView.swift; sourceTree = "<group>"; };
@@ -325,6 +329,7 @@
 		AC13263925B737B9007CF049 /* Diary */ = {
 			isa = PBXGroup;
 			children = (
+				AC496F6F28B85C3A002D508B /* DiaryFormView.swift */,
 			);
 			path = Diary;
 			sourceTree = "<group>";
@@ -341,6 +346,7 @@
 		AC2B20F02850055700618CF4 /* Lottie */ = {
 			isa = PBXGroup;
 			children = (
+				AC496F6D28B6B8DA002D508B /* location_animation.json */,
 				AC2B20F12850058F00618CF4 /* login_animation.json */,
 			);
 			path = Lottie;
@@ -830,6 +836,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				AC2B20F22850058F00618CF4 /* login_animation.json in Resources */,
+				AC496F6E28B6B8DA002D508B /* location_animation.json in Resources */,
 				ACC05350255067EC00B9753A /* Localizable.strings in Resources */,
 				AC6F1F2F24FF297A005E57DC /* LaunchScreen.storyboard in Resources */,
 				AC6F1F2C24FF297A005E57DC /* Preview Assets.xcassets in Resources */,
@@ -1045,6 +1052,7 @@
 				AC60C1EB2747495F00294834 /* PotentialListView.swift in Sources */,
 				AC34452625637F5F00C0D668 /* MessageTabView.swift in Sources */,
 				AC6F1F2724FF2978005E57DC /* ContentView.swift in Sources */,
+				AC496F7028B85C3B002D508B /* DiaryFormView.swift in Sources */,
 				AC78D2F126D5551D00674A4F /* RealmDao.swift in Sources */,
 				ACD8263027D90376002EE5D9 /* MasterLaboratoryView.swift in Sources */,
 				AC3444EB256368C200C0D668 /* DashboardView.swift in Sources */,

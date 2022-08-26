@@ -82,7 +82,7 @@ struct PanelContactFormView: View {
     @State var additionalData = ""
     @State var dynamicData = Dictionary<String, Any>()
     @State private var form = DynamicForm(tabs: [DynamicFormTab]())
-    @State private var options = DynamicFormFieldOptions(table: "contact", op: "")
+    @State private var options = DynamicFormFieldOptions(table: "contact", op: .view)
     @State private var showValidationError = false
     
     var body: some View {
@@ -126,7 +126,7 @@ struct PanelContactFormView: View {
         }
         options.objectId = contact!.objectId
         options.item = contact?.id ?? 0
-        options.op = viewRouter.data.objectId == nil ? "create" : "update"
+        options.op = viewRouter.data.objectId == nil ? .create : .update
         dynamicData = Utils.jsonDictionary(string: Config.get(key: "P_CTC_DYNAMIC_FORM").complement ?? "")
         
         initDynamic(data: dynamicData)

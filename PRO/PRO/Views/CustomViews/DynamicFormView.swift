@@ -28,7 +28,8 @@ struct DynamicFormSection: View {
     var options: DynamicFormFieldOptions
     
     var body: some View {
-        CustomSection(group.title) {
+        let title = DynamicUtils.formatLabel(s: group.title).localized(defaultValue: group.title)
+        CustomSection(title) {
             ForEach($group.fields) { $field in
                 if field.localVisible {
                     DynamicFieldView(form: $form, field: $field, options: options)
@@ -51,18 +52,18 @@ struct DynamicFieldView: View {
     var body: some View {
         VStack {
             switch(field.controlType) {
-                case "canvas":
-                    DynamicFormCanvas(field: $field, options: options)
+                case "canvas", "habeas-data", "image":
+                    DynamicFormImage(field: $field, options: options)
                 case "checkbox":
                     DynamicFormCheckbox(field: $field)
-                case "day-month":
-                    DynamicFormDayMonth(field: $field)
                 case "date":
                     DynamicFormDate(field: $field)
-                case "habeas-data":
-                    DynamicFormHabeasData(field: $field, options: options)
-                case "image":
-                    DynamicFormImage(field: $field, options: options)
+                case "day-month":
+                    DynamicFormDayMonth(field: $field)
+                case "file":
+                    Text("B")
+                case "info":
+                    DynamicFormInfo(field: $field)
                 case "list":
                     DynamicFormList(field: $field)
                 case "text-field":
@@ -70,7 +71,7 @@ struct DynamicFieldView: View {
                 case "time":
                     DynamicFormTime(field: $field)
             default:
-                Text("A")
+                EmptyView()
             }
         }
         .padding(.vertical, 6)
@@ -87,30 +88,26 @@ struct DynamicFieldView: View {
     }
     
     func hasConditions(type: String) -> Bool {
-        if let conditions = field.condition {
-            if let c = try? JSONDecoder().decode(DynamicConditionForm.self, from: conditions.data(using: .utf8)!) {
-                formConditions = c
-                var groups = [DynamicConditionGroup]()
-                switch type {
-                case "editable":
-                    groups = formConditions?.editable ?? [DynamicConditionGroup]()
-                case "required":
-                    groups = formConditions?.required ?? [DynamicConditionGroup]()
-                case "visible":
-                    groups = formConditions?.visible ?? [DynamicConditionGroup]()
-                default:
-                    break
-                }
-                if !groups.isEmpty {
-                    var hasConditions = false
-                    groups.forEach { group in
-                        if !group.conditions.isEmpty {
-                            hasConditions = true
-                        }
-                    }
-                    return hasConditions
+        formConditions = field.condition
+        var groups = [DynamicConditionGroup]()
+        switch type {
+            case "editable":
+                groups = formConditions?.editable ?? [DynamicConditionGroup]()
+            case "required":
+                groups = formConditions?.required ?? [DynamicConditionGroup]()
+            case "visible":
+                groups = formConditions?.visible ?? [DynamicConditionGroup]()
+            default:
+                break
+        }
+        if !groups.isEmpty {
+            var hasConditions = false
+            groups.forEach { group in
+                if !group.conditions.isEmpty {
+                    hasConditions = true
                 }
             }
+            return hasConditions
         }
         return false
     }
@@ -127,7 +124,7 @@ struct DynamicFieldView: View {
     }
     
     func isEditable() -> Bool {
-        if options.op == "create" {
+        if options.op == .create {
             return field.editable.createUserTypes.components(separatedBy: ",").contains(String(user?.type ?? 0))
         } else {
             return field.editable.updateUserTypes.components(separatedBy: ",").contains(String(user?.type ?? 0))
@@ -167,14 +164,14 @@ struct DynamicFieldView: View {
     
     func isVisible() -> Bool {
         switch options.table {
-        case "movement":
-            return optionsValue(key: "visible") && movementOptsValue(key: "visible")
-        default:
-            if options.op == "create" {
-                return field.visible.createUserTypes.components(separatedBy: ",").contains(String(user?.type ?? 0))
-            } else {
-                return field.visible.updateUserTypes.components(separatedBy: ",").contains(String(user?.type ?? 0))
-            }
+            case "movement":
+                return optionsValue(key: "visible") && movementOptsValue(key: "visible")
+            default:
+                if options.op == .create {
+                    return field.visible.createUserTypes.components(separatedBy: ",").contains(String(user?.type ?? 0))
+                } else {
+                    return field.visible.updateUserTypes.components(separatedBy: ",").contains(String(user?.type ?? 0))
+                }
         }
     }
     
@@ -207,12 +204,7 @@ struct DynamicFieldView: View {
             field.localEditable = self.validateConditions(set: set) && self.isEditable()
             break
         case "required":
-            let condition = self.validateConditions(set: set)
-            if condition {
                 field.localRequired = self.validateConditions(set: set) && self.isRequired()
-            } else {
-                field.localRequired = self.isRequired()
-            }
             break
         case "visible":
             field.localVisible = self.validateConditions(set: set) && self.isVisible()
@@ -226,20 +218,82 @@ struct DynamicFieldView: View {
         var result = true
         set.forEach { group in
             group.conditions.forEach { condition in
-                if condition.current.isEmpty {
-                    result = false
-                } else {
-                    if condition.field != "" && condition.op != "" && !condition.value.isEmpty {
+                
+                if ["equal", "not-equal"].contains(condition.op) {
+                    if condition.value.isEmpty {
+                        if !condition.current.isEmpty {
+                            if !condition.current[0].isEmpty {
+                                result = false
+                            }
+                        }
+                    } else {
                         var contains = false
                         condition.current.forEach { it in
                             if condition.value.contains(it) {
                                 contains = true
                             }
                         }
-                        if !contains {
-                            result = false
+                        switch condition.op {
+                            case "equal":
+                                if !contains {
+                                    result = false
+                                }
+                            case "not-equal":
+                                if contains {
+                                    result = false
+                                }
+                            default:
+                                break
                         }
                     }
+                } else if ["less", "more"].contains(condition.op) {
+                    if !condition.value.isEmpty {
+                        if !condition.value[0].isEmpty {
+                            if condition.current.isEmpty {
+                                result = false
+                            } else {
+                                if condition.current[0].isEmpty {
+                                    result = false
+                                } else {
+                                    switch field.dataType {
+                                        case "date", "time":
+                                            var v: Date
+                                            var c: Date
+                                            if field.dataType == "date" {
+                                                v = Utils.strToDate(value: condition.value[0])
+                                                c = Utils.strToDate(value: condition.current[0])
+                                            } else {
+                                                v = Utils.strToDate(value: condition.value[0], format: "HH:mm")
+                                                c = Utils.strToDate(value: condition.current[0], format: "HH:mm")
+                                            }
+                                            if condition.op == "less" {
+                                                if c >= v {
+                                                    result = false
+                                                }
+                                            } else {
+                                                if c <= v {
+                                                    result = false
+                                                }
+                                            }
+                                        default:
+                                            let v = Utils.castInt(value: condition.value[0])
+                                            let c = Utils.castInt(value: condition.current[0])
+                                            if condition.op == "less" {
+                                                if c >= v {
+                                                    result = false
+                                                }
+                                            } else {
+                                                if c <= v {
+                                                    result = false
+                                                }
+                                            }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    //BETWEEN
                 }
             }
         }
@@ -250,7 +304,7 @@ struct DynamicFieldView: View {
         if let panelTypes = Utils.jsonDictionary(string: field.options)["panelType"] as? Dictionary<String, Any> {
             if let panelOptions = panelTypes[options.panelType] as? Dictionary<String, Any> {
                 if let keyOptions = panelOptions[key] as? Dictionary<String, Any> {
-                    if let opValues = keyOptions[options.op] as? String {
+                    if let opValues = keyOptions[DynamicUtils.transactionType(action: options.op).lowercased()] as? String {
                         return opValues.components(separatedBy: ",").contains(String(user?.type ?? 0))
                     }
                 }
@@ -272,18 +326,54 @@ struct DynamicFieldView: View {
     
 }
 
+struct DynamicFormDescriptionView: View {
+    
+    var field: DynamicFormField
+    
+    var body: some View {
+        if let d = field.description {
+            if !d.isEmpty {
+                Text(d)
+                    .foregroundColor(.cTextMedium)
+                    .font(.system(size: 13))
+            }
+        }
+    }
+    
+}
+
 struct DynamicFormTextField: View {
     
     @Binding var field: DynamicFormField
     
     var body: some View {
+        let label = DynamicUtils.formatLabel(s: field.label).localized(defaultValue: field.label)
         VStack {
-            Text(NSLocalizedString("env\(field.label.capitalized)", comment: field.label))
+            Text(label)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .foregroundColor((field.localRequired && field.value.isEmpty) ? Color.cDanger : .cTextMedium)
-            TextField("env\(field.label.capitalized)", text: $field.value)
+            TextField(label, text: $field.value)
                 .cornerRadius(CGFloat(4))
                 .textFieldStyle(RoundedBorderTextFieldStyle())
+            DynamicFormDescriptionView(field: field)
+        }
+    }
+    
+}
+
+struct DynamicFormInfo: View {
+    
+    @Binding var field: DynamicFormField
+    
+    var body: some View {
+        let label = DynamicUtils.formatLabel(s: field.label).localized(defaultValue: field.label)
+        VStack {
+            Text(label)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .foregroundColor(.cTextMedium)
+            Text(field.value)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .foregroundColor(.cTextHigh)
         }
     }
     
@@ -296,13 +386,15 @@ struct DynamicFormDate: View {
     @State private var date = Date()
 
     var body: some View {
+        let label = DynamicUtils.formatLabel(s: field.label).localized(defaultValue: field.label)
         VStack {
-            Text(NSLocalizedString("env\(field.label.capitalized)", comment: field.label))
+            Text(label)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .foregroundColor((field.localRequired && field.value.isEmpty) ? Color.cDanger : .cTextMedium)
             DatePicker("", selection: $date.onChange(dateChanged), displayedComponents: .date)
                 .labelsHidden()
                 .clipped()
+            DynamicFormDescriptionView(field: field)
         }
         .onAppear {
             load()
@@ -326,13 +418,15 @@ struct DynamicFormTime: View {
     @State private var date = Date()
 
     var body: some View {
+        let label = DynamicUtils.formatLabel(s: field.label).localized(defaultValue: field.label)
         VStack {
-            Text(NSLocalizedString("env\(field.label.capitalized)", comment: field.label))
+            Text(label)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .foregroundColor((field.localRequired && field.value.isEmpty) ? Color.cDanger : .cTextMedium)
             DatePicker("", selection: $date.onChange(dateChanged), displayedComponents: .hourAndMinute)
                 .labelsHidden()
                 .clipped()
+            DynamicFormDescriptionView(field: field)
         }
         .onAppear {
             load()
@@ -355,9 +449,11 @@ struct DynamicFormCheckbox: View {
     @State private var checked = true
     
     var body: some View {
+        let label = DynamicUtils.formatLabel(s: field.label).localized(defaultValue: field.label)
         VStack {
-            Toggle(NSLocalizedString("env\(field.label.capitalized)", comment: field.label), isOn: $checked.onChange(valueChanged))
+            Toggle(label, isOn: $checked.onChange(valueChanged))
                 .foregroundColor((field.localRequired && field.value.isEmpty) ? Color.cDanger : .cTextMedium)
+            DynamicFormDescriptionView(field: field)
         }
         .onAppear {
             load()
@@ -365,7 +461,7 @@ struct DynamicFormCheckbox: View {
     }
     
     func load() {
-        if field.value == "Y" {
+        if field.value == "1" {
             checked = true
         } else {
             checked = false
@@ -373,7 +469,7 @@ struct DynamicFormCheckbox: View {
     }
     
     func valueChanged(_ value: Bool) {
-        field.value = value ? "Y" : "N"
+        field.value = value ? "1" : "0"
     }
     
 }
@@ -383,65 +479,122 @@ struct DynamicFormImage: View {
     @Binding var field: DynamicFormField
     var options: DynamicFormFieldOptions
     
-    @State private var showActionSheet = false
-    @State private var shouldPresentSheet = false
-    @State private var sourceType: UIImagePickerController.SourceType = .camera
-    @State private var sheetLayout: SheetLayout = .picker
+    @State private var actionSheet = false
+    @State private var modalCamera = false
+    @State private var modalDraw = false
+    @State private var modalGallery = false
+    
+    @State private var initialValue = ""
+    @State private var availableSources = ""
     
     @State private var uiImage: UIImage?
     
+    private let pickerSources = Utils.jsonDictionary(string: Config.get(key: "PICKER_SOURCES").complement ?? "{}")
+    
     var body: some View {
+        let label = DynamicUtils.formatLabel(s: field.label).localized(defaultValue: field.label)
         VStack {
+            HStack {
+                Text(label)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .foregroundColor((field.localRequired && field.value.isEmpty) ? Color.cDanger : .cTextMedium)
+                if field.value == "Y" {
+                    Button(action: {
+                        delete()
+                    }) {
+                        Image("ic-delete")
+                            .resizable()
+                            .scaledToFit()
+                            .foregroundColor(.cDanger)
+                            .frame(width: 24, height: 24, alignment: .center)
+                    }
+                    .frame(width: 44, height: 44, alignment: .center)
+                }
+            }
             Button(action: {
-                showActionSheet = true
+                switch field.controlType {
+                    case "canvas":
+                        onSourceSelected(s: "D")
+                    default:
+                        actionSheet = true
+                }
             }) {
-                VStack {
-                    Text(NSLocalizedString("env\(field.label.capitalized)", comment: field.label))
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .foregroundColor((field.localRequired && field.value.isEmpty) ? Color.cDanger : .cTextMedium)
+                if field.value == "Y" {
+                    ImageViewerWrapperView(table: options.table, field: field.key, id: options.item, localId: options.objectId)
+                } else {
+                    Image(icon())
+                        .resizable()
+                        .scaledToFit()
+                        .foregroundColor(.cIcon)
+                        .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
                 }
             }
-            .frame(height: 44)
-            .buttonStyle(BorderlessButtonStyle())
-            .actionSheet(isPresented: self.$showActionSheet) {
-                ActionSheet(title: Text("envSelect"), message: Text(""), buttons: [
-                    .default(Text("envCamera"), action: {
-                        self.sourceType = .camera
-                        sheetLayout = .picker
-                        shouldPresentSheet = true
-                    }),
-                    .default(Text("envGallery"), action: {
-                        self.sourceType = .photoLibrary
-                        sheetLayout = .picker
-                        shouldPresentSheet = true
-                    }),
-                    .cancel()
-                ])
-            }
-            if field.value == "Y" {
-                Button(action: {
-                    sheetLayout = .viewer
-                    shouldPresentSheet = true
-                }) {
-                    Text("envPreviewResource")
-                }
-                .frame(height: 40)
-                .buttonStyle(BorderlessButtonStyle())
-            }
+            DynamicFormDescriptionView(field: field)
         }
-        .sheet(isPresented: $shouldPresentSheet) {
-            switch sheetLayout {
-                case .picker:
-                    CustomImagePickerView(sourceType: sourceType, uiImage: self.$uiImage, onSelectionDone: onSelectionDone)
-                case .viewer:
-                    ImageViewerDialog(table: options.table, field: field.key, id: options.item, localId: options.objectId)
-            }
+        .actionSheet(isPresented: $actionSheet) {
+            ActionSheet(title: Text("envSelect"), message: nil, buttons: Widgets.mediaSourcePickerButtons(available: availableSources, action: onSourceSelected))
+        }
+        .sheet(isPresented: $modalCamera) {
+            CustomImagePickerView(sourceType: .camera, uiImage: self.$uiImage, onSelectionDone: onSelectionDone)
+        }
+        .sheet(isPresented: $modalDraw) {
+            CanvasDrawerDialog(uiImage: self.$uiImage, title: NSLocalizedString(label, comment: field.label), onSelectionDone: onSelectionDone)
+        }
+        .sheet(isPresented: $modalGallery) {
+            CustomImagePickerView(sourceType: .photoLibrary, uiImage: self.$uiImage, onSelectionDone: onSelectionDone)
+        }
+        .onAppear {
+            initField()
+        }
+    }
+    
+    func initField() {
+        initialValue = field.value
+        switch field.controlType {
+            case "image":
+                availableSources = Utils.castString(value: pickerSources["IMAGE"], defaultValue: "C,G")
+            case "habeas-data":
+                availableSources = Utils.castString(value: pickerSources["HABEAS-DATA"], defaultValue: "D,C,G")
+            default:
+                break
+        }
+    }
+    
+    func delete() {
+        field.value = initialValue
+        MediaUtils.remove(table: options.table, field: field.key, id: options.item, localId: options.objectId)
+    }
+    
+    func icon() -> String {
+        switch field.controlType {
+            case "canvas":
+                return "ic-draw"
+            case "habeas-data":
+                return "ic-habeas-data"
+            default:
+                return "ic-gallery"
+        }
+    }
+    
+    func onSourceSelected(s: String) {
+        actionSheet = false
+        switch s {
+            case "C":
+                modalCamera = true
+            case "D":
+                modalDraw = true
+            case "G":
+                modalGallery = true
+            default:
+                break;
         }
     }
     
     func onSelectionDone(_ done: Bool) {
-        self.shouldPresentSheet = false
-        field.value = done ? "Y" : field.value
+        self.modalCamera = false
+        self.modalDraw = false
+        self.modalGallery = false
+        field.value = ""
         if done {
             MediaUtils.store(
                 uiImage: uiImage,
@@ -450,7 +603,9 @@ struct DynamicFormImage: View {
                 id: options.item,
                 localId: options.objectId
             )
-            print(uiImage ?? "")
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+            field.value = done ? "Y" : initialValue
         }
     }
     
@@ -478,12 +633,13 @@ struct DynamicFormHabeasData: View {
     @State private var uiImage: UIImage?
     
     var body: some View {
+        let label = DynamicUtils.formatLabel(s: field.label).localized(defaultValue: field.label)
         VStack {
             Button(action: {
                 showActionSheet = true
             }) {
                 VStack {
-                    Text(NSLocalizedString("env\(field.label.capitalized)", comment: field.label))
+                    Text(label)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .foregroundColor((field.localRequired && field.value.isEmpty) ? Color.cDanger : .cTextMedium)
                 }
@@ -559,9 +715,10 @@ struct DynamicFormCanvas: View {
     @State private var uiImage: UIImage?
     
     var body: some View {
+        let label = DynamicUtils.formatLabel(s: field.label).localized(defaultValue: field.label)
         VStack {
             VStack {
-                Text(NSLocalizedString("env\(field.label.capitalized)", comment: field.label))
+                Text(label)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .foregroundColor((field.localRequired && field.value.isEmpty) ? Color.cDanger : .cTextMedium)
             }
@@ -600,54 +757,97 @@ struct DynamicFormCanvas: View {
 struct DynamicFormDayMonth: View {
     
     @Binding var field: DynamicFormField
-    @State var selected = [String]()
-    @State private var selectDialog = false
-    @State var selectedLabel: String = ""
+    
+    @State private var modalMonth = false
+    @State private var modalDay = false
+    @State private var selectedMonth: Int = 0
+    @State private var selectedDay: Int = 0
     
     var body: some View {
-        Button(action: {
-            selectDialog.toggle()
-        }) {
+        let label = DynamicUtils.formatLabel(s: field.label).localized(defaultValue: field.label)
+        VStack {
+            Text(label)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .foregroundColor((field.localRequired && field.value.isEmpty) ? Color.cDanger : .cTextMedium)
             HStack {
-                VStack(alignment: .leading) {
-                    Text(NSLocalizedString("env\(field.label.capitalized)", comment: field.label))
-                        .font(selected.isEmpty ? .none : .system(size: 14.0))
-                        .foregroundColor((field.localRequired && field.value.isEmpty) ? Color.cDanger : (selected.isEmpty ? .cTextMedium : .cTextHigh))
-                    if !selected.isEmpty {
-                        Text(selectedLabel)
-                            .foregroundColor(.cTextHigh)
+                Button(action: {
+                    modalMonth = true
+                }) {
+                    HStack {
+                        VStack {
+                            Text("envMonth")
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .foregroundColor(.cTextMedium)
+                                .font(.system(size: 13))
+                            Text(selectedMonth > 0 ? TimeUtils.monthName(m: selectedMonth) : NSLocalizedString("envChoose", comment: ""))
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .foregroundColor(.cTextHigh)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        Image("ic-arrow-expand-more")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 24, height: 24, alignment: .center)
+                            .foregroundColor(.cIcon)
                     }
                 }
-                Spacer()
-                Image("ic-right-arrow")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 16, height: 16, alignment: .center)
-                    .foregroundColor(.cAccent)
+                Button(action: {
+                    if selectedMonth > 0 {
+                        modalDay = true
+                    }
+                }) {
+                    HStack {
+                        VStack {
+                            Text("envDay")
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .foregroundColor(.cTextMedium)
+                                .font(.system(size: 13))
+                            Text(selectedDay > 0 ? String(selectedDay) : NSLocalizedString("envChoose", comment: ""))
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .foregroundColor(.cTextHigh)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        Image("ic-arrow-expand-more")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 24, height: 24, alignment: .center)
+                            .foregroundColor(.cIcon)
+                    }
+                }
+            }
+            DynamicFormDescriptionView(field: field)
+        }
+        .partialSheet(isPresented: $modalMonth) {
+            DialogMonthPickerView { month in
+                selectedMonth = month
+                onSelectionDone()
+                modalMonth = false
+            }
+        }
+        .partialSheet(isPresented: $modalDay) {
+            DialogMonthDayPickerView(month: $selectedMonth) { day in
+                selectedDay = day
+                onSelectionDone()
+                modalDay = false
             }
         }
         .onAppear {
             load()
         }
-        .sheet(isPresented: $selectDialog, content: {
-            DayMonthDialogPicker(onSelectionDone: onSelectionDone, selected: $selected)
-        })
     }
     
     func load() {
         let value = field.value.components(separatedBy: "-")
-        if value.count > 1 {
-            selected = value
-            onSelectionDone([])
+        if !value.isEmpty {
+            selectedMonth = Utils.castInt(value: value[0])
+            if value.count > 1 {
+                selectedDay = Utils.castInt(value: value[0])
+            }
         }
     }
     
-    func onSelectionDone(_ : [String]) {
-        selectDialog = false
-        if selected.count > 1 {
-            field.value = "\(selected[0])-\(selected[1])"
-            selectedLabel = "\(Utils.castString(value: CommonUtils.months[Utils.castInt(value: selected[0]) - 1]["name"])) \(selected[1])"
-        }
+    func onSelectionDone() {
+        field.value = "\(selectedMonth)-\(selectedDay)"
     }
     
 }
@@ -659,56 +859,60 @@ struct DynamicFormList: View {
     @State var items = [ListItem]()
     @State var selected = [String]()
     @State var selectedLabel: String = ""
+    @State var extraData: [String: Any] = [:]
     
     @State private var selectSourceDynamic = false
-    @State private var selectSourceTableAuto = false
-    @State private var selectSourceTableFull = false
+    @State private var selectSourceTable = false
     @State private var selectSourceServer = false
     
+    @State private var capitalized = true
+    
     var body: some View {
+        let label = DynamicUtils.formatLabel(s: field.label).localized(defaultValue: field.label)
         Button(action: {
+            print(field.source)
             switch field.sourceType {
-            case "json":
-                selectSourceDynamic.toggle()
-            case "table":
-                if true {
-                    selectSourceTableFull.toggle()
-                } else {
-                    selectSourceTableAuto.toggle()
-                }
-            default:
-                selectSourceServer.toggle()
+                case "json":
+                    selectSourceDynamic.toggle()
+                case "table":
+                    selectSourceTable.toggle()
+                default:
+                    selectSourceServer.toggle()
             }
         }) {
-            HStack {
-                VStack(alignment: .leading) {
-                    Text(NSLocalizedString("env\(field.label.capitalized)", comment: field.label))
-                        .font(selected.isEmpty ? .none : .system(size: 14.0))
-                        .foregroundColor((field.localRequired && field.value.isEmpty) ? Color.cDanger : .cTextMedium)
-                    if !selected.isEmpty {
-                        Text(selectedLabel)
-                            .foregroundColor(.cTextHigh)
+            VStack {
+                HStack {
+                    VStack(alignment: .leading) {
+                        Text(label)
+                            .font(selected.isEmpty ? .none : .system(size: 14.0))
+                            .foregroundColor((field.localRequired && field.value.isEmpty) ? Color.cDanger : .cTextMedium)
+                        if !selected.isEmpty {
+                            Text(capitalized ? selectedLabel.capitalized : selectedLabel)
+                                .foregroundColor(.cTextHigh)
+                                .multilineTextAlignment(.leading)
+                        }
                     }
+                    Spacer()
+                    Image("ic-arrow-expand-more")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 24, height: 24, alignment: .center)
+                        .foregroundColor(.cIcon)
                 }
-                Spacer()
-                Image("ic-arrow-expand-more")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 24, height: 24, alignment: .center)
-                    .foregroundColor(.cIcon)
+                DynamicFormDescriptionView(field: field)
             }
         }
         .onAppear {
             load()
         }
-        .sheet(isPresented: $selectSourceTableAuto) {
-            DialogSourcePickerView(selected: $selected, key: field.source, multiple: field.multiple, title: NSLocalizedString("env\(field.label.capitalized)", comment: field.label), onSelectionDone: onSelectionDone)
+        .sheet(isPresented: $selectSourceServer) {
+            DialogSourcePickerView(selected: $selected, key: field.source, multiple: field.multiple, title: NSLocalizedString(label, comment: field.label), onSelectionDone: onSelectionDone)
         }
         .sheet(isPresented: $selectSourceDynamic, content: {
-            DialogPlainPickerView(selected: $selected, data: field.source, multiple: field.multiple, title: NSLocalizedString("env\(field.label.capitalized)", comment: field.label), onSelectionDone: onSelectionDone)
+            DialogPlainPickerView(selected: $selected, data: field.source, multiple: field.multiple, title: NSLocalizedString(label, comment: field.label), onSelectionDone: onSelectionDone)
         })
-        .sheet(isPresented: $selectSourceTableFull, content: {
-            DialogSourcePickerView(selected: $selected, key: field.source, multiple: field.multiple, title: NSLocalizedString("env\(field.label.capitalized)", comment: field.label), onSelectionDone: onSelectionDone)
+        .sheet(isPresented: $selectSourceTable, content: {
+            DialogSourcePickerView(selected: $selected, key: field.source, multiple: field.multiple, title: NSLocalizedString(label, comment: field.label), extraData: extraData, onSelectionDone: onSelectionDone)
         })
     }
     
@@ -717,10 +921,18 @@ struct DynamicFormList: View {
             selected = field.value.components(separatedBy: ",")
             onSelectionDone([])
         }
+        switch field.source {
+            case "category":
+                capitalized = false
+                extraData["categoryType"] = field.moreOptions.categoryType
+                break
+            default:
+                break
+        }
     }
     
     func onSelectionDone(_ : [String]) {
-        field.value = selected.joined()
+        field.value = selected.joined(separator: ",")
         if field.multiple {
             selectedLabel = "\(selected.count) \(NSLocalizedString("envItemsSelected", comment: ""))"
         } else {
@@ -742,8 +954,7 @@ struct DynamicFormList: View {
             }
         }
         selectSourceDynamic = false
-        selectSourceTableFull = false
-        selectSourceTableAuto = false
+        selectSourceTable = false
         selectSourceServer = false
     }
     

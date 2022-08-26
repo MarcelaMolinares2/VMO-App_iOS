@@ -172,6 +172,10 @@ class PanelUtils {
         return valueByPanelType(by: .title, panelType: panelType) as! String
     }
     
+    static func duplicationKeyByPanelType(panelType: String) -> String {
+        return valueByPanelType(by: .duplication, panelType: panelType) as! String
+    }
+    
     static func valueByPanelType(by type: PanelValueType, panelType: String) -> Any {
         let data = [
             [
@@ -205,6 +209,14 @@ class PanelUtils {
                 "P": "modPatient",
                 "T": "modPotential",
                 "D": ""
+            ],
+            [
+                "M": "P_DOC_DUPLICATION_FIELDS",
+                "F": "P_PHA_DUPLICATION_FIELDS",
+                "C": "P_CLI_DUPLICATION_FIELDS",
+                "P": "P_PAT_DUPLICATION_FIELDS",
+                "T": "P_PPT_DUPLICATION_FIELDS",
+                "D": ""
             ]
         ]
         var index = -1
@@ -217,6 +229,8 @@ class PanelUtils {
                 index = 2
             case .title:
                 index = 3
+            case .duplication:
+                index = 4
         }
         
         if let val = data[index][panelType] {
@@ -253,7 +267,130 @@ class PanelUtils {
     }
     
     enum PanelValueType {
-        case color, icon, form, title
+        case color, icon, form, title, duplication
+    }
+    
+    static func castLocations(lm: [PanelLocationModel]) -> [PanelLocation] {
+        var locations = [PanelLocation]()
+        lm.forEach { l in
+            let location = PanelLocation()
+            location.id = l.id
+            location.address = l.address
+            location.latitude = l.latitude
+            location.longitude = l.longitude
+            location.type = l.type
+            location.geocode = l.geocode
+            location.cityId = l.cityId
+            location.complement = l.complement
+            locations.append(location)
+        }
+        return locations
+    }
+    
+    static func castContactControl(cc: [PanelContactControlModel]) -> [ContactControlPanel] {
+        var ccs = [ContactControlPanel]()
+        cc.forEach { c in
+            let contactControlPanel = ContactControlPanel()
+            contactControlPanel.contactControlTypeId = c.contactControlType.id
+            contactControlPanel.status = c.status ? 1 : 0
+            ccs.append(contactControlPanel)
+        }
+        return ccs
+    }
+    
+    static func castVisitingHours(vh: [PanelVisitingHourModel]) -> [PanelVisitingHour] {
+        var visitingHours = [PanelVisitingHour]()
+        vh.forEach { v in
+            let visitingHour = PanelVisitingHour()
+            visitingHour.dayOfWeek = v.dayOfWeek
+            visitingHour.amHourStart = Utils.dateFormat(date: v.amHourStart, format: "HH:mm")
+            visitingHour.amHourEnd = Utils.dateFormat(date: v.amHourEnd, format: "HH:mm")
+            visitingHour.pmHourStart = Utils.dateFormat(date: v.pmHourStart, format: "HH:mm")
+            visitingHour.pmHourEnd = Utils.dateFormat(date: v.pmHourEnd, format: "HH:mm")
+            visitingHour.amStatus = v.amStatus ? 1 : 0
+            visitingHour.pmStatus = v.pmStatus ? 1 : 0
+            visitingHours.append(visitingHour)
+        }
+        return visitingHours
+    }
+    
+    static func duplication<T: Object & Codable>(from: T.Type, object: T, panelType: String, classKeys: [String: String]) -> [T] {
+        if let keyValue = Config.get(key: duplicationKeyByPanelType(panelType: panelType)).complement {
+            if !keyValue.isEmpty {
+                let fields = keyValue.components(separatedBy: ",")
+                var orConditions: [String] = []
+                fields.forEach { field in
+                    let keys = field.components(separatedBy: ":")
+                    var andConditions: [String] = []
+                    keys.forEach { key in
+                        let classAttr = findClassKey(classKeys: classKeys, k: key)
+                        if let keyType = findClassKeyType(object: object, key: classAttr) {
+                            if keyType == Persisted<String>.self || keyType == Persisted<Optional<String>>.self {
+                                andConditions.append("\(classAttr) == '\(Utils.castString(value: object.value(forKey: classAttr)))'")
+                            } else {
+                                andConditions.append("\(classAttr) == \(Utils.castString(value: object.value(forKey: classAttr)))")
+                            }
+                        }
+                    }
+                    orConditions.append("(\(andConditions.joined(separator: " and ")))")
+                }
+                let realm = try! Realm()
+                return Array(realm.objects(from.self).filter(orConditions.joined(separator: " or ")))
+            }
+        }
+        return []
+    }
+    
+    static func couldValidDuplicates(panelType: String) -> Bool {
+        if let keyValue = Config.get(key: duplicationKeyByPanelType(panelType: panelType)).complement {
+            return !keyValue.isEmpty
+        }
+        return false
+    }
+    
+    static func findClassKeyType<T: Object & Codable>(object: T, key: String) -> Any.Type? {
+        var foundType: Any.Type = Any.self
+        for property in Mirror(reflecting: object).children {
+            if Utils.castString(value: property.label) == "_\(key)" {
+                foundType = type(of: property.value)
+            }
+        }
+        return foundType
+    }
+    
+    static func findClassKey(classKeys: [String: String], k: String) -> String {
+        var rs = ""
+        classKeys.forEach { (key: String, value: String) in
+            if value == k {
+                rs = key
+            }
+        }
+        return rs
+    }
+    
+    static func defaultVisitsFee(by type: String) -> Int {
+        let obj = Utils.jsonDictionary(string: Config.get(key: "MOV_DEFAULT_FEES").complement ?? "{}")
+        print(obj)
+        if let value = obj[type] {
+            return Utils.castInt(value: value, defaultValue: 1)
+        }
+        return 1
+    }
+    
+    func categorization(field: DynamicFormField) -> Int {
+        return 0
+    }
+    
+    static func categorizationSettings(by type: String) -> PanelCategorizationSettings {
+        let obj = Utils.jsonDictionary(string: Config.get(key: "P_CATEGORIZATION_SETTINGS").complement ?? "{}")
+        if let value = obj[type] {
+            do {
+                return try JSONDecoder().decode(PanelCategorizationSettings.self, from: Utils.castString(value: value).data(using: .utf8)!)
+            } catch {
+                print(error)
+            }
+        }
+        return PanelCategorizationSettings()
     }
     
 }
@@ -271,6 +408,51 @@ class TimeUtils {
             NSLocalizedString("envSunday", comment: "Sunday")
         ]
         return days[by]
+    }
+    
+    static func months() -> [GenericPickerItem] {
+        return [
+            GenericPickerItem(value: 1, label: NSLocalizedString("envJanuary", comment: "")),
+            GenericPickerItem(value: 2, label: NSLocalizedString("envFebruary", comment: "")),
+            GenericPickerItem(value: 3, label: NSLocalizedString("envMarch", comment: "")),
+            GenericPickerItem(value: 4, label: NSLocalizedString("envApril", comment: "")),
+            GenericPickerItem(value: 5, label: NSLocalizedString("envMay", comment: "")),
+            GenericPickerItem(value: 6, label: NSLocalizedString("envJune", comment: "")),
+            GenericPickerItem(value: 7, label: NSLocalizedString("envJuly", comment: "")),
+            GenericPickerItem(value: 8, label: NSLocalizedString("envAugust", comment: "")),
+            GenericPickerItem(value: 9, label: NSLocalizedString("envSeptember", comment: "")),
+            GenericPickerItem(value: 10, label: NSLocalizedString("envOctober", comment: "")),
+            GenericPickerItem(value: 11, label: NSLocalizedString("envNovember", comment: "")),
+            GenericPickerItem(value: 12, label: NSLocalizedString("envDecember", comment: ""))
+        ]
+    }
+    
+    static func monthDays(m: Int) -> [GenericPickerItem] {
+        var days = [GenericPickerItem]()
+        for d in 1..<monthDayLimit(month: m) + 1 {
+            days.append(GenericPickerItem(value: d, label: String(d)))
+        }
+        return days
+    }
+    
+    static func monthDayLimit(month: Int) -> Int {
+        switch month {
+            case 2:
+                return 29
+            case 4, 6, 9, 11:
+                return 30
+            default:
+                return 31
+        }
+    }
+    
+    static func monthName(m: Int) -> String {
+        if let month = months().first(where: { gpi in
+            gpi.value == m
+        }) {
+            return month.label
+        }
+        return ""
     }
     
 }

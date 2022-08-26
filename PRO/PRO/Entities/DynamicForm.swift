@@ -46,7 +46,7 @@ struct DynamicFormField: Identifiable, Decodable {
     var defaultValue: String?
     var source: String
     var sourceType: String
-    var condition: String?
+    var condition: DynamicConditionForm
     var countries: String
     var cities: String
     var options: String
@@ -57,6 +57,7 @@ struct DynamicFormField: Identifiable, Decodable {
     var localEditable: Bool = true
     var localRequired: Bool = false
     var localVisible: Bool = true
+    var moreOptions: DynamicFormFieldMoreOptions
     
     private enum CodingKeys: String, CodingKey {
         case key, label, description, controlType, dataType, requiredUserTypes, visible, editable, multiple, maxLength, multiline, mask, acceptedValues, acceptOtherValue, defaultValue, source, sourceType, condition, countries, cities, options, minValue, maxValue, isAdditional
@@ -87,9 +88,11 @@ struct DynamicFormField: Identifiable, Decodable {
             self.maxValue = ""
         }
         do {
-            self.condition = try container.decode(String?.self, forKey: .condition)
+            self.condition = try container.decode(DynamicConditionForm.self, forKey: .condition)
         } catch DecodingError.typeMismatch {
-            self.condition = ""
+            self.condition = DynamicConditionForm()
+        } catch DecodingError.keyNotFound {
+            self.condition = DynamicConditionForm()
         }
         do {
             self.acceptedValues = try container.decode(String?.self, forKey: .acceptedValues)
@@ -126,19 +129,18 @@ struct DynamicFormField: Identifiable, Decodable {
         self.countries = try DynamicUtils.stringTypeDecoding(container: container, key: .countries)
         self.cities = try DynamicUtils.stringTypeDecoding(container: container, key: .cities)
         self.options = try DynamicUtils.stringTypeDecoding(container: container, key: .options)
+        
+        self.moreOptions = DynamicFormFieldMoreOptions()
+        
+        if let table = Utils.jsonDictionary(string: self.options)["table"] as? String {
+            self.moreOptions.table = table
+        }
+        if let categoryType = Utils.jsonDictionary(string: self.options)["categoryType"] as? Int {
+            self.moreOptions.categoryType = categoryType
+        }
     }
     
     mutating func setValue(value: String) {
         self.value = value
     }
 }
-
-struct DynamicFormFieldUserOpts: Decodable {
-    var createUserTypes: String
-    var updateUserTypes: String
-    
-    private enum CodingKeys: String, CodingKey {
-        case createUserTypes, updateUserTypes
-    }
-}
-

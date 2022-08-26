@@ -63,8 +63,6 @@ struct DashboardTabContentWrapperView: View {
                 DashboardTabView()
             case "birthdays":
                 BirthdayTabView()
-            case "messages":
-                MessageTabView()
             default:
                 DiaryListTabView()
         }
@@ -84,7 +82,7 @@ struct DashboardTabWrapperView: View {
                 DashboardTabContentWrapperView(key: tab.key)
                     .tag(tab.key)
                     .tabItem {
-                        Text(tab.label)
+                        Text(tab.label.localized())
                         Image(tab.icon)
                     }
             }
@@ -96,10 +94,13 @@ struct DashboardTabWrapperView: View {
     }
     
     private func loadTabs() {
-        if tab == "center" {
-            tabs = Array(generateTabs()[..<5])
-        } else {
-            tabs = Array(generateTabs()[5...])
+        let gTabs = generateTabs()
+        if gTabs.count > 4 && gTabs.count < 10 {
+            if tab == "center" {
+                tabs = Array(gTabs[..<5])
+            } else {
+                tabs = Array(gTabs[5...])
+            }
         }
     }
     
@@ -129,7 +130,7 @@ struct DashboardTabWrapperView: View {
                         default:
                             icon = "ic-home"
                     }
-                    tabs.append(MasterDashboardTab(key: Utils.castString(value: d["key"]), icon: icon, label: "env\(Utils.castString(value: d["label"]).capitalized)", route: Utils.castString(value: d["route"])))
+                    tabs.append(MasterDashboardTab(key: Utils.castString(value: d["key"]), icon: icon, label: "envTab\(Utils.castString(value: d["label"]).capitalized)", route: Utils.castString(value: d["route"])))
                 }
             }
         }

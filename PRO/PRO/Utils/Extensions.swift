@@ -168,3 +168,11 @@ extension UIApplication {
     }
     
 }
+
+extension String {
+    
+    func localized(defaultValue: String? = nil) -> String {
+        return NSLocalizedString(self, tableName: nil, bundle: Bundle.main, value: defaultValue ?? self, comment: "")
+    }
+    
+}

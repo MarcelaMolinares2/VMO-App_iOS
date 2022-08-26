@@ -358,7 +358,6 @@ class DynamicUtils {
             groupsData.forEach { group in
                 var fields = [DynamicFormField]()
                 let fieldsData = group["fields"] as! [Dictionary<String, Any>]
-                
                 fieldsData.forEach { field in
                     //print(field)
                     fields.append(try! DynamicFormField(from: field))
@@ -368,7 +367,40 @@ class DynamicUtils {
             }
             tabs.append(DynamicFormTab(key: key, title: Utils.castString(value: tab["title"]), groups: groups))
         }
+        serializeForm(tabs: &tabs)
         return tabs
+    }
+    
+    static func serializeForm(tabs: inout [DynamicFormTab]) {
+        let user = UserDao(realm: try! Realm()).logged()
+        tabs.indices.forEach { i in
+            tabs[i].groups.indices.forEach { j in
+                tabs[i].groups[j].fields.indices.forEach {
+                    let field = tabs[i].groups[j].fields[$0]
+                    tabs[i].groups[j].fields[$0].visible.country = field.countries.isEmpty || field.countries == "0" || field.countries.components(separatedBy: ",").contains(String(user?.countryId ?? 0))
+                    tabs[i].groups[j].fields[$0].visible.city = field.cities.isEmpty || field.cities == "0" || field.cities.components(separatedBy: ",").contains(String(user?.cityId ?? 0))
+                }
+            }
+        }
+        cleanForm(tabs: &tabs)
+    }
+    
+    static func cleanForm(tabs: inout [DynamicFormTab]) {
+        tabs.indices.forEach { i in
+            tabs[i].groups.indices.forEach {
+                tabs[i].groups[$0].fields = tabs[i].groups[$0].fields.filter({ field in
+                    field.visible.country && field.visible.city
+                })
+            }
+        }
+        tabs.indices.forEach { i in
+            tabs[i].groups = tabs[i].groups.filter({ group in
+                !group.fields.isEmpty
+            })
+        }
+        tabs = tabs.filter({ tab in
+            !tab.groups.isEmpty
+        })
     }
     
     static func validate(form: DynamicForm) -> Bool {
@@ -395,6 +427,28 @@ class DynamicUtils {
             }
         }
         return (Utils.json(from: data) ?? "{}")
+    }
+    
+    static func boolTypeDecoding<T: CodingKey>(container: KeyedDecodingContainer<T>, key: KeyedDecodingContainer<T>.Key) throws -> Bool {
+        do {
+            return try container.decode(Bool.self, forKey: key)
+        } catch DecodingError.keyNotFound {
+            return false
+        } catch DecodingError.typeMismatch {
+            do {
+                let value = try container.decode(String.self, forKey: key)
+                return Utils.castInt(value: value) == 1
+            } catch DecodingError.typeMismatch {
+                do {
+                    let value = try container.decode(Int.self, forKey: key)
+                    return value == 1
+                } catch DecodingError.typeMismatch {
+                    return false
+                }
+            }
+        } catch DecodingError.valueNotFound {
+            return false
+        }
     }
     
     static func intTypeDecoding<T: CodingKey>(container: KeyedDecodingContainer<T>, key: KeyedDecodingContainer<T>.Key) throws -> Int {
@@ -451,6 +505,8 @@ class DynamicUtils {
             return RealmSwift.List<R>()
         } catch DecodingError.valueNotFound {
             return RealmSwift.List<R>()
+        } catch DecodingError.typeMismatch {
+            return RealmSwift.List<R>()
         }
     }
     
@@ -461,6 +517,28 @@ class DynamicUtils {
             return R()
         } catch DecodingError.valueNotFound {
             return R()
+        } catch DecodingError.typeMismatch {
+            return R()
+        }
+    }
+    
+    static func flagTypeDecoding<T: CodingKey>(container: KeyedDecodingContainer<T>, key: KeyedDecodingContainer<T>.Key) throws -> Int {
+        do {
+            return try container.decode(Int.self, forKey: key)
+        } catch DecodingError.keyNotFound {
+            return 0
+        } catch DecodingError.typeMismatch {
+            let value = try container.decode(String.self, forKey: key)
+            switch value {
+                case "Y":
+                    return 1
+                case "N":
+                    return 0
+                default:
+                    return Utils.castInt(value: value)
+            }
+        } catch DecodingError.valueNotFound {
+            return 0
         }
     }
     
@@ -497,6 +575,10 @@ class DynamicUtils {
     static func fillForm(form: inout DynamicForm, base: String, additional: String = "{}") {
         let baseDict = Utils.jsonDictionary(string: base)
         let additionalDict = Utils.jsonDictionary(string: additional)
+        print(1)
+        print(baseDict)
+        print(2)
+        print(additionalDict)
         for i in form.tabs.indices {
             for j in form.tabs[i].groups.indices {
                 for k in form.tabs[i].groups[j].fields.indices {
@@ -509,6 +591,71 @@ class DynamicUtils {
                 }
             }
         }
+    }
+    
+    static func fillFormField(form: inout DynamicForm, key: String, value: String = "") {
+        for i in form.tabs.indices {
+            for j in form.tabs[i].groups.indices {
+                for k in form.tabs[i].groups[j].fields.indices {
+                    if form.tabs[i].groups[j].fields[k].key == key {
+                        form.tabs[i].groups[j].fields[k].value = value
+                    }
+                }
+            }
+        }
+    }
+    
+    static func fillFormCategories(realm: Realm, form: inout DynamicForm, categories: [PanelCategoryPanel]) {
+        for i in form.tabs.indices {
+            for j in form.tabs[i].groups.indices {
+                for k in form.tabs[i].groups[j].fields.indices {
+                    if form.tabs[i].groups[j].fields[k].source == "category" {
+                        let c = categories.filter { pcp in
+                            CategoryDao(realm: realm).by(id: pcp.categoryId)?.categoryTypeId == form.tabs[i].groups[j].fields[k].moreOptions.categoryType
+                        }
+                        if !c.isEmpty {
+                            form.tabs[i].groups[j].fields[k].value = String(c.first?.categoryId ?? 0)
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    static func findFormField(form: DynamicForm, key: String) -> DynamicFormField? {
+        var rs: DynamicFormField? = nil
+        form.tabs.forEach { tab in
+            tab.groups.forEach { group in
+                group.fields.forEach { field in
+                    if field.key == key {
+                        rs = field
+                    }
+                }
+            }
+        }
+        return rs
+    }
+    
+    static func findFormField(form: DynamicForm, source: String) -> [DynamicFormField] {
+        var rs: [DynamicFormField] = []
+        form.tabs.forEach { tab in
+            tab.groups.forEach { group in
+                group.fields.forEach { field in
+                    if field.source == source {
+                        rs.append(field)
+                    }
+                }
+            }
+        }
+        return rs
+    }
+    
+    static func formatLabel(s: String) -> String {
+        return "env\(s.components(separatedBy: ".").last?.replacingOccurrences(of: "-", with: " ").replacingOccurrences(of: "_", with: " ").capitalized.replacingOccurrences(of: " ", with: "") ?? "")"
+    }
+    
+    static func transactionType(action: FormAction) -> String {
+        return action == .create ? "CREATE" : "UPDATE"
     }
     
 }

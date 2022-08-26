@@ -82,8 +82,10 @@
 "envNotVisited" = "Not visited";
 "envToVisit" = "To visit";
 "envVisited" = "Visited";
-"envFTFVisit" = "FTF";
-"envVirtualVisit" = "Virtual";
+"envFTF" = "FTF";
+"envVirtual" = "Virtual";
+"envFtfVisit" = "FTF Visit";
+"envVirtualVisit" = "Virtual visit";
 "envBrick" = "Brick";
 "envCategory" = "Category";
 "envCity" = "City";
@@ -104,6 +106,57 @@
 "envFriday" = "Friday";
 "envSaturday" = "Saturday";
 "envSunday" = "Sunday";
+"envCamera" = "Camera";
+"envGallery" = "Gallery";
+"envDraw" = "Draw";
+"envMonth" = "Month";
+"envDay" = "Day";
+"envCode" = "Code";
+"envDocumentType" = "Document type";
+"envDni" = "DNI";
+"envCdi" = "CDI";
+"envFirstName" = "First Name";
+"envLastName" = "Last Name";
+"envHasNoEmail" = "Has no email";
+"envEmail" = "Email";
+"envEmailVerified" = "Email verified";
+"envOfficePhone" = "Office phone";
+"envMobilePhone" = "Mobile phone";
+"envSecondSpecialty" = "Second specialty";
+"envGroups" = "Groups";
+"envGender" = "Gender";
+"envLines" = "Lines";
+"envCountry" = "Country";
+"envNeighborhood" = "Neighborhood";
+"envHq" = "HQ";
+"envPhoto" = "Photo";
+"envCollege" = "College";
+"envFormulation" = "Formulation";
+"envPrePaidEntities" = "Pre paid entities";
+"envRelated" = "Related";
+"envBirthday" = "Birthday";
+"envSecretary" = "Secretary";
+"envBirthdaySecretary" = "Birthday secretary";
+"envType" = "Type";
+"envPharmacyChain" = "Pharmacy chain";
+"envPhone" = "Phone";
+"envPricesList" = "Prices list";
+"envOpeningDate" = "Opening date";
+"envProfile" = "Profile";
+"envSsn" = "SSN";
+"envUrl" = "Url";
+"envBasicInformation" = "Basic information";
+"envInfoBasicComp" = "Complementary information";
+"envLocationInformation" = "Location information";
+"envVisitInformation" = "Visit information";
+"envInfoAdditionalComp" = "Complementary additional information";
+"envAdditionalInformation" = "Additional information";
+"envInfoAdditional" = "Additional information";
+"envSaveAnyway" = "Save anyway";
+"envDuplicationWarning" = "There are some duplicated items. Tap to see";
+"envDuplicatesMesssage" = "The following items have one or more equal fields";
+"envSave" = "Save";
+
 
 //Expense
 "envOriginDestiny" = "Origin - Destiny";
@@ -120,14 +173,22 @@
 //Panels
 "envClient" = "Client";
 "envClients" = "Clients";
+"envTabClient" = "Clients";
 "envDoctor" = "Doctor";
 "envDoctors" = "Doctors";
+"envTabDoctor" = "Doctors";
 "envPatient" = "Patient";
 "envPatients" = "Patients";
+"envTabPatient" = "Patients";
 "envPharmacy" = "Pharmacy";
 "envPharmacies" = "Pharmacies";
+"envTabPharmacy" = "Pharmacies";
 "envPotential" = "Potential";
 "envPotentials" = "Potentials";
+"envTabPotential" = "Potentials";
+"envTabDashboard" = "Dashboard";
+"envTabBirthdays" = "Birthdays";
+"envTabIndicators" = "Indicators";
 "envMarkedForDelete" = "Marked for inactivation";
 "envMaximumVisits" = "Maximum visits (%@/%@)";
 "envVisitedToday" = "The panel member was visited today";
@@ -156,9 +217,17 @@
 //Activities
 "envRequestAuthorizedDay" = "Request authorized day";
 "envRequestedDayPercentage" = "Percentage of the requested day";
+"envDTVComment" = "Describe the activity below";
 
 //Lists
 "envShowingNResults" = "Showing %@ result(s)";
+
+//Diary
+"envIntervalToSchedule" = "Interval to schedule";
+"envHourStart" = "Hour start";
+"envSaveAsGroup" = "Save as group";
+"envMoveAll" = "Move all";
+"envDeleteAll" = "Delete all";
 
 //SLAID
 "envVisualAids" = "Visual Aids";

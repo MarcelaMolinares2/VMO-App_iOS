@@ -60,6 +60,7 @@ struct PanelFormLocationView: View {
     @State private var markers = [GMSMarker]()
     @State private var goToMyLocation = false
     @State private var fitToBounds = false
+    @State private var processingNearLocation = false
     
     @State private var layout: WrapperLayout = .list
     
@@ -89,55 +90,67 @@ struct PanelFormLocationView: View {
                     .background(Color.cBackground1dp)
                 if layout == .form {
                     VStack(spacing: 10) {
-                        if locationManager.location != nil {
-                            VStack {
-                                Toggle(isOn: $panelFormLocationModel.attachCurrentLocation) {
-                                    Text("envAttachCurrentLocation")
-                                        .foregroundColor(.cTextHigh)
-                                        .frame(maxWidth: .infinity, alignment: .leading)
+                        if processingNearLocation {
+                            LottieView(name: "location_animation", loopMode: .loop)
+                                .frame(width: 300, height: 200)
+                        } else {
+                            if let lastLocation = locationManager.location {
+                                if lastLocation.coordinate.latitude != 0 && lastLocation.coordinate.longitude != 0 {
+                                    VStack {
+                                        Toggle(isOn: $panelFormLocationModel.attachCurrentLocation) {
+                                            Text("envAttachCurrentLocation")
+                                                .foregroundColor(.cTextHigh)
+                                                .frame(maxWidth: .infinity, alignment: .leading)
+                                        }
+                                        .onChange(of: panelFormLocationModel.attachCurrentLocation) { v in
+                                            if v {
+                                                getNearAddress(location: lastLocation)
+                                            }
+                                        }
+                                    }
+                                    .padding(.horizontal, Globals.UI_FORM_PADDING_HORIZONTAL)
                                 }
                             }
+                            VStack {
+                                Text("envAddress")
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .foregroundColor(panelFormLocationModel.address.isEmpty ? Color.cDanger : .cTextMedium)
+                                TextField("envAddress", text: $panelFormLocationModel.address)
+                                    .cornerRadius(CGFloat(4))
+                                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                            }
                             .padding(.horizontal, Globals.UI_FORM_PADDING_HORIZONTAL)
-                        }
-                        VStack {
-                            Text("envAddress")
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .foregroundColor(panelFormLocationModel.address.isEmpty ? Color.cDanger : .cTextMedium)
-                            TextField("envAddress", text: $panelFormLocationModel.address)
-                                .cornerRadius(CGFloat(4))
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                        }
-                        .padding(.horizontal, Globals.UI_FORM_PADDING_HORIZONTAL)
-                        VStack {
-                            Text("envComplement")
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .foregroundColor(.cTextMedium)
-                            TextField("envComplementPlaceholder", text: $panelFormLocationModel.complement)
-                                .cornerRadius(CGFloat(4))
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                        }
-                        .padding(.horizontal, Globals.UI_FORM_PADDING_HORIZONTAL)
-                        HStack {
-                            Button(action: {
-                                clearForm()
-                                layout = .list
-                            }) {
-                                Text("envDiscard")
-                                    .foregroundColor(.cDanger)
-                                    .font(.system(size: 15))
-                                    .frame(maxWidth: .infinity, minHeight: 40)
+                            VStack {
+                                Text("envComplement")
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .foregroundColor(.cTextMedium)
+                                TextField("envComplementPlaceholder", text: $panelFormLocationModel.complement)
+                                    .cornerRadius(CGFloat(4))
+                                    .textFieldStyle(RoundedBorderTextFieldStyle())
                             }
-                            Button(action: {
-                                addItem()
-                            }) {
-                                Text("envAddItem")
-                                    .foregroundColor(panelFormLocationModel.address.isEmpty ? .cTextDisabled : .cTextMedium)
-                                    .font(.system(size: 15))
-                                    .frame(maxWidth: .infinity, minHeight: 40)
+                            .padding(.horizontal, Globals.UI_FORM_PADDING_HORIZONTAL)
+                            HStack {
+                                Button(action: {
+                                    clearForm()
+                                    layout = .list
+                                }) {
+                                    Text("envDiscard")
+                                        .foregroundColor(.cDanger)
+                                        .font(.system(size: 15))
+                                        .frame(maxWidth: .infinity, minHeight: 40)
+                                }
+                                Button(action: {
+                                    addItem()
+                                }) {
+                                    Text("envAddItem")
+                                        .foregroundColor(panelFormLocationModel.address.isEmpty ? .cTextDisabled : .cTextMedium)
+                                        .font(.system(size: 15))
+                                        .frame(maxWidth: .infinity, minHeight: 40)
+                                }
+                                .disabled(panelFormLocationModel.address.isEmpty)
                             }
-                            .disabled(panelFormLocationModel.address.isEmpty)
+                            .padding(.bottom, 5)
                         }
-                        .padding(.bottom, 5)
                     }
                 } else {
                     VStack {
@@ -247,6 +260,23 @@ struct PanelFormLocationView: View {
             goToMyLocation = true
         } else {
             fitToBounds = true
+        }
+    }
+    
+    func getNearAddress(location: CLLocation) {
+        processingNearLocation = true
+        AppServer().postRequest(data: [
+            "latitude": location.coordinate.latitude,
+            "longitude": location.coordinate.longitude
+        ], path: "vm/panel/location/near") { success, code, data in
+            if success {
+                if let response = data as? [String: Any] {
+                    if let address = response["address"] {
+                        panelFormLocationModel.address = Utils.castString(value: address)
+                    }
+                }
+            }
+            self.processingNearLocation = false
         }
     }
     
@@ -374,8 +404,11 @@ struct PanelFormContactControlView: View {
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
                 }
+                .padding(.vertical, 12)
+                .padding(.horizontal, 6)
             }
         }
+        .padding(.horizontal, Globals.UI_SC_PADDING_HORIZONTAL)
     }
     
 }
@@ -801,7 +834,7 @@ struct PanelFilterView: View {
                     Button(action: {
                         updateFilterValues(key: "contact_type", value: ["P"])
                     }) {
-                        Text("envFTFVisit")
+                        Text("envFTF")
                             .frame(minWidth: 0, maxWidth: .infinity, minHeight: 44.0)
                             .foregroundColor(.cTextHigh)
                             .background(matchValue(key: "contact_type", value: "P") ? Color.cSelected : Color.cUnselected)
@@ -815,7 +848,7 @@ struct PanelFilterView: View {
                     Button(action: {
                         updateFilterValues(key: "contact_type", value: ["V"])
                     }) {
-                        Text("envVirtualVisit")
+                        Text("envVirtual")
                             .frame(minWidth: 0, maxWidth: .infinity, minHeight: 44.0)
                             .foregroundColor(.cTextHigh)
                             .background(matchValue(key: "contact_type", value: "V") ? Color.cSelected : Color.cUnselected)
@@ -1169,6 +1202,134 @@ struct PanelSelectWrapperView: View {
         modalPanelClient = false
         modalPanelPatient = false
         modalPanelPotential = false
+    }
+    
+}
+
+struct PanelFormDuplicationAdviceView: View {
+    
+    var body: some View {
+        HStack {
+            Text("envDuplicationWarning")
+                .fontWeight(.bold)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .lineLimit(1)
+                .padding(.horizontal, 5)
+                .foregroundColor(.cTextHigh)
+            Image("ic-warning")
+                .resizable()
+                .scaledToFit()
+                .foregroundColor(.cWarning)
+                .frame(width: 34, height: 34, alignment: .center)
+                .padding(4)
+        }
+        .frame(maxWidth: .infinity)
+    }
+    
+}
+
+struct CustomPanelFormWrapperView: View {
+    @StateObject var tabRouter = TabRouter()
+    
+    var tabs: [String]
+    @Binding var form: DynamicForm
+    @Binding var options: DynamicFormFieldOptions
+    @Binding var contactControl: [PanelContactControlModel]
+    @Binding var locations: [PanelLocationModel]
+    @Binding var visitingHours: [PanelVisitingHourModel]
+    
+    @Binding var savedToast: Bool
+    
+    let onFABSaveTapped: () -> Void
+    
+    var body: some View {
+        ZStack(alignment: .bottom) {
+            TabView(selection: $tabRouter.current) {
+                ForEach($form.tabs) { $tab in
+                    CustomForm {
+                        DynamicFormView(form: $form, tab: $tab, options: options)
+                        ScrollViewFABBottom()
+                    }
+                    .tag(tab.key)
+                    .tabItem {
+                        Text(NSLocalizedString("envTab\(tab.key.capitalized)", comment: ""))
+                        Image("ic-dynamic-tab-\(tab.key.lowercased())")
+                    }
+                }
+                if tabs.contains("visiting-hours") {
+                    PanelFormVisitingHoursView(items: $visitingHours)
+                        .tag("visiting-hours")
+                        .tabItem {
+                            Text("envTabVisitingHours")
+                            Image("ic-calendar")
+                        }
+                }
+                if tabs.contains("locations") {
+                    PanelFormLocationView(items: $locations)
+                        .tag("locations")
+                        .tabItem {
+                            Text("envTabLocations")
+                            Image("ic-map")
+                        }
+                }
+                if tabs.contains("contact-control") {
+                    PanelFormContactControlView(items: $contactControl)
+                        .tag("contact-control")
+                        .tabItem {
+                            Text("envTabContactControl")
+                            Image("ic-contact-control")
+                        }
+                }
+            }
+            .tabViewStyle(DefaultTabViewStyle())
+            HStack(alignment: .bottom) {
+                Spacer()
+                if !["locations"].contains(tabRouter.current) {
+                    if !savedToast {
+                        FAB(image: "ic-cloud") {
+                            self.onFABSaveTapped()
+                        }
+                    }
+                }
+            }
+            .padding(.bottom, Globals.UI_FAB_VERTICAL + 50)
+            .padding(.horizontal, Globals.UI_FAB_HORIZONTAL)
+        }
+        .onAppear {
+            tabRouter.current = "BASIC"
+        }
+    }
+    
+}
+
+struct CustomPanelListDuplicatesView<Content: View>: View {
+    @Binding var form: DynamicForm
+    var content: () -> Content
+    let onSaveAnywayTapped: () -> Void
+    
+    var body: some View {
+        VStack {
+            VStack {
+                Text("envDuplicatesMesssage")
+                    .foregroundColor(.cTextHigh)
+                    .frame(maxWidth: .infinity, alignment: .center)
+            }
+            .padding(.horizontal, Globals.UI_SC_PADDING_HORIZONTAL)
+            .padding(.vertical, 10)
+            ScrollView {
+                LazyVStack(content: content)
+            }
+            .padding(.horizontal, Globals.UI_SC_PADDING_HORIZONTAL)
+            if DynamicUtils.validate(form: form) {
+                Button(action: {
+                    onSaveAnywayTapped()
+                }) {
+                    Text("envSaveAnyway")
+                        .foregroundColor(.cTextLink)
+                        .frame(maxWidth: .infinity, minHeight: 44, maxHeight: 44, alignment: .center)
+                }
+            }
+        }
     }
     
 }

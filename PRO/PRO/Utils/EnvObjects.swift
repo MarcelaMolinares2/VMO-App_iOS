@@ -76,6 +76,12 @@ struct ChipItem: Identifiable {
     }
 }
 
+struct GenericPickerItem: Identifiable {
+    let id = UUID()
+    var value: Int
+    var label: String
+}
+
 struct SortModel {
     var key: String
     var ascending: Bool
@@ -139,6 +145,9 @@ class DynamicConditionForm: Decodable {
             self.visible = [DynamicConditionGroup]()
         }
     }
+    
+    init() {
+    }
 }
 
 class DynamicConditionGroup: Decodable {
@@ -173,26 +182,34 @@ class DynamicConditionRow: Decodable {
     required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         do {
-            self.value = try container.decode([String].self, forKey: .value)
-        } catch DecodingError.typeMismatch {
             do {
-                let value = try container.decode(String.self, forKey: .value)
-                self.value = value.components(separatedBy: ",")
+                self.value = try container.decode([String].self, forKey: .value)
             } catch DecodingError.typeMismatch {
                 do {
-                    let value = try container.decode([Int].self, forKey: .value)
-                    self.value = value.map { String($0) }
+                    let value = try container.decode(String.self, forKey: .value)
+                    self.value = value.components(separatedBy: ",")
                 } catch DecodingError.typeMismatch {
-                    let value = try container.decode(Int.self, forKey: .value)
-                    self.value = String(value).components(separatedBy: ",")
+                    do {
+                        let value = try container.decode([Int].self, forKey: .value)
+                        self.value = value.map { String($0) }
+                    } catch DecodingError.typeMismatch {
+                        do {
+                            let value = try container.decode(Int.self, forKey: .value)
+                            self.value = String(value).components(separatedBy: ",")
+                        } catch DecodingError.typeMismatch {
+                            do {
+                                let value = try container.decode(Bool.self, forKey: .value)
+                                self.value = [value ? "1" : "0"]
+                            } catch DecodingError.typeMismatch {
+                                self.value = []
+                            }
+                        }
+                    }
                 }
             }
+        } catch DecodingError.valueNotFound {
+            self.value = []
         }
-        /*do {
-            self.current = try container.decode([String].self, forKey: .current)
-        } catch DecodingError.typeMismatch {
-            self.current = []
-        }*/
         self.current = []
         
         self.field = try container.decode(String.self, forKey: .field)
@@ -202,16 +219,38 @@ class DynamicConditionRow: Decodable {
 
 class DynamicFormFieldOptions {
     var table: String = ""
-    var op: String = ""
+    var op: FormAction
     var type: String = ""
     var panelType: String = ""
     var item: Int = 0
     var objectId: ObjectId
     
-    init(table: String, op: String) {
+    init(table: String, op: FormAction, panelType: String = "") {
         self.table = table
         self.op = op
+        self.panelType = panelType
         self.objectId = ObjectId()
+    }
+}
+
+struct DynamicFormFieldUserOpts: Decodable {
+    var country: Bool = true
+    var city: Bool = true
+    var user: Bool = true
+    var createUserTypes: String
+    var updateUserTypes: String
+    
+    private enum CodingKeys: String, CodingKey {
+        case createUserTypes, updateUserTypes
+    }
+}
+
+struct DynamicFormFieldMoreOptions: Decodable {
+    var table: String = ""
+    var categoryType: Int = 0
+    
+    private enum CodingKeys: String, CodingKey {
+        case table, categoryType
     }
 }
 
@@ -277,21 +316,25 @@ class AdvertisingMaterialDeliveryReport: Codable {
 
 class PanelLocationModel: ObservableObject, Identifiable {
     var uuid = UUID()
+    @Published var id: Int = 0
     @Published var address: String = ""
     @Published var latitude: Float = 0
     @Published var longitude: Float = 0
     @Published var type: String = ""
+    @Published var geocode: String = ""
     @Published var cityId: Int = 0
     @Published var complement: String = ""
     
     init() {
     }
     
-    init(address: String, latitude: Float, longitude: Float, type: String, cityId: Int, complement: String) {
+    init(id: Int, address: String, latitude: Float, longitude: Float, type: String, geocode: String, cityId: Int, complement: String) {
+        self.id = id
         self.address = address
         self.latitude = latitude
         self.longitude = longitude
         self.type = type
+        self.geocode = geocode
         self.cityId = cityId
         self.complement = complement
     }
@@ -334,5 +377,53 @@ class PanelVisitingHourModel: ObservableObject, Identifiable {
         self.pmHourEnd = Utils.strToDate(value: pmHourEnd, format: "HH:mm")
         self.amStatus = amStatus
         self.pmStatus = pmStatus
+    }
+}
+
+class PanelCategorizationSettings: Decodable {
+    var automatic: Bool = false
+    var attachVisitsFee: Bool = false
+    var allowEditVisitsFee: Bool = true
+    
+    private enum CodingKeys: String, CodingKey {
+        case automatic, attachVisitsFee, allowEditVisitsFee
+    }
+    
+    required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        self.automatic = try DynamicUtils.boolTypeDecoding(container: container, key: .automatic)
+        self.attachVisitsFee = try DynamicUtils.boolTypeDecoding(container: container, key: .attachVisitsFee)
+        self.allowEditVisitsFee = try DynamicUtils.boolTypeDecoding(container: container, key: .allowEditVisitsFee)
+    }
+    
+    init() {}
+    
+}
+
+enum FormAction {
+    case create, update, view
+}
+
+struct EnumMap<Enum: CaseIterable & Hashable, Value> {
+    private let values: [Enum : Value]
+    
+    init(resolver: (Enum) -> Value) {
+        var values = [Enum : Value]()
+        
+        for key in Enum.allCases {
+            values[key] = resolver(key)
+        }
+        
+        self.values = values
+    }
+    
+    subscript(key: Enum) -> Value {
+        // Here we have to force-unwrap, since there's no way
+        // of telling the compiler that a value will always exist
+        // for any given key. However, since it's kept private
+        // it should be fine - and we can always add tests to
+        // make sure things stay safe.
+        return values[key]!
     }
 }

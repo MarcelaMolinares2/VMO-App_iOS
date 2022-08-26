@@ -16,6 +16,9 @@ struct MovementFormView: View {
     @StateObject var tabRouter = TabRouter()
     @ObservedObject var locationService = LocationService()
     
+    
+    var realm = try! Realm()
+    
     var title = ""
     var icon = "ic-home"
     var color = Color.cPrimary
@@ -27,16 +30,19 @@ struct MovementFormView: View {
     @State private var panel: Panel?
     @State private var promotedProducts = [String]()
     
+    
+    @State private var materials = [AdvertisingMaterialDeliveryMaterial]()
+    
+    
+    @State private var mainTabsLayout = true
+    
+    @State var mainTabs = [[String: Any]]()
+    @State var moreTabs = [[String: Any]]()
+    
     var body: some View {
         VStack {
             HeaderToggleView(title: "modVisit") {
                 
-            }
-            Button(action: {
-                print(movement)
-                print(locationService.location ?? "")
-            }) {
-                Text("Test")
             }
             if locationRequired && locationService.location == nil {
                 Spacer()
@@ -52,7 +58,7 @@ struct MovementFormView: View {
                     }
                     Spacer()
                 } else {
-                    switch tabRouter.current {
+                    /*switch tabRouter.current {
                         case "MATERIAL":
                             MovementFormTabMaterialView(selected: $movement.dataMaterial)
                         case "PROMOTED":
@@ -67,6 +73,28 @@ struct MovementFormView: View {
                             MovementFormTabBasicView(movement: $movement, location: locationService.location, panel: panel!, op: viewRouter.data.objectId == nil ? "create" : "update", visitType: visitType)
                     }
                     MovementBottomNavigationView(tabRouter: tabRouter)
+                    */
+                    /*if mainTabsLayout {
+                        TabView(selection: $tabRouter.current) {
+                            ForEach(mainTabs) { tab in
+                                switch tab[""] {
+                                    case "MATERIAL":
+                                        MaterialDeliveryFormWrapperView(realm: realm, details: $materials)
+                                            .tag(2)
+                                            .tabItem {
+                                                Text("envMaterial")
+                                                Image("ic-material")
+                                            }
+                                    default:
+                                        break
+                                }
+                            }
+                        }
+                    } else {
+                        TabView(selection: $tabRouter.current) {
+                            
+                        }
+                    }*/
                 }
             }
         }
@@ -80,8 +108,14 @@ struct MovementFormView: View {
     }
     
     func initForm() {
-        //panel = PanelUtils.panel(type: viewRouter.data.type, objectId: viewRouter.data.objectId)
-        if viewRouter.data.objectId != nil {
+        let tabs = MovementUtils.initTabs(data: MovementUtils.tabs(panelType: viewRouter.data.type, visitType: Utils.castString(value: viewRouter.data.options["visitType"]).lowercased()))
+        mainTabs = tabs[0]
+        moreTabs = tabs[1]
+        tabRouter.current = "BASIC"
+        
+        
+        if let oId = viewRouter.data.objectId {
+            panel = PanelUtils.panel(type: viewRouter.data.type, objectId: oId)
             movement.panelId = panel?.id ?? 0
             movement.panelObjectId = viewRouter.data.objectId!
             movement.panelType = viewRouter.data.type
@@ -104,7 +138,7 @@ struct MovementFormTabBasicView: View {
     @State var dynamicData = Dictionary<String, Any>()
     
     @State private var form = DynamicForm(tabs: [DynamicFormTab]())
-    @State private var options = DynamicFormFieldOptions(table: "movement", op: "")
+    @State private var options = DynamicFormFieldOptions(table: "movement", op: .view)
     @State private var formAssistance = false
     @State private var formInPoint = false
     
@@ -285,7 +319,7 @@ struct MovementFormTabBasicView: View {
     func initForm() {
         options.objectId = movement.objectId
         options.item = movement.id
-        options.op = op
+        options.op = .create
         options.type = visitType.lowercased()
         options.panelType = panel.type
         dynamicData = Utils.jsonDictionary(string: Config.get(key: "P_MOV_FORM_ADDITIONAL").complement ?? "")
@@ -411,10 +445,6 @@ struct MovementBottomNavigationView: View {
     }
     
     func load() {
-        let tabs = MovementUtils.initTabs(data: MovementUtils.tabs(panelType: viewRouter.data.type, visitType: Utils.castString(value: viewRouter.data.options["visitType"]).lowercased()))
-        mainTabs = tabs[0]
-        moreTabs = tabs[1]
-        tabRouter.current = "BASIC"
     }
     
     

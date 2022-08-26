@@ -330,6 +330,7 @@ protocol Panel {
     var visitVirtual: Int? { get set }
     
     var isSelected: Bool { get set }
+    var visitsFeeWasEdited: Bool { get set }
     
     var lastMovement: MovementSummarized? { get set }
     var lastMove: PanelMove? { get set }
@@ -467,6 +468,7 @@ class GenericPanel: Panel, SyncEntity {
     var fields: String = ""
     var cityId: Int = 0
     var isSelected: Bool = false
+    var visitsFeeWasEdited: Bool = false
     var lastMove: PanelMove?
     var lastMovement: MovementSummarized?
     var visitingHours: List<PanelVisitingHour> = List<PanelVisitingHour>()
@@ -508,6 +510,7 @@ class Client: Object, Codable, Panel, SyncEntity, Identifiable {
     @Persisted var zoneId: Int?
     @Persisted var visitFTF: Int?
     @Persisted var visitVirtual: Int?
+    @Persisted var visitsFeeWasEdited: Bool = false
     var isSelected: Bool = false
 
     @Persisted var lastMove: PanelMove?
@@ -523,7 +526,7 @@ class Client: Object, Codable, Panel, SyncEntity, Identifiable {
     @Persisted var contacts: List<PanelContact> = List<PanelContact>()
     
     private enum CodingKeys: String, CodingKey {
-        case id = "id_cliente", idNumber = "nit", name = "nombre", email = "email", createdAt = "created_at", phone = "telefono", fields, brickId = "id_brick", cityId = "id_ciudad", countryId = "id_pais", pricesListId = "id_lista_precios", zoneId = "id_zona", visitFTF = "visit_ftf", visitVirtual = "visit_virtual", lastMove = "last_move", lastMovement = "last_movement", visitingHours = "visiting_hours", locations, categories, contactControl = "contact_control", requests = "general_requests", users = "panel_user", visitDates = "visited_on", contacts
+        case id = "id_cliente", idNumber = "nit", name = "nombre", email = "email", createdAt = "created_at", phone = "telefono", fields, brickId = "id_brick", cityId = "id_ciudad", countryId = "id_pais", pricesListId = "id_lista_precios", zoneId = "id_zona", visitFTF = "visit_ftf", visitVirtual = "visit_virtual", visitsFeeWasEdited = "visits_fee_was_edited", lastMove = "last_move", lastMovement = "last_movement", visitingHours = "visiting_hours", locations, categories, contactControl = "contact_control", requests = "general_requests", users = "panel_user", visitDates = "visited_on", contacts
     }
     
     override init() {
@@ -548,6 +551,7 @@ class Client: Object, Codable, Panel, SyncEntity, Identifiable {
         self.zoneId = try DynamicUtils.intTypeDecoding(container: container, key: .zoneId)
         self.visitFTF = try DynamicUtils.intTypeDecoding(container: container, key: .visitFTF)
         self.visitVirtual = try DynamicUtils.intTypeDecoding(container: container, key: .visitVirtual)
+        self.visitsFeeWasEdited = try DynamicUtils.boolTypeDecoding(container: container, key: .visitsFeeWasEdited)
         self.lastMove = try DynamicUtils.objectTypeDecoding(container: container, key: .lastMove)
         self.lastMovement = try DynamicUtils.objectTypeDecoding(container: container, key: .lastMovement)
         self.visitingHours = try DynamicUtils.listTypeDecoding(container: container, key: .visitingHours)
@@ -597,6 +601,10 @@ class Client: Object, Codable, Panel, SyncEntity, Identifiable {
         return codingKey.rawValue
     }
     
+    static func classKeys() -> [String: String] {
+        return ["id" : "id_cliente", "idNumber" : "nit", "name" : "nombre", "email" : "email", "createdAt" : "created_at", "phone" : "telefono", "fields, brickId" : "id_brick", "cityId" : "id_ciudad", "countryId" : "id_pais", "pricesListId" : "id_lista_precios", "zoneId" : "id_zona", "visitFTF" : "visit_ftf", "visitVirtual" : "visit_virtual", "lastMove" : "last_move", "lastMovement" : "last_movement", "visitingHours" : "visiting_hours", "locations, categories, contactControl" : "contact_control", "requests" : "general_requests", "users" : "panel_user", "visitDates" : "visited_on"]
+    }
+    
 }
 
 class PanelContact: Object, Codable, Panel, SyncEntity, Identifiable {
@@ -621,6 +629,7 @@ class PanelContact: Object, Codable, Panel, SyncEntity, Identifiable {
     @Persisted var zoneId: Int?
     @Persisted var visitFTF: Int?
     @Persisted var visitVirtual: Int?
+    @Persisted var visitsFeeWasEdited: Bool = false
     var isSelected: Bool = false
     
     @Persisted var lastMove: PanelMove?
@@ -651,7 +660,7 @@ class PanelContact: Object, Codable, Panel, SyncEntity, Identifiable {
     @Persisted var specialtyId: Int? = 0
     
     private enum CodingKeys: String, CodingKey {
-        case id = "id_contacto", idNumber = "cedula", name = "nombres", email = "email", createdAt = "created_at", phone = "telefono", fields, brickId = "id_brick", cityId = "id_ciudad", countryId = "id_pais", pricesListId = "id_lista_precios", zoneId = "id_zona", visitFTF = "visit_ftf", visitVirtual = "visit_virtual", lastMove = "last_move", lastMovement = "last_movement", visitingHours = "visiting_hours", locations, categories, contactControl = "contact_control", requests = "general_requests", users = "panel_user", visitDates = "visited_on", panelId = "id_panel", panelType = "tipo_panel", documentType = "tipo_documento", gender = "sexo", position = "cargo", profession = "profesion", address = "direccion", mobilePhone = "celular", joinDate = "fecha_ingreso", ext = "extension", habeasData = "habeas_data", birthDate = "md_cumpleanos", specialtyId = "id_especialidad"
+        case id = "id_contacto", idNumber = "cedula", name = "nombres", email = "email", createdAt = "created_at", phone = "telefono", fields, brickId = "id_brick", cityId = "id_ciudad", countryId = "id_pais", pricesListId = "id_lista_precios", zoneId = "id_zona", visitFTF = "visit_ftf", visitVirtual = "visit_virtual", visitsFeeWasEdited = "visits_fee_was_edited", lastMove = "last_move", lastMovement = "last_movement", visitingHours = "visiting_hours", locations, categories, contactControl = "contact_control", requests = "general_requests", users = "panel_user", visitDates = "visited_on", panelId = "id_panel", panelType = "tipo_panel", documentType = "tipo_documento", gender = "sexo", position = "cargo", profession = "profesion", address = "direccion", mobilePhone = "celular", joinDate = "fecha_ingreso", ext = "extension", habeasData = "habeas_data", birthDate = "md_cumpleanos", specialtyId = "id_especialidad"
     }
     
     override init() {
@@ -675,6 +684,7 @@ class PanelContact: Object, Codable, Panel, SyncEntity, Identifiable {
         self.zoneId = try DynamicUtils.intTypeDecoding(container: container, key: .zoneId)
         self.visitFTF = try DynamicUtils.intTypeDecoding(container: container, key: .visitFTF)
         self.visitVirtual = try DynamicUtils.intTypeDecoding(container: container, key: .visitVirtual)
+        self.visitsFeeWasEdited = try DynamicUtils.boolTypeDecoding(container: container, key: .visitsFeeWasEdited)
         self.lastMove = try DynamicUtils.objectTypeDecoding(container: container, key: .lastMove)
         self.lastMovement = try DynamicUtils.objectTypeDecoding(container: container, key: .lastMovement)
         self.visitingHours = try DynamicUtils.listTypeDecoding(container: container, key: .visitingHours)
@@ -802,6 +812,7 @@ class Doctor: Object, Codable, Panel, SyncEntity, Identifiable {
     @Persisted var zoneId: Int?
     @Persisted var visitFTF: Int?
     @Persisted var visitVirtual: Int?
+    @Persisted var visitsFeeWasEdited: Bool = false
     var isSelected: Bool = false
     
     @Persisted var lastMove: PanelMove?
@@ -846,8 +857,8 @@ class Doctor: Object, Codable, Panel, SyncEntity, Identifiable {
     @Persisted var lines: List<PanelLine> = List<PanelLine>()
     @Persisted var clients: List<PanelRelation> = List<PanelRelation>()
     
-    private enum CodingKeys: String, CodingKey {
-        case id = "id_medico", idNumber = "dni", email = "email", createdAt = "created_at", phone = "telefono_consulta", fields, brickId = "id_brick", cityId = "id_ciudad", countryId = "id_pais", pricesListId = "id_lista_precios", zoneId = "id_zona", visitFTF = "visit_ftf", visitVirtual = "visit_virtual", lastMove = "last_move", lastMovement = "last_movement", visitingHours = "visiting_hours", locations, categories, contactControl = "contact_control", requests = "general_requests", users = "panel_user", visitDates = "visited_on", documentType = "tipo_documento", firstName = "nombres", lastName = "apellidos", score = "puntaje", cdi, code = "codigo", neighborhood = "barrio", institution = "institucion", emailVerified = "email_verificado", hasNoEmail = "no_email", habeasData = "habeas_data", gender = "sexo", hq = "sede", mobilePhone = "telefono_movil", secretary = "nombre_secretaria", birthDate = "md_cumpleanos", birthDateSecretary = "md_cumpleanos_secretaria", joinDate = "fecha_ingreso", prepaidEntities = "entidades_prepagadas", relatedTo = "asoc", formulation = "formulacion", photo = "foto", collegeId = "id_universidad", specialtyId = "id_especialidad", secondSpecialtyId = "id_especialidad_secundaria", styleId = "id_estilo", tvConsent = "tv_consent", clients, lines
+    private enum CodingKeys: String, CodingKey, CaseIterable {
+        case id = "id_medico", idNumber = "dni", email = "email", createdAt = "created_at", phone = "telefono_consulta", fields, brickId = "id_brick", cityId = "id_ciudad", countryId = "id_pais", pricesListId = "id_lista_precios", zoneId = "id_zona", visitFTF = "visit_ftf", visitVirtual = "visit_virtual", visitsFeeWasEdited = "visits_fee_was_edited", lastMove = "last_move", lastMovement = "last_movement", visitingHours = "visiting_hours", locations, categories, contactControl = "contact_control", requests = "general_requests", users = "panel_user", visitDates = "visited_on", documentType = "tipo_documento", firstName = "nombres", lastName = "apellidos", score = "puntaje", cdi, code = "codigo", neighborhood = "barrio", institution = "institucion", emailVerified = "email_verificado", hasNoEmail = "no_email", habeasData = "habeas_data", gender = "sexo", hq = "sede", mobilePhone = "telefono_movil", secretary = "nombre_secretaria", birthDate = "md_cumpleanos", birthDateSecretary = "md_cumpleanos_secretaria", joinDate = "fecha_ingreso", prepaidEntities = "entidades_prepagadas", relatedTo = "asoc", formulation = "formulacion", photo = "foto", collegeId = "id_universidad", specialtyId = "id_especialidad", secondSpecialtyId = "id_especialidad_secundaria", styleId = "id_estilo", tvConsent = "tv_consent", clients, lines
     }
     
     override init() {
@@ -869,8 +880,9 @@ class Doctor: Object, Codable, Panel, SyncEntity, Identifiable {
         self.countryId = try DynamicUtils.intTypeDecoding(container: container, key: .countryId)
         self.pricesListId = try DynamicUtils.intTypeDecoding(container: container, key: .pricesListId)
         self.zoneId = try DynamicUtils.intTypeDecoding(container: container, key: .zoneId)
-        self.visitFTF = try DynamicUtils.intTypeDecoding(container: container, key: .visitFTF)
-        self.visitVirtual = try DynamicUtils.intTypeDecoding(container: container, key: .visitVirtual)
+        self.visitFTF = try DynamicUtils.flagTypeDecoding(container: container, key: .visitFTF)
+        self.visitVirtual = try DynamicUtils.flagTypeDecoding(container: container, key: .visitVirtual)
+        self.visitsFeeWasEdited = try DynamicUtils.boolTypeDecoding(container: container, key: .visitsFeeWasEdited)
         self.lastMove = try DynamicUtils.objectTypeDecoding(container: container, key: .lastMove)
         self.lastMovement = try DynamicUtils.objectTypeDecoding(container: container, key: .lastMovement)
         self.visitingHours = try DynamicUtils.listTypeDecoding(container: container, key: .visitingHours)
@@ -890,8 +902,8 @@ class Doctor: Object, Codable, Panel, SyncEntity, Identifiable {
         self.code = try DynamicUtils.stringTypeDecoding(container: container, key: .code)
         self.neighborhood = try DynamicUtils.stringTypeDecoding(container: container, key: .neighborhood)
         self.institution = try DynamicUtils.stringTypeDecoding(container: container, key: .institution)
-        self.emailVerified = try DynamicUtils.intTypeDecoding(container: container, key: .emailVerified)
-        self.hasNoEmail = try DynamicUtils.intTypeDecoding(container: container, key: .hasNoEmail)
+        self.emailVerified = try DynamicUtils.flagTypeDecoding(container: container, key: .emailVerified)
+        self.hasNoEmail = try DynamicUtils.flagTypeDecoding(container: container, key: .hasNoEmail)
         self.habeasData = try DynamicUtils.stringTypeDecoding(container: container, key: .habeasData)
         self.gender = try DynamicUtils.stringTypeDecoding(container: container, key: .gender)
         self.hq = try DynamicUtils.stringTypeDecoding(container: container, key: .hq)
@@ -927,7 +939,7 @@ class Doctor: Object, Codable, Panel, SyncEntity, Identifiable {
         try container.encode(email, forKey: .email)
         try container.encode(createdAt, forKey: .createdAt)
         try container.encode(phone, forKey: .phone)
-        try container.encode(fields, forKey: .fields)
+        //try container.encode(fields, forKey: .fields)
         try container.encode(brickId, forKey: .brickId)
         try container.encode(cityId, forKey: .cityId)
         try container.encode(countryId, forKey: .countryId)
@@ -935,11 +947,11 @@ class Doctor: Object, Codable, Panel, SyncEntity, Identifiable {
         try container.encode(zoneId, forKey: .zoneId)
         try container.encode(visitFTF, forKey: .visitFTF)
         try container.encode(visitVirtual, forKey: .visitVirtual)
-        try container.encode(visitingHours, forKey: .visitingHours)
-        try container.encode(locations, forKey: .locations)
-        try container.encode(categories, forKey: .categories)
-        try container.encode(contactControl, forKey: .contactControl)
-        try container.encode(requests, forKey: .requests)
+        //try container.encode(visitingHours, forKey: .visitingHours)
+        //try container.encode(locations, forKey: .locations)
+        //try container.encode(categories, forKey: .categories)
+        //try container.encode(contactControl, forKey: .contactControl)
+        //try container.encode(requests, forKey: .requests)
         
         try container.encode(documentType, forKey: .documentType)
         try container.encode(firstName, forKey: .firstName)
@@ -968,14 +980,18 @@ class Doctor: Object, Codable, Panel, SyncEntity, Identifiable {
         try container.encode(styleId, forKey: .styleId)
         try container.encode(tvConsent, forKey: .tvConsent)
         
-        try container.encode(clients, forKey: .clients)
-        try container.encode(lines, forKey: .lines)
+        //try container.encode(clients, forKey: .clients)
+        //try container.encode(lines, forKey: .lines)
     }
     
     static func primaryCodingKey() -> String {
         let codingKey: CodingKeys
         codingKey = .id
         return codingKey.rawValue
+    }
+    
+    static func classKeys() -> [String: String] {
+        return ["id" : "id_medico", "idNumber" : "dni", "email" : "email", "createdAt" : "created_at", "phone" : "telefono_consulta", "fields, brickId" : "id_brick", "cityId" : "id_ciudad", "countryId" : "id_pais", "pricesListId" : "id_lista_precios", "zoneId" : "id_zona", "visitFTF" : "visit_ftf", "visitVirtual" : "visit_virtual", "lastMove" : "last_move", "lastMovement" : "last_movement", "visitingHours" : "visiting_hours", "locations, categories, contactControl" : "contact_control", "requests" : "general_requests", "users" : "panel_user", "visitDates" : "visited_on", "documentType" : "tipo_documento", "firstName" : "nombres", "lastName" : "apellidos", "score" : "puntaje", "cdi, code" : "codigo", "neighborhood" : "barrio", "institution" : "institucion", "emailVerified" : "email_verificado", "hasNoEmail" : "no_email", "habeasData" : "habeas_data", "gender" : "sexo", "hq" : "sede", "mobilePhone" : "telefono_movil", "secretary" : "nombre_secretaria", "birthDate" : "md_cumpleanos", "birthDateSecretary" : "md_cumpleanos_secretaria", "joinDate" : "fecha_ingreso", "prepaidEntities" : "entidades_prepagadas", "relatedTo" : "asoc", "formulation" : "formulacion", "photo" : "foto", "collegeId" : "id_universidad", "specialtyId" : "id_especialidad", "secondSpecialtyId" : "id_especialidad_secundaria", "styleId" : "id_estilo", "tvConsent" : "tv_consent"]
     }
     
     func specialtyName(realm: Realm) -> String {
@@ -1203,6 +1219,7 @@ class Patient: Object, Codable, Panel, SyncEntity, Identifiable {
     @Persisted var zoneId: Int?
     @Persisted var visitFTF: Int?
     @Persisted var visitVirtual: Int?
+    @Persisted var visitsFeeWasEdited: Bool = false
     var isSelected: Bool = false
     
     @Persisted var lastMove: PanelMove?
@@ -1223,7 +1240,7 @@ class Patient: Object, Codable, Panel, SyncEntity, Identifiable {
     @Persisted var doctors: List<PanelRelation> = List<PanelRelation>()
     
     private enum CodingKeys: String, CodingKey {
-        case id = "id_paciente", idNumber = "dni", email = "email", createdAt = "created_at", phone = "telefono", fields, brickId = "id_brick", cityId = "id_ciudad", countryId = "id_pais", pricesListId = "id_lista_precios", zoneId = "id_zona", visitFTF = "visit_ftf", visitVirtual = "visit_virtual", lastMove = "last_move", lastMovement = "last_movement", visitingHours = "visiting_hours", locations, categories, contactControl = "contact_control", requests = "general_requests", users = "panel_user", visitDates = "visited_on", firstName = "nombres", lastName = "apellidos", habeasData = "habeas_data", clients, doctors
+        case id = "id_paciente", idNumber = "dni", email = "email", createdAt = "created_at", phone = "telefono", fields, brickId = "id_brick", cityId = "id_ciudad", countryId = "id_pais", pricesListId = "id_lista_precios", zoneId = "id_zona", visitFTF = "visit_ftf", visitVirtual = "visit_virtual", visitsFeeWasEdited = "visits_fee_was_edited", lastMove = "last_move", lastMovement = "last_movement", visitingHours = "visiting_hours", locations, categories, contactControl = "contact_control", requests = "general_requests", users = "panel_user", visitDates = "visited_on", firstName = "nombres", lastName = "apellidos", habeasData = "habeas_data", clients, doctors
     }
     
     override init() {
@@ -1247,6 +1264,7 @@ class Patient: Object, Codable, Panel, SyncEntity, Identifiable {
         self.zoneId = try DynamicUtils.intTypeDecoding(container: container, key: .zoneId)
         self.visitFTF = try DynamicUtils.intTypeDecoding(container: container, key: .visitFTF)
         self.visitVirtual = try DynamicUtils.intTypeDecoding(container: container, key: .visitVirtual)
+        self.visitsFeeWasEdited = try DynamicUtils.boolTypeDecoding(container: container, key: .visitsFeeWasEdited)
         self.lastMove = try DynamicUtils.objectTypeDecoding(container: container, key: .lastMove)
         self.lastMovement = try DynamicUtils.objectTypeDecoding(container: container, key: .lastMovement)
         self.visitingHours = try DynamicUtils.listTypeDecoding(container: container, key: .visitingHours)
@@ -1304,6 +1322,10 @@ class Patient: Object, Codable, Panel, SyncEntity, Identifiable {
         codingKey = .id
         return codingKey.rawValue
     }
+    
+    static func classKeys() -> [String: String] {
+        return ["id" : "id_paciente", "idNumber" : "dni", "email" : "email", "createdAt" : "created_at", "phone" : "telefono", "fields, brickId" : "id_brick", "cityId" : "id_ciudad", "countryId" : "id_pais", "pricesListId" : "id_lista_precios", "zoneId" : "id_zona", "visitFTF" : "visit_ftf", "visitVirtual" : "visit_virtual", "lastMove" : "last_move", "lastMovement" : "last_movement", "visitingHours" : "visiting_hours", "locations, categories, contactControl" : "contact_control", "requests" : "general_requests", "users" : "panel_user", "visitDates" : "visited_on", "firstName" : "nombres", "lastName" : "apellidos", "habeasData" : "habeas_data"]
+    }
 }
 
 class Pharmacy: Object, Codable, Panel, SyncEntity, Identifiable {
@@ -1328,6 +1350,7 @@ class Pharmacy: Object, Codable, Panel, SyncEntity, Identifiable {
     @Persisted var zoneId: Int?
     @Persisted var visitFTF: Int?
     @Persisted var visitVirtual: Int?
+    @Persisted var visitsFeeWasEdited: Bool = false
     var isSelected: Bool = false
     
     @Persisted var lastMove: PanelMove?
@@ -1354,7 +1377,7 @@ class Pharmacy: Object, Codable, Panel, SyncEntity, Identifiable {
     @Persisted var contacts: List<PanelContact> = List<PanelContact>()
     
     private enum CodingKeys: String, CodingKey {
-        case id = "id_detfarmacia", idNumber = "nit", name = "nombre", email = "email", createdAt = "created_at", phone = "telefono", fields, brickId = "id_brick", cityId = "id_ciudad", countryId = "id_pais", pricesListId = "id_lista_precios", zoneId = "id_zona", visitFTF = "visit_ftf", visitVirtual = "visit_virtual", lastMove = "last_move", lastMovement = "last_movement", visitingHours = "visiting_hours", locations, categories, contactControl = "contact_control", requests = "general_requests", users = "panel_user", visitDates = "visited_on", code = "cod_farma", neighborhood = "barrio", openDate = "fecha_apertura", relatedTo = "asociado", profile = "perfil", observations = "observ", pharmacyChainId = "id_genfarmacia", pharmacyTypeId = "id_tipo_farmacia", lines, contacts
+        case id = "id_detfarmacia", idNumber = "nit", name = "nombre", email = "email", createdAt = "created_at", phone = "telefono", fields, brickId = "id_brick", cityId = "id_ciudad", countryId = "id_pais", pricesListId = "id_lista_precios", zoneId = "id_zona", visitFTF = "visit_ftf", visitVirtual = "visit_virtual", visitsFeeWasEdited = "visits_fee_was_edited", lastMove = "last_move", lastMovement = "last_movement", visitingHours = "visiting_hours", locations, categories, contactControl = "contact_control", requests = "general_requests", users = "panel_user", visitDates = "visited_on", code = "cod_farma", neighborhood = "barrio", openDate = "fecha_apertura", relatedTo = "asociado", profile = "perfil", observations = "observ", pharmacyChainId = "id_genfarmacia", pharmacyTypeId = "id_tipo_farmacia", lines, contacts
     }
     
     override init() {
@@ -1379,6 +1402,7 @@ class Pharmacy: Object, Codable, Panel, SyncEntity, Identifiable {
         self.zoneId = try DynamicUtils.intTypeDecoding(container: container, key: .zoneId)
         self.visitFTF = try DynamicUtils.intTypeDecoding(container: container, key: .visitFTF)
         self.visitVirtual = try DynamicUtils.intTypeDecoding(container: container, key: .visitVirtual)
+        self.visitsFeeWasEdited = try DynamicUtils.boolTypeDecoding(container: container, key: .visitsFeeWasEdited)
         self.lastMove = try DynamicUtils.objectTypeDecoding(container: container, key: .lastMove)
         self.lastMovement = try DynamicUtils.objectTypeDecoding(container: container, key: .lastMovement)
         self.visitingHours = try DynamicUtils.listTypeDecoding(container: container, key: .visitingHours)
@@ -1449,6 +1473,10 @@ class Pharmacy: Object, Codable, Panel, SyncEntity, Identifiable {
         return codingKey.rawValue
     }
     
+    static func classKeys() -> [String: String] {
+        return ["id" : "id_detfarmacia", "idNumber" : "nit", "name" : "nombre", "email" : "email", "createdAt" : "created_at", "phone" : "telefono", "fields, brickId" : "id_brick", "cityId" : "id_ciudad", "countryId" : "id_pais", "pricesListId" : "id_lista_precios", "zoneId" : "id_zona", "visitFTF" : "visit_ftf", "visitVirtual" : "visit_virtual", "visitsFeeWasEdited" : "visits_fee_was_edited", "lastMove" : "last_move", "lastMovement" : "last_movement", "visitingHours" : "visiting_hours", "locations, categories, contactControl" : "contact_control", "requests" : "general_requests", "users" : "panel_user", "visitDates" : "visited_on", "code" : "cod_farma", "neighborhood" : "barrio", "openDate" : "fecha_apertura", "relatedTo" : "asociado", "profile" : "perfil", "observations" : "observ", "pharmacyChainId" : "id_genfarmacia", "pharmacyTypeId" : "id_tipo_farmacia"]
+    }
+    
     func pharmacyTypeName(realm: Realm) -> String {
         if let pharmacyType = PharmacyTypeDao(realm: realm).by(id: pharmacyTypeId) {
             return pharmacyType.name
@@ -1487,6 +1515,7 @@ class PotentialProfessional: Object, Codable, Panel, SyncEntity, Identifiable {
     @Persisted var zoneId: Int?
     @Persisted var visitFTF: Int?
     @Persisted var visitVirtual: Int?
+    @Persisted var visitsFeeWasEdited: Bool = false
     var isSelected: Bool = false
     
     @Persisted var lastMove: PanelMove?
@@ -1513,7 +1542,7 @@ class PotentialProfessional: Object, Codable, Panel, SyncEntity, Identifiable {
     var zone: Zone?
     
     private enum CodingKeys: String, CodingKey {
-        case id = "id", idNumber = "cedula", name = "nombre", email = "email", createdAt = "created_at", phone = "telefono", fields, brickId = "id_brick", cityId = "id_ciudad", countryId = "id_pais", pricesListId = "id_lista_precios", zoneId = "id_zona", visitFTF = "visit_ftf", visitVirtual = "visit_virtual", lastMove = "last_move", lastMovement = "last_movement", visitingHours = "visiting_hours", locations, categories, contactControl = "contact_control", requests = "general_requests", users = "panel_user", visitDates = "visited_on", contacts, cityName = "ciudad", address = "direccion", specialtyName = "especialidad", joinDate = "fecha_ingre", observations = "observaciones"
+        case id = "id", idNumber = "cedula", name = "nombre", email = "email", createdAt = "created_at", phone = "telefono", fields, brickId = "id_brick", cityId = "id_ciudad", countryId = "id_pais", pricesListId = "id_lista_precios", zoneId = "id_zona", visitFTF = "visit_ftf", visitVirtual = "visit_virtual", visitsFeeWasEdited = "visits_fee_was_edited", lastMove = "last_move", lastMovement = "last_movement", visitingHours = "visiting_hours", locations, categories, contactControl = "contact_control", requests = "general_requests", users = "panel_user", visitDates = "visited_on", contacts, cityName = "ciudad", address = "direccion", specialtyName = "especialidad", joinDate = "fecha_ingre", observations = "observaciones"
     }
     
     override init() {
@@ -1538,6 +1567,7 @@ class PotentialProfessional: Object, Codable, Panel, SyncEntity, Identifiable {
         self.zoneId = try DynamicUtils.intTypeDecoding(container: container, key: .zoneId)
         self.visitFTF = try DynamicUtils.intTypeDecoding(container: container, key: .visitFTF)
         self.visitVirtual = try DynamicUtils.intTypeDecoding(container: container, key: .visitVirtual)
+        self.visitsFeeWasEdited = try DynamicUtils.boolTypeDecoding(container: container, key: .visitsFeeWasEdited)
         self.lastMove = try DynamicUtils.objectTypeDecoding(container: container, key: .lastMove)
         self.lastMovement = try DynamicUtils.objectTypeDecoding(container: container, key: .lastMovement)
         self.visitingHours = try DynamicUtils.listTypeDecoding(container: container, key: .visitingHours)
@@ -1593,6 +1623,10 @@ class PotentialProfessional: Object, Codable, Panel, SyncEntity, Identifiable {
         let codingKey: CodingKeys
         codingKey = .id
         return codingKey.rawValue
+    }
+    
+    static func classKeys() -> [String: String] {
+        return ["id" : "id", "idNumber" : "cedula", "name" : "nombre", "email" : "email", "createdAt" : "created_at", "phone" : "telefono", "fields, brickId" : "id_brick", "cityId" : "id_ciudad", "countryId" : "id_pais", "pricesListId" : "id_lista_precios", "zoneId" : "id_zona", "visitFTF" : "visit_ftf", "visitVirtual" : "visit_virtual", "lastMove" : "last_move", "lastMovement" : "last_movement", "visitingHours" : "visiting_hours", "locations, categories, contactControl" : "contact_control", "requests" : "general_requests", "users" : "panel_user", "visitDates" : "visited_on", "contacts, cityName" : "ciudad", "address" : "direccion", "specialtyName" : "especialidad", "joinDate" : "fecha_ingre", "observations" : "observaciones"]
     }
 }
 
@@ -1857,7 +1891,7 @@ class PanelVisitingHour: Object, Codable {
 }
 
 class PanelMove: Object, Codable {
-    @Persisted(primaryKey: true) var id: Int = 0
+    @Persisted var id: Int = 0
     @Persisted var userForm: Int = 0
     @Persisted var userTo: Int = 0
     @Persisted var date: String = ""
@@ -1868,7 +1902,7 @@ class PanelMove: Object, Codable {
 }
 
 class PanelCategoryPanel: Object, Codable {
-    @Persisted(primaryKey: true) var id: Int = 0
+    @Persisted var id: Int = 0
     @Persisted var categoryId: Int = 0
     
     private enum CodingKeys: String, CodingKey {
