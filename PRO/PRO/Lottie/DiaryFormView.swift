@@ -20,11 +20,9 @@ class DiaryActivityModel: ObservableObject {
 class DiaryItemWrapper: ObservableObject, Identifiable {
     var id = UUID()
     @Published var time: Date
-    @Published var diaries: [Diary]
     
-    init(time: Date, diaries: [Diary] = []) {
+    init(time: Date) {
         self.time = time
-        self.diaries = diaries
     }
     
 }
@@ -59,8 +57,8 @@ struct DiaryFormView: View {
     @State private var modalPanelClient = false
     @State private var modalPanelPatient = false
     
+    @State private var diaries: [Diary] = []
     @State private var predefinedTime = ""
-    @State private var isRefreshing = false
     
     var body: some View {
         VStack {
@@ -144,12 +142,10 @@ struct DiaryFormView: View {
                     }
                     ZStack(alignment: .bottom) {
                         ScrollView {
-                            if !isRefreshing {
-                                ForEach($itemWrappers) { $iw in
-                                    DiaryFormWrapperItemView(realm: realm, iw: $iw, onRefreshRequested: refresh) { diw in
-                                        predefinedTime = Utils.hourFormat(date: diw.time)
-                                        modalPanelType = true
-                                    }
+                            ForEach($itemWrappers) { $iw in
+                                DiaryFormWrapperItemView(realm: realm, iw: $iw, dateDiaries: $diaries, interval: $interval, onRefreshRequested: refresh) { diw in
+                                    predefinedTime = Utils.hourFormat(date: diw.time)
+                                    modalPanelType = true
                                 }
                             }
                         }
@@ -216,7 +212,10 @@ struct DiaryFormView: View {
             }
         }
         .partialSheet(isPresented: $modalActivity) {
-            DiaryActivityFormView()
+            DiaryActivityFormView {
+                modalActivity = false
+                refresh()
+            }
         }
         .partialSheet(isPresented: $modalMainMenu) {
             VStack(spacing: 20) {
@@ -323,8 +322,6 @@ struct DiaryFormView: View {
         }
         .partialSheet(isPresented: $modalPanelType) {
             PanelTypeSelectView(types: ["M", "F", "C", "P", "G"]) { type in
-                let diaries = itemWrappers.map { $0.diaries }.compactMap { $0 }.flatMap { $0 }
-                
                 slDoctors = diaries.filter { $0.panelType == "M" }.map { $0.panelObjectId }
                 slPharmacies = diaries.filter { $0.panelType == "F" }.map { $0.panelObjectId }
                 slClients = diaries.filter { $0.panelType == "C" }.map { $0.panelObjectId }
@@ -397,7 +394,6 @@ struct DiaryFormView: View {
     }
     
     func append(panelType: String) {
-        let diaries = itemWrappers.map { $0.diaries }.compactMap { $0 }.flatMap { $0 }
         switch panelType {
             case "F":
                 slPharmacies.forEach { oId in
@@ -445,10 +441,10 @@ struct DiaryFormView: View {
     func appendToEmpty(diary: Diary) {
         if predefinedTime.isEmpty {
             if let iw = itemWrappers.first (where: { diw in
-                diw.diaries.isEmpty
+                !iwHasDiaries(iw: diw)
             }) {
                 diary.hourStart = Utils.hourFormat(date: iw.time)
-                iw.diaries.append(Diary())
+                diaries.append(diary)
             } else {
                 diary.hourStart = Utils.hourFormat(date: itemWrappers.last?.time ?? startTime)
             }
@@ -459,17 +455,16 @@ struct DiaryFormView: View {
     }
     
     func refresh() {
-        let diaries = DiaryDao(realm: realm).by(date: date)
-        itemWrappers.forEach { diw in
-            let timeEnd = diw.time.addingTimeInterval(TimeInterval(Double(interval) * 60.0))
-            diw.diaries.removeAll()
-            diw.diaries.append(contentsOf: diaries.filter({ d in
-                TimeUtils.hourTo(time: d.hourStart) >= TimeUtils.hourTo(time: diw.time) && TimeUtils.hourTo(time: d.hourStart) < TimeUtils.hourTo(time: timeEnd)
-            }))
+        diaries.removeAll()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
+            diaries.append(contentsOf: DiaryDao(realm: realm).by(date: date))
         }
-        isRefreshing = true
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            self.isRefreshing = false
+    }
+    
+    func iwHasDiaries(iw: DiaryItemWrapper) -> Bool {
+        let timeEnd = iw.time.addingTimeInterval(TimeInterval(Double(interval) * 60.0))
+        return diaries.contains { d in
+            TimeUtils.hourTo(time: d.hourStart) >= TimeUtils.hourTo(time: iw.time) && TimeUtils.hourTo(time: d.hourStart) < TimeUtils.hourTo(time: timeEnd)
         }
     }
     
@@ -478,8 +473,12 @@ struct DiaryFormView: View {
 struct DiaryFormWrapperItemView: View {
     var realm: Realm
     @Binding var iw: DiaryItemWrapper
+    @Binding var dateDiaries: [Diary]
+    @Binding var interval: Int
     let onRefreshRequested: () -> Void
     let onItemTapped: (_ diw: DiaryItemWrapper) -> Void
+    
+    @State private var diaries: [Diary] = []
     
     var body: some View {
         VStack {
@@ -492,7 +491,7 @@ struct DiaryFormWrapperItemView: View {
                 }
                 .frame(maxWidth: .infinity)
             }
-            if iw.diaries.isEmpty {
+            if diaries.isEmpty {
                 Button {
                     onItemTapped(iw)
                 } label: {
@@ -502,21 +501,40 @@ struct DiaryFormWrapperItemView: View {
                     .frame(maxWidth: .infinity, minHeight: 60)
                 }
             }
-            ForEach(iw.diaries, id: \.objectId) { diary in
-                DiaryPanelItemView(realm: realm, diary: diary)
-                    .onDrag {
-                        let provider = NSItemProvider(object: diary.objectId.stringValue as NSString)
-                        return provider
+            ForEach($diaries, id: \.objectId) { $diary in
+                VStack {
+                    switch diary.type {
+                        case "A":
+                            DiaryActivityItemView(diary: diary)
+                        default:
+                            DiaryPanelItemView(realm: realm, diary: diary)
                     }
+                }
+                .onDrag {
+                    let provider = NSItemProvider(object: diary.objectId.stringValue as NSString)
+                    return provider
+                }
             }
         }
         .onDrop(of: [UTType.text], delegate: DiaryDropDelegate(iw: iw, onDropPerformed: onRefreshRequested))
+        .onChange(of: dateDiaries) { n in
+            let timeEnd = iw.time.addingTimeInterval(TimeInterval(Double(interval) * 60.0))
+            diaries.removeAll()
+            diaries.append(contentsOf: dateDiaries.filter({ d in
+                TimeUtils.hourTo(time: d.hourStart) >= TimeUtils.hourTo(time: iw.time) && TimeUtils.hourTo(time: d.hourStart) < TimeUtils.hourTo(time: timeEnd)
+            }))
+        }
     }
     
 }
 
 struct DiaryActivityFormView: View {
+    let onSaveDone: () -> Void
+    
     @State private var model: DiaryActivityModel = DiaryActivityModel()
+    @State private var hourFrom: Date = Date()
+    
+    let realm = try! Realm()
     
     var body: some View {
         VStack {
@@ -537,8 +555,11 @@ struct DiaryActivityFormView: View {
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .foregroundColor(.cTextMedium)
                                 .font(.system(size: 13))
-                            DatePicker("", selection: $model.hourFrom, displayedComponents: [.hourAndMinute])
+                            DatePicker("", selection: $hourFrom, displayedComponents: [.hourAndMinute])
                                 .fixedSize()
+                                .onChange(of: hourFrom) { newValue in
+                                    model.hourFrom = newValue
+                                }
                         }
                         .frame(maxWidth: .infinity)
                         VStack{
@@ -546,7 +567,7 @@ struct DiaryActivityFormView: View {
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .foregroundColor(.cTextMedium)
                                 .font(.system(size: 13))
-                            DatePicker("", selection: $model.hourTo, in: model.hourFrom..., displayedComponents: [.hourAndMinute])
+                            DatePicker("", selection: $model.hourTo, in: hourFrom..., displayedComponents: [.hourAndMinute])
                                 .fixedSize()
                         }
                         .frame(maxWidth: .infinity)
@@ -569,7 +590,7 @@ struct DiaryActivityFormView: View {
                 }
             }
             Button(action: {
-                
+                validate()
             }) {
                 Text("envSave")
                     .foregroundColor(.cTextHigh)
@@ -578,6 +599,25 @@ struct DiaryActivityFormView: View {
             .frame(maxWidth: .infinity, minHeight: 44, maxHeight: 44, alignment: .center)
         }
         .padding(.horizontal, Globals.UI_SC_PADDING_HORIZONTAL)
+    }
+    
+    func validate() {
+        if model.comment.isEmpty {
+            return
+        }
+        save()
+    }
+    
+    func save() {
+        let diary = Diary()
+        diary.date = Utils.dateFormat(date: model.date)
+        diary.type = "A"
+        diary.transactionType = "CREATE"
+        diary.hourStart = Utils.hourFormat(date: model.hourFrom)
+        diary.hourEnd = Utils.hourFormat(date: model.hourTo)
+        diary.content = model.comment
+        DiaryDao(realm: realm).store(diary: diary)
+        onSaveDone()
     }
     
 }
@@ -594,7 +634,6 @@ struct DiaryDropDelegate: DropDelegate {
     }
     
     func performDrop(info: DropInfo) -> Bool {
-        print(info.itemProviders(for: [UTType.text]))
         if let item = info.itemProviders(for: ["public.text"]).first {
             item.loadItem(forTypeIdentifier: "public.text", options: nil) { text, err in
                 if let data = text as? Data {
@@ -620,6 +659,41 @@ struct DiaryDropDelegate: DropDelegate {
         }
         return true
     }
+}
+
+struct DiaryActivityItemView: View {
+    let diary: Diary
+    
+    var body: some View {
+        VStack {
+            HStack {
+                VStack {
+                    Image("ic-activity")
+                        .resizable()
+                        .scaledToFit()
+                        .foregroundColor(.cPanelActivity)
+                        .frame(width: 34, height: 34, alignment: .center)
+                        .padding(4)
+                }
+                .frame(height: 40)
+                VStack {
+                    Text(diary.content ?? "--")
+                        .fontWeight(.bold)
+                        .font(.system(size: 15))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .foregroundColor(.cTextHigh)
+                        .lineLimit(1)
+                    Text("\(diary.hourStart) - \(diary.hourEnd ?? "--")")
+                        .font(.system(size: 14))
+                        .foregroundColor(.cTextMedium)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .frame(maxWidth: .infinity)
+            }
+        }
+        .contentShape(Rectangle())
+    }
+    
 }
 
 struct DiaryPanelItemView: View {
