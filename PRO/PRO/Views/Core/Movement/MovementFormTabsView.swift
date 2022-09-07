@@ -11,620 +11,499 @@ import RealmSwift
 import AlertToast
 import Combine
 
-struct MovementFormTabPromotedView: View {
-    
-    @Binding var selected: [String]
-    @State var selectedBridge = [String]()
-    @State var products = [Product]()
-    @State private var isEditable = false
-    @State private var isSheet = false
-    let valueNameBrand: Int = Config.get(key: "MOV_PROMOTED_ONLY_BRAND").value
+struct MovementFormTabMaterialView: View {
+    var realm: Realm
+    @Binding var materials: [AdvertisingMaterialDeliveryMaterial]
     
     var body: some View {
-        VStack{
-            Button(action: {
-                isSheet = true
-            }, label: {
-                HStack{
-                    Spacer()
-                    Text(NSLocalizedString("envPromotedProducts", comment: ""))
-                    Image("ic-plus-circle")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 35)
-                    Spacer()
+        MaterialDeliveryFormWrapperView(realm: realm, details: $materials)
+    }
+    
+}
+
+struct MovementFormTabPromotedView: View {
+    var realm: Realm
+    var isEditable: Bool
+    var extraData: [String: Any]
+    @Binding var selected: [String]
+    
+    @State private var modalOpen = false
+    
+    let groupByBrand: Bool = Config.get(key: "MOV_PROMOTED_ONLY_BRAND").value == 1
+    
+    var body: some View {
+        VStack {
+            if isEditable {
+                CustomHeaderButtonIconView(label: "envPromotedProducts") {
+                    modalOpen = true
                 }
-                .padding(10)
-                .foregroundColor(.cTextMedium)
-            })
+            }
             List {
-                ForEach(products, id: \.self) { item in
-                    //Text((valueNameBrand == 0) ? item.name ?? "": item.brand ?? "")
+                ForEach(selected, id: \.self) { item in
+                    if groupByBrand {
+                        if let brand = ProductBrandDao(realm: realm).by(id: item) {
+                            Text(brand.name.capitalized)
+                                .foregroundColor(.cTextHigh)
+                                .multilineTextAlignment(.leading)
+                        }
+                    } else {
+                        if let product = ProductDao(realm: realm).by(id: item) {
+                            Text(product.name.capitalized)
+                                .foregroundColor(.cTextHigh)
+                                .multilineTextAlignment(.leading)
+                        }
+                    }
                 }
                 .onMove(perform: move)
                 .onDelete(perform: self.delete)
                 .foregroundColor(.cTextMedium)
-                .onLongPressGesture {
-                    withAnimation {
-                        self.isEditable = true
-                    }
-                }
             }
-            .environment(\.editMode, isEditable ? .constant(.active) : .constant(.inactive))
+            .environment(\.editMode, .constant(.active))
             .buttonStyle(PlainButtonStyle())
             
-        }.sheet(isPresented: $isSheet, content: {
-            CustomDialogPicker(onSelectionDone: onSelectionDone, selected: $selectedBridge, key: (valueNameBrand == 0) ? "PRODUCT-PROMOTED": "PRODUCT-BY-BRAND", multiple: true, isSheet: true)
-        })
-        .onAppear {
-            initView()
         }
-        
-    }
-    
-    func initView(){
-        self.selected.forEach{ id in
-            if let product = ProductDao(realm: try! Realm()).by(id: id){
-                if !validate(product: product){
-                    products.append(product)
-                }
+        .sheet(isPresented: $modalOpen) {
+            DialogSourcePickerView(selected: $selected, key: groupByBrand ? "PRODUCT-BY-BRAND": "PRODUCT-PROMOTED", multiple: true, title: (groupByBrand ? "envBrand": "envProduct").localized(), extraData: extraData) { selected in
+                onSelectionDone(selected)
             }
         }
     }
     
     func onSelectionDone(_ selected: [String]) {
-        isSheet = false
-        self.selectedBridge.forEach{ id in
-            if let product = ProductDao(realm: try! Realm()).by(id: id){
-                if !validate(product: product){
-                    products.append(product)
-                    self.selected.append(id)
-                }
-            }
-        }
+        modalOpen = false
     }
     
     func move(from source: IndexSet, to destination: Int) {
-        self.products.move(fromOffsets: source, toOffset: destination)
         self.selected.move(fromOffsets: source, toOffset: destination)
-        withAnimation {
-            isEditable = false
-        }
     }
     
     func delete(at offsets: IndexSet) {
-        withAnimation{
-            var its: Int = 0
-            offsets.forEach{ it in
-                its = it
-            }
-            selected.remove(at: its)
-            self.products.remove(atOffsets: offsets)
+        withAnimation {
+            selected.remove(atOffsets: offsets)
         }
     }
     
-    func validate(product: Product) -> Bool {
-        var exists = false
-        for i in products {
-            if i.id == product.id {
-                exists = true
-                break
-            }
-        }
-        return exists
-    }
 }
 
 struct MovementFormTabStockView: View {
+    var realm: Realm
+    @Binding var items: [MovementProductStockModel]
     
-    @Binding var selected: RealmSwift.List<MovementProductStock>
-    
-    @State private var isSheet = false
-    @State private var idsSelected = [String]()
+    @State private var selected: [String] = []
+    @State private var modalOpen = false
     
     var body: some View {
         VStack {
-            Button(action: {
-                isSheet = true
-            }, label: {
-                HStack{
-                    Spacer()
-                    Text(NSLocalizedString("envStock", comment: ""))
-                    Image("ic-plus-circle")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 35)
-                    Spacer()
-                }
-                .foregroundColor(.cTextMedium)
-                .padding(10)
-            })
-            
-            List {
-                ForEach(selected.indices, id: \.self) { index in
-                    CardStock(item: $selected[index])
+            CustomHeaderButtonIconView(label: "envStock") {
+                modalOpen = true
+            }
+            ScrollView {
+                ForEach($items) { $item in
+                    MovementFormTabStockItemView(realm: realm, item: $item) {
+                        delete(detail: item)
+                    }
                 }
             }
-            .buttonStyle(PlainButtonStyle())
-        }.sheet(isPresented: $isSheet, content: {
-            CustomDialogPicker(onSelectionDone: onSelectionDone, selected: $idsSelected, key: "PRODUCT-PROMOTED", multiple: true, isSheet: true)
-        })
-        
-    }
-    
-    func onSelectionDone(_ selected: [String]) {
-        isSheet = false
-        self.idsSelected.forEach{ id in
-            var exist = false
-            for i in self.selected {
-                if String(i.id) == id{
-                    exist = true
-                    break
-                }
-            }
-            if !exist {
-                let movementProductStock = MovementProductStock()
-                movementProductStock.id = Int(id) ?? 0
-                self.selected.append(movementProductStock)
+        }
+        .sheet(isPresented: $modalOpen) {
+            DialogSourcePickerView(selected: $selected, key: "PRODUCT-STOCK", multiple: true, title: "envProduct".localized()) { selected in
+                onSelectionDone(selected)
             }
         }
     }
     
+    func onSelectionDone(_ selected: [String]) {
+        modalOpen = false
+        selected.forEach { s in
+            if items.filter({ d in
+                d.productId == Utils.castInt(value: s)
+            }).count <= 0 {
+                if let product = ProductDao(realm: realm).by(id: s) {
+                    let item = MovementProductStockModel()
+                    item.productId = product.id
+                    items.append(item)
+                }
+            }
+        }
+    }
+    
+    private func delete(detail: MovementProductStockModel) {
+        selected = selected.filter { $0 != String(detail.productId) }
+        items = items.filter { $0.productId != detail.productId }
+    }
+    
 }
 
-struct CardStock: View {
-    @Binding var item: MovementProductStock
+struct MovementFormTabStockItemView: View {
+    var realm: Realm
+    @Binding var item: MovementProductStockModel
+    let onDeleteTapped: () -> Void
     
-    @State var configData = Config.get(key: "MOV_STOCK_NE_REASONS").complement ?? ""
-    @State private var showReason = false
-    @State private var isSheet = false
     @State private var selected = [String]()
-    @State private var reason = ""
+    @State private var dataReasons = Config.get(key: "MOV_STOCK_NE_REASONS").complement ?? "{}"
+    @State private var modalReasonOpen = false
+    
     var body: some View {
-        VStack{
-            if let product = ProductDao(realm: try! Realm()).by(id: String(item.id)){
-                Toggle(isOn: $showReason){
-                    Text(product.name )
+        let product = ProductDao(realm: realm).by(id: item.productId)
+        VStack {
+            CustomCard {
+                HStack {
+                    Text((product?.name ?? "").capitalized)
+                        .foregroundColor(.cTextHigh)
+                        .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
+                        .lineLimit(2)
+                    Button(action: {
+                        onDeleteTapped()
+                    }) {
+                        Image("ic-delete")
+                            .resizable()
+                            .foregroundColor(.cDanger)
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 22, height: 22, alignment: .center)
+                            .padding(8)
+                    }
+                    .frame(width: 44, height: 44, alignment: .center)
+                }
+                Toggle(isOn: $item.hasStock) {
+                    Text("envPresenceAtPointOfSale")
+                        .foregroundColor(.cTextHigh)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                if item.hasStock {
+                    Text("envQuantity")
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .foregroundColor(.cTextMedium)
-                        .font(.system(size: 18))
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                .onChange(of: showReason, perform: { value in
-                    item.hasStock = value
-                    item.noStockReason = (value) ? "" : item.noStockReason
-                })
-                .toggleStyle(SwitchToggleStyle(tint: .cBlueDark))
-                
-                
-                if showReason {
-                    TextField("", text: Binding(
-                        get: { String(item.quantity) },
-                        set: { item.quantity = Float($0) ?? 0 }
-                    ))
-                    .cornerRadius(CGFloat(4))
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    TextField("envQuantity", value: $item.quantity, formatter: NumberFormatter())
+                        .cornerRadius(CGFloat(4))
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
                 } else {
                     Button(action: {
-                        isSheet = true
-                    }) {
+                        modalReasonOpen = true
+                    }, label: {
                         HStack{
                             VStack{
                                 Text(NSLocalizedString("envReason", comment: ""))
                                     .frame(maxWidth: .infinity, alignment: .leading)
-                                    .foregroundColor(.cTextMedium)
+                                    .foregroundColor(item.noStockReason.isEmpty ? Color.cDanger : .cTextMedium)
                                     .font(.system(size: 14))
-                                Text( (item.noStockReason == "") ? NSLocalizedString("envChoose", comment: ""): reason)
+                                Text(DynamicUtils.jsonValue(data: dataReasons, selected: selected))
                                     .frame(maxWidth: .infinity, alignment: .leading)
-                                    .foregroundColor(.cTextMedium)
-                                    .font(.system(size: 14))
+                                    .foregroundColor(.cTextHigh)
+                                    .font(.system(size: 16))
                             }
                             Spacer()
                             Image("ic-arrow-expand-more")
                                 .resizable()
                                 .scaledToFit()
                                 .frame(width: 35)
-                                .foregroundColor(.cTextMedium)
+                                .foregroundColor(.cIcon)
                         }
-                        .padding(10)
-                        .background(Color.white)
-                        .frame(alignment: Alignment.center)
-                        .clipped()
-                        .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
-                    }
+                        .sheet(isPresented: $modalReasonOpen) {
+                            DialogPlainPickerView(selected: $selected, data: dataReasons, multiple: false, title: "envReason".localized(), onSelectionDone: onSelectionDone)
+                        }
+                        .padding(.vertical, 10)
+                    })
                 }
-                
             }
         }
-        .partialSheet(isPresented: $isSheet) {
-            SourceDynamicDialogPicker(onSelectionDone: onSelectionDone, selected: $selected, data: configData, multiple: false, title: "Titulo", isSheet: true)
-        }
-        .onAppear{initCard()}
-        .padding(7)
-        .background(Color.white)
-        .frame(alignment: Alignment.center)
-        .clipped()
-        .shadow(color: Color.gray, radius: 4, x: 0, y: 0)
-    }
-    
-    func initCard(){
-        
-        let dynamicData = Utils.jsonObject(string: configData)
-        dynamicData.forEach{ it in
-            if it["id"] as! String == item.noStockReason{
-                reason = it["label"] as! String
-            }
-        }
+        .padding(.horizontal, Globals.UI_SC_PADDING_HORIZONTAL)
     }
     
     func onSelectionDone(_ selected: [String]) {
-        isSheet = false
-        item.noStockReason = self.selected[0]
-        let dynamicData = Utils.jsonObject(string: configData)
-        dynamicData.forEach{ it in
-            if it["id"] as! String == self.selected[0]{
-                reason = it["label"] as! String
-            }
+        if !selected.isEmpty {
+            item.noStockReason = selected[0]
         }
+        modalReasonOpen = false
     }
     
 }
 
 struct MovementFormTabShoppingView: View {
+    var realm: Realm
+    @Binding var items: [MovementProductShoppingModel]
     
-    @Binding var selected: RealmSwift.List<MovementProductShopping>
-    
-    @State private var isSheet = false
-    @State private var idsSelected = [String]()
+    @State private var selected: [String] = []
+    @State private var modalOpen = false
     
     var body: some View {
         VStack {
-            Button(action: {
-                isSheet = true
-            }, label: {
-                HStack{
-                    Spacer()
-                    Text(NSLocalizedString("envShopping", comment: ""))
-                    Image("ic-plus-circle")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 35)
-                    Spacer()
-                }
-                .foregroundColor(.cTextMedium)
-                .padding(10)
-            })
-            List {
-                ForEach(selected.indices, id: \.self) { index in
-                    CardShopping(item: $selected[index])
-                }
-                .onDelete(perform: self.delete)
+            CustomHeaderButtonIconView(label: "envShopping") {
+                modalOpen = true
             }
-            .buttonStyle(PlainButtonStyle())
-        }.sheet(isPresented: $isSheet, content: {
-            CustomDialogPicker(onSelectionDone: onSelectionDone, selected: $idsSelected, key: "PRODUCT-SHOPPING", multiple: true, isSheet: true)
-        })
+            ScrollView {
+                ForEach($items) { $item in
+                    MovementFormTabShoppingItemView(realm: realm, item: $item) {
+                        delete(detail: item)
+                    }
+                }
+            }
+        }
+        .sheet(isPresented: $modalOpen) {
+            DialogSourcePickerView(selected: $selected, key: "PRODUCT-SHOPPING", multiple: true, title: "envProduct".localized()) { selected in
+                onSelectionDone(selected)
+            }
+        }
     }
     
     func onSelectionDone(_ selected: [String]) {
-        isSheet = false
-        self.idsSelected.forEach{ id in
-            var exist = false
-            for i in self.selected {
-                if String(i.id) == id{
-                    exist = true
-                    break
-                }
-            }
-            if !exist {
-                if let product = ProductDao(realm: try! Realm()).by(id: id) {
-                    let movementProductShopping = MovementProductShopping()
-                    movementProductShopping.id = Int(id) ?? 0
-                    product.competitors?.components(separatedBy: ",").forEach({ competitor in
-                        let movementCompetitor = MovementProductShoppingCompetitor()
-                        movementCompetitor.id = competitor
-                        movementProductShopping.competitors.append(movementCompetitor)
-                    })
-                    self.selected.append(movementProductShopping)
+        modalOpen = false
+        selected.forEach { s in
+            if items.filter({ d in
+                d.productId == Utils.castInt(value: s)
+            }).count <= 0 {
+                if let product = ProductDao(realm: realm).by(id: s) {
+                    let item = MovementProductShoppingModel()
+                    item.productId = product.id
+                    product.competitors?.components(separatedBy: ",").forEach { competitor in
+                        let c = MovementProductShoppingCompetitorModel()
+                        c.id = competitor
+                        c.price = 0
+                        item.competitors.append(c)
+                    }
+                    items.append(item)
                 }
             }
         }
     }
     
-    func delete(at offsets: IndexSet) {
-        withAnimation{
-            //self.selected.remove(atOffsets: offsets)
-        }
+    func delete(detail: MovementProductShoppingModel) {
+        selected = selected.filter { $0 != String(detail.productId) }
+        items = items.filter { $0.productId != detail.productId }
     }
 }
 
-struct CardShopping: View {
-    @Binding var item: MovementProductShopping
+struct MovementFormTabShoppingItemView: View {
+    var realm: Realm
+    @Binding var item: MovementProductShoppingModel
+    let onDeleteTapped: () -> Void
     
-    @State var idCompetitors : [String] = []
     var body: some View {
-        VStack{
-            VStack{
-                if let product = ProductDao(realm: try! Realm()).by(id: String(item.id)){
-                    Text(product.name)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .foregroundColor(.cTextMedium)
-                        .font(.system(size: 18))
+        let product = ProductDao(realm: realm).by(id: item.productId)
+        VStack {
+            CustomCard {
+                HStack {
+                    Text((product?.name ?? "").capitalized)
+                        .foregroundColor(.cTextHigh)
+                        .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
+                        .lineLimit(2)
+                    Button(action: {
+                        onDeleteTapped()
+                    }) {
+                        Image("ic-delete")
+                            .resizable()
+                            .foregroundColor(.cDanger)
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 22, height: 22, alignment: .center)
+                            .padding(8)
+                    }
+                    .frame(width: 44, height: 44, alignment: .center)
                 }
-                Text("ENTRY PRICE")
+                Text("envQuantity")
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .foregroundColor(.cTextMedium)
-                    .font(.system(size: 14))
-                TextField("", text: Binding(
-                    get: { String(item.price) },
-                    set: { item.price = Float($0) ?? 0 }
-                ))
-                .cornerRadius(CGFloat(4))
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-            }
-            VStack {
-                ForEach(item.competitors.indices, id: \.self) { index in
-                    CardCompetitorsShopping(item: $item.competitors[index])
+                TextField("envQuantity", value: $item.price, formatter: NumberFormatter())
+                    .cornerRadius(CGFloat(4))
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                Divider()
+                ForEach($item.competitors) { $competitor in
+                    MovementFormTabShoppingCompetitorItemView(item: $competitor)
                 }
             }
-            .padding(7)
-            .background(Color.white)
-            .frame(alignment: Alignment.center)
-            .clipped()
-            .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
         }
-        .padding(7)
-        .background(Color.white)
-        .frame(alignment: Alignment.center)
-        .clipped()
-        .shadow(color: Color.gray, radius: 4, x: 0, y: 0)
+        .padding(.horizontal, Globals.UI_SC_PADDING_HORIZONTAL)
     }
 }
 
-struct CardCompetitorsShopping: View{
+struct MovementFormTabShoppingCompetitorItemView: View{
     
-    @Binding var item: MovementProductShoppingCompetitor
+    @Binding var item: MovementProductShoppingCompetitorModel
     
     var body: some View {
         VStack{
-            Text(item.id)
-                .frame(maxWidth: .infinity, alignment: .center)
+            Text(item.id.capitalized)
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .foregroundColor(.cTextMedium)
-                .font(.system(size: 14))
-            
-            TextField("", text: Binding(
-                get: { String(item.price) },
-                set: { item.price = Float($0) ?? 0 }
-            ))
-            .cornerRadius(CGFloat(4))
-            .textFieldStyle(RoundedBorderTextFieldStyle())
+            TextField("envQuantity", value: $item.price, formatter: NumberFormatter())
+                .cornerRadius(CGFloat(4))
+                .textFieldStyle(RoundedBorderTextFieldStyle())
         }
     }
 }
 
 struct MovementFormTabTransferenceView: View {
-    
-    @Binding var selected: RealmSwift.List<MovementProductTransference>
+    var realm: Realm
     var visitType: String
+    @Binding var items: [MovementProductTransferenceModel]
     
-    let dynamicData = Utils.jsonDictionary(string: Config.get(key: "MOV_TRANSFER_FIELDS").complement ?? "")
-    @State private var isSheet = false
-    @State private var idsSelected = [String]()
-    @State private var dataVisitType: Any = ""
+    @State private var selected: [String] = []
+    @State private var modalOpen = false
     
     var body: some View {
         VStack {
-            Button(action: {
-                isSheet = true
-            }, label: {
-                HStack{
-                    Spacer()
-                    Text(NSLocalizedString("envTransference", comment: ""))
-                    Image("ic-plus-circle")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 35)
-                    Spacer()
-                }
-                .foregroundColor(.cTextMedium)
-                .padding(10)
-            })
-            List {
-                ForEach(selected.indices, id: \.self) { index in
-                    CardTransference(item: $selected[index], dataVisitType: dataVisitType)
-                }
-                .onDelete(perform: self.delete)
+            CustomHeaderButtonIconView(label: "envTransference") {
+                modalOpen = true
             }
-            .buttonStyle(PlainButtonStyle())
-        }.sheet(isPresented: $isSheet, content: {
-            CustomDialogPicker(onSelectionDone: onSelectionDone, selected: $idsSelected, key: "PRODUCT-TRANSFERENCE", multiple: true, isSheet: true)
-        })
-        .foregroundColor(.cPrimary)
-        .onAppear{
-            initView()
+            ScrollView {
+                ForEach($items) { $item in
+                    MovementFormTabTransferenceItemView(realm: realm, visitType: visitType, item: $item) {
+                        delete(detail: item)
+                    }
+                }
+            }
         }
-    }
-    
-    func initView(){
-        if let data = dynamicData[visitType.lowercased()]{
-            dataVisitType = data
+        .sheet(isPresented: $modalOpen) {
+            DialogSourcePickerView(selected: $selected, key: "PRODUCT-TRANSFERENCE", multiple: true, title: "envProduct".localized()) { selected in
+                onSelectionDone(selected)
+            }
         }
     }
     
     func onSelectionDone(_ selected: [String]) {
-        isSheet = false
-        self.idsSelected.forEach{ id in
-            var exist = false
-            for i in self.selected {
-                if String(i.id) == id{
-                    exist = true
-                    break
+        modalOpen = false
+        selected.forEach { s in
+            if items.filter({ d in
+                d.productId == Utils.castInt(value: s)
+            }).count <= 0 {
+                if let product = ProductDao(realm: realm).by(id: s) {
+                    let item = MovementProductTransferenceModel()
+                    item.productId = product.id
+                    items.append(item)
                 }
-            }
-            if !exist {
-                let movementProductTransference = MovementProductTransference()
-                movementProductTransference.id = Int(id) ?? 0
-                self.selected.append(movementProductTransference)
             }
         }
     }
     
-    func delete(at offsets: IndexSet) {
-        withAnimation{
-            //self.selected.remove(atOffsets: offsets)
-        }
+    private func delete(detail: MovementProductTransferenceModel) {
+        selected = selected.filter { $0 != String(detail.productId) }
+        items = items.filter { $0.productId != detail.productId }
     }
     
 }
 
-struct CardTransference: View{
-    @Binding var item: MovementProductTransference
-    var dataVisitType: Any
+struct MovementFormTabTransferenceItemView: View{
+    var realm: Realm
+    var visitType: String
+    @Binding var item: MovementProductTransferenceModel
+    let onDeleteTapped: () -> Void
     
-    @State private var isSheet = false
-    @State private var idsSelected = [String]()
-    var body: some View{
-        VStack (alignment: .leading, spacing: 15){
-            VStack {
-                if let product = ProductDao(realm: try! Realm()).by(id: String(item.id)){
-                    Text(product.name)
+    let transferOptions = Utils.jsonDictionary(string: Config.get(key: "MOV_TRANSFER_FIELDS").complement ?? "")
+    
+    @State private var selected = [String]()
+    @State private var modalBonusOpen = false
+    
+    @State private var bonusVisible = false
+    @State private var bonusRequired = false
+    @State private var priceVisible = true
+    @State private var priceRequired = false
+    @State private var quantityVisible = true
+    @State private var quantityRequired = false
+    
+    var body: some View {
+        let product = ProductDao(realm: realm).by(id: item.productId)
+        VStack {
+            CustomCard {
+                HStack {
+                    Text((product?.name ?? "").capitalized)
+                        .foregroundColor(.cTextHigh)
+                        .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
+                        .lineLimit(2)
+                    Button(action: {
+                        onDeleteTapped()
+                    }) {
+                        Image("ic-delete")
+                            .resizable()
+                            .foregroundColor(.cDanger)
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 22, height: 22, alignment: .center)
+                            .padding(8)
+                    }
+                    .frame(width: 44, height: 44, alignment: .center)
+                }
+                if quantityVisible {
+                    Text("envQuantity")
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .foregroundColor(.cTextMedium)
-                        .font(.system(size: 18))
+                        .foregroundColor(quantityRequired && item.quantity <= 0 ? .cDanger : .cTextMedium)
+                    TextField("envQuantity", value: $item.quantity, formatter: NumberFormatter())
+                        .cornerRadius(CGFloat(4))
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
                 }
-                if let quantity = (dataVisitType as! NSDictionary)["quantity"]{
-                    if let visibleQuantity = (quantity as! NSDictionary)["visible"]{
-                        if String((visibleQuantity as AnyObject).description) == "1"{
-                            VStack{
-                                if let requiredQuantity = (quantity as! NSDictionary)["required"]{
-                                    Text(NSLocalizedString("quantityTransference", comment: ""))
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                        .foregroundColor((String((requiredQuantity as AnyObject).description)  == "1") ? Color.cDanger : .cTextMedium)
-                                        .font(.system(size: 14))
-                                }
-                                TextField("", text: Binding(
-                                    get: { String(item.quantity) },
-                                    set: { item.quantity = Float($0) ?? 0 }
-                                ))
-                                .cornerRadius(CGFloat(4))
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                            }
-                            .padding(.top, 3)
-                        }
-                    }
+                if priceVisible {
+                    Text("envPrice")
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .foregroundColor(priceRequired && item.price <= 0 ? .cDanger : .cTextMedium)
+                    TextField("envPrice", value: $item.price, formatter: NumberFormatter())
+                        .cornerRadius(CGFloat(4))
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
                 }
-                if let price = (dataVisitType as! NSDictionary)["price"]{
-                    if let visiblePrice = (price as! NSDictionary)["visible"]{
-                        if String((visiblePrice as AnyObject).description) == "1"{
-                            VStack{
-                                if let priceQuantity = (price as! NSDictionary)["required"]{
-                                    Text(NSLocalizedString("priceTransference", comment: ""))
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                        .foregroundColor((String((priceQuantity as AnyObject).description)  == "1") ? Color.cDanger : .cTextMedium)
-                                        .font(.system(size: 14))
-                                }
-                                TextField("", text: Binding(
-                                    get: { String(item.price) },
-                                    set: { item.price = Float($0) ?? 0 }
-                                ))
-                                .cornerRadius(CGFloat(4))
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                            }
-                            .padding(.top, 3)
-                        }
-                    }
-                }
-            }
-            VStack {
-                if let bouns = (dataVisitType as! NSDictionary)["bonus"]{
-                    if let visibleBonus = (bouns as! NSDictionary)["visible"]{
-                        if String((visibleBonus as AnyObject).description) == "1" {
-                            VStack {
-                                VStack {
-                                    Text(NSLocalizedString("bonusTransference", comment: ""))
-                                        .frame(maxWidth: .infinity, alignment: .center)
-                                        .foregroundColor(.cTextMedium)
-                                        .font(.system(size: 16))
-                                    Button(action: {
-                                        isSheet = true
-                                    }) {
-                                        HStack{
-                                            VStack{
-                                                if let bounsRequired = (bouns as! NSDictionary)["required"]{
-                                                    Text(NSLocalizedString("productTransference", comment: ""))
-                                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                                        .foregroundColor((String((bounsRequired as AnyObject).description)  == "1") ? Color.cDanger : .cTextMedium)
-                                                        .font(.system(size: 14))
-                                                }
-                                                if let product = ProductDao(realm: try! Realm()).by(id: String(item.bonusProduct)){
-                                                    Text(product.name)
-                                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                                        .foregroundColor(.cTextMedium)
-                                                        .font(.system(size: 14))
-                                                } else {
-                                                    Text(NSLocalizedString("envChoose", comment: ""))
-                                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                                        .foregroundColor(.cTextMedium)
-                                                        .font(.system(size: 14))
-                                                
-                                                }
-                                            }
-                                            Spacer()
-                                            Image("ic-arrow-expand-more")
-                                                .resizable()
-                                                .scaledToFit()
-                                                .frame(width: 35)
-                                                .foregroundColor(.cTextMedium)
-                                        }
-                                        .padding(10)
-                                        .background(Color.white)
-                                        .frame(alignment: Alignment.center)
-                                        .clipped()
-                                        .shadow(color: Color.gray, radius: 1, x: 0, y: 0)
-                                    }
-                                }
+                if bonusVisible {
+                    Divider()
+                    VStack {
+                        Button(action: {
+                            modalBonusOpen = true
+                        }, label: {
+                            HStack{
                                 VStack{
-                                    if let bounsRequired = (bouns as! NSDictionary)["required"]{
-                                        Text(NSLocalizedString("bonusUnitsTransference", comment: ""))
-                                            .frame(maxWidth: .infinity, alignment: .leading)
-                                            .foregroundColor((String((bounsRequired as AnyObject).description)  == "1") ? Color.cDanger : .cTextMedium)
-                                            .font(.system(size: 14))
-                                        
-                                    }
-                                    TextField("", text: Binding(
-                                        get: { String(item.bonusQuantity) },
-                                        set: { item.bonusQuantity = Float($0) ?? 0 }
-                                    ))
-                                        .cornerRadius(CGFloat(4))
-                                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    Text(NSLocalizedString("envBonusProduct", comment: ""))
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .foregroundColor(bonusRequired && item.bonusProduct <= 0 ? .cDanger : .cTextMedium)
+                                        .font(.system(size: 14))
+                                    Text(DynamicUtils.tableValue(key: "PRODUCT", selected: selected, defaultValue: "envChoose".localized()).capitalized)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .multilineTextAlignment(.leading)
+                                        .foregroundColor(.cTextHigh)
+                                        .font(.system(size: 16))
                                 }
-                                .padding(.horizontal, 10)
-                                .padding(.vertical, 3)
+                                Spacer()
+                                Image("ic-arrow-expand-more")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 35)
+                                    .foregroundColor(.cIcon)
                             }
-                            .padding(7)
-                            .background(Color.white)
-                            .frame(alignment: Alignment.center)
-                            .clipped()
-                            .shadow(color: Color.gray, radius: 2, x: 0, y: 0)
-                        }
+                            .sheet(isPresented: $modalBonusOpen) {
+                                DialogSourcePickerView(selected: $selected, key: "PRODUCT", multiple: false, title: "envProduct".localized()) { selected in
+                                    onSelectionDone(selected)
+                                }
+                            }
+                            .padding(.vertical, 10)
+                        })
+                        Text("envBonusQuantity")
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .foregroundColor(bonusRequired && item.bonusQuantity <= 0 ? .cDanger : .cTextMedium)
+                        TextField("envBonusQuantity", value: $item.bonusQuantity, formatter: NumberFormatter())
+                            .cornerRadius(CGFloat(4))
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
                     }
+                    .padding(.horizontal, Globals.UI_SC_PADDING_HORIZONTAL)
                 }
             }
         }
-        .padding(7)
-        .background(Color.white)
-        .frame(alignment: Alignment.center)
-        .clipped()
-        .shadow(color: Color.gray, radius: 4, x: 0, y: 0)
-        .sheet(isPresented: $isSheet, content: {
-            CustomDialogPicker(onSelectionDone: onSelectionDone, selected: $idsSelected, key: "PRODUCT-TRANSFERENCE", multiple: false, isSheet: true)
-        })
+        .onAppear {
+            initItem()
+        }
+    }
+    
+    func initItem() {
+        if let ops = transferOptions[visitType.lowercased()] as? [String: Any] {
+            if let bonus = ops["bonus"] as? [String: Int] {
+                bonusRequired = bonus["required"] == 1
+                bonusVisible = bonus["visible"] == 1
+            }
+            if let price = ops["price"] as? [String: Int] {
+                priceRequired = price["required"] == 1
+                priceVisible = price["visible"] == 1
+            }
+            if let quantity = ops["quantity"] as? [String: Int] {
+                quantityRequired = quantity["required"] == 1
+                quantityVisible = quantity["visible"] == 1
+            }
+        }
     }
     
     func onSelectionDone(_ selected: [String]) {
-        self.isSheet = false
-        self.idsSelected.forEach{ id in
-            item.bonusProduct = Int(id) ?? 0
+        self.modalBonusOpen = false
+        if !selected.isEmpty {
+            item.bonusProduct = Utils.castInt(value: selected[0])
         }
     }
 }

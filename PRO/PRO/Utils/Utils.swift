@@ -309,44 +309,46 @@ class GMSUtils {
 
 class DynamicUtils {
     
-    static func tableValue(key: String, selected: [String]) -> String? {
+    static func tableValue(key: String, selected: [String], defaultValue: String = "--") -> String {
         if !selected.isEmpty {
             switch key.uppercased() {
                 case "BRICK":
-                    return BrickDao(realm: try! Realm()).by(id: selected[0])?.name
+                    return BrickDao(realm: try! Realm()).by(id: selected[0])?.name ?? defaultValue
                 case "CATEGORY":
-                    return CategoryDao(realm: try! Realm()).by(id: selected[0])?.name
+                    return CategoryDao(realm: try! Realm()).by(id: selected[0])?.name ?? defaultValue
                 case "CITY":
-                    return CityDao(realm: try! Realm()).by(id: selected[0])?.name
+                    return CityDao(realm: try! Realm()).by(id: selected[0])?.name ?? defaultValue
                 case "COLLEGE":
-                    return CollegeDao(realm: try! Realm()).by(id: selected[0])?.name
+                    return CollegeDao(realm: try! Realm()).by(id: selected[0])?.name ?? defaultValue
                 case "COUNTRY":
-                    return CountryDao(realm: try! Realm()).by(id: selected[0])?.name
+                    return CountryDao(realm: try! Realm()).by(id: selected[0])?.name ?? defaultValue
                 case "CYCLE":
-                    return CycleDao(realm: try! Realm()).by(id: selected[0])?.displayName
+                    return CycleDao(realm: try! Realm()).by(id: selected[0])?.displayName ?? defaultValue
                 case "LINE":
-                    return LineDao(realm: try! Realm()).by(id: selected[0])?.name
+                    return LineDao(realm: try! Realm()).by(id: selected[0])?.name ?? defaultValue
                 case "MATERIAL":
-                    return MaterialDao(realm: try! Realm()).by(id: selected[0])?.name
+                    return MaterialDao(realm: try! Realm()).by(id: selected[0])?.name ?? defaultValue
                 case "PHARMACY-CHAIN":
-                    return PharmacyChainDao(realm: try! Realm()).by(id: selected[0])?.name
+                    return PharmacyChainDao(realm: try! Realm()).by(id: selected[0])?.name ?? defaultValue
                 case "PHARMACY-TYPE":
-                    return PharmacyTypeDao(realm: try! Realm()).by(id: selected[0])?.name
+                    return PharmacyTypeDao(realm: try! Realm()).by(id: selected[0])?.name ?? defaultValue
                 case "PRICES-LIST":
-                    return PricesListDao(realm: try! Realm()).by(id: selected[0])?.name
+                    return PricesListDao(realm: try! Realm()).by(id: selected[0])?.name ?? defaultValue
+                case "PRODUCT":
+                    return ProductDao(realm: try! Realm()).by(id: selected[0])?.name ?? defaultValue
                 case "SPECIALTY":
-                    return SpecialtyDao(realm: try! Realm()).by(id: selected[0])?.name
+                    return SpecialtyDao(realm: try! Realm()).by(id: selected[0])?.name ?? defaultValue
                 case "SECOND-SPECIALTY":
-                    return SpecialtyDao(realm: try! Realm()).by(id: selected[0])?.name
+                    return SpecialtyDao(realm: try! Realm()).by(id: selected[0])?.name ?? defaultValue
                 case "STYLE":
-                    return StyleDao(realm: try! Realm()).by(id: selected[0])?.name
+                    return StyleDao(realm: try! Realm()).by(id: selected[0])?.name ?? defaultValue
                 case "ZONE":
-                    return ZoneDao(realm: try! Realm()).by(id: selected[0])?.name
+                    return ZoneDao(realm: try! Realm()).by(id: selected[0])?.name ?? defaultValue
                 default:
                     break
             }
         }
-        return "--"
+        return defaultValue
     }
     
     static func initForm(data: Dictionary<String, Any>) -> [DynamicFormTab] {
@@ -575,10 +577,6 @@ class DynamicUtils {
     static func fillForm(form: inout DynamicForm, base: String, additional: String = "{}") {
         let baseDict = Utils.jsonDictionary(string: base)
         let additionalDict = Utils.jsonDictionary(string: additional)
-        print(1)
-        print(baseDict)
-        print(2)
-        print(additionalDict)
         for i in form.tabs.indices {
             for j in form.tabs[i].groups.indices {
                 for k in form.tabs[i].groups[j].fields.indices {
@@ -656,6 +654,19 @@ class DynamicUtils {
     
     static func transactionType(action: FormAction) -> String {
         return action == .create ? "CREATE" : "UPDATE"
+    }
+    
+    static func jsonValue(data: String, selected: [String], defaultValue: String = "envSelect") -> String {
+        if !selected.isEmpty {
+            let list = Utils.genericList(data: data)
+            let rs = list.filter { item -> Bool in
+                item.id == selected[0]
+            }
+            if !rs.isEmpty {
+                return rs[0].label
+            }
+        }
+        return defaultValue.localized()
     }
     
 }

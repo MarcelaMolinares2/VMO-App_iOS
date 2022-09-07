@@ -273,6 +273,22 @@ class MasterDashboardTab {
     
 }
 
+struct MovementTab: Identifiable {
+    var id = UUID()
+    var key: String = ""
+    var icon: String = ""
+    var label: String = ""
+    var required: Bool = false
+    
+    init(key: String, icon: String, label: String, required: Bool) {
+        self.key = key
+        self.icon = icon
+        self.label = label
+        self.required = required
+    }
+    
+}
+
 class MasterLaboratory: Codable {
     var id: Int = 0
     var name: String = ""
@@ -378,6 +394,32 @@ class PanelVisitingHourModel: ObservableObject, Identifiable {
         self.amStatus = amStatus
         self.pmStatus = pmStatus
     }
+}
+
+class MovementProductStockModel: ObservableObject, Identifiable {
+    @Published var productId: Int = 0
+    @Published var hasStock: Bool = false
+    @Published var quantity: Float = 0
+    @Published var noStockReason: String = ""
+}
+
+class MovementProductShoppingModel: ObservableObject, Identifiable {
+    @Published var productId: Int = 0
+    @Published var price: Float = 0
+    @Published var competitors = [MovementProductShoppingCompetitorModel]()
+}
+
+class MovementProductShoppingCompetitorModel: ObservableObject, Identifiable {
+    var id: String = ""
+    @Published var price: Float = 0
+}
+
+class MovementProductTransferenceModel: ObservableObject, Identifiable {
+    @Published var productId: Int = 0
+    @Published var quantity: Float = 0
+    @Published var price: Float = 0
+    @Published var bonusProduct: Int = 0
+    @Published var bonusQuantity: Float = 0
 }
 
 class PanelCategorizationSettings: Decodable {

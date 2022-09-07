@@ -485,13 +485,16 @@ class Product: Object, Codable {
     @Persisted var brandId: Int?
     @Persisted var lineId: Int?
     @Persisted var countryId: Int?
+    @Persisted var status: Int = 1
+    
+    @Persisted var pharmacyChains: List<ProductPharmacyChain>
     
     var line: Line?
     var country: Country?
     
     private enum CodingKeys: String, CodingKey {
         case id = "id_producto", name = "producto", code = "codigo", presentation = "id_presentacion", competitors = "competidores",
-             verifyExistence = "verificar_existencia", brandId = "brand_id", lineId = "id_linea", countryId = "id_pais"
+             verifyExistence = "verificar_existencia", brandId = "brand_id", lineId = "id_linea", countryId = "id_pais", status = "status_", pharmacyChains = "pharmacy_chains"
     }
     
     static func primaryCodingKey() -> String {
@@ -505,9 +508,26 @@ class ProductBrand: Object, Codable {
     @Persisted(primaryKey: true) var objectId: ObjectId
     @Persisted var id = 0
     @Persisted var name: String
+    @Persisted var status: Int = 1
     
     private enum CodingKeys: String, CodingKey {
-        case id = "product_brand_id", name = "name_"
+        case id = "product_brand_id", name = "name_", status = "status_"
+    }
+    
+    static func primaryCodingKey() -> String {
+        let codingKey: CodingKeys
+        codingKey = .id
+        return codingKey.rawValue
+    }
+}
+
+class ProductPharmacyChain: Object, Codable {
+    @Persisted var id: Int? = 0
+    @Persisted var pharmacyChainId: Int
+    @Persisted var eanCode: String
+    
+    private enum CodingKeys: String, CodingKey {
+        case id = "pharmacy_chain_product_id", pharmacyChainId = "pharmacy_chain_id", eanCode = "ean_code"
     }
     
     static func primaryCodingKey() -> String {
@@ -652,6 +672,26 @@ class UserPermissionInCharge: Object, Codable {
     
     private enum CodingKeys: String, CodingKey {
         case id = "user_permission_in_charge_id", module, environment, read = "read_", create = "create_", update = "update_", delete = "delete_"
+    }
+    
+    static func primaryCodingKey() -> String {
+        let codingKey: CodingKeys
+        codingKey = .id
+        return codingKey.rawValue
+    }
+}
+
+class UserPreference: Object, Codable {
+    @Persisted(primaryKey: true) var objectId: ObjectId
+    @Persisted var id = 0
+    @Persisted var userId: Int
+    @Persisted var environment: String
+    @Persisted var module: String
+    @Persisted var type: String
+    @Persisted var value: String
+    
+    private enum CodingKeys: String, CodingKey {
+        case id = "user_preference_id", userId = "user_id", environment, module, type = "type_", value = "value_"
     }
     
     static func primaryCodingKey() -> String {

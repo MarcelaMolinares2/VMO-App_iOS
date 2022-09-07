@@ -553,7 +553,9 @@ struct DialogSourcePickerView: View {
                 list = GenericSelectableDao(realm: try! Realm()).pharmacyTypes()
             case "PRICES-LIST":
                 list = GenericSelectableDao(realm: try! Realm()).pricesLists()
-            case "PRODUCT-PROMOTED", "PRODUCT-TRANSFERENCE":
+            case "PRODUCT-PROMOTED":
+                list = GenericSelectableDao(realm: try! Realm()).productsPromoted(pharmacyChainId: Utils.castInt(value: extraData["pharmacyChain"]))
+            case "PRODUCT", "PRODUCT-TRANSFERENCE", "PRODUCT-STOCK":
                 list = GenericSelectableDao(realm: try! Realm()).products()
             case "PRODUCT-BY-BRAND":
                 list = GenericSelectableDao(realm: try! Realm()).productBrands()

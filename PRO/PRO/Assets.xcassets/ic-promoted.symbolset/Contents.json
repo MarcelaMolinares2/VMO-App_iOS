@@ -1,0 +1,12 @@
+{
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  },
+  "symbols" : [
+    {
+      "filename" : "fact_check-fact_check_symbol.svg",
+      "idiom" : "universal"
+    }
+  ]
+}

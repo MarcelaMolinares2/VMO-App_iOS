@@ -947,7 +947,7 @@ struct DynamicFormList: View {
                         selectedLabel = rs[0].label
                     }
                 case "table":
-                    selectedLabel = DynamicUtils.tableValue(key: field.source, selected: selected) ?? "--"
+                    selectedLabel = DynamicUtils.tableValue(key: field.source, selected: selected)
                 default:
                     selectedLabel = ""
                 }

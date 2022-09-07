@@ -403,3 +403,32 @@ struct ScrollViewFABBottom: View {
     }
     
 }
+
+struct CustomHeaderButtonIconView: View {
+    var label: String
+    var icon: String = "ic-plus-circle"
+    let onItemTapped: () -> Void
+    
+    var body: some View {
+        Button(action: {
+            onItemTapped()
+        }) {
+            ZStack(alignment: .center) {
+                HStack {
+                    Spacer()
+                    Image(icon)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 40, height: 40, alignment: .center)
+                        .foregroundColor(.cIcon)
+                }
+                VStack {
+                    Text(label)
+                        .foregroundColor(.cTextHigh)
+                }
+            }
+        }
+        .padding(.horizontal, Globals.UI_FORM_PADDING_HORIZONTAL)
+    }
+    
+}

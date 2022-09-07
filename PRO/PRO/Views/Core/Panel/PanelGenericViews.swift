@@ -923,7 +923,7 @@ struct PanelFilterView: View {
                                         filters[i].modalOpen = false
                                         filters[i].chips.removeAll()
                                         selected.forEach { s in
-                                            let label = DynamicUtils.tableValue(key: f.key, selected: [s]) ?? ""
+                                            let label = DynamicUtils.tableValue(key: f.key, selected: [s])
                                             if !label.isEmpty {
                                                 filters[i].chips.append(ChipItem(label: label, image: "", onApplyTapped: {
                                                     

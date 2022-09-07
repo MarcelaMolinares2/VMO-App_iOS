@@ -28,23 +28,26 @@ struct MovementFormView: View {
     
     @State private var movement: Movement = Movement()
     @State private var panel: Panel?
-    @State private var promotedProducts = [String]()
-    
     
     @State private var materials = [AdvertisingMaterialDeliveryMaterial]()
-    
+    @State private var promoted = [String]()
+    @State private var stock = [MovementProductStockModel]()
+    @State private var shopping = [MovementProductShoppingModel]()
+    @State private var transference = [MovementProductTransferenceModel]()
     
     @State private var mainTabsLayout = true
     
-    @State var mainTabs = [[String: Any]]()
-    @State var moreTabs = [[String: Any]]()
+    @State var mainTabs = [MovementTab]()
+    @State var moreTabs = [MovementTab]()
+    
+    @State private var extraData: [String: Any] = [:]
     
     var body: some View {
         VStack {
             HeaderToggleView(title: "modVisit") {
-                
+                viewRouter.currentPage = "MASTER"
             }
-            if locationRequired && locationService.location == nil {
+            if locationRequired && locationService.location == nil || (locationService.location?.coordinate.latitude == 0 && locationService.location?.coordinate.longitude == 0) {
                 Spacer()
                 VStack {
                     Text("envMovementLocationRequired")
@@ -58,46 +61,58 @@ struct MovementFormView: View {
                     }
                     Spacer()
                 } else {
-                    /*switch tabRouter.current {
-                        case "MATERIAL":
-                            MovementFormTabMaterialView(selected: $movement.dataMaterial)
-                        case "PROMOTED":
-                            MovementFormTabPromotedView(selected: $promotedProducts)
-                        case "SHOPPING":
-                            MovementFormTabShoppingView(selected: $movement.dataShopping)
-                        case "STOCK":
-                            MovementFormTabStockView(selected: $movement.dataStock)
-                        case "TRANSFERENCE":
-                            MovementFormTabTransferenceView(selected: $movement.dataTransference, visitType: visitType)
-                        default:
-                            MovementFormTabBasicView(movement: $movement, location: locationService.location, panel: panel!, op: viewRouter.data.objectId == nil ? "create" : "update", visitType: visitType)
-                    }
-                    MovementBottomNavigationView(tabRouter: tabRouter)
-                    */
-                    /*if mainTabsLayout {
-                        TabView(selection: $tabRouter.current) {
-                            ForEach(mainTabs) { tab in
-                                switch tab[""] {
-                                    case "MATERIAL":
-                                        MaterialDeliveryFormWrapperView(realm: realm, details: $materials)
-                                            .tag(2)
+                    VStack {
+                        VStack {
+                            PanelFormHeaderView(panel: panel!)
+                        }
+                        .background(Color.cBackground1dp)
+                        ZStack(alignment: .bottom) {
+                            if mainTabsLayout {
+                                TabView(selection: $tabRouter.current) {
+                                    ForEach(mainTabs) { tab in
+                                        MovementTabContentWrapperView(realm: realm, key: tab.key, visitType: visitType, isEditable: true, extraData: extraData, materials: $materials, promoted: $promoted, stock: $stock, shopping: $shopping, transference: $transference)
+                                            .tag(tab.key)
                                             .tabItem {
-                                                Text("envMaterial")
-                                                Image("ic-material")
+                                                Text(tab.label.localized())
+                                                Image(tab.icon)
                                             }
-                                    default:
-                                        break
+                                    }
+                                }
+                            } else {
+                                TabView(selection: $tabRouter.current) {
+                                    ForEach(moreTabs) { tab in
+                                        MovementTabContentWrapperView(realm: realm, key: tab.key, visitType: visitType, isEditable: true, extraData: extraData, materials: $materials, promoted: $promoted, stock: $stock, shopping: $shopping, transference: $transference)
+                                            .tag(tab.key)
+                                            .tabItem {
+                                                Text(tab.label.localized())
+                                                Image(tab.icon)
+                                            }
+                                    }
                                 }
                             }
+                            HStack(alignment: .bottom) {
+                                Spacer()
+                                FAB(image: "ic-cloud") {
+                                    //validate()
+                                }
+                            }
+                            .padding(.bottom, Globals.UI_FAB_VERTICAL + 50)
+                            .padding(.horizontal, Globals.UI_FAB_HORIZONTAL)
                         }
-                    } else {
-                        TabView(selection: $tabRouter.current) {
-                            
-                        }
-                    }*/
+                    }
                 }
             }
         }
+        .onChange(of: tabRouter.current, perform: { newValue in
+            if newValue == "MORE" {
+                mainTabsLayout = false
+                tabRouter.current = moreTabs[1].key
+            }
+            if newValue == "BACK" {
+                mainTabsLayout = true
+                tabRouter.current = "BASIC"
+            }
+        })
         .onAppear {
             locationService.start()
             initForm()
@@ -113,12 +128,16 @@ struct MovementFormView: View {
         moreTabs = tabs[1]
         tabRouter.current = "BASIC"
         
-        
         if let oId = viewRouter.data.objectId {
             panel = PanelUtils.panel(type: viewRouter.data.type, objectId: oId)
             movement.panelId = panel?.id ?? 0
-            movement.panelObjectId = viewRouter.data.objectId!
+            movement.panelObjectId = oId
             movement.panelType = viewRouter.data.type
+            
+            if movement.panelType == "F" {
+                let pharmacy = PharmacyDao(realm: realm).by(objectId: oId)
+                extraData["pharmacyChain"] = pharmacy?.pharmacyChainId
+            }
         } else {
             //doctor = Movement(value: try! MovementDao(realm: try! Realm()).by(objectId: ObjectId(string: viewRouter.data.objectId)) ?? Doctor())
         }
@@ -349,103 +368,40 @@ struct MovementFormTabBasicView: View {
     
 }
 
-
-struct MovementFormTabMaterialView: View {
+struct MovementTabContentWrapperView: View {
+    var realm: Realm
+    var key: String
+    var visitType: String
+    var isEditable: Bool
+    var extraData: [String: Any]
     
-    @Binding var selected: RealmSwift.List<MovementMaterial>
-    
-    var body: some View {
-        ScrollView {
-            VStack {
-                Text("MATERIAL!!!!")
-            }
-        }
-    }
-    
-}
-
-struct MovementBottomNavigationView: View {
-    
-    @EnvironmentObject var viewRouter: ViewRouter
-    
-    @StateObject var tabRouter: TabRouter
-    
-    @State var mainTabs = [[String: Any]]()
-    @State var moreTabs = [[String: Any]]()
-    @State var bottomNavActive = "MAIN"
+    @Binding var materials: [AdvertisingMaterialDeliveryMaterial]
+    @Binding var promoted: [String]
+    @Binding var stock: [MovementProductStockModel]
+    @Binding var shopping: [MovementProductShoppingModel]
+    @Binding var transference: [MovementProductTransferenceModel]
     
     var body: some View {
-        GeometryReader { geometry in
-            HStack(spacing: 0) {
-                if bottomNavActive == "MAIN" {
-                    Image("ic-visit")
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .padding(5)
-                        .frame(width: geometry.size.width / CGFloat(mainTabs.count + 1 + (moreTabs.isEmpty ? 0 : 1)), alignment: .center)
-                        .foregroundColor(tabRouter.current == "BASIC" ? .cPrimary : .cAccent)
-                        .onTapGesture {
-                            tabRouter.current = "BASIC"
-                        }
-                    ForEach(mainTabs.indices, id: \.self) { index in
-                        let key = Utils.castString(value: mainTabs[index]["key"])
-                        Image(MovementUtils.iconTabs(key: key))
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .padding(5)
-                            .frame(width: geometry.size.width / CGFloat(mainTabs.count + 1 + (moreTabs.isEmpty ? 0 : 1)), alignment: .center)
-                            .foregroundColor(tabRouter.current == key ? .cPrimary : .cAccent)
-                            .onTapGesture {
-                                tabRouter.current = key
-                            }
-                    }
-                    if !moreTabs.isEmpty {
-                        Image("ic-more")
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .padding(5)
-                            .frame(width: geometry.size.width / CGFloat(mainTabs.count + 2), alignment: .center)
-                            .foregroundColor(.cAccent)
-                            .onTapGesture {
-                                bottomNavActive = "MORE"
-                                tabRouter.current = "ROTATION"
-                            }
-                    }
-                } else {
-                    Image("ic-back")
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .padding(5)
-                        .frame(width: geometry.size.width / CGFloat(moreTabs.count + 1), alignment: .center)
-                        .foregroundColor(.cAccent)
-                        .onTapGesture {
-                            bottomNavActive = "MAIN"
-                            tabRouter.current = "BASIC"
-                        }
-                    ForEach(moreTabs.indices, id: \.self) { index in
-                        let key = Utils.castString(value: moreTabs[index]["key"])
-                        Image(MovementUtils.iconTabs(key: key))
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .padding(5)
-                            .frame(width: geometry.size.width / CGFloat(moreTabs.count + 1), alignment: .center)
-                            .foregroundColor(tabRouter.current == key ? .cPrimary : .cAccent)
-                            .onTapGesture {
-                                tabRouter.current = key
-                            }
-                    }
+        switch key {
+            case "MATERIAL":
+                MovementFormTabMaterialView(realm: realm, materials: $materials)
+            case "PROMOTED":
+                MovementFormTabPromotedView(realm: realm, isEditable: isEditable, extraData: extraData, selected: $promoted)
+            case "SHOPPING":
+                MovementFormTabShoppingView(realm: realm, items: $shopping)
+            case "STOCK":
+                MovementFormTabStockView(realm: realm, items: $stock)
+            case "TRANSFERENCE":
+                MovementFormTabTransferenceView(realm: realm, visitType: visitType, items: $transference)
+            case "MORE", "BACK":
+                ScrollView {
+                    
                 }
-            }
-            .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
-        }
-        .frame(minWidth: 0, maxWidth: .infinity, minHeight: 46, maxHeight: 46)
-        .onAppear {
-            load()
+            default:
+                ScrollView {
+                    
+                }
         }
     }
-    
-    func load() {
-    }
-    
     
 }

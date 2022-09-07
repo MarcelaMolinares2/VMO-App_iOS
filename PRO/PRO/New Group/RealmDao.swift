@@ -190,6 +190,31 @@ class CycleDao: GenericDao {
     
 }
 
+class DiaryDao: GenericDao {
+    
+    func store(diary: Diary) {
+        try! realm.write {
+            if diary.transactionType.isEmpty {
+                diary.transactionType = "UPDATE"
+            }
+            realm.add(diary, update: .all)
+        }
+    }
+    
+    func by(date: Date) -> [Diary] {
+        return Array(
+            realm.objects(Diary.self).where {
+                $0.date == Utils.dateFormat(date: date)
+            }
+        )
+    }
+    
+    func by(objectId: String) -> Diary? {
+        return try! realm.object(ofType: Diary.self, forPrimaryKey: ObjectId(string: objectId))
+    }
+    
+}
+
 class ExpenseReportDao: GenericDao {
     
     func store(expenseReport: ExpenseReport) {
@@ -431,6 +456,14 @@ class GenericSelectableDao: GenericDao {
     
     func products() -> [GenericSelectableItem] {
         ProductDao(realm: self.realm).all().map { GenericSelectableItem(id: "\($0.id)", label: $0.name) }
+    }
+    
+    func productsPromoted(pharmacyChainId: Int) -> [GenericSelectableItem] {
+        if pharmacyChainId == 0 {
+            return products()
+        } else {
+            return ProductDao(realm: self.realm).by(pharmacyChainId: pharmacyChainId).map { GenericSelectableItem(id: "\($0.id)", label: $0.name) }
+        }
     }
     
     func productBrands() -> [GenericSelectableItem] {
@@ -713,8 +746,18 @@ class ProductDao: GenericDao {
         return Array(realm.objects(Product.self).sorted(byKeyPath: "name"))
     }
     
+    func by(pharmacyChainId: Int) -> [Product] {
+        return Array(realm.objects(Product.self).where {
+            $0.pharmacyChains.pharmacyChainId == pharmacyChainId
+        }.sorted(byKeyPath: "name"))
+    }
+    
     func by(id: String) -> Product? {
         return realm.objects(Product.self).filter("id == \(id)").first
+    }
+    
+    func by(id: Int?) -> Product? {
+        return by(id: String(describing: id ?? 0))
     }
     
     func competitors() -> [Product] {
@@ -788,6 +831,22 @@ class UserDao: GenericDao {
     
     func logged() -> User? {
         return by(id: JWTUtils.sub())
+    }
+    
+}
+
+class UserPreferenceDao: GenericDao {
+    
+    func all() -> [UserPreference] {
+        return Array(realm.objects(UserPreference.self))
+    }
+    
+    func by(module: String) -> [UserPreference] {
+        return Array(
+            realm.objects(UserPreference.self).where {
+                $0.module == module
+            }
+        )
     }
     
 }

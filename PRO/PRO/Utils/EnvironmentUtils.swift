@@ -60,27 +60,31 @@ class MovementUtils {
         return tabs
     }
     
-    static func initTabs(data: [String: [String: Any]]) -> [[[String: Any]]] {
-        var mainTabs = [[String: Any]]()
-        var moreTabs = [[String: Any]]()
+    static func initTabs(data: [String: [String: Any]]) -> [[MovementTab]] {
+        var mainTabs = [MovementTab]()
+        var moreTabs = [MovementTab]()
+        
+        mainTabs.append(MovementTab(key: "BASIC", icon: iconTabs(key: "BASIC"), label: "envBasic", required: true))
+        moreTabs.append(MovementTab(key: "BACK", icon: iconTabs(key: "BACK"), label: "envBack", required: true))
         
         var i = 0
-        data.sorted(by: { (el1: (key: String, value: [String : Any]), el2: (key: String, value: [String : Any])) -> Bool in
+        let baseTabs = data.sorted(by: { (el1: (key: String, value: [String : Any]), el2: (key: String, value: [String : Any])) -> Bool in
             if Utils.castInt(value: el1.value["index"]) < Utils.castInt(value: el2.value["index"]) {
                 return true
             }
             return false
-        }).forEach { (key: String, value: [String : Any]) in
-            print(value)
-            if i > 2 {
-                moreTabs.append(["key": key, "required": value["required"] as! Bool])
+        })
+        baseTabs.forEach { (key: String, value: [String : Any]) in
+            if baseTabs.count > 4 && i > 2 {
+                moreTabs.append(MovementTab(key: key, icon: iconTabs(key: key), label: "env\(key.capitalized)", required: value["required"] as! Bool))
             } else {
-                mainTabs.append(["key": key, "required": value["required"] as! Bool])
+                mainTabs.append(MovementTab(key: key, icon: iconTabs(key: key), label: "env\(key.capitalized)", required: value["required"] as! Bool))
             }
             i += 1
         }
-        print(mainTabs)
-        print(moreTabs)
+        if baseTabs.count > 4 {
+            mainTabs.append(MovementTab(key: "MORE", icon: iconTabs(key: "MORE"), label: "envMore", required: true))
+        }
         return [mainTabs, moreTabs]
     }
     
@@ -91,9 +95,11 @@ class MovementUtils {
             "ROTATION": "ic-rotation",
             "SHOPPING": "ic-shopping",
             "STOCK": "ic-stock",
-            "TRANSFERENCE": "ic-shopping-list"
+            "TRANSFERENCE": "ic-transference",
+            "BACK": "ic-back",
+            "MORE": "ic-more"
         ]
-        return data[key] ?? "ic-home"
+        return data[key] ?? "ic-dynamic-tab-basic"
     }
     
     static func existsMovementOpen(objectId: ObjectId, type: String) -> Bool {
@@ -453,6 +459,14 @@ class TimeUtils {
             return month.label
         }
         return ""
+    }
+    
+    static func hourTo(time: Date) -> Int {
+        return hourTo(time: Utils.hourFormat(date: time))
+    }
+    
+    static func hourTo(time: String) -> Int {
+        return Utils.castInt(value: time.replacingOccurrences(of: ":", with: ""))
     }
     
 }

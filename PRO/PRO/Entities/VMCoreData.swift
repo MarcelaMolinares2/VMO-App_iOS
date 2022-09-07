@@ -746,21 +746,24 @@ class PanelContact: Object, Codable, Panel, SyncEntity, Identifiable {
     
 }
 
-class Diary: Object, Codable, SyncEntity {
+class Diary: Object, Codable, SyncEntity, Identifiable {
     @Persisted(primaryKey: true) var objectId: ObjectId
     @Persisted(indexed: true) var id = 0
     @Persisted var transactionStatus: String = ""
     @Persisted var transactionType: String = ""
     @Persisted var transactionResponse: String = ""
     
-    @Persisted var date: String?
-    @Persisted var hourStart: String?
-    @Persisted var hourEnd: String?
-    @Persisted var type: String?
-    @Persisted var contactType: String?
-    @Persisted var panelType: String?
-    @Persisted var content: String?
+    
     @Persisted var panelId = 0
+    @Persisted var panelObjectId: ObjectId
+    @Persisted var panelType: String = ""
+    
+    @Persisted var date: String = ""
+    @Persisted var hourStart: String = ""
+    @Persisted var hourEnd: String? = ""
+    @Persisted var type: String = ""
+    @Persisted var contactType: String?
+    @Persisted var content: String?
     @Persisted var isContactPoint = 0
     @Persisted var wasVisited = 0
     @Persisted var dataFields: String?

@@ -57,7 +57,7 @@ struct HeaderToggleView: View {
                                 .resizable()
                                 .aspectRatio(contentMode: .fit)
                                 .foregroundColor(.cIcon)
-                                .frame(width: 32, height: 32, alignment: .center)
+                                .frame(width: 24, height: 24, alignment: .center)
                         }
                         .frame(width: 44, height: 44, alignment: .center)
                         Spacer()

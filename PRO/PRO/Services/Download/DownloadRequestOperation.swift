@@ -11,9 +11,9 @@ import RealmSwift
 import Amplify
 
 enum DownloadRequestServices {
-    case brick, category, city, college, config, contact_control_type, country, cycle, day_request_reason, pharmacy_chain, pharmacy_type, prices_list, specialty, style, user, zone, concept_expense, menu,//Tertiary
+    case brick, category, city, college, config, contact_control_type, country, cycle, day_request_reason, pharmacy_chain, pharmacy_type, prices_list, specialty, style, user, zone, concept_expense, menu, product_brand, user_preference,//Tertiary
          material, material_plain, product, line,//Secondary
-         activity, client, doctor, patient, pharmacy, potential//Primary
+         activity, diary, client, doctor, patient, pharmacy, potential//Primary
 }
 
 class DownloadRequestOperation: Operation {
@@ -128,8 +128,8 @@ class DownloadRequestOperation: Operation {
                         for item in rs {
                             //print(item)
                             let object = Utils.jsonDictionary(string: item)
-                            let objectId = Utils.castInt(value: object[primaryKey])
-                            if let local = realm.objects(from.self).filter("id = %@", objectId > 0 ? objectId : Utils.castString(value: object[primaryKey])).first {
+                            let id = Utils.castInt(value: object[primaryKey])
+                            if let local = realm.objects(from.self).filter("id = %@", id > 0 ? id : Utils.castString(value: object[primaryKey])).first {
                                 var final = Dictionary<String, Any>()
                                 let obj = Utils.jsonDictionary(string: item)
                                 obj.keys.forEach { key in
@@ -141,6 +141,11 @@ class DownloadRequestOperation: Operation {
                                 }
                                 let server = try JSONDecoder().decode(from.self, from: (Utils.json(from: final)?.data(using: .utf8)!)!)
                                 server.setValue(local.value(forKey: "objectId"), forKey: "objectId")
+                                if path.contains("doctor") {
+                                    print("///////////////////////")
+                                    print(local)
+                                    print(server)
+                                }
                                 realm.add(server, update: .modified)
                             } else {
                                 let decoded = try JSONDecoder().decode(from.self, from: item.data(using: .utf8)!)
@@ -186,8 +191,6 @@ class DownloadRequestOperation: Operation {
                 getRQ(from: Line.self, path: "line", primaryKey: Line.primaryCodingKey())
             case .material:
                 postRQ(from: AdvertisingMaterial.self, path: "advertising-material/stock", data: [String: Any](), primaryKey: AdvertisingMaterial.primaryCodingKey(), identifier: "advertising-material")
-            case .product:
-                getRQ(from: Product.self, path: "product", primaryKey: Product.primaryCodingKey())
             case .activity:
                 postRQ(from: DifferentToVisit.self, path: "activity/filter", data:
                         [
@@ -256,6 +259,16 @@ class DownloadRequestOperation: Operation {
                     getRQ(from: AdvertisingMaterialPlain.self, path: "advertising-material", primaryKey: AdvertisingMaterial.primaryCodingKey())
                 case .contact_control_type:
                     getRQ(from: ContactControlType.self, path: "contact-control/type", primaryKey: ContactControlType.primaryCodingKey())
+                case .product:
+                    getRQ(from: Product.self, path: "product/mobile", primaryKey: Product.primaryCodingKey())
+                case .product_brand:
+                    getRQ(from: ProductBrand.self, path: "product/brand", primaryKey: ProductBrand.primaryCodingKey())
+                case .user_preference:
+                    getRQ(from: UserPreference.self, path: "user/preference", primaryKey: UserPreference.primaryCodingKey())
+                case .diary:
+                    let date = Date().addingTimeInterval(TimeInterval(-7 * 24 * 60.0 * 60.0))
+                    print("vm/diary/by/user/\(JWTUtils.sub())/\(Utils.dateFormat(date: date))")
+                    getRQ(from: Diary.self, path: "vm/diary/by/user/\(JWTUtils.sub())/\(Utils.dateFormat(date: date))", primaryKey: Diary.primaryCodingKey())
             }
         } else {
             debugPrint("Sync Process End")

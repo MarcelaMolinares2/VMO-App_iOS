@@ -140,25 +140,9 @@ struct MaterialDeliveryFormWrapperView: View {
     
     var body: some View {
         VStack {
-            Button(action: {
+            CustomHeaderButtonIconView(label: "envMaterialAndSamples") {
                 modalOpen = true
-            }) {
-                ZStack(alignment: .center) {
-                    HStack {
-                        Spacer()
-                        Image("ic-plus-circle")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 40, height: 40, alignment: .center)
-                            .foregroundColor(.cIcon)
-                    }
-                    VStack {
-                        Text("envMaterialAndSamples")
-                            .foregroundColor(.cTextHigh)
-                    }
-                }
             }
-            .padding(.horizontal, Globals.UI_FORM_PADDING_HORIZONTAL)
             ScrollView {
                 ForEach($details) { $detail in
                     MaterialDeliveryFormItemView(realm: realm, deliveryMaterial: $detail) {
