@@ -225,12 +225,8 @@ struct RouteFormView: View {
             routeName = group?.name ?? ""
             members.removeAll()
             group?.members.forEach{ gm in
-                if gm.panelId <= 0 {
-                    members.append(PanelItemModel(objectId: gm.panelObjectId, type: gm.panelType))
-                } else {
-                    if let panel = PanelUtils.panel(type: gm.panelType, id: gm.panelId) {
-                        members.append(PanelItemModel(objectId: panel.objectId, type: gm.panelType))
-                    }
+                if let panel = PanelUtils.panel(type: gm.panelType, objectId: gm.panelObjectId, id: gm.panelId) {
+                    members.append(PanelItemModel(objectId: panel.objectId, type: gm.panelType))
                 }
             }
         } else {

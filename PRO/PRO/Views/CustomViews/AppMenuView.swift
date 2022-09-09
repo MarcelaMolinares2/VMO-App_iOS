@@ -421,7 +421,7 @@ struct GlobalMenu: View {
                 ForEach(topMenu, id: \.objectId) { menu in
                     Button(action: {
                         print(menu.routerLink)
-                        self.goTo(page: "\(menu.routerLink.uppercased())-VIEW")
+                        self.goTo(page: "\(menu.routerLink.uppercased())-VIEW", menuId: menu.id)
                     }) {
                         VStack {
                             Image(menu.icon.replacingOccurrences(of: "_", with: "-"))
@@ -441,7 +441,7 @@ struct GlobalMenu: View {
                     ForEach(bottomMenu, id: \.objectId) { menu in
                         Button(action: {
                             print(menu.routerLink)
-                            self.goTo(page: "\(menu.routerLink.uppercased())-VIEW")
+                            self.goTo(page: "\(menu.routerLink.uppercased())-VIEW", menuId: menu.id)
                         }) {
                             HStack {
                                 Image(menu.icon.replacingOccurrences(of: "_", with: "-"))
@@ -487,7 +487,8 @@ struct GlobalMenu: View {
         bottomMenu = Array(menu[4...])
     }
     
-    func goTo(page: String) {
+    func goTo(page: String, menuId: Int = 0) {
+        viewRouter.parentMenuId = menuId
         viewRouter.currentPage = page
         self.isPresented = false
     }

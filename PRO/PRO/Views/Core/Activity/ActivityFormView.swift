@@ -119,12 +119,8 @@ struct ActivityFormView: View {
             
             assistants.removeAll()
             differentToVisit?.assistants.forEach{ assistant in
-                if assistant.panelId <= 0 {
-                    assistants.append(PanelItemModel(objectId: assistant.panelObjectId, type: assistant.panelType))
-                } else {
-                    if let panel = PanelUtils.panel(type: assistant.panelType, id: assistant.panelId) {
-                        assistants.append(PanelItemModel(objectId: panel.objectId, type: assistant.panelType))
-                    }
+                if let panel = PanelUtils.panel(type: assistant.panelType, objectId: assistant.panelObjectId, id: assistant.panelId) {
+                    assistants.append(PanelItemModel(objectId: panel.objectId, type: assistant.panelType))
                 }
             }
         }

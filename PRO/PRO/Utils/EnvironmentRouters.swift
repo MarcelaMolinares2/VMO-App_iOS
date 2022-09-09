@@ -90,6 +90,13 @@ class ViewRouter: ObservableObject {
             }
         }
     }
+    var parentMenuId: Int = 0 {
+        didSet {
+            withAnimation() {
+                objectWillChange.send(self)
+            }
+        }
+    }
     
     func panel() -> Panel & SyncEntity {
         /*

@@ -16,6 +16,8 @@
 		AC1AF8C4274DEC67002658B6 /* MovementFormTabsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC1AF8C3274DEC67002658B6 /* MovementFormTabsView.swift */; };
 		AC22180C27624F9C00815E4E /* ActivityFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC22180B27624F9C00815E4E /* ActivityFormView.swift */; };
 		AC2840C528519C4B00669892 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = AC2840C428519C4B00669892 /* Lottie */; };
+		AC299EB128CAE0830000875D /* ReportsMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC299EB028CAE0830000875D /* ReportsMenuView.swift */; };
+		AC299EB328CAE0E10000875D /* SupportMainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC299EB228CAE0E10000875D /* SupportMainView.swift */; };
 		AC2B20F22850058F00618CF4 /* login_animation.json in Resources */ = {isa = PBXBuildFile; fileRef = AC2B20F12850058F00618CF4 /* login_animation.json */; };
 		AC3444C42562C66900C0D668 /* DownloadRequestOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC3444C32562C66900C0D668 /* DownloadRequestOperation.swift */; };
 		AC3444CA2562C72400C0D668 /* UploadRequestOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC3444C92562C72400C0D668 /* UploadRequestOperation.swift */; };
@@ -149,6 +151,8 @@
 		AC17AD85274426DA002A376B /* ViewerDialogs.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewerDialogs.swift; sourceTree = "<group>"; };
 		AC1AF8C3274DEC67002658B6 /* MovementFormTabsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovementFormTabsView.swift; sourceTree = "<group>"; };
 		AC22180B27624F9C00815E4E /* ActivityFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityFormView.swift; sourceTree = "<group>"; };
+		AC299EB028CAE0830000875D /* ReportsMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportsMenuView.swift; sourceTree = "<group>"; };
+		AC299EB228CAE0E10000875D /* SupportMainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupportMainView.swift; sourceTree = "<group>"; };
 		AC2B20F12850058F00618CF4 /* login_animation.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = login_animation.json; sourceTree = "<group>"; };
 		AC3444C32562C66900C0D668 /* DownloadRequestOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadRequestOperation.swift; sourceTree = "<group>"; };
 		AC3444C92562C72400C0D668 /* UploadRequestOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UploadRequestOperation.swift; sourceTree = "<group>"; };
@@ -343,6 +347,22 @@
 			path = Movement;
 			sourceTree = "<group>";
 		};
+		AC299EAE28CAE0590000875D /* Reports */ = {
+			isa = PBXGroup;
+			children = (
+				AC299EB028CAE0830000875D /* ReportsMenuView.swift */,
+			);
+			path = Reports;
+			sourceTree = "<group>";
+		};
+		AC299EAF28CAE0610000875D /* Support */ = {
+			isa = PBXGroup;
+			children = (
+				AC299EB228CAE0E10000875D /* SupportMainView.swift */,
+			);
+			path = Support;
+			sourceTree = "<group>";
+		};
 		AC2B20F02850055700618CF4 /* Lottie */ = {
 			isa = PBXGroup;
 			children = (
@@ -428,7 +448,9 @@
 				AC60C1E12747457500294834 /* Patient */,
 				AC34454525638AC800C0D668 /* Pharmacy */,
 				ACA106CD25758F8800FDD7E4 /* Potential */,
+				AC299EAE28CAE0590000875D /* Reports */,
 				ACC1283A2583D82F00595078 /* Route */,
+				AC299EAF28CAE0610000875D /* Support */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -1007,6 +1029,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				AC344536256389A800C0D668 /* DiaryListTabView.swift in Sources */,
+				AC299EB128CAE0830000875D /* ReportsMenuView.swift in Sources */,
 				AC22180C27624F9C00815E4E /* ActivityFormView.swift in Sources */,
 				AC60C1FA27474A4100294834 /* PharmacyFormView.swift in Sources */,
 				AC6F1F2324FF2978005E57DC /* AppDelegate.swift in Sources */,
@@ -1080,6 +1103,7 @@
 				AC3444D72562CA4E00C0D668 /* SyncDataService.swift in Sources */,
 				ACC053582550981E00B9753A /* AuthServices.swift in Sources */,
 				AC3444F02563691B00C0D668 /* DashboardExtraView.swift in Sources */,
+				AC299EB328CAE0E10000875D /* SupportMainView.swift in Sources */,
 				ACC053412550629500B9753A /* NetworkService.swift in Sources */,
 				ACC49D1B2750881E0078F7CA /* LocationService.swift in Sources */,
 				AC3444DD2562CCE200C0D668 /* SyncService.swift in Sources */,

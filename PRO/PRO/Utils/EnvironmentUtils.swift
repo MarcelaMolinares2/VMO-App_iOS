@@ -33,6 +33,13 @@ class SyncUtils {
         }
     }
     
+    static func count<T: Object & SyncEntity>(realm: Realm, from: T.Type) -> Int {
+        return realm.objects(from.self).where {
+            $0.transactionStatus != ""
+        }
+        .count
+    }
+    
 }
 
 
@@ -110,7 +117,10 @@ class MovementUtils {
 
 class PanelUtils {
     
-    static func panel(type: String, objectId: ObjectId) -> Panel? {
+    static func panel(type: String, objectId: ObjectId, id: Int = 0) -> Panel? {
+        if id > 0 {
+            return panel(type: type, id: id)
+        }
         switch type {
             case "M":
                 return DoctorDao(realm: try! Realm()).by(objectId: objectId)
@@ -130,7 +140,7 @@ class PanelUtils {
         return nil
     }
     
-    static func panel(type: String, id: Int) -> Panel? {
+    private static func panel(type: String, id: Int) -> Panel? {
         switch type {
             case "M":
                 return DoctorDao(realm: try! Realm()).by(id: String(id))
@@ -243,23 +253,6 @@ class PanelUtils {
             return val
         } else {
             return data[index]["D"] as Any
-        }
-    }
-    
-    static func panelByType(id: Int, type: String) -> Panel? {
-        switch type {
-            case "M":
-                return try! Realm().object(ofType: Doctor.self, forPrimaryKey: id)
-            case "F":
-                return try! Realm().object(ofType: Pharmacy.self, forPrimaryKey: id)
-            case "C":
-                return try! Realm().object(ofType: Client.self, forPrimaryKey: id)
-            case "P":
-                return try! Realm().object(ofType: Patient.self, forPrimaryKey: id)
-            case "T":
-                return try! Realm().object(ofType: PotentialProfessional.self, forPrimaryKey: id)
-            default:
-                return nil
         }
     }
     

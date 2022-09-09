@@ -259,7 +259,7 @@ class MenuDao: GenericDao {
     
     func by(userType: Int, parent: Int = 0) -> [Menu] {
         return realm.objects(Menu.self).where {
-            $0.parent == 0
+            $0.parent == parent
         }
         .sorted(byKeyPath: "order", ascending: true)
         .filter { menu in

@@ -99,3 +99,7 @@ enum PanelLayout {
 enum WrapperLayout {
     case list, form
 }
+
+enum ConnectionStatus {
+    case unknown, connected, error
+}

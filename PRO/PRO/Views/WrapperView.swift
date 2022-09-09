@@ -56,12 +56,10 @@ struct WrapperView: View {
                 RecordExpenseView()
             case "REQUEST-DAYS-VIEW":
                 RequestDayView()
-            /*
-            case "ROUTE-FORM":
-                RouteFormView()
-            */
-            case "SUPPORT":
-                SupportView()
+            case "REPORTS-VIEW":
+                ReportsMenuView()
+            case "SUPPORT-VIEW":
+                SupportMainView()
             default:
                 Text("")
         }

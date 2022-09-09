@@ -10,12 +10,20 @@ import SwiftUI
 import RealmSwift
 import CoreLocation
 
+class MovementModel: ObservableObject {
+    @Published var date: Date = Date()
+    @Published var comment: String = ""
+    @Published var fields: String = ""
+    
+    @Published var requestAssistance = false
+    @Published var attachPanelLocation = false
+}
+
 struct MovementFormView: View {
     
     @EnvironmentObject var viewRouter: ViewRouter
     @StateObject var tabRouter = TabRouter()
     @ObservedObject var locationService = LocationService()
-    
     
     var realm = try! Realm()
     
@@ -42,12 +50,19 @@ struct MovementFormView: View {
     
     @State private var extraData: [String: Any] = [:]
     
+    @State private var dynamicData = Utils.jsonDictionary(string: Config.get(key: "P_MOV_FORM_ADDITIONAL").complement ?? "")
+    @State private var dynamicForm = DynamicForm(tabs: [DynamicFormTab]())
+    @State private var dynamicOptions = DynamicFormFieldOptions(table: "move", op: .view)
+    
+    @State private var model = MovementModel()
+    
     var body: some View {
         VStack {
             HeaderToggleView(title: "modVisit") {
                 viewRouter.currentPage = "MASTER"
             }
-            if locationRequired && locationService.location == nil || (locationService.location?.coordinate.latitude == 0 && locationService.location?.coordinate.longitude == 0) {
+            let locationAvailable = !(locationService.location == nil || (locationService.location?.coordinate.latitude == 0 && locationService.location?.coordinate.longitude == 0))
+            if locationRequired && !locationAvailable {
                 Spacer()
                 VStack {
                     Text("envMovementLocationRequired")
@@ -70,7 +85,7 @@ struct MovementFormView: View {
                             if mainTabsLayout {
                                 TabView(selection: $tabRouter.current) {
                                     ForEach(mainTabs) { tab in
-                                        MovementTabContentWrapperView(realm: realm, key: tab.key, visitType: visitType, isEditable: true, extraData: extraData, materials: $materials, promoted: $promoted, stock: $stock, shopping: $shopping, transference: $transference)
+                                        MovementTabContentWrapperView(realm: realm, key: tab.key, visitType: visitType, isEditable: true, locationAvailable: locationAvailable, extraData: extraData, model: $model, dynamicForm: $dynamicForm, dynamicOptions: $dynamicOptions, materials: $materials, promoted: $promoted, stock: $stock, shopping: $shopping, transference: $transference)
                                             .tag(tab.key)
                                             .tabItem {
                                                 Text(tab.label.localized())
@@ -81,7 +96,7 @@ struct MovementFormView: View {
                             } else {
                                 TabView(selection: $tabRouter.current) {
                                     ForEach(moreTabs) { tab in
-                                        MovementTabContentWrapperView(realm: realm, key: tab.key, visitType: visitType, isEditable: true, extraData: extraData, materials: $materials, promoted: $promoted, stock: $stock, shopping: $shopping, transference: $transference)
+                                        MovementTabContentWrapperView(realm: realm, key: tab.key, visitType: visitType, isEditable: true, locationAvailable: locationAvailable, extraData: extraData, model: $model, dynamicForm: $dynamicForm, dynamicOptions: $dynamicOptions, materials: $materials, promoted: $promoted, stock: $stock, shopping: $shopping, transference: $transference)
                                             .tag(tab.key)
                                             .tabItem {
                                                 Text(tab.label.localized())
@@ -141,229 +156,114 @@ struct MovementFormView: View {
         } else {
             //doctor = Movement(value: try! MovementDao(realm: try! Realm()).by(objectId: ObjectId(string: viewRouter.data.objectId)) ?? Doctor())
         }
+        
+        initDynamic()
+    }
+    
+    func initDynamic() {
+        dynamicForm.tabs = DynamicUtils.initForm(data: dynamicData).sorted(by: { $0.key > $1.key })
+        if !model.fields.isEmpty {
+            DynamicUtils.fillForm(form: &dynamicForm, base: model.fields)
+        }
+        dynamicOptions.op = .create
     }
 }
 
 struct MovementFormTabBasicView: View {
-    
-    @Binding var movement: Movement
-    @State var location: CLLocation?
-    @State var panel: Panel
-    var op: String
+    @Binding var model: MovementModel
+    @Binding var dynamicForm: DynamicForm
+    @Binding var dynamicOptions: DynamicFormFieldOptions
     var visitType: String
+    var locationAvailable: Bool
     
-    @State var plainData = ""
-    @State var additionalData = ""
-    @State var dynamicData = Dictionary<String, Any>()
+    @State private var requestAssistance = false
+    @State private var attachPanelLocation = false
     
-    @State private var form = DynamicForm(tabs: [DynamicFormTab]())
-    @State private var options = DynamicFormFieldOptions(table: "movement", op: .view)
-    @State private var formAssistance = false
-    @State private var formInPoint = false
+    @State private var modalInfo = false
     
-    @State private var showInfoDialog = false
-    
-    @State private var basicFormOpts = Config.get(key: "MOV_LOCATION_REQUIRED").value == 1
+    let reportType = Config.get(key: "MOV_REPORT_TYPE").value
     
     var body: some View {
         VStack {
-            GeometryReader { geometry in
-                HStack(spacing: 0) {
+            HStack(spacing: 0) {
+                Button {
+                    modalInfo = true
+                } label: {
                     Image("ic-info")
                         .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .padding(5)
-                        .frame(width: geometry.size.width / CGFloat(5), alignment: .center)
-                        .foregroundColor(.cInfo)
-                        .onTapGesture {
-                            showInfoDialog = true
-                        }
-                    Image(formAssistance ? "ic-notification-fill" : "ic-notification")
+                        .scaledToFit()
+                        .frame(width: 26, height: 26, alignment: .center)
+                        .foregroundColor(.cIcon)
+                }
+                .frame(maxWidth: .infinity, alignment: .center)
+                Button {
+                    requestAssistance.toggle()
+                } label: {
+                    Image(requestAssistance ? "ic-notifications-active" : "ic-notifications")
                         .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .padding(5)
-                        .frame(width: geometry.size.width / CGFloat(5), alignment: .center)
-                        .foregroundColor(formAssistance ? .cToggleActive : .cAccent)
-                        .onTapGesture {
-                            toggleAssistance()
-                        }
-                    Image(location == nil ? "ic-location-disabled" : "ic-location")
+                        .scaledToFit()
+                        .frame(width: 26, height: 26, alignment: .center)
+                        .foregroundColor(requestAssistance ? .cDone : .cIcon)
+                }
+                .frame(maxWidth: .infinity, alignment: .center)
+                .onChange(of: requestAssistance) { v in
+                    model.requestAssistance = v
+                }
+                Button {
+                    if locationAvailable {
+                        attachPanelLocation.toggle()
+                    }
+                } label: {
+                    Image(locationAvailable ? "ic-location" : "ic-location-disabled")
                         .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .padding(5)
-                        .frame(width: geometry.size.width / CGFloat(5), alignment: .center)
-                        .foregroundColor(formInPoint ? .cToggleActive : .cAccent)
-                        .onTapGesture {
-                            if location != nil {
-                                toggleInPoint()
-                            }
-                        }
-                    if true {
+                        .scaledToFit()
+                        .frame(width: 26, height: 26, alignment: .center)
+                        .foregroundColor(attachPanelLocation ? .cDone : .cIcon)
+                }
+                .onChange(of: attachPanelLocation) { v in
+                    model.attachPanelLocation = v
+                }
+                .frame(maxWidth: .infinity, alignment: .center)
+                if dynamicOptions.op == FormAction.create {
+                    Button {
+                        
+                    } label: {
                         Image("ic-warning")
                             .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .padding(5)
-                            .frame(width: geometry.size.width / CGFloat(5), alignment: .center)
-                            .foregroundColor(.cError)
-                            .onTapGesture {
-                                
-                            }
+                            .scaledToFit()
+                            .frame(width: 26, height: 26, alignment: .center)
+                            .foregroundColor(.cWarning)
                     }
-                    if true {
+                    .frame(maxWidth: .infinity, alignment: .center)
+                }
+                if reportType == 2 && dynamicOptions.op == .update {
+                    Button {
+                        
+                    } label: {
                         Image("ic-delete")
                             .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .padding(5)
-                            .frame(width: geometry.size.width / CGFloat(5), alignment: .center)
+                            .scaledToFit()
+                            .frame(width: 26, height: 26, alignment: .center)
                             .foregroundColor(.cDanger)
-                            .onTapGesture {
-                                
-                            }
                     }
+                    .frame(maxWidth: .infinity, alignment: .center)
                 }
             }
-            .frame(minWidth: 0, maxWidth: .infinity, minHeight: 38, maxHeight: 38)
-            Form {
-                Section {
-                    HStack {
-                        HStack{
-                            VStack{
-                                Text(NSLocalizedString("envCycle", comment: ""))
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .foregroundColor(.cTextMedium)
-                                    .font(.system(size: 14))
-                                Text((movement.cycleId <= 0) ? NSLocalizedString("envChoose", comment: "") : "----")
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .foregroundColor(.cTextMedium)
-                                    .font(.system(size: 16))
-                            }
-                            Spacer()
-                            Image("ic-arrow-expand-more")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 35)
-                                .foregroundColor(.cTextMedium)
-                        }
-                        .padding(10)
-                        HStack{
-                            VStack{
-                                Text(NSLocalizedString("envFrom", comment: ""))
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .foregroundColor(.cTextMedium)
-                                    .font(.system(size: 14))
-                                DatePicker("", selection: $movement.tmpDate, in: Date()..., displayedComponents: [.date, .hourAndMinute])
-                                    .datePickerStyle(CompactDatePickerStyle())
-                                    .labelsHidden()
-                                    .clipped()
-                                    .accentColor(.cTextHigh)
-                                    .background(Color.white)
-                                    .onChange(of: movement.tmpDate, perform: { value in
-                                        
-                                    })
-                            }
-                            .padding(10)
-                            Spacer()
-                            Image("ic-day-request")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(height: 35)
-                                .foregroundColor(.cTextMedium)
-                                .padding(10)
-                        }
-                    }
-                    VStack {
-                    }
-                    VStack {
-                        HStack {
-                            Text("AAAAA")
-                            Text("DDDDD")
-                        }
-                    }
-                    VStack {
-                        HStack {
-                            Text("AAAAA")
-                            Text("DDDDD")
-                        }
-                    }
-                    VStack {
-                        HStack {
-                            Text("AAAAA")
-                            Text("DDDDD")
-                        }
-                    }
-                    VStack {
-                        HStack {
-                            Text("AAAAA")
-                            Text("DDDDD")
-                        }
-                    }
-                    VStack {
-                        HStack {
-                            Text("AAAAA")
-                            Text("DDDDD")
-                        }
-                    }
-                    VStack {
-                        HStack {
-                            Text("AAAAA")
-                            Text("DDDDD")
-                        }
-                    }
-                    VStack {
-                        HStack {
-                            Text("AAAAA")
-                            Text("DDDDD")
-                        }
-                    }
-                    VStack {
-                        HStack {
-                            Text("AAAAA")
-                            Text("DDDDD")
-                        }
-                    }
-                }
-                ForEach(form.tabs, id: \.id) { tab in
-                    DynamicFormView(form: $form, tab: $form.tabs[0], options: options)
+            CustomForm {
+                ForEach($dynamicForm.tabs) { $tab in
+                    DynamicFormView(form: $dynamicForm, tab: $tab, options: dynamicOptions)
                 }
             }
         }
         .onAppear {
             initForm()
         }
-        .partialSheet(isPresented: $showInfoDialog) {
-            PanelInfoDialog(panel: panel)
+        .partialSheet(isPresented: $modalInfo) {
+            //PanelInfoDialog(panel: panel)
         }
     }
     
     func initForm() {
-        options.objectId = movement.objectId
-        options.item = movement.id
-        options.op = .create
-        options.type = visitType.lowercased()
-        options.panelType = panel.type
-        dynamicData = Utils.jsonDictionary(string: Config.get(key: "P_MOV_FORM_ADDITIONAL").complement ?? "")
-
-        initDynamic(data: dynamicData)
-    }
-    
-    func initDynamic(data: Dictionary<String, Any>) {
-        plainData = try! Utils.objToJSON(movement)
-        additionalData = (movement.additionalFields ?? "").isEmpty ? (movement.additionalFields ?? "{}") : "{}"
-        
-        form.tabs = DynamicUtils.initForm(data: data).sorted(by: { $0.key > $1.key })
-        if !plainData.isEmpty {
-            DynamicUtils.fillForm(form: &form, base: plainData, additional: additionalData)
-        }
-    }
-    
-    func toggleAssistance() {
-        formAssistance.toggle()
-        movement.rqAssistance = formAssistance ? 1 : 0
-    }
-    
-    func toggleInPoint() {
-        formInPoint.toggle()
-        movement.assocPanelLocation = formInPoint
     }
     
 }
@@ -373,7 +273,12 @@ struct MovementTabContentWrapperView: View {
     var key: String
     var visitType: String
     var isEditable: Bool
+    var locationAvailable: Bool
     var extraData: [String: Any]
+    
+    @Binding var model: MovementModel
+    @Binding var dynamicForm: DynamicForm
+    @Binding var dynamicOptions: DynamicFormFieldOptions
     
     @Binding var materials: [AdvertisingMaterialDeliveryMaterial]
     @Binding var promoted: [String]
@@ -398,9 +303,7 @@ struct MovementTabContentWrapperView: View {
                     
                 }
             default:
-                ScrollView {
-                    
-                }
+                MovementFormTabBasicView(model: $model, dynamicForm: $dynamicForm, dynamicOptions: $dynamicOptions, visitType: visitType, locationAvailable: locationAvailable)
         }
     }
     

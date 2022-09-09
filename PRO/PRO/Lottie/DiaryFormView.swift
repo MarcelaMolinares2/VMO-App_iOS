@@ -9,6 +9,16 @@
 import SwiftUI
 import RealmSwift
 import UniformTypeIdentifiers
+import GoogleMaps
+
+class DiaryModel: ObservableObject {
+    @Published var date: Date = Date()
+    @Published var hourFrom: Date = Date()
+    @Published var hourTo: Date = Date()
+    @Published var comment: String = ""
+    @Published var contactType: String = ""
+    @Published var isContactPoint: Bool = false
+}
 
 class DiaryActivityModel: ObservableObject {
     @Published var date: Date = Date()
@@ -44,6 +54,8 @@ struct DiaryFormView: View {
     @State private var modalSelectionMenu: Bool = false
     @State private var modalPanelType = false
     
+    @State private var modalMenuEdit = false
+    
     @State private var itemWrappers: [DiaryItemWrapper] = []
     
     private var realm = try! Realm()
@@ -58,6 +70,7 @@ struct DiaryFormView: View {
     @State private var modalPanelPatient = false
     
     @State private var diaries: [Diary] = []
+    @State private var diarySelected: Diary = Diary()
     @State private var predefinedTime = ""
     
     var body: some View {
@@ -99,6 +112,7 @@ struct DiaryFormView: View {
                                     .labelsHidden()
                                     .id(date)
                                     .onChange(of: date) { d in
+                                        layout = .main
                                         refresh()
                                     }
                                 Spacer()
@@ -141,11 +155,18 @@ struct DiaryFormView: View {
                         }
                     }
                     ZStack(alignment: .bottom) {
-                        ScrollView {
-                            ForEach($itemWrappers) { $iw in
-                                DiaryFormWrapperItemView(realm: realm, iw: $iw, dateDiaries: $diaries, interval: $interval, onRefreshRequested: refresh) { diw in
-                                    predefinedTime = Utils.hourFormat(date: diw.time)
-                                    modalPanelType = true
+                        if layout == .map {
+                            DiaryListMapView(items: $diaries)
+                        } else {
+                            ScrollView {
+                                ForEach($itemWrappers) { $iw in
+                                    DiaryFormWrapperItemView(realm: realm, iw: $iw, dateDiaries: $diaries, interval: $interval, onRefreshRequested: refresh, onDiaryTapped: { diary in
+                                        diarySelected = diary
+                                        modalMenuEdit = true
+                                    }) { diw in
+                                        predefinedTime = Utils.hourFormat(date: diw.time)
+                                        modalPanelType = true
+                                    }
                                 }
                             }
                         }
@@ -174,18 +195,24 @@ struct DiaryFormView: View {
                     if layout != .selection {
                         HStack {
                             Button(action: {
-                                layout = .map
+                                if layout == .map {
+                                    layout = .main
+                                    refresh()
+                                } else {
+                                    layout = .map
+                                }
                             }) {
-                                Image("ic-map")
+                                Image(layout == .map ? "ic-list" : "ic-map")
                                     .resizable()
                                     .foregroundColor(.cIcon)
                                     .aspectRatio(contentMode: .fit)
-                                    .frame(width: 30, height: 30, alignment: .center)
-                                    .padding(8)
+                                    .frame(width: 26, height: 26, alignment: .center)
                             }
                             .frame(maxWidth: .infinity, minHeight: 44, maxHeight: 44, alignment: .center)
-                            EmptyView()
-                                .frame(maxWidth: .infinity, minHeight: 44, maxHeight: 44)
+                            VStack {
+                                
+                            }
+                            .frame(maxWidth: .infinity, minHeight: 44, maxHeight: 44)
                             Button(action: {
                                 modalActivity = true
                             }) {
@@ -193,8 +220,7 @@ struct DiaryFormView: View {
                                     .resizable()
                                     .foregroundColor(.cIcon)
                                     .aspectRatio(contentMode: .fit)
-                                    .frame(width: 30, height: 30, alignment: .center)
-                                    .padding(8)
+                                    .frame(width: 26, height: 26, alignment: .center)
                             }
                             .frame(maxWidth: .infinity, minHeight: 44, maxHeight: 44, alignment: .center)
                         }
@@ -339,6 +365,12 @@ struct DiaryFormView: View {
                 modalPanelType = false
             }
         }
+        .partialSheet(isPresented: $modalMenuEdit) {
+            DiaryMenuEdit(realm: realm, diary: diarySelected) {
+                modalMenuEdit = false
+                refresh()
+            }
+        }
         .sheet(isPresented: $modalPanelDoctor) {
             DoctorSelectView(selected: $slDoctors) {
                 modalPanelDoctor = false
@@ -457,7 +489,7 @@ struct DiaryFormView: View {
     func refresh() {
         diaries.removeAll()
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
-            diaries.append(contentsOf: DiaryDao(realm: realm).by(date: date))
+            diaries.append(contentsOf: DiaryDao(realm: realm).by(date: date).map { Diary(value: $0) })
         }
     }
     
@@ -476,6 +508,7 @@ struct DiaryFormWrapperItemView: View {
     @Binding var dateDiaries: [Diary]
     @Binding var interval: Int
     let onRefreshRequested: () -> Void
+    let onDiaryTapped: (_ diw: Diary) -> Void
     let onItemTapped: (_ diw: DiaryItemWrapper) -> Void
     
     @State private var diaries: [Diary] = []
@@ -506,8 +539,14 @@ struct DiaryFormWrapperItemView: View {
                     switch diary.type {
                         case "A":
                             DiaryActivityItemView(diary: diary)
+                                .onTapGesture {
+                                    onDiaryTapped(diary)
+                                }
                         default:
                             DiaryPanelItemView(realm: realm, diary: diary)
+                                .onTapGesture {
+                                    onDiaryTapped(diary)
+                                }
                     }
                 }
                 .onDrag {
@@ -647,7 +686,9 @@ struct DiaryDropDelegate: DropDelegate {
                             if diary.type == "P" {
                                 diary.hourStart = Utils.hourFormat(date: iw.time)
                             } else {
-                                
+                                let difference = Utils.strToDate(value: diary.hourStart, format: "HH:mm").distance(to: Utils.strToDate(value: diary.hourEnd ?? "", format: "HH:mm"))
+                                diary.hourStart = Utils.hourFormat(date: iw.time)
+                                diary.hourEnd = Utils.hourFormat(date: iw.time.addingTimeInterval(TimeInterval(difference)))
                             }
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                                 onDropPerformed()
@@ -666,23 +707,15 @@ struct DiaryActivityItemView: View {
     
     var body: some View {
         VStack {
-            HStack {
-                VStack {
-                    Image("ic-activity")
-                        .resizable()
-                        .scaledToFit()
-                        .foregroundColor(.cPanelActivity)
-                        .frame(width: 34, height: 34, alignment: .center)
-                        .padding(4)
-                }
-                .frame(height: 40)
+            HStack(alignment: .top) {
+                DiaryItemLeadingView(diary: diary, headerColor: .cPanelActivity, headerIcon: "ic-activity")
                 VStack {
                     Text(diary.content ?? "--")
                         .fontWeight(.bold)
                         .font(.system(size: 15))
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .foregroundColor(.cTextHigh)
-                        .lineLimit(1)
+                        .lineLimit(3)
                     Text("\(diary.hourStart) - \(diary.hourEnd ?? "--")")
                         .font(.system(size: 14))
                         .foregroundColor(.cTextMedium)
@@ -702,21 +735,13 @@ struct DiaryPanelItemView: View {
     
     @State var panel: Panel? = nil
     
-    @State var headerColor = Color.cPrimary
-    @State var headerIcon = "ic-home"
+    @State private var headerColor = Color.cPrimary
+    @State private var headerIcon = "ic-home"
     
     var body: some View {
         VStack {
-            HStack {
-                VStack {
-                    Image(headerIcon)
-                        .resizable()
-                        .scaledToFit()
-                        .foregroundColor(headerColor)
-                        .frame(width: 34, height: 34, alignment: .center)
-                        .padding(4)
-                }
-                .frame(height: 40)
+            HStack(alignment: .top) {
+                DiaryItemLeadingView(diary: diary, panel: panel, headerColor: headerColor, headerIcon: headerIcon)
                 VStack {
                     Text(panel?.name?.capitalized ?? " -- ")
                         .fontWeight(.bold)
@@ -770,14 +795,296 @@ struct DiaryPanelItemView: View {
     }
     
     func load() {
-        if diary.panelId <= 0 {
-            panel = PanelUtils.panel(type: diary.panelType, objectId: diary.panelObjectId)
-        } else {
-            panel = PanelUtils.panel(type: diary.panelType, id: diary.panelId)
-        }
+        panel = PanelUtils.panel(type: diary.panelType, objectId: diary.panelObjectId, id: diary.panelId)
         if let p = panel {
             self.headerColor = PanelUtils.colorByPanelType(panel: p)
             self.headerIcon = PanelUtils.iconByPanelType(panel: p)
+        }
+    }
+    
+}
+
+struct DiaryItemLeadingView: View {
+    let diary: Diary
+    var panel: Panel? = nil
+    var headerColor: Color
+    var headerIcon: String
+    
+    var body: some View {
+        VStack(spacing: 2) {
+            Image(headerIcon)
+                .resizable()
+                .scaledToFit()
+                .foregroundColor(headerColor)
+                .frame(width: 26, height: 26, alignment: .center)
+                .padding(4)
+            HStack(spacing: 0) {
+                Image(diary.contactType == "V" ? "ic-phone-call" : "ic-person")
+                    .resizable()
+                    .scaledToFit()
+                    .foregroundColor(.cIcon)
+                    .frame(width: 12, height: 12, alignment: .center)
+                    .padding(2)
+                Image("ic-pin")
+                    .resizable()
+                    .scaledToFit()
+                    .foregroundColor( diary.isContactPoint == 1 ? .cDanger : .cIcon)
+                    .frame(width: 12, height: 12, alignment: .center)
+                    .padding(2)
+                Image("ic-circle-check")
+                    .resizable()
+                    .scaledToFit()
+                    .foregroundColor(.cIconLight)
+                    .frame(width: 12, height: 12, alignment: .center)
+                    .padding(2)
+            }
+            .frame(width: 50)
+        }
+        .frame(width: 50)
+        .onAppear {
+            load()
+        }
+    }
+    
+    func load() {
+    }
+    
+}
+
+struct DiaryListMapView: View {
+    @Binding var items: [Diary]
+    
+    @State private var markers = [GMSMarker]()
+    @State private var goToMyLocation = false
+    @State private var fitToBounds = false
+    
+    @State private var menuIsPresented = false
+    @State private var panelTapped: Panel = GenericPanel()
+    
+    var body: some View {
+        ZStack(alignment: .topTrailing) {
+            CustomMarkerMapView(markers: $markers, goToMyLocation: $goToMyLocation, fitToBounds: $fitToBounds) { marker in
+                if let p = marker.userData as? Panel {
+                    panelTapped = p
+                    menuIsPresented = true
+                }
+            }
+            .onAppear {
+                markers.removeAll()
+                items.forEach { diary in
+                    if let panel = PanelUtils.panel(type: diary.panelType, objectId: diary.panelObjectId, id: diary.panelId) {
+                        if let location = panel.mainLocation() {
+                            if let lat = location.latitude, let lng = location.longitude {
+                                let marker = GMSMarker(position: CLLocationCoordinate2D(latitude: Double(lat), longitude: Double(lng)))
+                                marker.userData = panel
+                                markers.append(marker)
+                            }
+                        }
+                    }
+                }
+                fitToBounds = true
+            }
+            VStack(spacing: 10) {
+                FAB(image: "ic-my-location") {
+                    goToMyLocation = true
+                }
+                FAB(image: "ic-bounds") {
+                    fitToBounds = true
+                }
+            }
+            .padding(.top, Globals.UI_FAB_VERTICAL)
+            .padding(.horizontal, Globals.UI_FAB_HORIZONTAL)
+        }
+        .sheet(isPresented: $menuIsPresented) {
+            
+        }
+    }
+    
+}
+
+struct DiaryMenuEdit: View {
+    let realm: Realm
+    let diary: Diary
+    let onActionDone: () -> Void
+    
+    @State private var date: Date = Date()
+    @State private var hourFrom: Date = Date()
+    @State private var hourTo: Date = Date()
+    @State private var comment: String = ""
+    @State private var contactType: String = ""
+    @State private var isContactPoint: Bool = false
+    
+    var body: some View {
+        let panel = PanelUtils.panel(type: diary.panelType, objectId: diary.panelObjectId, id: diary.panelId)
+        VStack {
+            if diary.type == "P" {
+                if let p = panel {
+                    let headerColor = PanelUtils.colorByPanelType(panel: p)
+                    let headerIcon = PanelUtils.iconByPanelType(panel: p)
+                    HStack {
+                        Text(p.name ?? "")
+                            .fontWeight(.bold)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .lineLimit(1)
+                            .padding(.horizontal, 5)
+                            .foregroundColor(.cTextHigh)
+                        Image(headerIcon)
+                            .resizable()
+                            .scaledToFit()
+                            .foregroundColor(headerColor)
+                            .frame(width: 34, height: 34, alignment: .center)
+                            .padding(4)
+                    }
+                    PanelItemMapView(item: p)
+                        .frame(maxHeight: 200)
+                }
+            }
+            CustomSection {
+                VStack(spacing: 15) {
+                    HStack(spacing: 15) {
+                        DatePicker("envDate", selection: $date, displayedComponents: [.date])
+                            .id(date)
+                        Image("ic-calendar")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(height: 26)
+                            .foregroundColor(.cIcon)
+                    }
+                    if diary.type == "P" {
+                        HStack(spacing: 15) {
+                            DatePicker("envHour", selection: $hourFrom, displayedComponents: [.hourAndMinute])
+                                .id(hourFrom)
+                            Image("ic-clock")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(height: 26)
+                                .foregroundColor(.cIcon)
+                        }
+                    }
+                    if diary.type == "A" {
+                        HStack {
+                            VStack{
+                                Text(NSLocalizedString("envFrom", comment: "From"))
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .foregroundColor(.cTextMedium)
+                                    .font(.system(size: 13))
+                                DatePicker("", selection: $hourFrom, displayedComponents: [.hourAndMinute])
+                                    .fixedSize()
+                            }
+                            .frame(maxWidth: .infinity)
+                            VStack{
+                                Text(NSLocalizedString("envTo", comment: "To"))
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .foregroundColor(.cTextMedium)
+                                    .font(.system(size: 13))
+                                DatePicker("", selection: $hourTo, in: hourFrom..., displayedComponents: [.hourAndMinute])
+                                    .fixedSize()
+                            }
+                            .frame(maxWidth: .infinity)
+                            Image("ic-clock")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(height: 26)
+                                .foregroundColor(.cIcon)
+                        }
+                        VStack {
+                            Text("envDTVComment")
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .foregroundColor((comment.isEmpty) ? .cDanger : .cTextMedium)
+                                .font(.system(size: 14))
+                            VStack{
+                                TextEditor(text: $comment)
+                                    .frame(height: 80)
+                            }
+                        }
+                    }
+                }
+            }
+            HStack {
+                Button(action: {
+                    validate()
+                }) {
+                    Image("ic-done-all")
+                        .resizable()
+                        .foregroundColor(.cIcon)
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 26, height: 26, alignment: .center)
+                }
+                .frame(maxWidth: .infinity, minHeight: 44, maxHeight: 44, alignment: .center)
+                Button(action: {
+                    contactType = contactType == "V" ? "P" : "V"
+                }) {
+                    Image(contactType == "V" ? "ic-phone-call" : "ic-person")
+                        .resizable()
+                        .foregroundColor(.cIcon)
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 26, height: 26, alignment: .center)
+                }
+                .frame(maxWidth: .infinity, minHeight: 44, maxHeight: 44, alignment: .center)
+                Button(action: {
+                    isContactPoint.toggle()
+                }) {
+                    Image("ic-pin")
+                        .resizable()
+                        .foregroundColor(isContactPoint ? .cWarning : .cIcon)
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 26, height: 26, alignment: .center)
+                }
+                .frame(maxWidth: .infinity, minHeight: 44, maxHeight: 44, alignment: .center)
+                Button(action: {
+                    delete()
+                }) {
+                    Image("ic-delete")
+                        .resizable()
+                        .foregroundColor(.cDanger)
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 26, height: 26, alignment: .center)
+                }
+                .frame(maxWidth: .infinity, minHeight: 44, maxHeight: 44, alignment: .center)
+            }
+        }
+        .onAppear {
+            load()
+        }
+    }
+    
+    func load() {
+        date = Utils.strToDate(value: diary.date)
+        hourFrom = Utils.strToDate(value: diary.hourStart, format: "HH:mm")
+        hourTo = Utils.strToDate(value: diary.hourEnd ?? "", format: "HH:mm")
+        contactType = diary.contactType ?? "P"
+        isContactPoint = diary.isContactPoint == 1
+        comment = diary.content ?? ""
+    }
+    
+    func validate() {
+        if diary.type == "A" {
+            if comment.isEmpty {
+                return
+            }
+        }
+        save()
+    }
+    
+    func save() {
+        diary.date = Utils.dateFormat(date: date)
+        diary.hourStart = Utils.hourFormat(date: hourFrom)
+        diary.hourEnd = Utils.hourFormat(date: hourTo)
+        diary.contactType = contactType
+        diary.isContactPoint = isContactPoint ? 1 : 0
+        diary.content = comment
+        DiaryDao(realm: realm).store(diary: diary)
+        onActionDone()
+    }
+    
+    func delete() {
+        if let d = DiaryDao(realm: realm).by(objectId: diary.objectId.stringValue) {
+            try! realm.write {
+                realm.delete(d)
+                DispatchQueue.main.async {
+                    onActionDone()
+                }
+            }
         }
     }
     
