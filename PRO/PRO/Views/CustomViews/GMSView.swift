@@ -30,7 +30,7 @@ struct GoogleMapsView: UIViewRepresentable {
 struct CustomMarkerMapView: UIViewRepresentable {
     
     @ObservedObject var locationManager = LocationManager()
-    private let zoom: Float = 15.0//4.6187452,-74.1592274,15z
+    private let zoom: Float = 15.0
     @Binding var markers: [GMSMarker]
     @Binding var goToMyLocation: Bool
     @Binding var fitToBounds: Bool
@@ -70,8 +70,10 @@ struct CustomMarkerMapView: UIViewRepresentable {
             }
         }
         if goToMyLocation {
-            let camera = GMSCameraPosition.camera(withLatitude: locationManager.latitude, longitude: locationManager.longitude, zoom: zoom)
-            mapView.animate(to: camera)
+            if let location = locationManager.location {
+                let camera = GMSCameraPosition.camera(withLatitude: location.coordinate.latitude, longitude: location.coordinate.longitude, zoom: zoom)
+                mapView.animate(to: camera)
+            }
             DispatchQueue.main.async {
                 goToMyLocation = false
             }

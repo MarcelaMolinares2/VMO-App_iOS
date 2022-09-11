@@ -21,9 +21,7 @@ struct ReportsMenuView: View {
     
     var body: some View {
         VStack {
-            HeaderToggleView(title: "modReports") {
-                viewRouter.currentPage = "MASTER"
-            }
+            HeaderToggleView(title: "modReports")
             ScrollView {
                 VStack {
                     ForEach(nestedMenus, id: \.objectId) { menu in

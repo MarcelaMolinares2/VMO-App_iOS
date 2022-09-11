@@ -19,6 +19,7 @@ struct HeaderToggleView: View {
     private var onBackPressed: () -> Void = {}
     
     @State private var menuIsPresented = false
+    @State private var modalAgentLocation = false
     
     init(search: Binding<String>, title: String) {
         self.couldSearch = true
@@ -106,7 +107,15 @@ struct HeaderToggleView: View {
         .padding(.horizontal, 8)
         .frame(minWidth: 0, maxWidth: .infinity, minHeight: 44, maxHeight: 44)
         .partialSheet(isPresented: self.$menuIsPresented) {
-            GlobalMenu(isPresented: self.$menuIsPresented)
+            GlobalMenu(isPresented: self.$menuIsPresented) {
+                menuIsPresented = false
+                modalAgentLocation = true
+            }
+        }
+        .partialSheet(isPresented: $modalAgentLocation) {
+            AgentLocationForm() {
+                modalAgentLocation = false
+            }
         }
     }
 }

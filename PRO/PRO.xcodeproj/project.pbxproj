@@ -18,6 +18,10 @@
 		AC2840C528519C4B00669892 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = AC2840C428519C4B00669892 /* Lottie */; };
 		AC299EB128CAE0830000875D /* ReportsMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC299EB028CAE0830000875D /* ReportsMenuView.swift */; };
 		AC299EB328CAE0E10000875D /* SupportMainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC299EB228CAE0E10000875D /* SupportMainView.swift */; };
+		AC299EB528CD74080000875D /* sync_animation.json in Resources */ = {isa = PBXBuildFile; fileRef = AC299EB428CD74070000875D /* sync_animation.json */; };
+		AC299EB728CD74120000875D /* sync_done_animation.json in Resources */ = {isa = PBXBuildFile; fileRef = AC299EB628CD74120000875D /* sync_done_animation.json */; };
+		AC299EBA28CD84660000875D /* Zip in Frameworks */ = {isa = PBXBuildFile; productRef = AC299EB928CD84660000875D /* Zip */; };
+		AC299EBC28CDA6A10000875D /* PanelGlobalSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC299EBB28CDA6A10000875D /* PanelGlobalSearchView.swift */; };
 		AC2B20F22850058F00618CF4 /* login_animation.json in Resources */ = {isa = PBXBuildFile; fileRef = AC2B20F12850058F00618CF4 /* login_animation.json */; };
 		AC3444C42562C66900C0D668 /* DownloadRequestOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC3444C32562C66900C0D668 /* DownloadRequestOperation.swift */; };
 		AC3444CA2562C72400C0D668 /* UploadRequestOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC3444C92562C72400C0D668 /* UploadRequestOperation.swift */; };
@@ -153,6 +157,9 @@
 		AC22180B27624F9C00815E4E /* ActivityFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityFormView.swift; sourceTree = "<group>"; };
 		AC299EB028CAE0830000875D /* ReportsMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportsMenuView.swift; sourceTree = "<group>"; };
 		AC299EB228CAE0E10000875D /* SupportMainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupportMainView.swift; sourceTree = "<group>"; };
+		AC299EB428CD74070000875D /* sync_animation.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = sync_animation.json; sourceTree = "<group>"; };
+		AC299EB628CD74120000875D /* sync_done_animation.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = sync_done_animation.json; sourceTree = "<group>"; };
+		AC299EBB28CDA6A10000875D /* PanelGlobalSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PanelGlobalSearchView.swift; sourceTree = "<group>"; };
 		AC2B20F12850058F00618CF4 /* login_animation.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = login_animation.json; sourceTree = "<group>"; };
 		AC3444C32562C66900C0D668 /* DownloadRequestOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadRequestOperation.swift; sourceTree = "<group>"; };
 		AC3444C92562C72400C0D668 /* UploadRequestOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UploadRequestOperation.swift; sourceTree = "<group>"; };
@@ -270,6 +277,7 @@
 				AC56227E274FDF1A00098C3A /* AWSS3StoragePlugin in Frameworks */,
 				AC56227A274FDF1A00098C3A /* Amplify in Frameworks */,
 				AC716E22289A20F6008944C7 /* Alamofire in Frameworks */,
+				AC299EBA28CD84660000875D /* Zip in Frameworks */,
 				AC5B9762256CAE0F0007500D /* PartialSheet in Frameworks */,
 				ACB1C263285269AC000D3AD2 /* AlertToast in Frameworks */,
 				AC56227C274FDF1A00098C3A /* AWSCognitoAuthPlugin in Frameworks */,
@@ -366,6 +374,8 @@
 		AC2B20F02850055700618CF4 /* Lottie */ = {
 			isa = PBXGroup;
 			children = (
+				AC299EB628CD74120000875D /* sync_done_animation.json */,
+				AC299EB428CD74070000875D /* sync_animation.json */,
 				AC496F6D28B6B8DA002D508B /* location_animation.json */,
 				AC2B20F12850058F00618CF4 /* login_animation.json */,
 			);
@@ -701,6 +711,7 @@
 				AC82D63926D3E3D100701D3D /* ContactListView.swift */,
 				AC60C1FE274750E200294834 /* PanelGenericViews.swift */,
 				ACDD64B6274C0FDA00D2C340 /* PanelStockView.swift */,
+				AC299EBB28CDA6A10000875D /* PanelGlobalSearchView.swift */,
 			);
 			path = Panel;
 			sourceTree = "<group>";
@@ -756,6 +767,7 @@
 				ACB1C262285269AC000D3AD2 /* AlertToast */,
 				AC6F86D9285AC99100A5C135 /* BottomSheet */,
 				AC716E21289A20F6008944C7 /* Alamofire */,
+				AC299EB928CD84660000875D /* Zip */,
 			);
 			productName = PRO;
 			productReference = AC6F1F1F24FF2978005E57DC /* PRO.app */;
@@ -840,6 +852,7 @@
 				ACB1C261285269AC000D3AD2 /* XCRemoteSwiftPackageReference "AlertToast" */,
 				AC6F86D8285AC99100A5C135 /* XCRemoteSwiftPackageReference "BottomSheet" */,
 				AC716E20289A20F6008944C7 /* XCRemoteSwiftPackageReference "Alamofire" */,
+				AC299EB828CD84660000875D /* XCRemoteSwiftPackageReference "Zip" */,
 			);
 			productRefGroup = AC6F1F2024FF2978005E57DC /* Products */;
 			projectDirPath = "";
@@ -858,8 +871,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				AC2B20F22850058F00618CF4 /* login_animation.json in Resources */,
+				AC299EB728CD74120000875D /* sync_done_animation.json in Resources */,
 				AC496F6E28B6B8DA002D508B /* location_animation.json in Resources */,
 				ACC05350255067EC00B9753A /* Localizable.strings in Resources */,
+				AC299EB528CD74080000875D /* sync_animation.json in Resources */,
 				AC6F1F2F24FF297A005E57DC /* LaunchScreen.storyboard in Resources */,
 				AC6F1F2C24FF297A005E57DC /* Preview Assets.xcassets in Resources */,
 				AC7892FE27AC4030002EBEBB /* amplifyconfiguration.json in Resources */,
@@ -1092,6 +1107,7 @@
 				ACC128312581184E00595078 /* MovementListView.swift in Sources */,
 				AC17AD86274426DB002A376B /* ViewerDialogs.swift in Sources */,
 				ACA106DD2575966B00FDD7E4 /* HeaderToggleView.swift in Sources */,
+				AC299EBC28CDA6A10000875D /* PanelGlobalSearchView.swift in Sources */,
 				ACB1C2602852643B000D3AD2 /* AuthRecoverPasswordView.swift in Sources */,
 				AC82D63A26D3E3D100701D3D /* ContactListView.swift in Sources */,
 				AC78D2E726D54A2D00674A4F /* EnvObjects.swift in Sources */,
@@ -1469,6 +1485,14 @@
 				minimumVersion = 3.0.0;
 			};
 		};
+		AC299EB828CD84660000875D /* XCRemoteSwiftPackageReference "Zip" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/marmelroy/Zip.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
 		AC562278274FDF1A00098C3A /* XCRemoteSwiftPackageReference "amplify-ios" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/aws-amplify/amplify-ios";
@@ -1516,6 +1540,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = AC2840C328519C4B00669892 /* XCRemoteSwiftPackageReference "lottie-ios" */;
 			productName = Lottie;
+		};
+		AC299EB928CD84660000875D /* Zip */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AC299EB828CD84660000875D /* XCRemoteSwiftPackageReference "Zip" */;
+			productName = Zip;
 		};
 		AC562279274FDF1A00098C3A /* Amplify */ = {
 			isa = XCSwiftPackageProductDependency;

@@ -340,6 +340,7 @@ struct GlobalMenu: View {
     @EnvironmentObject var viewRouter: ViewRouter
     
     @Binding var isPresented: Bool
+    let onLocationTapped: () -> Void
     
     @State var usrFullName = ""
     @State var usrEmail = ""
@@ -368,7 +369,7 @@ struct GlobalMenu: View {
                 }
                 Spacer()
                 Button(action: {
-                    
+                    self.goTo(page: "PANEL-GLOBAL-SEARCH-VIEW")
                 }) {
                     Image("ic-search")
                         .resizable()
@@ -377,7 +378,7 @@ struct GlobalMenu: View {
                         .foregroundColor(.cPrimary)
                 }
                 Button(action: {
-                    
+                    onLocationTapped()
                 }) {
                     Image("ic-location")
                         .resizable()

@@ -116,3 +116,59 @@ class SyncUploadOnDemandService: UploadRequestOperation {
     }
     
 }
+
+class SyncOnDemandPanelsService: DownloadRequestOperation {
+    
+    override func main() {
+        debugPrint("SyncOnDemandPanelsService")
+        self.prefix = "vm"
+        
+        services = [.client, .doctor, .patient, .pharmacy, .potential]
+        
+        step = 0
+        get()
+    }
+    
+}
+
+class SyncOnDemandGeneralConfigService: DownloadRequestOperation {
+    
+    override func main() {
+        debugPrint("SyncOnDemandGeneralConfigService")
+        self.prefix = "vm"
+        
+        services = [.config]
+        
+        step = 0
+        get()
+    }
+    
+}
+
+class SyncOnDemandGeneralConfigNestedService: DownloadRequestOperation {
+    
+    override func main() {
+        debugPrint("SyncOnDemandGeneralConfigService")
+        self.prefix = "vm/config"
+        
+        services = [.cycle, .material, .material_plain]
+        
+        step = 0
+        get()
+    }
+    
+}
+
+class SyncOnDemandDiaryService: DownloadRequestOperation {
+    
+    override func main() {
+        debugPrint("SyncOnDemandDiaryService")
+        self.prefix = "vm"
+        
+        services = [.diary]
+        
+        step = 0
+        get()
+    }
+    
+}

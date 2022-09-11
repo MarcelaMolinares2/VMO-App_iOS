@@ -1038,7 +1038,7 @@ class GroupMember: Object, Codable {
     }
 }
 
-class MediaItem: Object, Decodable, SyncEntity {
+class MediaItem: Object, Codable, SyncEntity {
     @Persisted(primaryKey: true) var objectId: ObjectId
     @Persisted(indexed: true) var id = 0
     @Persisted var transactionStatus: String = "PENDING"

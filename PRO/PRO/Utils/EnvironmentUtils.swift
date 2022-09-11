@@ -35,9 +35,69 @@ class SyncUtils {
     
     static func count<T: Object & SyncEntity>(realm: Realm, from: T.Type) -> Int {
         return realm.objects(from.self).where {
-            $0.transactionStatus != ""
+            $0.transactionType != ""
         }
         .count
+    }
+    
+    static func shareMedia() -> [String] {
+        var jsonData = [String]()
+        let realm = try! Realm()
+        realm.objects(MediaItem.self).forEach { media in
+            do {
+                let jsonObject = try Utils.objToJSON(MediaItem(value: media))
+                jsonData.append(jsonObject)
+            } catch {
+                
+            }
+        }
+        return jsonData
+    }
+    
+    static func shareData() -> [String] {
+        var jsonData = [String]()
+        let realm = try! Realm()
+        
+        jsonData.append("\n\nMovement\n")
+        realm.objects(Movement.self).forEach { movement in
+            do {
+                jsonData.append(try Utils.objToJSON(movement))
+            } catch {
+                
+            }
+        }
+        
+        jsonData.append("\n\nDiary\n")
+        jsonData.append(genericDataShare(realm: realm, from: Diary.self))
+        
+        jsonData.append("\n\nClient\n")
+        jsonData.append(genericDataShare(realm: realm, from: Client.self))
+        jsonData.append("\n\nDoctor\n")
+        jsonData.append(genericDataShare(realm: realm, from: Doctor.self))
+        jsonData.append("\n\nPatient\n")
+        jsonData.append(genericDataShare(realm: realm, from: Patient.self))
+        jsonData.append("\n\nPharmacy\n")
+        jsonData.append(genericDataShare(realm: realm, from: Pharmacy.self))
+        jsonData.append("\n\nPotential Professional\n")
+        jsonData.append(genericDataShare(realm: realm, from: PotentialProfessional.self))
+        jsonData.append("\n\nActivity\n")
+        jsonData.append(genericDataShare(realm: realm, from: DifferentToVisit.self))
+        
+        return jsonData
+    }
+    
+    static func genericDataShare<T: Object & SyncEntity & Codable>(realm: Realm, from: T.Type) -> String {
+        var jsonData = [String]()
+        realm.objects(from.self).where {
+            $0.transactionType != ""
+        }.forEach { item in
+            do {
+                jsonData.append(try Utils.objToJSON(item))
+            } catch {
+                
+            }
+        }
+        return jsonData.joined(separator: "\n")
     }
     
 }
@@ -463,3 +523,30 @@ class TimeUtils {
     }
     
 }
+
+class ApplicationUtils {
+    
+    static func rootViewController() -> UIViewController? {
+        let keyWindow: UIWindow? = UIApplication.shared.connectedScenes
+            .filter { $0.activationState == .foregroundActive }
+            .first(where: { $0 is UIWindowScene })
+            .flatMap({ $0 as? UIWindowScene })?.windows
+            .first(where: \.isKeyWindow)
+        
+        var viewController = keyWindow?.rootViewController
+        if let presentedController = viewController as? UITabBarController {
+            viewController = presentedController.selectedViewController
+        }
+        while let presentedController = viewController?.presentedViewController {
+            if let presentedController = presentedController as? UITabBarController {
+                viewController = presentedController.selectedViewController
+            } else {
+                viewController = presentedController
+            }
+        }
+        
+        return viewController
+    }
+    
+}
+

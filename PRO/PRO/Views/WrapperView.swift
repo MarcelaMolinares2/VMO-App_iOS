@@ -60,8 +60,10 @@ struct WrapperView: View {
                 ReportsMenuView()
             case "SUPPORT-VIEW":
                 SupportMainView()
+            case "PANEL-GLOBAL-SEARCH-VIEW":
+                PanelGlobalSearchView()
             default:
-                Text("")
+                Text(viewRouter.currentPage)
         }
     }
 }

@@ -9,6 +9,7 @@
 import RealmSwift
 import SwiftUI
 import Lottie
+import GoogleMaps
 
 struct PanelListView: View {
     @State var data: Array<Panel & SyncEntity>
@@ -429,6 +430,59 @@ struct CustomHeaderButtonIconView: View {
             }
         }
         .padding(.horizontal, Globals.UI_FORM_PADDING_HORIZONTAL)
+    }
+    
+}
+
+struct AgentLocationForm: View {
+    let onActionDone: () -> Void
+    
+    @ObservedObject var locationManager = LocationManager()
+    
+    @State private var markers = [GMSMarker]()
+    @State private var goToMyLocation = false
+    @State private var fitToBounds = false
+    
+    var body: some View {
+        VStack {
+            CustomMarkerMapView(markers: $markers, goToMyLocation: $goToMyLocation, fitToBounds: $fitToBounds) { marker in
+                
+            }
+            .frame(height: 200)
+            Button {
+                validate()
+            } label: {
+                Text("envReportLocation")
+                    .foregroundColor(.cTextHigh)
+                    .frame(maxWidth: .infinity, minHeight: 44, maxHeight: 44, alignment: .center)
+            }
+        }
+        .onChange(of: locationManager.location) { lastLocation in
+            if let location = lastLocation {
+                markers.removeAll()
+                let marker = GMSMarker(position: location.coordinate)
+                markers.append(marker)
+                if !goToMyLocation {
+                    goToMyLocation = true
+                }
+            }
+        }
+    }
+    
+    func validate() {
+        if let location = locationManager.location {
+            if location.coordinate.latitude != 0 && location.coordinate.longitude != 0 {
+                save(location: location)
+            }
+        }
+    }
+    
+    func save(location: CLLocation) {
+        let agentLocation = AgentLocation()
+        agentLocation.latitude = Float(location.coordinate.latitude)
+        agentLocation.longitude = Float(location.coordinate.longitude)
+        agentLocation.date = Utils.currentDateTime()
+        onActionDone()
     }
     
 }

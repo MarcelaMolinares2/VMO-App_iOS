@@ -16,6 +16,7 @@ struct MasterView: View {
     
     @State var menuIsPresented = false
     @State var searchBarOpen = false
+    @State var modalAgentLocation = false
     
     @ObservedResults(CurrentOperation.self) var operations
     
@@ -98,7 +99,15 @@ struct MasterView: View {
             }
         }
         .sheet(isPresented: self.$menuIsPresented) {
-            GlobalMenu(isPresented: self.$menuIsPresented)
+            GlobalMenu(isPresented: self.$menuIsPresented) {
+                menuIsPresented = false
+                modalAgentLocation = true
+            }
+        }
+        .partialSheet(isPresented: $modalAgentLocation) {
+            AgentLocationForm() {
+                modalAgentLocation = false
+            }
         }
         .onAppear {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {

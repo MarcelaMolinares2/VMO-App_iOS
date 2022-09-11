@@ -74,23 +74,53 @@ class MediaUtils {
 
 class FileUtils {
     
+    static func syncZip(type: String) -> URL {
+        create(path: "sync")
+        let paths = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)
+        let documentsDirectory = paths[0]
+        let docURL = URL(fileURLWithPath: documentsDirectory)
+        let dataPath = docURL.appendingPathComponent("sync/\(UserDefaults.standard.string(forKey: Globals.LABORATORY_PATH) ?? "")_\(JWTUtils.sub())_\(type)_\(Utils.dateFormat(date: Date(), format: "yyyyMMddHHmmss")).zip")
+        return dataPath
+    }
+    
+    static func sync(type: String, data: [String]) -> URL {
+        create(path: "sync")
+        let paths = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)
+        let documentsDirectory = paths[0]
+        let docURL = URL(fileURLWithPath: documentsDirectory)
+        let dataPath = docURL.appendingPathComponent("sync/\(type).txt")
+        do {
+            try data.joined(separator: "\n").write(to: dataPath, atomically: false, encoding: .utf8)
+        } catch let error as NSError {
+            print("SYNC FILE WRITE", error)
+        }
+        return dataPath
+    }
+    
     static func create(path: String) {
         let paths = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)
         let documentsDirectory = paths[0]
-        let docURL = URL(string: documentsDirectory)!
+        let docURL = URL(fileURLWithPath: documentsDirectory)
         let dataPath = docURL.appendingPathComponent(path)
-        if !FileManager.default.fileExists(atPath: dataPath.absoluteString) {
+        if !FileManager.default.fileExists(atPath: dataPath.relativePath) {
             do {
-                try FileManager.default.createDirectory(atPath: dataPath.absoluteString, withIntermediateDirectories: true, attributes: nil)
+                try FileManager.default.createDirectory(atPath: dataPath.relativePath, withIntermediateDirectories: true, attributes: nil)
             } catch {
                 print("\(path): \(error.localizedDescription)")
             }
         }
     }
     
+    static func folder(path: String) -> URL {
+        let paths = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)
+        let documentsDirectory = paths[0]
+        let docURL = URL(fileURLWithPath: documentsDirectory)
+        let dataPath = docURL.appendingPathComponent(path)
+        return dataPath
+    }
+    
     static func exists(media: MediaItem) -> Bool {
         let pathComponent = MediaUtils.mediaURL(media: media)
-        print(pathComponent)
         let filePath = pathComponent.path
         let fileManager = FileManager.default
         if fileManager.fileExists(atPath: filePath) {
