@@ -10,6 +10,8 @@ import RealmSwift
 import SwiftUI
 import Lottie
 import GoogleMaps
+import Combine
+import AlertToast
 
 struct PanelListView: View {
     @State var data: Array<Panel & SyncEntity>
@@ -43,6 +45,52 @@ struct PanelListView: View {
             }
         }
     }
+}
+
+struct PanelItemReport: View {
+    let realm: Realm
+    var panel: PanelReport
+    let onItemTapped: () -> Void
+    
+    @State private var subtitle = ""
+    @State private var complement = ""
+    
+    @State private var panelIcon = ""
+    @State private var panelColor = Color.cIcon
+    
+    var body: some View {
+        HStack(alignment: .top) {
+            if !panelIcon.isEmpty {
+                Image(panelIcon)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 32)
+                    .foregroundColor(panelColor)
+            }
+            PanelItem(realm: realm, userId: JWTUtils.sub(), panel: panel, subtitle: subtitle, complement: complement, onItemTapped: onItemTapped)
+        }
+        .padding(.vertical, 5)
+        .onTapGesture {
+            onItemTapped()
+        }
+        .onAppear {
+            load()
+        }
+    }
+    
+    func load() {
+        panelIcon = PanelUtils.iconByPanelType(panel: panel)
+        panelColor = PanelUtils.colorByPanelType(panel: panel)
+        switch panel.type {
+            case "M":
+                subtitle = SpecialtyDao(realm: realm).by(id: panel.specialtyId)?.name ?? ""
+            case "F":
+                subtitle = PharmacyChainDao(realm: realm).by(id: panel.pharmacyChainId)?.name ?? ""
+            default:
+                subtitle = ""
+        }
+    }
+    
 }
 
 struct PanelItemDoctor: View {
@@ -123,7 +171,7 @@ struct PanelItemPotential: View {
 struct PanelItem: View {
     let realm: Realm
     let userId: Int
-    var panel: Panel & SyncEntity
+    var panel: Panel
     var subtitle = ""
     var complement = ""
     let onItemTapped: () -> Void
@@ -443,6 +491,11 @@ struct AgentLocationForm: View {
     @State private var goToMyLocation = false
     @State private var fitToBounds = false
     
+    @State private var subscriber: AnyCancellable?
+    
+    @State private var toastMessage = ""
+    @State private var toastShow = false
+    
     var body: some View {
         VStack {
             CustomMarkerMapView(markers: $markers, goToMyLocation: $goToMyLocation, fitToBounds: $fitToBounds) { marker in
@@ -462,10 +515,21 @@ struct AgentLocationForm: View {
                 markers.removeAll()
                 let marker = GMSMarker(position: location.coordinate)
                 markers.append(marker)
-                if !goToMyLocation {
-                    goToMyLocation = true
-                }
             }
+        }
+        .onAppear {
+            self.subscriber = Timer
+                .publish(every: 1, on: .main, in: .common)
+                .autoconnect()
+                .sink(receiveValue: { _ in
+                    goToMyLocation = true
+                })
+        }
+        .onDisappear {
+            subscriber = nil
+        }
+        .toast(isPresenting: $toastShow) {
+            return AlertToast(type: .regular, title: toastMessage.localized())
         }
     }
     
@@ -473,8 +537,11 @@ struct AgentLocationForm: View {
         if let location = locationManager.location {
             if location.coordinate.latitude != 0 && location.coordinate.longitude != 0 {
                 save(location: location)
+                return
             }
         }
+        toastMessage = "errLocationNotValid"
+        toastShow = true
     }
     
     func save(location: CLLocation) {
@@ -482,7 +549,34 @@ struct AgentLocationForm: View {
         agentLocation.latitude = Float(location.coordinate.latitude)
         agentLocation.longitude = Float(location.coordinate.longitude)
         agentLocation.date = Utils.currentDateTime()
+        agentLocation.userId = JWTUtils.sub()
+        agentLocation.transactionType = "CREATE"
+        AgentLocationDao(realm: try! Realm()).store(agentLocation: agentLocation)
         onActionDone()
+    }
+    
+}
+
+struct NoConnectionView: View {
+    
+    var body: some View {
+        VStack {
+            Spacer()
+            VStack {
+                Text("errServerConection")
+                    .foregroundColor(Color.cTextHigh)
+                    .font(.system(size: 14))
+                Image("ic-wifi-off")
+                    .resizable()
+                    .scaledToFit()
+                    .foregroundColor(.cIcon)
+                    .frame(width: 100, height: 100, alignment: .center)
+                Text("envTapToTryAgain")
+                    .foregroundColor(Color.cTextHigh)
+                    .font(.system(size: 14))
+            }
+            Spacer()
+        }
     }
     
 }

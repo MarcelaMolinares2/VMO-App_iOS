@@ -486,6 +486,13 @@ class DynamicUtils {
             return ""
         } catch DecodingError.valueNotFound {
             return ""
+        } catch DecodingError.typeMismatch {
+            do {
+                let value = try container.decode(Int.self, forKey: key)
+                return String(value)
+            } catch {
+                return ""
+            }
         }
     }
     

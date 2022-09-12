@@ -396,6 +396,73 @@ class PanelVisitingHourModel: ObservableObject, Identifiable {
     }
 }
 
+class PanelReport: Decodable, Panel, Identifiable {
+    var objectId: ObjectId = ObjectId()
+    var isSelected: Bool = false
+    
+    var id = 0
+    var transactionStatus: String = ""
+    var transactionType: String = ""
+    var transactionResponse: String = ""
+    
+    var idNumber: String = ""
+    var type: String = ""
+    var name: String? = ""
+    var email: String? = ""
+    var createdAt: String = ""
+    var phone: String? = ""
+    var fields: String = ""
+    
+    var brickId: Int? = 0
+    var cityId: Int = 0
+    var countryId: Int? = 0
+    var pricesListId: Int? = 0
+    var zoneId: Int? = 0
+    var visitFTF: Int? = 0
+    var visitVirtual: Int? = 0
+    var visitsFeeWasEdited: Bool = false
+    
+    var lastMove: PanelMove? = nil
+    var lastMovement: MovementSummarized? = nil
+    var visitingHours: RealmSwift.List<PanelVisitingHour> = RealmSwift.List<PanelVisitingHour>()
+    var locations: RealmSwift.List<PanelLocation> = RealmSwift.List<PanelLocation>()
+    var categories: RealmSwift.List<PanelCategoryPanel> = RealmSwift.List<PanelCategoryPanel>()
+    var contactControl: RealmSwift.List<ContactControlPanel> = RealmSwift.List<ContactControlPanel>()
+    var requests: RealmSwift.List<GeneralRequest> = RealmSwift.List<GeneralRequest>()
+    var users: RealmSwift.List<PanelUser> = RealmSwift.List<PanelUser>()
+    var visitDates: RealmSwift.List<PanelVisitedOn> = RealmSwift.List<PanelVisitedOn>()
+    
+    var specialtyId: Int? = 0
+    var pharmacyChainId: Int? = 0
+    var inactive: String = ""
+    
+    private enum CodingKeys: String, CodingKey {
+        case id = "panel_id", type = "panel_type", idNumber = "dni", name = "full_name", email, createdAt, phone = "phones", cityId = "id_ciudad", specialtyId = "specialty_id", pharmacyChainId = "pharmacy_chain_id", countryId = "id_pais", locations, categories, requests = "general_requests", users = "panel_user", inactive
+    }
+    
+    required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        self.id = try DynamicUtils.intTypeDecoding(container: container, key: .id)
+        self.idNumber = try DynamicUtils.stringTypeDecoding(container: container, key: .idNumber)
+        self.type = try DynamicUtils.stringTypeDecoding(container: container, key: .type)
+        self.name = try DynamicUtils.stringTypeDecoding(container: container, key: .name)
+        self.email = try DynamicUtils.stringTypeDecoding(container: container, key: .email)
+        self.createdAt = try DynamicUtils.stringTypeDecoding(container: container, key: .createdAt)
+        self.phone = try DynamicUtils.stringTypeDecoding(container: container, key: .phone)
+        self.cityId = try DynamicUtils.intTypeDecoding(container: container, key: .cityId)
+        self.countryId = try DynamicUtils.intTypeDecoding(container: container, key: .countryId)
+        self.locations = try DynamicUtils.listTypeDecoding(container: container, key: .locations)
+        self.categories = try DynamicUtils.listTypeDecoding(container: container, key: .categories)
+        self.requests = try DynamicUtils.listTypeDecoding(container: container, key: .requests)
+        self.users = try DynamicUtils.listTypeDecoding(container: container, key: .users)
+        
+        self.specialtyId = try DynamicUtils.intTypeDecoding(container: container, key: .specialtyId)
+        self.pharmacyChainId = try DynamicUtils.intTypeDecoding(container: container, key: .pharmacyChainId)
+        self.inactive = try DynamicUtils.stringTypeDecoding(container: container, key: .inactive)
+    }
+}
+
 class MovementProductStockModel: ObservableObject, Identifiable {
     @Published var productId: Int = 0
     @Published var hasStock: Bool = false

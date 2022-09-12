@@ -103,3 +103,7 @@ enum WrapperLayout {
 enum ConnectionStatus {
     case unknown, connected, error
 }
+
+enum PanelGlobalSearchLayout {
+    case list, searching, error
+}

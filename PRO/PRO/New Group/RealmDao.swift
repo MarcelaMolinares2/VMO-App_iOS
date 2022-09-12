@@ -46,6 +46,20 @@ class AdvertisingMaterialDeliveryDao: GenericDao {
     
 }
 
+class AgentLocationDao: GenericDao {
+    
+    func all() -> [AgentLocation] {
+        return Array(realm.objects(AgentLocation.self).sorted(by: \.date, ascending: false))
+    }
+    
+    func store(agentLocation: AgentLocation) {
+        try! realm.write {
+            realm.add(agentLocation, update: .all)
+        }
+    }
+    
+}
+
 class BrickDao: GenericDao {
     
     func all() -> [Brick] {
@@ -350,6 +364,10 @@ class DoctorDao: GenericDao {
     
     func by(id: String) -> Doctor? {
         return realm.objects(Doctor.self).filter("id == \(id)").first
+    }
+    
+    func by(id: Int) -> Doctor? {
+        return by(id: String(id))
     }
     
     func by(objectId: ObjectId) -> Doctor? {

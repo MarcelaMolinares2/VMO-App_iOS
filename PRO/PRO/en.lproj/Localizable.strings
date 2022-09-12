@@ -56,7 +56,7 @@
 "envObservations" = "Observations";
 "envMaterialAndSamples" = "Material and Samples";
 "envMaterial" = "Material";
-"envSuccessfullySaved" = "Date successfully saved";
+"envSuccessfullySaved" = "Successfully saved";
 "envExpDate" = "(Exp.: %@)";
 "envRemainder" = "(Remainder: %@ units)";
 "envCurrency" = "%@: %@";
@@ -156,7 +156,8 @@
 "envDuplicationWarning" = "There are some duplicated items. Tap to see";
 "envDuplicatesMesssage" = "The following items have one or more equal fields";
 "envSave" = "Save";
-
+"envReportLocation" = "Report location";
+"envTapToTryAgain" = "Tap to try again";
 
 //Expense
 "envOriginDestiny" = "Origin - Destiny";
@@ -243,6 +244,7 @@
 "errRecordExpenseEmpty" = "Please select at least one concept";
 "errFormEmpty" = "Please fill the required fields";
 "errFreeDayRequestEmpty" = "Please select at least one date";
+"errLocationNotValid" = "Location is not valid";
 
 //Modules
 "modMaterialRequest" = "Material Request";

@@ -9,14 +9,16 @@
 import SwiftUI
 import PartialSheet
 import RealmSwift
+import AlertToast
 
 struct MasterView: View {
     @EnvironmentObject var masterRouter: MasterRouter
     @EnvironmentObject var userSettings: UserSettings
     
-    @State var menuIsPresented = false
-    @State var searchBarOpen = false
-    @State var modalAgentLocation = false
+    @State private var menuIsPresented = false
+    @State private var searchBarOpen = false
+    @State private var modalAgentLocation = false
+    @State private var locationSavedToast = false
     
     @ObservedResults(CurrentOperation.self) var operations
     
@@ -107,7 +109,11 @@ struct MasterView: View {
         .partialSheet(isPresented: $modalAgentLocation) {
             AgentLocationForm() {
                 modalAgentLocation = false
+                locationSavedToast = true
             }
+        }
+        .toast(isPresenting: $locationSavedToast) {
+            AlertToast(type: .complete(.cDone), title: NSLocalizedString("envSuccessfullySaved", comment: ""))
         }
         .onAppear {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {

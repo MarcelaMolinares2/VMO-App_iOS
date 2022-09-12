@@ -7,6 +7,7 @@
 //
 
 import SwiftUI
+import AlertToast
 
 struct HeaderToggleView: View {
     @StateObject var headerRouter = TabRouter()
@@ -20,6 +21,7 @@ struct HeaderToggleView: View {
     
     @State private var menuIsPresented = false
     @State private var modalAgentLocation = false
+    @State private var locationSavedToast = false
     
     init(search: Binding<String>, title: String) {
         self.couldSearch = true
@@ -115,7 +117,11 @@ struct HeaderToggleView: View {
         .partialSheet(isPresented: $modalAgentLocation) {
             AgentLocationForm() {
                 modalAgentLocation = false
+                locationSavedToast = true
             }
+        }
+        .toast(isPresenting: $locationSavedToast) {
+            AlertToast(type: .complete(.cDone), title: NSLocalizedString("envSuccessfullySaved", comment: ""))
         }
     }
 }

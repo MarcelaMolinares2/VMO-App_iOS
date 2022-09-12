@@ -335,6 +335,56 @@ struct PanelMenu: View {
     
 }
 
+struct PanelMenuRequestActivation: View {
+    var panel: Panel
+    
+    @State private var headerColor = Color.cPrimary
+    @State private var headerIcon = "ic-home"
+    
+    let layout = [
+        GridItem(.flexible())
+    ]
+    
+    var body: some View {
+        VStack {
+            HStack {
+                Text(panel.name ?? "")
+                    .fontWeight(.bold)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .lineLimit(1)
+                    .padding(.horizontal, 5)
+                    .foregroundColor(.cTextHigh)
+                Image(headerIcon)
+                    .resizable()
+                    .scaledToFit()
+                    .foregroundColor(headerColor)
+                    .frame(width: 34, height: 34, alignment: .center)
+                    .padding(4)
+            }
+            VStack {
+                LazyVGrid(columns: layout, spacing: 20) {
+                    Button(action: {
+                        
+                    }) {
+                        VStack {
+                            Image("ic-info")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
+                                .foregroundColor(.cIcon)
+                            Text("envRequestActivation")
+                                .foregroundColor(.cTextMedium)
+                                .lineLimit(2)
+                                .font(.system(size: 15))
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+}
+
 struct GlobalMenu: View {
     @EnvironmentObject var userSettings: UserSettings
     @EnvironmentObject var viewRouter: ViewRouter
