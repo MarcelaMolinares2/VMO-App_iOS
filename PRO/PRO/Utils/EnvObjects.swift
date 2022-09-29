@@ -10,19 +10,20 @@ import Foundation
 import SwiftUI
 import RealmSwift
 
-class GenericSelectableItem {
-    var id: String = ""
+class GenericSelectableItem: Identifiable {
+    var id = UUID()
+    var value: String = ""
     var label: String = ""
     var complement: String = ""
     var selected: Bool = false
     
-    init(id: String, label: String) {
-        self.id = id
+    init(value: String, label: String) {
+        self.value = value
         self.label = label
     }
     
-    init(id: String, label: String, complement: String) {
-        self.id = id
+    init(value: String, label: String, complement: String) {
+        self.value = value
         self.label = label
         self.complement = complement
     }
@@ -395,6 +396,51 @@ class PanelVisitingHourModel: ObservableObject, Identifiable {
         self.pmStatus = pmStatus
     }
 }
+
+class MovementReport: Decodable, Identifiable {
+    var id = 0
+    var reportedBy = 0
+    var panelType = ""
+    var date = ""
+    var hour = ""
+    var comment = ""
+    var targetNext = ""
+    var executed = 0
+    var visitType = ""
+    var movementFailReasonId: Int? = 0
+    var contactType = ""
+    var contactedBy = ""
+    var latitude: Float = 0
+    var longitude: Float = 0
+    
+    var visitsQuota = 0
+    var visitsInCycle = 0
+    
+    var panel: GenericPanel?
+    var cycle: Cycle?
+    
+    private enum CodingKeys: String, CodingKey {
+        case id = "id_movimiento", reportedBy = "id_usuario", panelType = "tipo", date = "fecha_visita", hour = "hora_visita", comment = "comentario", targetNext = "objetivo_proxima", executed, visitType = "visit_type", movementFailReasonId = "movement_fail_reason_id", contactType = "tipo_contacto", contactedBy = "contactado_por", latitude = "latitud", longitude = "longitud", panel, cycle
+    }
+    
+}
+
+/*
+ @SerializedName(value = "") var targetNext: String = "",
+ @SerializedName(value = "no_efect") var executed: String = "",
+ @SerializedName(value = "tipo_contacto") var contactType: String = "",
+ @SerializedName(value = "contactado_por") var contactedBy: String = "",
+ @SerializedName(value = "latitud") var latitude: Float = 0f,
+ @SerializedName(value = "longitud") var longitude: Float = 0f,
+ 
+ var visitsQuota: Int = 0,
+ var visitsInCycle: Int = 0,
+ 
+ @SerializedName(value = "panel") var panelReport: VMPanelReport? = null,
+ var panelLocal: VMPanel? = null,
+ var cycle: Cycle? = null
+
+ */
 
 class PanelReport: Decodable, Panel, Identifiable {
     var objectId: ObjectId = ObjectId()

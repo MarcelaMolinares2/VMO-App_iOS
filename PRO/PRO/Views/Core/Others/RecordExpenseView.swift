@@ -249,7 +249,6 @@ struct RecordExpenseConceptResourceView: View {
                         MediaUtils.remove(
                             table: "expense_report_detail",
                             field: "supporting_document",
-                            id: 0,
                             localId: detail.objectId
                         )
                     }) {

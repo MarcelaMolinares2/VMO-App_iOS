@@ -26,7 +26,7 @@ struct ReportsMenuView: View {
                 VStack {
                     ForEach(nestedMenus, id: \.objectId) { menu in
                         Button(action: {
-                            print(menu)
+                            self.goTo(page: "\(menu.routerLink.uppercased())-VIEW")
                         }) {
                             CustomSection {
                                 HStack {
@@ -61,10 +61,13 @@ struct ReportsMenuView: View {
     }
     
     func load() {
-        print(viewRouter.parentMenuId)
         if let user = userSettings.userData() {
             nestedMenus = MenuDao(realm: realm).by(userType: user.type, parent: viewRouter.parentMenuId)
         }
+    }
+    
+    func goTo(page: String) {
+        viewRouter.currentPage = page
     }
     
 }

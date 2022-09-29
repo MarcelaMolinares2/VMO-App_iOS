@@ -54,6 +54,13 @@ class MasterRouter: ObservableObject {
             }
         }
     }
+    var diaryLayout: DiaryFormLayout = .main {
+        didSet {
+            withAnimation() {
+                objectWillChange.send(self)
+            }
+        }
+    }
 }
 
 class ModuleRouter: ObservableObject {
@@ -97,18 +104,7 @@ class ViewRouter: ObservableObject {
             }
         }
     }
-    
-    func panel() -> Panel & SyncEntity {
-        /*
-         case "C":
-         return try! Realm().object(ofType: Client.self, forPrimaryKey: data.id) ?? Client()
-         */
-        switch data.type {
-        default:
-            return GenericPanel()
-        }
-    }
-    
+
     func option(key: String, default defaultValue: String) -> String {
         if let value = data.options[key] {
             return Utils.castString(value: value)

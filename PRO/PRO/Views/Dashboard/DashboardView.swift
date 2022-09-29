@@ -18,13 +18,18 @@ struct DashboardView: View {
             if userSettings.initStatus {
                 DashboardTabWrapperView(tab: "center", route: $masterRouter.tabCenter)
                 VStack {
-                    FAB(image: self.masterRouter.tabCenter == "LIST" ? "ic-map" : (self.masterRouter.tabCenter == "MAP" ? "ic-diary" : "ic-home"), size: 60, margin: 32) {
-                        switch self.masterRouter.tabCenter {
-                            case "LIST":
-                                self.masterRouter.tabCenter = "MAP"
-                            default:
-                                self.masterRouter.tabCenter = "LIST"
+                    FAB(image: self.masterRouter.tabCenter != "home" ? "ic-home" : (self.masterRouter.diaryLayout == .map ? "ic-home" : "ic-map")) {
+                        if self.masterRouter.tabCenter != "home" {
+                            self.masterRouter.diaryLayout = .main
+                        } else {
+                            switch self.masterRouter.diaryLayout {
+                                case .main:
+                                    self.masterRouter.diaryLayout = .map
+                                default:
+                                    self.masterRouter.diaryLayout = .main
+                            }
                         }
+                        self.masterRouter.tabCenter = "home"
                     }
                 }
                 .padding(.bottom, 8)
@@ -40,6 +45,113 @@ struct DashboardExtraView: View {
     
     var body: some View {
         DashboardTabWrapperView(tab: "right", route: $masterRouter.tabRight)
+    }
+    
+}
+
+struct DashboardMasterCenterView: View {
+    @EnvironmentObject var viewRouter: ViewRouter
+    @EnvironmentObject var masterRouter: MasterRouter
+    
+    @State private var diaries: [Diary] = []
+    @State private var itemWrappers: [DiaryItemWrapper] = []
+    @State private var interval: Int = 30
+    
+    @State private var isProcessing = false
+    @State private var movements: [MovementReport] = []
+    
+    private var realm = try! Realm()
+    
+    var body: some View {
+        ZStack(alignment: .bottom) {
+            if masterRouter.diaryLayout == .map {
+                DiaryListMapView(items: $diaries) { diary in
+                    
+                }
+            } else {
+                ScrollView {
+                    ForEach($itemWrappers) { $iw in
+                        DiaryViewerWrapperItemView(realm: realm, iw: $iw, dateDiaries: $diaries, interval: $interval) { diary in
+                            
+                        }
+                    }
+                    if isProcessing {
+                        LottieView(name: "sync_animation", loopMode: .loop, speed: 1)
+                            .frame(width: 300, height: 200)
+                    } else {
+                        ForEach($movements) { $movement in
+                            ReportMovementItemView(realm: realm, item: movement, userId: JWTUtils.sub())
+                        }
+                    }
+                }
+            }
+            HStack(alignment: .bottom) {
+                Spacer()
+                VStack {
+                    FAB(image: "ic-calendar") {
+                        FormEntity(objectId: nil).go(path: "DIARY-VIEW", router: viewRouter)
+                    }
+                }
+            }
+            .padding(.bottom, Globals.UI_FAB_VERTICAL)
+            .padding(.horizontal, Globals.UI_FAB_HORIZONTAL)
+        }
+        .onAppear {
+            initForm()
+        }
+        .onChange(of: masterRouter.date) { newValue in
+            refresh()
+        }
+    }
+    
+    func initForm() {
+        itemWrappers.removeAll()
+        let preferences = UserPreferenceDao(realm: realm).by(module: "DIARY")
+        let hourStart = preferences.first { up in
+            up.type == "HOUR_START"
+        }?.value ?? "08:00"
+        let hourEnd = preferences.first { up in
+            up.type == "HOUR_END"
+        }?.value ?? "22:00"
+        interval = Utils.castInt(value: preferences.first { up in
+            up.type == "INTERVAL"
+        }?.value ?? "30")
+        
+        var currentTime = Utils.strToDate(value: hourStart, format: "HH:mm")
+        let limitTime = Utils.strToDate(value: hourEnd, format: "HH:mm")
+        
+        while currentTime < limitTime {
+            itemWrappers.append(DiaryItemWrapper(time: currentTime))
+            currentTime = currentTime.addingTimeInterval(TimeInterval(Double(interval) * 60.0))
+        }
+        
+        refresh()
+    }
+    
+    func refresh() {
+        diaries.removeAll()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
+            diaries.append(contentsOf: DiaryDao(realm: realm).by(date: masterRouter.date).map { Diary(value: $0) })
+        }
+        
+        isProcessing = true
+        AppServer().postRequest(data: [
+            "dateFrom": Utils.dateFormat(date: masterRouter.date),
+            "dateTo": Utils.dateFormat(date: masterRouter.date),
+            "user_id": JWTUtils.sub()
+        ], path: "vm/movement/mobile") { success, code, data in
+            if success {
+                if let rs = data as? [String] {
+                    for item in rs {
+                        let decoded = try! JSONDecoder().decode(MovementReport.self, from: item.data(using: .utf8)!)
+                        movements.append(decoded)
+                    }
+                }
+            }
+            DispatchQueue.main.async {
+                isProcessing = false
+            }
+        }
     }
     
 }
@@ -63,8 +175,12 @@ struct DashboardTabContentWrapperView: View {
                 DashboardTabView()
             case "birthdays":
                 BirthdayTabView()
+            case "home":
+                DashboardMasterCenterView()
             default:
-                DiaryListTabView()
+                ScrollView {
+                    
+                }
         }
     }
     
@@ -112,7 +228,7 @@ struct DashboardTabWrapperView: View {
         if let array = dict["\(type)"] as? Array<Any> {
             for (index, element) in array.enumerated() {
                 if index == 2 {
-                    tabs.append(MasterDashboardTab(key: "home", icon: "ic-home", label: "", route: "home"))
+                    tabs.append(MasterDashboardTab(key: "home", icon: "", label: "", route: "home"))
                 }
                 if let d = element as? Dictionary<String, String> {
                     var icon = "ic-home"

@@ -240,39 +240,6 @@ struct PanelItem: View {
     
 }
 
-struct KeyInfoView: View {
-    @State var panel: Panel!
-    
-    @State var headerColor = Color.cPrimary
-    @State var headerIcon = "ic-home"
-    
-    var body: some View {
-        VStack {
-            HStack {
-                Text(panel.name ?? "")
-                    .fontWeight(.bold)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .lineLimit(1)
-                    .padding(.horizontal, 5)
-                    .foregroundColor(.white)
-                Image(headerIcon)
-                    .resizable()
-                    .scaledToFit()
-                    .foregroundColor(.white)
-                    .frame(width: 34, height: 34, alignment: .center)
-                    .padding(4)
-            }
-            .background(headerColor)
-            .frame(maxWidth: .infinity)
-            ScrollView {
-                VStack {
-                    
-                }
-            }
-        }
-    }
-}
-
 protocol CustomContainerView: View {
     associatedtype Content
     init(content: @escaping () -> Content)

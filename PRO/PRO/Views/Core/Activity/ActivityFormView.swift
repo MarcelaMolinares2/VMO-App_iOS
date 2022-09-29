@@ -28,7 +28,6 @@ class DifferentToVisitModel: ObservableObject {
 
 
 struct ActivityFormView: View {
-    
     @EnvironmentObject var viewRouter: ViewRouter
     
     var realm = try! Realm()
@@ -105,7 +104,7 @@ struct ActivityFormView: View {
     
     func load() {
         if let oId = viewRouter.data.objectId {
-            differentToVisit = ActivityDao(realm: try! Realm()).by(objectId: oId)
+            differentToVisit = DifferentToVisit(value: ActivityDao(realm: try! Realm()).by(objectId: oId) ?? DifferentToVisit())
             dtvModel.dateFrom = Utils.strToDate(value: differentToVisit?.dateFrom ?? "")
             dtvModel.dateTo = Utils.strToDate(value: differentToVisit?.dateTo ?? "")
             dtvModel.hourFrom = Utils.strToDate(value: differentToVisit?.hourFrom ?? "", format: "HH:mm")

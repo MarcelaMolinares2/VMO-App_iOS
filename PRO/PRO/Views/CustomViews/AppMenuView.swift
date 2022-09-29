@@ -8,6 +8,7 @@
 
 import SwiftUI
 import RealmSwift
+import SheeKit
 
 struct PanelMenu: View {
     @EnvironmentObject var viewRouter: ViewRouter
@@ -15,7 +16,11 @@ struct PanelMenu: View {
     @Binding var panel: Panel
     var complementaryData: [String: Any] = [:]
     
-    @State var infoIsPresented = false
+    let onInfoTapped: () -> Void
+    let onDeleteTapped: () -> Void
+    
+    @State var modalHabeasData = false
+    @State var modalSummary = false
     
     @State var headerColor = Color.cPrimary
     @State var headerIcon = "ic-home"
@@ -82,9 +87,8 @@ struct PanelMenu: View {
             VStack {
                 LazyVGrid(columns: layout, spacing: 20) {
                     Button(action: {
-                        //self.isPresented = false
-                        //FormEntity(id: panel.id, type: "C").go(path: "PANEL-CARD", router: viewRouter)
-                        self.infoIsPresented = true
+                        self.isPresented = false
+                        onInfoTapped()
                     }) {
                         VStack {
                             Image("ic-info")
@@ -98,12 +102,8 @@ struct PanelMenu: View {
                                 .font(.system(size: fontSize))
                         }
                     }
-                    .sheet(isPresented: $infoIsPresented) {
-                        //KeyInfoView(panel: panel, headerColor: headerColor, headerIcon: headerIcon)
-                    }
                     Button(action: {
-                        self.isPresented = false
-                        FormEntity(objectId: panel.objectId, type: panel.type, options: [ "tab": "CARD" ]).go(path: "PANEL-CARD", router: viewRouter)
+                        modalSummary = true
                     }) {
                         VStack {
                             Image("ic-summary")
@@ -116,6 +116,12 @@ struct PanelMenu: View {
                                 .lineLimit(2)
                                 .font(.system(size: fontSize))
                         }
+                    }
+                    .sheet(isPresented: $modalSummary) {
+                        PanelSummaryView(panel: panel) {
+                            modalSummary = false
+                        }
+                        .interactiveDismissDisabled()
                     }
                     Button(action: {
                         self.isPresented = false
@@ -135,7 +141,8 @@ struct PanelMenu: View {
                         }
                     }
                     Button(action: {
-                        
+                        self.isPresented = false
+                        onDeleteTapped()
                     }) {
                         VStack {
                             Image("ic-forbidden")
@@ -168,10 +175,8 @@ struct PanelMenu: View {
                             }
                         }
                         Button(action: {
-                            if Utils.castInt(value: complementaryData["hd"]) == 1 {
-                                
-                            } else {
-                                
+                            if Utils.castString(value: complementaryData["hd"]) == "Y" {
+                                modalHabeasData = true
                             }
                         }) {
                             VStack {
@@ -180,10 +185,13 @@ struct PanelMenu: View {
                                     .scaledToFit()
                                     .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
                                     .foregroundColor(.cIcon)
-                                Text(Utils.castInt(value: complementaryData["hd"]) == 1 ? NSLocalizedString("envHabeasData", comment: "Habeas Data") : NSLocalizedString("envHabeasDataNR", comment: "HD not registered"))
+                                Text(Utils.castString(value: complementaryData["hd"]) == "Y" ? NSLocalizedString("envHabeasData", comment: "Habeas Data") : NSLocalizedString("envHabeasDataNR", comment: "HD not registered"))
                                     .foregroundColor(.cTextMedium)
                                     .lineLimit(2)
                                     .font(.system(size: fontSize))
+                            }
+                            .popover(isPresented: $modalHabeasData) {
+                                ImageViewerDialog(table: "doctor", field: "habeas_data", id: panel.id, localId: panel.objectId)
                             }
                         }
                     }
@@ -337,6 +345,7 @@ struct PanelMenu: View {
 
 struct PanelMenuRequestActivation: View {
     var panel: Panel
+    let onActionSelected: () -> Void
     
     @State private var headerColor = Color.cPrimary
     @State private var headerIcon = "ic-home"
@@ -364,10 +373,10 @@ struct PanelMenuRequestActivation: View {
             VStack {
                 LazyVGrid(columns: layout, spacing: 20) {
                     Button(action: {
-                        
+                        onActionSelected()
                     }) {
                         VStack {
-                            Image("ic-info")
+                            Image("ic-power-on")
                                 .resizable()
                                 .scaledToFit()
                                 .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
@@ -381,6 +390,73 @@ struct PanelMenuRequestActivation: View {
                 }
             }
         }
+        .onAppear {
+            ui()
+        }
+    }
+    
+    func ui() {
+        self.headerColor = PanelUtils.colorByPanelType(panel: panel)
+        self.headerIcon = PanelUtils.iconByPanelType(panel: panel)
+    }
+    
+}
+
+struct PanelMenuRequestMove: View {
+    var panel: Panel
+    let onActionSelected: () -> Void
+    
+    @State private var headerColor = Color.cPrimary
+    @State private var headerIcon = "ic-home"
+    
+    let layout = [
+        GridItem(.flexible())
+    ]
+    
+    var body: some View {
+        VStack {
+            HStack {
+                Text(panel.name ?? "")
+                    .fontWeight(.bold)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .lineLimit(1)
+                    .padding(.horizontal, 5)
+                    .foregroundColor(.cTextHigh)
+                Image(headerIcon)
+                    .resizable()
+                    .scaledToFit()
+                    .foregroundColor(headerColor)
+                    .frame(width: 34, height: 34, alignment: .center)
+                    .padding(4)
+            }
+            VStack {
+                LazyVGrid(columns: layout, spacing: 20) {
+                    Button(action: {
+                        onActionSelected()
+                    }) {
+                        VStack {
+                            Image("ic-swap")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
+                                .foregroundColor(.cIcon)
+                            Text("envRequestMove")
+                                .foregroundColor(.cTextMedium)
+                                .lineLimit(2)
+                                .font(.system(size: 15))
+                        }
+                    }
+                }
+            }
+        }
+        .onAppear {
+            ui()
+        }
+    }
+    
+    func ui() {
+        self.headerColor = PanelUtils.colorByPanelType(panel: panel)
+        self.headerIcon = PanelUtils.iconByPanelType(panel: panel)
     }
     
 }

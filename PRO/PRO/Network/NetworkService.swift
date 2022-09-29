@@ -99,6 +99,7 @@ class NetworkService {
             
             request.setValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
         } else {
+            print(params(data: data))
             let dataEncoded : Data = params(data: data).data(using: .utf8)!
             request = URLRequest(url: URL(string: "\(urlServer!)\(path)")!)
             request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField:"Content-Type")

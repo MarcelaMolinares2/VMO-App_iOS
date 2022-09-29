@@ -8,6 +8,7 @@
 
 import Foundation
 import UIKit
+import SwiftUI
 
 extension Dictionary {
     mutating func merge(dict: [Key: Value]){
@@ -175,4 +176,24 @@ extension String {
         return NSLocalizedString(self, tableName: nil, bundle: Bundle.main, value: defaultValue ?? self, comment: "")
     }
     
+}
+
+extension View {
+    public func customDrag(if condition: Bool, data: @escaping () -> NSItemProvider) -> some View {
+        self.modifier(Draggable(condition: condition, data: data))
+    }
+}
+
+struct Draggable: ViewModifier {
+    let condition: Bool
+    let data: () -> NSItemProvider
+    
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        if condition {
+            content.onDrag(data)
+        } else {
+            content
+        }
+    }
 }

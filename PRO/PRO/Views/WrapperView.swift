@@ -36,8 +36,6 @@ struct WrapperView: View {
                 PotentialListWrapperView()
             case "DTV-FORM":
                 ActivityFormView()
-            case "DTV-SUMMARY":
-                ActivitySummaryView()
             case "DIARY-VIEW":
                 DiaryFormView()
             case "MATERIAL-DELIVERY-VIEW":
@@ -46,8 +44,8 @@ struct WrapperView: View {
                 MovementFormView()
             case "MOVEMENTS-VIEW":
                 MovementsView()
-            case "PANEL-CARD":
-                PanelSummaryView(panel: viewRouter.panel(), defaultTab: viewRouter.option(key: "tab", default: "CARD"))
+            //case "PANEL-CARD":
+                //    PanelSummaryView(panel: viewRouter.panel(), defaultTab: viewRouter.option(key: "tab", default: "CARD"))
             case "REQUEST-MATERIAL-VIEW":
                 MaterialRequestView()
             case "GROUPS-VIEW":
@@ -62,6 +60,12 @@ struct WrapperView: View {
                 SupportMainView()
             case "PANEL-GLOBAL-SEARCH-VIEW":
                 PanelGlobalSearchView()
+            case "RP-DIARY-VIEW":
+                ReportDiaryView()
+            case "RP-LOCATIONS-VIEW":
+                ReportLocationView()
+            case "RP-VISITS-VIEW":
+                ReportVisitView()
             default:
                 Text(viewRouter.currentPage)
         }

@@ -152,31 +152,39 @@ struct MasterHeaderDynamicView: View {
     var body: some View {
         HStack {
             switch route {
-                case "DIARY-MAP", "DIARY-LIST":
+                case "home":
                     Button(action: {
-                        self.date = Utils.addDaysToDate(days: -1, to: self.date)
+                        var dateComponent = DateComponents()
+                        dateComponent.day = -1
+                        date = Calendar.current.date(byAdding: dateComponent, to: date) ?? Date()
                     }) {
-                        Image("ic-arrow-double-left")
+                        Image("ic-double-arrow-left")
                             .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: 60)
-                            .padding(10)
                             .foregroundColor(.cIcon)
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 30, height: 30, alignment: .center)
+                            .padding(8)
                     }
-                    Text(Utils.dateFormat(date: self.date, format: "d MMM"))
-                        .foregroundColor(.cPrimaryDark)
-                        .frame(maxWidth: .infinity)
+                    .frame(width: 44, height: 44, alignment: .center)
+                    Spacer()
+                    DatePicker(selection: $date, displayedComponents: .date) {}
+                        .labelsHidden()
+                        .id(date)
+                    Spacer()
                     Button(action: {
-                        self.date = Utils.addDaysToDate(days: 1, to: self.date)
+                        var dateComponent = DateComponents()
+                        dateComponent.day = 1
+                        date = Calendar.current.date(byAdding: dateComponent, to: date) ?? Date()
                     }) {
-                        Image("ic-arrow-double-right")
+                        Image("ic-double-arrow-right")
                             .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: 60)
-                            .padding(10)
                             .foregroundColor(.cIcon)
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 30, height: 30, alignment: .center)
+                            .padding(8)
                     }
-                case "DASHBOARD", "INDICATORS", "MESSAGES", "BIRTHDAYS":
+                    .frame(width: 44, height: 44, alignment: .center)
+                case "dashboard", "indicators", "birthdays":
                     Spacer()
                     Text(NSLocalizedString("env\(route.capitalized)", comment: ""))
                     Spacer()

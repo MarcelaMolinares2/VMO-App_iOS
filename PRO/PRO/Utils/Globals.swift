@@ -37,6 +37,8 @@ class Globals {
     
     static let ENV_SAVE_DELAY = CGFloat(1)
     
+    static let EV_DIARY_DATE = "diary-date"
+    
 }
 
 

@@ -223,7 +223,8 @@ class Country: Object, Codable {
 class Cycle: Object, Codable {
     @Persisted(primaryKey: true) var objectId: ObjectId
     @Persisted var id = 0
-    @Persisted var name = "0"
+    @Persisted var name = 0
+    @Persisted var alias = ""
     @Persisted var year = 0
     @Persisted var lineId = 0
     @Persisted var countryId = 0
@@ -232,7 +233,24 @@ class Cycle: Object, Codable {
     @Persisted var dateTo = ""
     
     private enum CodingKeys: String, CodingKey {
-        case id = "id_ciclo", name = "ciclo", year = "ano", lineId = "id_linea", countryId = "id_pais", isActive = "activo", dateFrom = "fecha_inicial", dateTo = "fecha_final"
+        case id = "id_ciclo", name = "ciclo", alias, year = "ano", lineId = "id_linea", countryId = "id_pais", isActive = "activo", dateFrom = "fecha_inicial", dateTo = "fecha_final"
+    }
+    
+    override init() {
+    }
+    
+    required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        self.id = try DynamicUtils.intTypeDecoding(container: container, key: .id)
+        self.name = try DynamicUtils.intTypeDecoding(container: container, key: .name)
+        self.alias = try DynamicUtils.stringTypeDecoding(container: container, key: .alias)
+        self.year = try DynamicUtils.intTypeDecoding(container: container, key: .year)
+        self.lineId = try DynamicUtils.intTypeDecoding(container: container, key: .lineId)
+        self.countryId = try DynamicUtils.intTypeDecoding(container: container, key: .countryId)
+        self.isActive = try DynamicUtils.stringTypeDecoding(container: container, key: .isActive)
+        self.dateFrom = try DynamicUtils.stringTypeDecoding(container: container, key: .dateFrom)
+        self.dateTo = try DynamicUtils.stringTypeDecoding(container: container, key: .dateTo)
     }
     
     static func primaryCodingKey() -> String {
@@ -262,15 +280,16 @@ class ExpenseConcept: Object, Codable, Identifiable {
     }
 }
 
-class FailReason: Object, Codable {
+class MovementFailReason: Object, Codable {
     @Persisted(primaryKey: true) var objectId: ObjectId
     @Persisted var id = 0
     @Persisted var panelType: String
     @Persisted var environment: String
     @Persisted var content: String
+    @Persisted var countryId: Int = 0
     
     private enum CodingKeys: String, CodingKey {
-        case id = "free_day_reason_id", panelType = "panel_type", environment, content
+        case id = "movement_fail_reason_id", panelType = "panel_type", environment, content, countryId = "country_id"
     }
     
     static func primaryCodingKey() -> String {

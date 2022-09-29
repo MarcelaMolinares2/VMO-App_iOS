@@ -10,7 +10,9 @@ import SwiftUI
 import RealmSwift
 
 struct PanelSummaryView: View {
-    var panel: Panel & SyncEntity
+    var panel: Panel
+    var onClosePressed: () -> Void
+    
     var defaultTab = "CARD"
     
     @StateObject var tabRouter = TabRouter()
@@ -18,8 +20,18 @@ struct PanelSummaryView: View {
     
     var body: some View {
         VStack {
-            HeaderToggleView(title: "") {
-                
+            HStack {
+                PanelFormHeaderView(panel: panel)
+                Button(action: {
+                    onClosePressed()
+                }) {
+                    Image("ic-close")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .foregroundColor(.cIcon)
+                        .frame(width: 24, height: 24, alignment: .center)
+                }
+                .frame(width: 44, height: 44, alignment: .center)
             }
             switch tabRouter.current {
             case "CONTACTS":

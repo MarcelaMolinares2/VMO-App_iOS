@@ -10,6 +10,7 @@ import SwiftUI
 import RealmSwift
 import UniformTypeIdentifiers
 import GoogleMaps
+import SheeKit
 
 class DiaryModel: ObservableObject {
     @Published var date: Date = Date()
@@ -68,10 +69,17 @@ struct DiaryFormView: View {
     @State private var modalPanelPharmacy = false
     @State private var modalPanelClient = false
     @State private var modalPanelPatient = false
+    @State private var modalMove = false
+    @State private var modalDeleteAll = false
+    @State private var modalDeleteSelected = false
     
     @State private var diaries: [Diary] = []
     @State private var diarySelected: Diary = Diary()
+    @State private var diariesSelected: [ObjectId] = []
     @State private var predefinedTime = ""
+    
+    @State private var hourFrom: Date = Date()
+    @State private var hourTo: Date = Date()
     
     var body: some View {
         VStack {
@@ -156,11 +164,14 @@ struct DiaryFormView: View {
                     }
                     ZStack(alignment: .bottom) {
                         if layout == .map {
-                            DiaryListMapView(items: $diaries)
+                            DiaryListMapView(items: $diaries) { diary in
+                                diarySelected = diary
+                                modalMenuEdit = true
+                            }
                         } else {
                             ScrollView {
                                 ForEach($itemWrappers) { $iw in
-                                    DiaryFormWrapperItemView(realm: realm, iw: $iw, dateDiaries: $diaries, interval: $interval, onRefreshRequested: refresh, onDiaryTapped: { diary in
+                                    DiaryFormWrapperItemView(realm: realm, iw: $iw, dateDiaries: $diaries, interval: $interval, layout: $layout, selected: $diariesSelected, onRefreshRequested: refresh, onDiaryTapped: { diary in
                                         diarySelected = diary
                                         modalMenuEdit = true
                                     }) { diw in
@@ -174,7 +185,12 @@ struct DiaryFormView: View {
                             VStack {
                                 if layout == .selection {
                                     FAB(image: "ic-done-all") {
-                                        
+                                        if diariesSelected.count != diaries.count {
+                                            diariesSelected.removeAll()
+                                            diariesSelected.append(contentsOf: diaries.map { $0.objectId })
+                                        } else {
+                                            diariesSelected.removeAll()
+                                        }
                                     }
                                 }
                             }
@@ -184,7 +200,7 @@ struct DiaryFormView: View {
                                     if layout == .selection {
                                         modalSelectionMenu = true
                                     } else {
-                                        modalMainMenu = true
+                                        modalMainMenu.toggle()
                                     }
                                 }
                             }
@@ -243,29 +259,75 @@ struct DiaryFormView: View {
                 refresh()
             }
         }
-        .partialSheet(isPresented: $modalMainMenu) {
+        .shee(isPresented: $modalMainMenu, presentationStyle: .formSheet(properties: .init(detents: [.medium()]))) {
             VStack(spacing: 20) {
                 VStack {
-                    Button {
-                        
-                    } label: {
+                    VStack {
                         Text("envIntervalToSchedule")
                             .foregroundColor(.cTextHigh)
                             .frame(maxWidth: .infinity, minHeight: 44, maxHeight: 44, alignment: .center)
+                        HStack {
+                            Button {
+                                updateInterval(interval: 20)
+                            } label: {
+                                Text("envMin20")
+                                    .foregroundColor(.cTextHigh)
+                                    .frame(maxWidth: .infinity, minHeight: 44, maxHeight: 44, alignment: .center)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            .background(Color.cBackground1dp)
+                            .cornerRadius(4)
+                            Button {
+                                updateInterval(interval: 30)
+                            } label: {
+                                Text("envMin30")
+                                    .foregroundColor(.cTextHigh)
+                                    .frame(maxWidth: .infinity, minHeight: 44, maxHeight: 44, alignment: .center)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            .background(Color.cBackground1dp)
+                            .cornerRadius(4)
+                            Button {
+                                updateInterval(interval: 60)
+                            } label: {
+                                Text("envHour1")
+                                    .foregroundColor(.cTextHigh)
+                                    .frame(maxWidth: .infinity, minHeight: 44, maxHeight: 44, alignment: .center)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            .background(Color.cBackground1dp)
+                            .cornerRadius(4)
+                        }
                     }
-                    .frame(height: 44)
                     Divider()
-                    Button {
-                        
-                    } label: {
-                        Text("envHourStart")
+                    VStack {
+                        Text("envHourInterval")
                             .foregroundColor(.cTextHigh)
                             .frame(maxWidth: .infinity, minHeight: 44, maxHeight: 44, alignment: .center)
+                        HStack {
+                            DatePicker("", selection: $hourFrom, displayedComponents: [.hourAndMinute])
+                                .fixedSize()
+                            Spacer()
+                            DatePicker("", selection: $hourTo, displayedComponents: [.hourAndMinute])
+                                .fixedSize()
+                            Spacer()
+                            Button(action: {
+                                updateHourLimits()
+                            }) {
+                                Image("ic-done")
+                                    .resizable()
+                                    .foregroundColor(.cIcon)
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(width: 30, height: 30, alignment: .center)
+                                    .padding(8)
+                            }
+                            .frame(width: 44, height: 44, alignment: .center)
+                        }
+                        .padding(.horizontal, 10)
                     }
-                    .frame(height: 44)
                     Divider()
                     Button {
-                        
+                        FormEntity(objectId: nil, type: "", options: [Globals.EV_DIARY_DATE: Utils.dateFormat(date: date)]).go(path: "GROUPS-VIEW", router: viewRouter)
                     } label: {
                         Text("envSaveAsGroup")
                             .foregroundColor(.cTextHigh)
@@ -277,7 +339,9 @@ struct DiaryFormView: View {
                 .cornerRadius(5)
                 VStack {
                     Button {
-                        
+                        diariesSelected = diaries.map { $0.objectId }
+                        modalMainMenu = false
+                        modalMove = true
                     } label: {
                         Text("envMoveAll")
                             .foregroundColor(.cTextHigh)
@@ -286,7 +350,8 @@ struct DiaryFormView: View {
                     .frame(height: 44)
                     Divider()
                     Button {
-                        
+                        modalMainMenu = false
+                        modalDeleteAll = true
                     } label: {
                         Text("envDeleteAll")
                             .foregroundColor(.cDanger)
@@ -299,32 +364,75 @@ struct DiaryFormView: View {
             }
             .padding()
         }
-        .partialSheet(isPresented: $modalSelectionMenu) {
+        .shee(isPresented: $modalSelectionMenu, presentationStyle: .formSheet(properties: .init(detents: [.medium()]))) {
             VStack(spacing: 20) {
                 VStack {
-                    Button {
-                        
-                    } label: {
+                    VStack {
                         Text("envContactType")
                             .foregroundColor(.cTextHigh)
-                            .frame(maxWidth: .infinity, minHeight: 44, maxHeight: 44, alignment: .center)
+                            .frame(maxWidth: .infinity, alignment: .center)
+                        HStack {
+                            Button {
+                                DiaryUtils.contactType(realm: realm, ids: diariesSelected, contactType: "P") {
+                                    modalSelectionMenu = false
+                                    refresh()
+                                }
+                            } label: {
+                                Text("envFTF")
+                                    .foregroundColor(.cTextHigh)
+                                    .frame(maxWidth: .infinity, minHeight: 44, maxHeight: 44, alignment: .center)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            Button {
+                                DiaryUtils.contactType(realm: realm, ids: diariesSelected, contactType: "V") {
+                                    modalSelectionMenu = false
+                                    refresh()
+                                }
+                            } label: {
+                                Text("envVirtual")
+                                    .foregroundColor(.cTextHigh)
+                                    .frame(maxWidth: .infinity, minHeight: 44, maxHeight: 44, alignment: .center)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .center)
+                        }
                     }
-                    .frame(height: 44)
                     Divider()
-                    Button {
-                        
-                    } label: {
+                    VStack {
                         Text("envContactPoint")
                             .foregroundColor(.cTextHigh)
-                            .frame(maxWidth: .infinity, minHeight: 44, maxHeight: 44, alignment: .center)
+                            .frame(maxWidth: .infinity, alignment: .center)
+                        HStack {
+                            Button {
+                                DiaryUtils.contactPoint(realm: realm, ids: diariesSelected, contactPoint: true) {
+                                    modalSelectionMenu = false
+                                    refresh()
+                                }
+                            } label: {
+                                Text("envYes")
+                                    .foregroundColor(.cTextHigh)
+                                    .frame(maxWidth: .infinity, minHeight: 44, maxHeight: 44, alignment: .center)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            Button {
+                                DiaryUtils.contactPoint(realm: realm, ids: diariesSelected, contactPoint: false) {
+                                    modalSelectionMenu = false
+                                    refresh()
+                                }
+                            } label: {
+                                Text("envNo")
+                                    .foregroundColor(.cTextHigh)
+                                    .frame(maxWidth: .infinity, minHeight: 44, maxHeight: 44, alignment: .center)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .center)
+                        }
                     }
-                    .frame(height: 44)
                 }
                 .background(Color.cBackground1dp)
                 .cornerRadius(5)
                 VStack {
                     Button {
-                        
+                        modalSelectionMenu = false
+                        modalMove = true
                     } label: {
                         Text("envMove")
                             .foregroundColor(.cTextHigh)
@@ -333,7 +441,8 @@ struct DiaryFormView: View {
                     .frame(height: 44)
                     Divider()
                     Button {
-                        
+                        modalSelectionMenu = false
+                        modalDeleteSelected = true
                     } label: {
                         Text("envDelete")
                             .foregroundColor(.cDanger)
@@ -365,12 +474,37 @@ struct DiaryFormView: View {
                 modalPanelType = false
             }
         }
-        .partialSheet(isPresented: $modalMenuEdit) {
+        .shee(isPresented: $modalMenuEdit, presentationStyle: .formSheet(properties: .init(preferredCornerRadius: 0, detents: [.medium()]))) {
             DiaryMenuEdit(realm: realm, diary: diarySelected) {
                 modalMenuEdit = false
                 refresh()
             }
+            .background(Color(UIColor(named: "Color")?.resolvedColor(with: UITraitCollection(userInterfaceStyle: .dark)) ?? UIColor.black).edgesIgnoringSafeArea(.all))
         }
+        .shee(isPresented: $modalMove, presentationStyle: .formSheet(properties: .init(detents: [.medium()]))) {
+            DiaryMoveFormView(selected: diariesSelected.count) { d in
+                DiaryUtils.move(realm: realm, ids: diariesSelected, date: d) {
+                    modalMove = false
+                    refresh()
+                }
+            }
+        }
+        .shee(isPresented: $modalDeleteSelected, presentationStyle: .formSheet(properties: .init(detents: [.medium()]))) {
+            DiaryDeleteFormView(fromSelected: true, date: $date) {
+                DiaryUtils.delete(realm: realm, ids: diariesSelected) {
+                    modalDeleteSelected = false
+                    refresh()
+                }
+            }
+        }
+        .shee(isPresented: $modalDeleteAll, presentationStyle: .formSheet(properties: .init(detents: [.medium()]))) {
+            DiaryDeleteFormView(fromSelected: false, date: $date) {
+                DiaryUtils.delete(realm: realm, date: date) {
+                    modalDeleteAll = false
+                    refresh()
+                }
+            }
+        }//UISheetPresentationController.Detent.Identifier.medium
         .sheet(isPresented: $modalPanelDoctor) {
             DoctorSelectView(selected: $slDoctors) {
                 modalPanelDoctor = false
@@ -396,12 +530,13 @@ struct DiaryFormView: View {
             }
         }
         .onAppear {
-            UITableView.appearance().contentInset.top = -35
+            //UITableView.appearance().contentInset.top = -35
             initForm()
         }
     }
     
     func initForm() {
+        itemWrappers.removeAll()
         let preferences = UserPreferenceDao(realm: realm).by(module: "DIARY")
         let hourStart = preferences.first { up in
             up.type == "HOUR_START"
@@ -412,6 +547,9 @@ struct DiaryFormView: View {
         interval = Utils.castInt(value: preferences.first { up in
             up.type == "INTERVAL"
         }?.value ?? "30")
+        
+        hourFrom = Utils.strToDate(value: hourStart, format: "HH:mm")
+        hourTo = Utils.strToDate(value: hourEnd, format: "HH:mm")
         
         startTime = Utils.strToDate(value: hourStart, format: "HH:mm")
         var currentTime = startTime
@@ -487,6 +625,7 @@ struct DiaryFormView: View {
     }
     
     func refresh() {
+        diariesSelected.removeAll()
         diaries.removeAll()
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
             diaries.append(contentsOf: DiaryDao(realm: realm).by(date: date).map { Diary(value: $0) })
@@ -500,6 +639,71 @@ struct DiaryFormView: View {
         }
     }
     
+    func updateInterval(interval: Int) {
+        UserPreferenceDao(realm: realm).update(module: "DIARY", key: "INTERVAL", value: String(interval)) {
+            initForm()
+            modalMainMenu = false
+        }
+    }
+    
+    func updateHourLimits() {
+        UserPreferenceDao(realm: realm).update(module: "DIARY", key: "HOUR_START", value: Utils.hourFormat(date: hourFrom)) {
+            UserPreferenceDao(realm: realm).update(module: "DIARY", key: "HOUR_END", value: Utils.hourFormat(date: hourTo)) {
+                initForm()
+                modalMainMenu = false
+            }
+        }
+    }
+    
+}
+
+struct DiaryViewerWrapperItemView: View {
+    var realm: Realm
+    @Binding var iw: DiaryItemWrapper
+    @Binding var dateDiaries: [Diary]
+    @Binding var interval: Int
+    let onDiaryTapped: (_ diw: Diary) -> Void
+    
+    @State private var diaries: [Diary] = []
+    
+    var body: some View {
+        VStack {
+            if !diaries.isEmpty {HStack {
+                Text(Utils.hourFormat(date: iw.time))
+                    .foregroundColor(.cTextMedium)
+                    .font(.system(size: 13))
+                VStack {
+                    Divider()
+                }
+                .frame(maxWidth: .infinity)
+            }
+                ForEach($diaries, id: \.objectId) { $diary in
+                    VStack {
+                        switch diary.type {
+                            case "A":
+                                DiaryActivityItemView(diary: diary)
+                                    .onTapGesture {
+                                        onDiaryTapped(diary)
+                                    }
+                            default:
+                                DiaryPanelItemView(realm: realm, diary: diary)
+                                    .onTapGesture {
+                                        onDiaryTapped(diary)
+                                    }
+                        }
+                    }
+                }
+            }
+        }
+        .onChange(of: dateDiaries) { n in
+            let timeEnd = iw.time.addingTimeInterval(TimeInterval(Double(interval) * 60.0))
+            diaries.removeAll()
+            diaries.append(contentsOf: dateDiaries.filter({ d in
+                TimeUtils.hourTo(time: d.hourStart) >= TimeUtils.hourTo(time: iw.time) && TimeUtils.hourTo(time: d.hourStart) < TimeUtils.hourTo(time: timeEnd)
+            }))
+        }
+    }
+    
 }
 
 struct DiaryFormWrapperItemView: View {
@@ -507,6 +711,8 @@ struct DiaryFormWrapperItemView: View {
     @Binding var iw: DiaryItemWrapper
     @Binding var dateDiaries: [Diary]
     @Binding var interval: Int
+    @Binding var layout: DiaryFormLayout
+    @Binding var selected: [ObjectId]
     let onRefreshRequested: () -> Void
     let onDiaryTapped: (_ diw: Diary) -> Void
     let onItemTapped: (_ diw: DiaryItemWrapper) -> Void
@@ -540,16 +746,25 @@ struct DiaryFormWrapperItemView: View {
                         case "A":
                             DiaryActivityItemView(diary: diary)
                                 .onTapGesture {
-                                    onDiaryTapped(diary)
+                                    if layout == .selection {
+                                        toggleSelection(diary: diary)
+                                    } else {
+                                        onDiaryTapped(diary)
+                                    }
                                 }
                         default:
                             DiaryPanelItemView(realm: realm, diary: diary)
                                 .onTapGesture {
-                                    onDiaryTapped(diary)
+                                    if layout == .selection {
+                                        toggleSelection(diary: diary)
+                                    } else {
+                                        onDiaryTapped(diary)
+                                    }
                                 }
                     }
                 }
-                .onDrag {
+                .opacity((layout == .main || selected.contains(diary.objectId)) ? 1 : 0.4)
+                .customDrag(if: layout == .main) {
                     let provider = NSItemProvider(object: diary.objectId.stringValue as NSString)
                     return provider
                 }
@@ -562,6 +777,14 @@ struct DiaryFormWrapperItemView: View {
             diaries.append(contentsOf: dateDiaries.filter({ d in
                 TimeUtils.hourTo(time: d.hourStart) >= TimeUtils.hourTo(time: iw.time) && TimeUtils.hourTo(time: d.hourStart) < TimeUtils.hourTo(time: timeEnd)
             }))
+        }
+    }
+    
+    func toggleSelection(diary: Diary) {
+        if let index = selected.firstIndex(of: diary.objectId) {
+            selected.remove(at: index)
+        } else {
+            selected.append(diary.objectId)
         }
     }
     
@@ -795,7 +1018,7 @@ struct DiaryPanelItemView: View {
     }
     
     func load() {
-        panel = PanelUtils.panel(type: diary.panelType, objectId: diary.panelObjectId, id: diary.panelId)
+        panel = diary.panel()
         if let p = panel {
             self.headerColor = PanelUtils.colorByPanelType(panel: p)
             self.headerIcon = PanelUtils.iconByPanelType(panel: p)
@@ -828,7 +1051,7 @@ struct DiaryItemLeadingView: View {
                 Image("ic-pin")
                     .resizable()
                     .scaledToFit()
-                    .foregroundColor( diary.isContactPoint == 1 ? .cDanger : .cIcon)
+                    .foregroundColor( diary.isContactPoint == "Y" ? .cDanger : .cIcon)
                     .frame(width: 12, height: 12, alignment: .center)
                     .padding(2)
                 Image("ic-circle-check")
@@ -853,20 +1076,17 @@ struct DiaryItemLeadingView: View {
 
 struct DiaryListMapView: View {
     @Binding var items: [Diary]
+    let onDiaryTapped: (_ diw: Diary) -> Void
     
     @State private var markers = [GMSMarker]()
     @State private var goToMyLocation = false
     @State private var fitToBounds = false
     
-    @State private var menuIsPresented = false
-    @State private var panelTapped: Panel = GenericPanel()
-    
     var body: some View {
         ZStack(alignment: .topTrailing) {
             CustomMarkerMapView(markers: $markers, goToMyLocation: $goToMyLocation, fitToBounds: $fitToBounds) { marker in
-                if let p = marker.userData as? Panel {
-                    panelTapped = p
-                    menuIsPresented = true
+                if let d = marker.userData as? Diary {
+                    onDiaryTapped(d)
                 }
             }
             .onAppear {
@@ -876,7 +1096,7 @@ struct DiaryListMapView: View {
                         if let location = panel.mainLocation() {
                             if let lat = location.latitude, let lng = location.longitude {
                                 let marker = GMSMarker(position: CLLocationCoordinate2D(latitude: Double(lat), longitude: Double(lng)))
-                                marker.userData = panel
+                                marker.userData = diary
                                 markers.append(marker)
                             }
                         }
@@ -894,9 +1114,6 @@ struct DiaryListMapView: View {
             }
             .padding(.top, Globals.UI_FAB_VERTICAL)
             .padding(.horizontal, Globals.UI_FAB_HORIZONTAL)
-        }
-        .sheet(isPresented: $menuIsPresented) {
-            
         }
     }
     
@@ -1000,6 +1217,7 @@ struct DiaryMenuEdit: View {
                     }
                 }
             }
+            Spacer()
             HStack {
                 Button(action: {
                     validate()
@@ -1053,7 +1271,7 @@ struct DiaryMenuEdit: View {
         hourFrom = Utils.strToDate(value: diary.hourStart, format: "HH:mm")
         hourTo = Utils.strToDate(value: diary.hourEnd ?? "", format: "HH:mm")
         contactType = diary.contactType ?? "P"
-        isContactPoint = diary.isContactPoint == 1
+        isContactPoint = diary.isContactPoint == "Y"
         comment = diary.content ?? ""
     }
     
@@ -1071,21 +1289,81 @@ struct DiaryMenuEdit: View {
         diary.hourStart = Utils.hourFormat(date: hourFrom)
         diary.hourEnd = Utils.hourFormat(date: hourTo)
         diary.contactType = contactType
-        diary.isContactPoint = isContactPoint ? 1 : 0
+        diary.isContactPoint = isContactPoint ? "Y" : "N"
         diary.content = comment
         DiaryDao(realm: realm).store(diary: diary)
         onActionDone()
     }
     
     func delete() {
-        if let d = DiaryDao(realm: realm).by(objectId: diary.objectId.stringValue) {
-            try! realm.write {
-                realm.delete(d)
-                DispatchQueue.main.async {
-                    onActionDone()
-                }
+        DiaryUtils.delete(realm: realm, ids: [diary.objectId]) {
+            DispatchQueue.main.async {
+                onActionDone()
             }
         }
+    }
+    
+}
+
+struct DiaryMoveFormView: View {
+    let selected: Int
+    let onMove: (_ date: Date) -> Void
+
+    @State private var date = Date()
+    
+    var body: some View {
+        VStack {
+            Text("envMoveDiary")
+                .foregroundColor(.cTextHigh)
+                .multilineTextAlignment(.center)
+            Spacer()
+            VStack(spacing: 20) {
+                Text(String(format: "envMoveMessage".localized(), String(selected)))
+                    .foregroundColor(.cTextHigh)
+                    .multilineTextAlignment(.center)
+                DatePicker(selection: $date, in: Date()..., displayedComponents: .date) {}
+                    .labelsHidden()
+                    .id(date)
+                Text("envMoveAdvice")
+                    .foregroundColor(.cTextMedium)
+                    .multilineTextAlignment(.center)
+            }
+            Spacer()
+            Button {
+                onMove(date)
+            } label: {
+                Text("envMove")
+                    .foregroundColor(.cHighlighted)
+                    .frame(maxWidth: .infinity, minHeight: 44, maxHeight: 44, alignment: .center)
+            }
+        }
+        .padding(.horizontal, Globals.UI_FORM_PADDING_HORIZONTAL)
+        .padding(.top, 10)
+    }
+    
+}
+
+struct DiaryDeleteFormView: View {
+    let fromSelected: Bool
+    @Binding var date: Date
+    let onDelete: () -> Void
+    
+    var body: some View {
+        VStack {
+            Spacer()
+            Text(fromSelected ? "envDiaryDeleteSelectedMessage".localized() : String(format: "envDiaryDeleteAllMessage".localized(), Utils.dateFormat(date: date, format: "dd MMM YYYY")))
+                .foregroundColor(.cTextHigh)
+                .multilineTextAlignment(.center)
+            Spacer()
+            Button {
+                onDelete()
+            } label: {
+                Text("envDelete")
+                    .foregroundColor(.cDanger)
+                    .frame(maxWidth: .infinity, minHeight: 44, maxHeight: 44, alignment: .center)
+            }
+        }
+        .padding(.horizontal, Globals.UI_FORM_PADDING_HORIZONTAL)
     }
     
 }

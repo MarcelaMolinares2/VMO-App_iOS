@@ -8,6 +8,7 @@
 
 import SwiftUI
 import RealmSwift
+import SheeKit
 
 struct ClientListWrapperView: View {
     @EnvironmentObject var masterRouter: MasterRouter
@@ -26,18 +27,33 @@ struct ClientListView: View {
     
     let realm = try! Realm()
     
-    @State private var menuIsPresented = false
-    @State private var doctorTapped: Panel = GenericPanel()
+    @State private var clientTapped: Panel = GenericPanel()
     @State private var complementaryData: [String: Any] = [:]
     @State private var selected = [ObjectId]()
     
+    @State private var menuIsPresented = false
+    @State private var modalInfo = false
+    @State private var modalDelete = false
+    
     var body: some View {
         CustomPanelClientView(realm: realm, results: $clients, selected: $selected) { panel in
-            self.doctorTapped = panel
+            self.clientTapped = panel
             menuIsPresented = true
         }
         .sheet(isPresented: $menuIsPresented) {
-            PanelMenu(isPresented: self.$menuIsPresented, panel: $doctorTapped, complementaryData: complementaryData)
+            PanelMenu(isPresented: self.$menuIsPresented, panel: $clientTapped, complementaryData: complementaryData) {
+                modalInfo = true
+            } onDeleteTapped: {
+                modalDelete = true
+            }
+        }
+        .shee(isPresented: $modalInfo, presentationStyle: .formSheet(properties: .init(detents: [.medium(), .large()]))) {
+            PanelKeyInfoView(panel: clientTapped)
+        }
+        .shee(isPresented: $modalDelete, presentationStyle: .formSheet(properties: .init(detents: [.medium()]))) {
+            PanelDeleteView(panel: clientTapped) {
+                modalDelete = false
+            }
         }
     }
 }

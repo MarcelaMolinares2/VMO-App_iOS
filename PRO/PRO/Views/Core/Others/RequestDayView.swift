@@ -9,6 +9,7 @@
 import SwiftUI
 import RealmSwift
 import AlertToast
+import SheeKit
 
 class FreeDayRequestModel: ObservableObject, Identifiable {
     @Published var reasonId: Int = 0
@@ -133,10 +134,10 @@ struct RequestDayView: View {
             .padding(.bottom, Globals.UI_FAB_VERTICAL)
             .padding(.horizontal, Globals.UI_FAB_HORIZONTAL)
         }
-        .adaptiveSheet(isPresented: $modalOpen, detents: [.medium()]) {
+        .shee(isPresented: $modalOpen, presentationStyle: .formSheet(properties: .init(detents: [.medium()]))) {
             DialogDatePicker(onSelectionDone: onSelectionDone)
         }
-        .toast(isPresenting: $showToast){
+        .toast(isPresenting: $showToast) {
             AlertToast(type: .error(.cError), title: NSLocalizedString(errorToast, comment: ""))
         }
         .toast(isPresenting: $savedToast) {

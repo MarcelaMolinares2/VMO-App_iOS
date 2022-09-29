@@ -299,6 +299,46 @@ struct PanelDialogPicker: View {
 }
 
 struct GenericDialogItem: View {
+    @Binding var item: GenericSelectableItem
+    var alignment: Alignment
+    var capitalized: Bool = true
+    let onItemTapped: () -> Void
+    
+    var body: some View {
+        Button(action: {
+            self.onItemTapped()
+        }) {
+            ZStack {
+                if item.selected {
+                    Color
+                        .cSelected
+                        .ignoresSafeArea()
+                        .cornerRadius(15)
+                        .frame(minWidth: 0, maxWidth: .infinity, minHeight: 40, maxHeight: .infinity)
+                }
+                VStack(alignment: .leading) {
+                    Text("\(capitalized ? item.label.capitalized : item.label)")
+                        .foregroundColor(.cTextHigh)
+                        .multilineTextAlignment(.leading)
+                    if !item.complement.isEmpty {
+                        Text("\(item.complement)")
+                            .foregroundColor(.cTextMedium)
+                            .lineLimit(2)
+                            .multilineTextAlignment(.leading)
+                    }
+                }
+                .frame(minWidth: 0, maxWidth: .infinity, alignment: alignment)
+                .padding([.leading, .trailing], 10)
+                .padding([.top, .bottom], 5)
+            }
+            .fixedSize(horizontal: false, vertical: true)
+            .frame(minWidth: 0, maxWidth: .infinity, minHeight: 40)
+        }
+    }
+    
+}
+
+struct GenericDialogItemOld: View {
     var item: GenericSelectableItem
     var alignment: Alignment
     var capitalized: Bool = true
@@ -341,16 +381,20 @@ struct GenericDialogItem: View {
 struct DialogSortPickerView: View {
     var data: [String]
     
-    @ObservedObject var viewModel = ListGenericViewModel()
+    @StateObject var viewModel = ListGenericViewModel()
     let onSelectionDone: (_ selected: SortModel) -> Void
     
     var body: some View {
         VStack {
             Text("envSortBy")
                 .foregroundColor(.cTextMedium)
-            ForEach(viewModel.items, id: \.id) { item in
-                GenericDialogItem(item: item, alignment: .center) {
-                    self.onItemSelected(item: item)
+            ScrollView {
+                VStack {
+                    ForEach($viewModel.items) { $item in
+                        GenericDialogItem(item: $item, alignment: .center) {
+                            self.onItemSelected(item: item)
+                        }
+                    }
                 }
             }
             HStack {
@@ -376,13 +420,12 @@ struct DialogSortPickerView: View {
     }
     
     func loadData() {
-        let list = data.map { GenericSelectableItem(id: $0, label: TextUtils.serializeEnv(s: $0)) }
-        viewModel.put(list: list)
+        viewModel.items = data.map { GenericSelectableItem(value: $0, label: TextUtils.serializeEnv(s: $0)) }
     }
     
     func onItemSelected(item: GenericSelectableItem) {
-        viewModel.items.forEach { item in
-            item.selected = false
+        for i in viewModel.items {
+            i.selected = false
         }
         item.selected = !item.selected
         viewModel.toggle()
@@ -390,7 +433,7 @@ struct DialogSortPickerView: View {
     
     func done(asc: Bool) {
         let selected = viewModel.items.first { item in item.selected }
-        onSelectionDone(SortModel(key: selected?.id ?? "", ascending: asc))
+        onSelectionDone(SortModel(key: selected?.value ?? "", ascending: asc))
     }
     
 }
@@ -416,7 +459,7 @@ struct DialogPlainPickerView: View {
                 ForEach(viewModel.items.filter {
                     searchText.isEmpty ? true : $0.label.lowercased().contains(searchText.lowercased())
                 }, id: \.id) { item in
-                    GenericDialogItem(item: item, alignment: .leading) {
+                    GenericDialogItemOld(item: item, alignment: .leading) {
                         self.onItemSelected(item: item)
                     }
                 }
@@ -446,7 +489,7 @@ struct DialogPlainPickerView: View {
     func loadData() {
         let list = Utils.genericList(data: data)
         list.indices.forEach { ix in
-            if selected.contains(list[ix].id) {
+            if selected.contains(list[ix].value) {
                 list[ix].selected = true
             }
         }
@@ -465,7 +508,7 @@ struct DialogPlainPickerView: View {
     }
     
     func done() {
-        selected = viewModel.items.filter { item in item.selected }.map { $0.id }
+        selected = viewModel.items.filter { item in item.selected }.map { $0.value }
         onSelectionDone(selected)
     }
     
@@ -494,7 +537,7 @@ struct DialogSourcePickerView: View {
                 ForEach(viewModel.items.filter {
                     searchText.isEmpty ? true : $0.label.lowercased().contains(searchText.lowercased())
                 }, id: \.id) { item in
-                    GenericDialogItem(item: item, alignment: .leading, capitalized: capitalized) {
+                    GenericDialogItemOld(item: item, alignment: .leading, capitalized: capitalized) {
                         self.onItemSelected(item: item)
                     }
                 }
@@ -575,7 +618,7 @@ struct DialogSourcePickerView: View {
                 break
         }
         list.indices.forEach { ix in
-            if selected.contains(list[ix].id) {
+            if selected.contains(list[ix].value) {
                 list[ix].selected = true
             }
         }
@@ -594,7 +637,7 @@ struct DialogSourcePickerView: View {
     }
     
     func done() {
-        selected = viewModel.items.filter { item in item.selected }.map { $0.id }
+        selected = viewModel.items.filter { item in item.selected }.map { $0.value }
         onSelectionDone(selected)
     }
 }
@@ -779,7 +822,7 @@ struct CanvasDrawerDialog: View {
                     self.uiImage = canvas.asImage(size: CGSize(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height - (50)))
                     onSelectionDone(true)
                 }) {
-                    Image("ic-disk")
+                    Image("ic-file-done")
                         .resizable()
                         .scaledToFit()
                         .frame(width: 40, height: 32, alignment: .center)
@@ -915,7 +958,7 @@ struct CustomDialogPicker: View {
                 ForEach(viewModel.items.filter {
                     searchText.isEmpty ? true : $0.label.lowercased().contains(searchText.lowercased())
                 }, id: \.id) { item in
-                    GenericDialogItem(item: item, alignment: .leading) {
+                    GenericDialogItemOld(item: item, alignment: .leading) {
                         self.onItemSelected(item: item)
                     }
                 }
@@ -995,7 +1038,7 @@ struct CustomDialogPicker: View {
     }
     
     func done() {
-        selected = viewModel.items.filter { item in item.selected }.map { $0.id }
+        selected = viewModel.items.filter { item in item.selected }.map { $0.value }
         onSelectionDone(selected)
     }
 }
@@ -1023,7 +1066,7 @@ struct SourceDynamicDialogPicker: View {
                 ForEach(viewModel.items.filter {
                     searchText.isEmpty ? true : $0.label.lowercased().contains(searchText.lowercased())
                 }, id: \.id) { item in
-                    GenericDialogItem(item: item, alignment: .leading) {
+                    GenericDialogItemOld(item: item, alignment: .leading) {
                         self.onItemSelected(item: item)
                     }
                 }
@@ -1063,7 +1106,7 @@ struct SourceDynamicDialogPicker: View {
     }
     
     func done() {
-        selected = viewModel.items.filter { item in item.selected }.map { $0.id }
+        selected = viewModel.items.filter { item in item.selected }.map { $0.value }
         onSelectionDone(selected)
     }
     

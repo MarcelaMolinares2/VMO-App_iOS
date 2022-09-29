@@ -8,7 +8,7 @@
 
 import SwiftUI
 import RealmSwift
-
+import SheeKit
 
 struct PotentialListWrapperView: View {
     @EnvironmentObject var masterRouter: MasterRouter
@@ -26,19 +26,33 @@ struct PotentialListView: View {
     @ObservedResults(PotentialProfessional.self) var potentials
     
     let realm = try! Realm()
-    
-    @State private var menuIsPresented = false
-    @State private var doctorTapped: Panel = GenericPanel()
+    @State private var potentialTapped: Panel = GenericPanel()
     @State private var complementaryData: [String: Any] = [:]
     @State private var selected = [ObjectId]()
     
+    @State private var menuIsPresented = false
+    @State private var modalInfo = false
+    @State private var modalDelete = false
+    
     var body: some View {
         CustomPanelPotentialView(realm: realm, results: $potentials, selected: $selected) { panel in
-            self.doctorTapped = panel
+            self.potentialTapped = panel
             menuIsPresented = true
         }
         .sheet(isPresented: $menuIsPresented) {
-            PanelMenu(isPresented: self.$menuIsPresented, panel: $doctorTapped, complementaryData: complementaryData)
+            PanelMenu(isPresented: self.$menuIsPresented, panel: $potentialTapped, complementaryData: complementaryData) {
+                modalInfo = true
+            } onDeleteTapped: {
+                modalDelete = true
+            }
+        }
+        .shee(isPresented: $modalInfo, presentationStyle: .formSheet(properties: .init(detents: [.medium(), .large()]))) {
+            PanelKeyInfoView(panel: potentialTapped)
+        }
+        .shee(isPresented: $modalDelete, presentationStyle: .formSheet(properties: .init(detents: [.medium()]))) {
+            PanelDeleteView(panel: potentialTapped) {
+                modalDelete = false
+            }
         }
     }
 }

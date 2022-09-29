@@ -143,6 +143,7 @@ struct DoctorFormView: View {
     
     func validate() {
         if DynamicUtils.validate(form: form) {
+            DynamicUtils.cloneObject(main: doctor, temporal: try! JSONDecoder().decode(Doctor.self, from: DynamicUtils.toJSON(form: form).data(using: .utf8)!), skipped: ["objectId", "id", "type"])
             if options.op == .create {
                 duplicates = PanelUtils.duplication(from: Doctor.self, object: doctor, panelType: options.panelType, classKeys: Doctor.classKeys())
                 if !duplicates.isEmpty {

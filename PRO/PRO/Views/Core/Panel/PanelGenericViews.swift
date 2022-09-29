@@ -9,6 +9,7 @@
 import SwiftUI
 import RealmSwift
 import GoogleMaps
+import SheeKit
 
 struct PanelFormHeaderView: View {
     var panel: Panel
@@ -644,10 +645,12 @@ struct CustomPanelListView<Content: View>: View {
                 .padding(.bottom, Globals.UI_FAB_VERTICAL)
                 .padding(.horizontal, Globals.UI_FAB_HORIZONTAL)
             }
-            .partialSheet(isPresented: $modalSort) {
-                DialogSortPickerView(data: sortOptions) { selected in
-                    sort = selected
-                    modalSort = false
+            .shee(isPresented: $modalSort, presentationStyle: .formSheet(properties: .init(detents: [.medium()]))) {
+                VStack {
+                    DialogSortPickerView(data: sortOptions) { selected in
+                        sort = selected
+                        modalSort = false
+                    }
                 }
             }
             .sheet(isPresented: $modalUserOpen) {
@@ -674,8 +677,11 @@ struct PanelListMapView: View {
     @State private var goToMyLocation = false
     @State private var fitToBounds = false
     
-    @State private var menuIsPresented = false
     @State private var panelTapped: Panel = GenericPanel()
+    
+    @State private var menuIsPresented = false
+    @State private var modalInfo = false
+    @State private var modalDelete = false
     
     var body: some View {
         ZStack(alignment: .topTrailing) {
@@ -710,7 +716,19 @@ struct PanelListMapView: View {
             .padding(.horizontal, Globals.UI_FAB_HORIZONTAL)
         }
         .sheet(isPresented: $menuIsPresented) {
-            PanelMenu(isPresented: self.$menuIsPresented, panel: $panelTapped)
+            PanelMenu(isPresented: self.$menuIsPresented, panel: $panelTapped) {
+                modalInfo = true
+            } onDeleteTapped: {
+                modalDelete = true
+            }
+        }
+        .shee(isPresented: $modalInfo, presentationStyle: .formSheet(properties: .init(detents: [.medium(), .large()]))) {
+            PanelKeyInfoView(panel: panelTapped)
+        }
+        .shee(isPresented: $modalDelete, presentationStyle: .formSheet(properties: .init(detents: [.medium()]))) {
+            PanelDeleteView(panel: panelTapped) {
+                modalDelete = false
+            }
         }
     }
     
@@ -1008,9 +1026,12 @@ struct PanelItemGenericSwitchView: View {
     @Binding var members: [PanelItemModel]
     let onDelete: (_ ixs: IndexSet) -> Void
     
-    @State private var menuIsPresented = false
     @State private var panelTapped: Panel = GenericPanel()
     @State private var complementaryData: [String: Any] = [:]
+    
+    @State private var menuIsPresented = false
+    @State private var modalInfo = false
+    @State private var modalDelete = false
     
     var body: some View {
         List {
@@ -1112,7 +1133,19 @@ struct PanelItemGenericSwitchView: View {
         .listStyle(.plain)
         .background(Color.clear)
         .sheet(isPresented: $menuIsPresented) {
-            PanelMenu(isPresented: self.$menuIsPresented, panel: $panelTapped, complementaryData: complementaryData)
+            PanelMenu(isPresented: self.$menuIsPresented, panel: $panelTapped, complementaryData: complementaryData) {
+                modalInfo = true
+            } onDeleteTapped: {
+                modalDelete = true
+            }
+        }
+        .shee(isPresented: $modalInfo, presentationStyle: .formSheet(properties: .init(detents: [.medium(), .large()]))) {
+            PanelKeyInfoView(panel: panelTapped)
+        }
+        .shee(isPresented: $modalDelete, presentationStyle: .formSheet(properties: .init(detents: [.medium()]))) {
+            PanelDeleteView(panel: panelTapped) {
+                modalDelete = false
+            }
         }
     }
     
@@ -1330,6 +1363,68 @@ struct CustomPanelListDuplicatesView<Content: View>: View {
                 }
             }
         }
+    }
+    
+}
+
+struct PanelKeyInfoView: View {
+    var panel: Panel
+    
+    var body: some View {
+        VStack {
+            PanelFormHeaderView(panel: panel)
+                .padding()
+            VStack {
+                PanelItemMapView(item: panel)
+                    .frame(height: 160)
+                ScrollView {
+                    VStack {
+                        
+                    }
+                }
+            }
+        }
+    }
+}
+
+struct PanelDeleteView: View {
+    var panel: Panel
+    let onActionDone: () -> Void
+    
+    @State private var reason = ""
+    
+    var body: some View {
+        VStack {
+            PanelFormHeaderView(panel: panel)
+            VStack {
+                Spacer()
+                VStack {
+                    Text("envDTVComment")
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .foregroundColor((reason.isEmpty) ? .cDanger : .cTextMedium)
+                        .font(.system(size: 14))
+                    VStack{
+                        TextEditor(text: $reason)
+                            .frame(height: 80)
+                    }
+                }
+                Spacer()
+                Button {
+                    save()
+                } label: {
+                    Text("envDelete")
+                        .foregroundColor(.cDanger)
+                        .frame(maxWidth: .infinity, minHeight: 44, maxHeight: 44, alignment: .center)
+                }
+                .disabled(reason.isEmpty)
+                .opacity(reason.isEmpty ? 0.4 : 1)
+            }
+        }
+        .padding()
+    }
+    
+    func save() {
+        onActionDone()
     }
     
 }

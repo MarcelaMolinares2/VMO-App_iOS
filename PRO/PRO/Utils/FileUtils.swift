@@ -38,8 +38,8 @@ class MediaUtils {
         }
     }
     
-    static func remove(table: String, field: String, id: Int, localId: ObjectId) {
-        let media = item(table: table, field: field, id: id, localId: localId)
+    static func remove(table: String, field: String, localId: ObjectId) {
+        let media = MediaItem(value: MediaItemDao(realm: try! Realm()).by(table: table, field: field, localId: localId))
         MediaItemDao(realm: try! Realm()).remove(mediaItem: media)
         FileUtils.remove(media: media)
     }
@@ -65,9 +65,9 @@ class MediaUtils {
     
     static func awsPath(media: MediaItem) -> String {
         if let laboratoryHash = UserDefaults.standard.string(forKey: Globals.LABORATORY_HASH) {
-            return "\(laboratoryHash)/\(media.table)/\(media.id)/\(media.field)/resource.\(media.ext)"
+            return "\(laboratoryHash)/\(media.table)/\(media.serverId)/\(media.field)/resource.\(media.ext)"
         }
-        return "\("LAB-PATH")/\(media.table)/\(media.id)/\(media.field)/resource.\(media.ext)"
+        return "\("LAB-PATH")/\(media.table)/\(media.serverId)/\(media.field)/resource.\(media.ext)"
     }
     
 }
@@ -130,8 +130,8 @@ class FileUtils {
     }
     
     static func remove(media: MediaItem) {
+        let pathComponent = MediaUtils.mediaURL(media: media)
         if exists(media: media) {
-            let pathComponent = MediaUtils.mediaURL(media: media)
             do {
                 try FileManager.default.removeItem(at: pathComponent)
             } catch {

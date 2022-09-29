@@ -511,22 +511,13 @@ struct DynamicFormImage: View {
                     .frame(width: 44, height: 44, alignment: .center)
                 }
             }
-            Button(action: {
+            ImageViewerWrapperView(value: $field.value, defaultIcon: icon(), table: options.table, field: field.key, id: options.item, localId: options.objectId) {
+                print(options.item)
                 switch field.controlType {
                     case "canvas":
                         onSourceSelected(s: "D")
                     default:
                         actionSheet = true
-                }
-            }) {
-                if field.value == "Y" {
-                    ImageViewerWrapperView(table: options.table, field: field.key, id: options.item, localId: options.objectId)
-                } else {
-                    Image(icon())
-                        .resizable()
-                        .scaledToFit()
-                        .foregroundColor(.cIcon)
-                        .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
                 }
             }
             DynamicFormDescriptionView(field: field)
@@ -562,7 +553,7 @@ struct DynamicFormImage: View {
     
     func delete() {
         field.value = initialValue
-        MediaUtils.remove(table: options.table, field: field.key, id: options.item, localId: options.objectId)
+        MediaUtils.remove(table: options.table, field: field.key, localId: options.objectId)
     }
     
     func icon() -> String {
@@ -606,6 +597,7 @@ struct DynamicFormImage: View {
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
             field.value = done ? "Y" : initialValue
+            print(field)
         }
     }
     
@@ -617,141 +609,6 @@ enum MediaSource {
 
 enum SheetLayout {
     case picker, viewer
-}
-
-struct DynamicFormHabeasData: View {
-    
-    @Binding var field: DynamicFormField
-    var options: DynamicFormFieldOptions
-    
-    @State private var showActionSheet = false
-    @State private var shouldPresentSheet = false
-    @State private var sourceType: UIImagePickerController.SourceType = .camera
-    @State private var source: MediaSource = .canvas
-    @State private var sheetLayout: SheetLayout = .picker
-    
-    @State private var uiImage: UIImage?
-    
-    var body: some View {
-        let label = DynamicUtils.formatLabel(s: field.label).localized(defaultValue: field.label)
-        VStack {
-            Button(action: {
-                showActionSheet = true
-            }) {
-                VStack {
-                    Text(label)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .foregroundColor((field.localRequired && field.value.isEmpty) ? Color.cDanger : .cTextMedium)
-                }
-                .frame(height: 44)
-            }
-            .buttonStyle(BorderlessButtonStyle())
-            .actionSheet(isPresented: self.$showActionSheet) {
-                ActionSheet(title: Text("envSelect"), message: Text(""), buttons: [
-                    .default(Text("envDraw"), action: {
-                        self.source = .canvas
-                        self.sheetLayout = .picker
-                        self.shouldPresentSheet = true
-                    }),
-                    .default(Text("envCamera"), action: {
-                        self.sourceType = .camera
-                        self.source = .camera
-                        self.sheetLayout = .picker
-                        self.shouldPresentSheet = true
-                    }),
-                    .default(Text("envGallery"), action: {
-                        self.sourceType = .photoLibrary
-                        self.source = .gallery
-                        self.sheetLayout = .picker
-                        self.shouldPresentSheet = true
-                    }),
-                    .cancel()
-                ])
-            }
-            if field.value == "Y" {
-                Button(action: {
-                    sheetLayout = .viewer
-                    shouldPresentSheet = true
-                }) {
-                    Text("envPreviewResource")
-                }
-                .frame(height: 40)
-                .buttonStyle(BorderlessButtonStyle())
-            }
-        }
-        .sheet(isPresented: $shouldPresentSheet) {
-            switch sheetLayout {
-                case .picker:
-                    switch source {
-                        case .canvas:
-                            CanvasDrawerDialog(uiImage: self.$uiImage, title: NSLocalizedString("env\(field.label.capitalized)", comment: field.label), onSelectionDone: onSelectionDone)
-                        default:
-                            CustomImagePickerView(sourceType: sourceType, uiImage: self.$uiImage, onSelectionDone: onSelectionDone)
-                    }
-                case .viewer:
-                    ImageViewerDialog(table: options.table, field: field.key, id: options.item, localId: options.objectId)
-            }
-        }
-    }
-    
-    func onSelectionDone(_ done: Bool) {
-        self.shouldPresentSheet = false
-        field.value = done ? "Y" : field.value
-        if done {
-            MediaUtils.store(uiImage: uiImage, table: options.table, field: field.key, id: options.item, localId: options.objectId)
-        }
-    }
-    
-}
-
-struct DynamicFormCanvas: View {
-    
-    @Binding var field: DynamicFormField
-    var options: DynamicFormFieldOptions
-
-    @State private var drawDialog = false
-    @State private var shouldPresentImageViewer = false
-    
-    @State private var uiImage: UIImage?
-    
-    var body: some View {
-        let label = DynamicUtils.formatLabel(s: field.label).localized(defaultValue: field.label)
-        VStack {
-            VStack {
-                Text(label)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .foregroundColor((field.localRequired && field.value.isEmpty) ? Color.cDanger : .cTextMedium)
-            }
-            .frame(height: 44)
-            .onTapGesture {
-                drawDialog = true
-            }
-            if field.value == "Y" {
-                Button(action: {
-                    shouldPresentImageViewer = true
-                }) {
-                    Text("envPreviewResource")
-                }
-                .frame(height: 40)
-                .buttonStyle(BorderlessButtonStyle())
-                .popover(isPresented: $shouldPresentImageViewer) {
-                    ImageViewerDialog(table: options.table, field: field.key, id: options.item, localId: options.objectId)
-                }
-            }
-        }
-        .sheet(isPresented: $drawDialog, content: {
-            CanvasDrawerDialog(uiImage: self.$uiImage, title: NSLocalizedString("env\(field.label.capitalized)", comment: field.label), onSelectionDone: onSelectionDone)
-        })
-    }
-    
-    func onSelectionDone(_ done: Bool) {
-        self.drawDialog = false
-        field.value = done ? "Y" : field.value
-        if done {
-            MediaUtils.store(uiImage: uiImage, table: options.table, field: field.key, id: options.item, localId: options.objectId)
-        }
-    }
-    
 }
 
 struct DynamicFormDayMonth: View {
@@ -941,7 +798,7 @@ struct DynamicFormList: View {
                 case "json":
                     let list = Utils.genericList(data: field.source)
                     let rs = list.filter { item -> Bool in
-                        item.id == selected[0]
+                        item.value == selected[0]
                     }
                     if !rs.isEmpty {
                         selectedLabel = rs[0].label

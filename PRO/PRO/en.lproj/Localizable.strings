@@ -158,6 +158,28 @@
 "envSave" = "Save";
 "envReportLocation" = "Report location";
 "envTapToTryAgain" = "Tap to try again";
+"envMin20" = "20 mins";
+"envMin30" = "30 mins";
+"envHour1" = "1 hour";
+"envYes" = "Yes";
+"envNo" = "No";
+"envHour" = "Hour";
+"envDiary" = "Diary";
+"envMaterialDelivery" = "Material delivery";
+"envRequestMaterial" = "Request material";
+"envSupport" = "Support";
+"envRequestDays" = "Request days";
+"envDifferentToVisit" = "Different to visit";
+"envReports" = "Reports";
+"envRecordExpenses" = "Record expenses";
+"envPotentialProfessional" = "Potential professional";
+"envLocations" = "Locations";
+"envLocationReport" = "Locations Report";
+"envLocationsMenuDesc" = "Locations report";
+"envDiaryMenuDesc" = "Diary report";
+"envDiaryReport" = "Diary Report";
+"envVisitsMenuDesc" = "Visits report";
+"envVisitReport" = "Visit Report";
 
 //Expense
 "envOriginDestiny" = "Origin - Destiny";
@@ -225,15 +247,24 @@
 
 //Diary
 "envIntervalToSchedule" = "Interval to schedule";
-"envHourStart" = "Hour start";
+"envHourInterval" = "Hour interval";
 "envSaveAsGroup" = "Save as group";
 "envMoveAll" = "Move all";
 "envDeleteAll" = "Delete all";
+"envDiaryDeleteAllMessage" = "Do you want to delete the diary of %@?";
+"envContactPoint" = "Contact point";
+"envMove" = "Move";
+"envMoveMessage" = "%@ items will be moved to";
+"envMoveAdvice" = "The moved items will keep their current time";
 
 //SLAID
 "envVisualAids" = "Visual Aids";
 "envVANotAvailable" = "This module is not available for your organization";
 "envVANotAvailableRequest" = "Request it to";
+
+//Movement
+"envMovementReportInfo" = "%@ Cycle: %@ - %@";
+
 
 //Error
 "errLogin" = "Username/Password incorrect";

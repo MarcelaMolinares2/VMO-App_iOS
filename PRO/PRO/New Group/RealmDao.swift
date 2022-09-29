@@ -227,6 +227,12 @@ class DiaryDao: GenericDao {
         return try! realm.object(ofType: Diary.self, forPrimaryKey: ObjectId(string: objectId))
     }
     
+    func local() -> [Diary] {
+        return Array(realm.objects(Diary.self).where {
+            ($0.transactionType != "") && ($0.transactionStatus == "")
+        })
+    }
+    
 }
 
 class ExpenseReportDao: GenericDao {
@@ -413,83 +419,83 @@ class GroupDao: GenericDao {
 class GenericSelectableDao: GenericDao {
     
     func bricks() -> [GenericSelectableItem] {
-        BrickDao(realm: self.realm).all().map { GenericSelectableItem(id: "\($0.id)", label: $0.name ?? "") }
+        BrickDao(realm: self.realm).all().map { GenericSelectableItem(value: "\($0.id)", label: $0.name ?? "") }
     }
     
     func categories() -> [GenericSelectableItem] {
-        CategoryDao(realm: self.realm).all().map { GenericSelectableItem(id: "\($0.id)", label: $0.name ?? "") }
+        CategoryDao(realm: self.realm).all().map { GenericSelectableItem(value: "\($0.id)", label: $0.name ?? "") }
     }
     
     func categories(categoryType: Int) -> [GenericSelectableItem] {
-        CategoryDao(realm: self.realm).all(categoryType: categoryType).map { GenericSelectableItem(id: "\($0.id)", label: $0.name ?? "") }
+        CategoryDao(realm: self.realm).all(categoryType: categoryType).map { GenericSelectableItem(value: "\($0.id)", label: $0.name ?? "") }
     }
     
     func cities() -> [GenericSelectableItem] {
-        CityDao(realm: self.realm).all().map { GenericSelectableItem(id: "\($0.id)", label: $0.name ?? "") }
+        CityDao(realm: self.realm).all().map { GenericSelectableItem(value: "\($0.id)", label: $0.name ?? "") }
     }
     
     func colleges() -> [GenericSelectableItem] {
-        CollegeDao(realm: self.realm).all().map { GenericSelectableItem(id: "\($0.id)", label: $0.name ?? "") }
+        CollegeDao(realm: self.realm).all().map { GenericSelectableItem(value: "\($0.id)", label: $0.name ?? "") }
     }
     
     func countries() -> [GenericSelectableItem] {
-        CountryDao(realm: self.realm).all().map { GenericSelectableItem(id: "\($0.id)", label: $0.name) }
+        CountryDao(realm: self.realm).all().map { GenericSelectableItem(value: "\($0.id)", label: $0.name) }
     }
     
     func cycles() -> [GenericSelectableItem] {
-        CycleDao(realm: self.realm).all().map { GenericSelectableItem(id: "\($0.id)", label: $0.displayName) }
+        CycleDao(realm: self.realm).all().map { GenericSelectableItem(value: "\($0.id)", label: $0.displayName) }
     }
     
     func expenseConcepts() -> [GenericSelectableItem] {
-        ExpenseConceptDao(realm: self.realm).all().map { GenericSelectableItem(id: "\($0.id)", label: $0.name) }
+        ExpenseConceptDao(realm: self.realm).all().map { GenericSelectableItem(value: "\($0.id)", label: $0.name) }
     }
     
     func freeDayReasons() -> [GenericSelectableItem] {
-        FreeDayReasonDao(realm: self.realm).all().map { GenericSelectableItem(id: "\($0.id)", label: $0.content) }
+        FreeDayReasonDao(realm: self.realm).all().map { GenericSelectableItem(value: "\($0.id)", label: $0.content) }
     }
     
     func lines() -> [GenericSelectableItem] {
-        LineDao(realm: self.realm).all().map { GenericSelectableItem(id: "\($0.id)", label: $0.name) }
+        LineDao(realm: self.realm).all().map { GenericSelectableItem(value: "\($0.id)", label: $0.name) }
     }
     
     func materials() -> [GenericSelectableItem] {
-        MaterialDao(realm: self.realm).all().map { GenericSelectableItem(id: "\($0.id)", label: $0.name ?? "", complement: String(format: NSLocalizedString("envCodeArg", comment: "Code: %@"), $0.code ?? "--")) }
+        MaterialDao(realm: self.realm).all().map { GenericSelectableItem(value: "\($0.id)", label: $0.name ?? "", complement: String(format: NSLocalizedString("envCodeArg", comment: "Code: %@"), $0.code ?? "--")) }
     }
     
     func materialsPlain() -> [GenericSelectableItem] {
-        MaterialPlainDao(realm: self.realm).all().map { GenericSelectableItem(id: "\($0.id)", label: $0.name ?? "", complement: String(format: NSLocalizedString("envCodeArg", comment: "Code: %@"), $0.code ?? "--")) }
+        MaterialPlainDao(realm: self.realm).all().map { GenericSelectableItem(value: "\($0.id)", label: $0.name ?? "", complement: String(format: NSLocalizedString("envCodeArg", comment: "Code: %@"), $0.code ?? "--")) }
     }
     
     func pharmacyChains() -> [GenericSelectableItem] {
-        PharmacyChainDao(realm: self.realm).all().map { GenericSelectableItem(id: "\($0.id)", label: $0.name ?? "") }
+        PharmacyChainDao(realm: self.realm).all().map { GenericSelectableItem(value: "\($0.id)", label: $0.name ?? "") }
     }
     
     func pharmacyTypes() -> [GenericSelectableItem] {
-        PharmacyTypeDao(realm: self.realm).all().map { GenericSelectableItem(id: "\($0.id)", label: $0.name) }
+        PharmacyTypeDao(realm: self.realm).all().map { GenericSelectableItem(value: "\($0.id)", label: $0.name) }
     }
     
     func pricesLists() -> [GenericSelectableItem] {
-        PricesListDao(realm: self.realm).all().map { GenericSelectableItem(id: "\($0.id)", label: $0.name ?? "") }
+        PricesListDao(realm: self.realm).all().map { GenericSelectableItem(value: "\($0.id)", label: $0.name ?? "") }
     }
     
     func products() -> [GenericSelectableItem] {
-        ProductDao(realm: self.realm).all().map { GenericSelectableItem(id: "\($0.id)", label: $0.name) }
+        ProductDao(realm: self.realm).all().map { GenericSelectableItem(value: "\($0.id)", label: $0.name) }
     }
     
     func productsPromoted(pharmacyChainId: Int) -> [GenericSelectableItem] {
         if pharmacyChainId == 0 {
             return products()
         } else {
-            return ProductDao(realm: self.realm).by(pharmacyChainId: pharmacyChainId).map { GenericSelectableItem(id: "\($0.id)", label: $0.name) }
+            return ProductDao(realm: self.realm).by(pharmacyChainId: pharmacyChainId).map { GenericSelectableItem(value: "\($0.id)", label: $0.name) }
         }
     }
     
     func productBrands() -> [GenericSelectableItem] {
-        ProductBrandDao(realm: self.realm).all().map { GenericSelectableItem(id: "\($0.id)", label: $0.name) }
+        ProductBrandDao(realm: self.realm).all().map { GenericSelectableItem(value: "\($0.id)", label: $0.name) }
     }
     
     func productsWithCompetitors() -> [GenericSelectableItem] {
-        ProductDao(realm: self.realm).competitors().map { GenericSelectableItem(id: "\($0.id)", label: $0.name) }
+        ProductDao(realm: self.realm).competitors().map { GenericSelectableItem(value: "\($0.id)", label: $0.name) }
     }
     
     func specialties(tp: String = "P") -> [GenericSelectableItem] {
@@ -499,19 +505,19 @@ class GenericSelectableDao: GenericDao {
         } else {
             items = SpecialtyDao(realm: self.realm).secondary()
         }
-        return items.map { GenericSelectableItem(id: "\($0.id)", label: $0.name) }
+        return items.map { GenericSelectableItem(value: "\($0.id)", label: $0.name) }
     }
     
     func styles() -> [GenericSelectableItem] {
-        StyleDao(realm: self.realm).all().map { GenericSelectableItem(id: "\($0.id)", label: $0.name) }
+        StyleDao(realm: self.realm).all().map { GenericSelectableItem(value: "\($0.id)", label: $0.name) }
     }
     
     func usersHierarchy() -> [GenericSelectableItem] {
-        UserDao(realm: self.realm).hierarchy().map { GenericSelectableItem(id: "\($0.id)", label: $0.name.capitalized) }
+        UserDao(realm: self.realm).hierarchy().map { GenericSelectableItem(value: "\($0.id)", label: $0.name.capitalized) }
     }
     
     func zones() -> [GenericSelectableItem] {
-        ZoneDao(realm: self.realm).all().map { GenericSelectableItem(id: "\($0.id)", label: $0.name ?? "") }
+        ZoneDao(realm: self.realm).all().map { GenericSelectableItem(value: "\($0.id)", label: $0.name ?? "") }
     }
     
 }
@@ -539,6 +545,22 @@ class MaterialDao: GenericDao {
     }
     
     func by(id: Int) -> AdvertisingMaterial? {
+        return by(id: String(describing: id))
+    }
+    
+}
+
+class MovementFailReasonDao: GenericDao {
+    
+    func all() -> [MovementFailReason] {
+        return Array(realm.objects(MovementFailReason.self).sorted(byKeyPath: "name"))
+    }
+    
+    func by(id: String) -> MovementFailReason? {
+        return realm.objects(MovementFailReason.self).filter("id == \(id)").first
+    }
+    
+    func by(id: Int) -> MovementFailReason? {
         return by(id: String(describing: id))
     }
     
@@ -644,6 +666,12 @@ class MediaItemDao: GenericDao {
         return Array(realm.objects(MediaItem.self).where {
             $0.table == table && $0.localId == item
         })
+    }
+    
+    func by(table: String, field: String, localId: ObjectId) -> MediaItem {
+        return realm.objects(MediaItem.self).where({ q in
+            q.table == table && q.field == field && q.localId == localId
+        }).first ?? MediaItem()
     }
     
 }
@@ -865,6 +893,20 @@ class UserPreferenceDao: GenericDao {
                 $0.module == module
             }
         )
+    }
+    
+    func update(module: String, key: String, value: String, onSaveDone: @escaping () -> Void) {
+        let preferences = realm.objects(UserPreference.self).where {
+            $0.module == module && $0.type == key
+        }
+        if let preference = preferences.first {
+            try! realm.write {
+                preference.value = value
+                DispatchQueue.main.async {
+                    onSaveDone()
+                }
+            }
+        }
     }
     
 }

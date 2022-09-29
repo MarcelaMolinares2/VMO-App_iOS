@@ -11,7 +11,7 @@ import Foundation
 import RealmSwift
 
 
-class AgentLocation: Object, Codable, SyncEntity {
+class AgentLocation: Object, Codable, SyncEntity, Identifiable {
     @Persisted(primaryKey: true) var objectId: ObjectId
     @Persisted(indexed: true) var id = 0
     @Persisted var transactionStatus: String = ""
@@ -21,6 +21,10 @@ class AgentLocation: Object, Codable, SyncEntity {
     @Persisted var date: String = ""
     @Persisted var latitude: Float = 0
     @Persisted var longitude: Float = 0
+    
+    private enum CodingKeys: String, CodingKey {
+        case id = "id_ubicacion", userId = "id_usuario", date = "fecha", latitude = "latitud", longitude = "longitud"
+    }
     
     private enum EncodingKeys: String, CodingKey {
         case id = "id_ubicacion", userId = "id_usuario", date = "fecha", latitude = "latitud", longitude = "longitud"
@@ -452,7 +456,9 @@ extension Panel {
     
 }
 
-class GenericPanel: Panel, SyncEntity {
+class GenericPanel: Decodable, Panel {
+    var objectId: ObjectId = ObjectId()
+    var isSelected: Bool = false
     var type: String = ""
     var email: String?
     var phone: String?
@@ -467,7 +473,6 @@ class GenericPanel: Panel, SyncEntity {
     var createdAt: String = ""
     var fields: String = ""
     var cityId: Int = 0
-    var isSelected: Bool = false
     var visitsFeeWasEdited: Bool = false
     var lastMove: PanelMove?
     var lastMovement: MovementSummarized?
@@ -478,11 +483,45 @@ class GenericPanel: Panel, SyncEntity {
     var requests: List<GeneralRequest> = List<GeneralRequest>()
     var users: List<PanelUser> = List<PanelUser>()
     var visitDates: List<PanelVisitedOn> = List<PanelVisitedOn>()
-    var objectId: ObjectId = ObjectId()
     var id: Int = 0
-    var transactionStatus: String = ""
-    var transactionType: String = ""
-    var transactionResponse: String = ""
+    
+    private enum CodingKeys: String, CodingKey {
+        case id = "panel_id", idNumber = "dni", type = "panel_type", name = "full_name", email = "email", createdAt = "created_at", phone = "telefono", fields, brickId = "id_brick", cityId = "id_ciudad", countryId = "id_pais", pricesListId = "id_lista_precios", zoneId = "id_zona", visitFTF = "visit_ftf", visitVirtual = "visit_virtual", visitsFeeWasEdited = "visits_fee_was_edited", lastMove = "last_move", lastMovement = "last_movement", visitingHours = "visiting_hours", locations, categories, contactControl = "contact_control", requests = "general_requests", users = "panel_user", visitDates = "visited_on"
+    }
+    
+    init() {
+        
+    }
+    
+    required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        self.id = try DynamicUtils.intTypeDecoding(container: container, key: .id)
+        self.idNumber = try DynamicUtils.stringTypeDecoding(container: container, key: .idNumber)
+        self.type = try DynamicUtils.stringTypeDecoding(container: container, key: .type)
+        self.name = try DynamicUtils.stringTypeDecoding(container: container, key: .name)
+        self.email = try DynamicUtils.stringTypeDecoding(container: container, key: .email)
+        self.createdAt = try DynamicUtils.stringTypeDecoding(container: container, key: .createdAt)
+        self.phone = try DynamicUtils.stringTypeDecoding(container: container, key: .phone)
+        self.fields = try DynamicUtils.adFieldsTypeDecoding(container: container, key: .fields)
+        self.brickId = try DynamicUtils.intTypeDecoding(container: container, key: .brickId)
+        self.cityId = try DynamicUtils.intTypeDecoding(container: container, key: .cityId)
+        self.countryId = try DynamicUtils.intTypeDecoding(container: container, key: .countryId)
+        self.pricesListId = try DynamicUtils.intTypeDecoding(container: container, key: .pricesListId)
+        self.zoneId = try DynamicUtils.intTypeDecoding(container: container, key: .zoneId)
+        self.visitFTF = try DynamicUtils.intTypeDecoding(container: container, key: .visitFTF)
+        self.visitVirtual = try DynamicUtils.intTypeDecoding(container: container, key: .visitVirtual)
+        self.visitsFeeWasEdited = try DynamicUtils.boolTypeDecoding(container: container, key: .visitsFeeWasEdited)
+        self.lastMove = try DynamicUtils.objectTypeDecoding(container: container, key: .lastMove)
+        self.lastMovement = try DynamicUtils.objectTypeDecoding(container: container, key: .lastMovement)
+        self.visitingHours = try DynamicUtils.listTypeDecoding(container: container, key: .visitingHours)
+        self.locations = try DynamicUtils.listTypeDecoding(container: container, key: .locations)
+        self.categories = try DynamicUtils.listTypeDecoding(container: container, key: .categories)
+        self.contactControl = try DynamicUtils.listTypeDecoding(container: container, key: .contactControl)
+        self.requests = try DynamicUtils.listTypeDecoding(container: container, key: .requests)
+        self.users = try DynamicUtils.listTypeDecoding(container: container, key: .users)
+        self.visitDates = try DynamicUtils.listTypeDecoding(container: container, key: .visitDates)
+    }
     
 }
 
@@ -753,7 +792,6 @@ class Diary: Object, Codable, SyncEntity, Identifiable {
     @Persisted var transactionType: String = ""
     @Persisted var transactionResponse: String = ""
     
-    
     @Persisted var panelId = 0
     @Persisted var panelObjectId: ObjectId
     @Persisted var panelType: String = ""
@@ -764,31 +802,44 @@ class Diary: Object, Codable, SyncEntity, Identifiable {
     @Persisted var type: String = ""
     @Persisted var contactType: String?
     @Persisted var content: String?
-    @Persisted var isContactPoint = 0
-    @Persisted var wasVisited = 0
+    @Persisted var isContactPoint = "N"
     @Persisted var dataFields: String?
     @Persisted var transaction = ""
     @Persisted var lastUpdate = ""
     
+    var rpPanel: GenericPanel?
+    
     private enum CodingKeys: String, CodingKey {
-        case id = "diary_id", date = "date_", hourStart = "hour_start", hourEnd = "hour_end", type = "type_", contactType = "contact_type", panelType = "panel_type", panelId = "panel_id", isContactPoint = "contact_point", dataFields, wasVisited, content
+        case id = "diary_id", date = "date_", hourStart = "hour_start", hourEnd = "hour_end", type = "type_", contactType = "contact_type", panelType = "panel_type", panelId = "panel_id", isContactPoint = "contact_point", dataFields, content, rpPanel = "panel"
     }
     
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(id, forKey: .id)
+        
+        try container.encode(panelId, forKey: .panelId)
+        try container.encode(panelType, forKey: .panelType)
         try container.encode(date, forKey: .date)
         try container.encode(hourStart, forKey: .hourStart)
         try container.encode(hourEnd, forKey: .hourEnd)
         try container.encode(type, forKey: .type)
         try container.encode(contactType, forKey: .contactType)
-        try container.encode(panelType, forKey: .panelType)
+        try container.encode(content, forKey: .content)
+        try container.encode(isContactPoint, forKey: .isContactPoint)
     }
     
     static func primaryCodingKey() -> String {
         let codingKey: CodingKeys
         codingKey = .id
         return codingKey.rawValue
+    }
+    
+    func panel() -> Panel {
+        if let p = rpPanel {
+            return p
+        } else if let p = PanelUtils.panel(type: panelType, objectId: panelObjectId, id: panelId) {
+            return p
+        }
+        return GenericPanel()
     }
 }
 
@@ -942,7 +993,6 @@ class Doctor: Object, Codable, Panel, SyncEntity, Identifiable {
         try container.encode(email, forKey: .email)
         try container.encode(createdAt, forKey: .createdAt)
         try container.encode(phone, forKey: .phone)
-        //try container.encode(fields, forKey: .fields)
         try container.encode(brickId, forKey: .brickId)
         try container.encode(cityId, forKey: .cityId)
         try container.encode(countryId, forKey: .countryId)
@@ -950,11 +1000,6 @@ class Doctor: Object, Codable, Panel, SyncEntity, Identifiable {
         try container.encode(zoneId, forKey: .zoneId)
         try container.encode(visitFTF, forKey: .visitFTF)
         try container.encode(visitVirtual, forKey: .visitVirtual)
-        //try container.encode(visitingHours, forKey: .visitingHours)
-        //try container.encode(locations, forKey: .locations)
-        //try container.encode(categories, forKey: .categories)
-        //try container.encode(contactControl, forKey: .contactControl)
-        //try container.encode(requests, forKey: .requests)
         
         try container.encode(documentType, forKey: .documentType)
         try container.encode(firstName, forKey: .firstName)
@@ -983,8 +1028,17 @@ class Doctor: Object, Codable, Panel, SyncEntity, Identifiable {
         try container.encode(styleId, forKey: .styleId)
         try container.encode(tvConsent, forKey: .tvConsent)
         
-        //try container.encode(clients, forKey: .clients)
-        //try container.encode(lines, forKey: .lines)
+        try container.encode("{data:\(fields)}", forKey: .fields)
+        
+        try container.encode(Utils.objArrayToJSON(categories), forKey: .categories)
+        try container.encode(Utils.objArrayToJSON(clients), forKey: .clients)
+        try container.encode(Utils.objArrayToJSON(lines), forKey: .lines)
+        
+        try container.encode(Utils.objArrayToJSON(visitingHours), forKey: .visitingHours)
+        try container.encode(Utils.objArrayToJSON(locations), forKey: .locations)
+        try container.encode(Utils.objArrayToJSON(contactControl), forKey: .contactControl)
+        //try container.encode(requests, forKey: .requests)
+        
     }
     
     static func primaryCodingKey() -> String {
@@ -1911,6 +1965,17 @@ class PanelCategoryPanel: Object, Codable {
     private enum CodingKeys: String, CodingKey {
         case id = "panel_category_panel_id", categoryId = "category_id"
     }
+    
+    private enum EncodingKeys: String, CodingKey {
+        case id = "panel_category_panel_id", categoryId = "category_id"
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: EncodingKeys.self)
+        
+        try container.encode(id, forKey: .id)
+        try container.encode(categoryId, forKey: .categoryId)
+    }
 }
 
 class ContactControlPanel: Object, Codable {
@@ -1919,6 +1984,17 @@ class ContactControlPanel: Object, Codable {
     
     private enum CodingKeys: String, CodingKey {
         case status = "status_", contactControlTypeId = "contact_control_type_id"
+    }
+    
+    private enum EncodingKeys: String, CodingKey {
+        case status = "status_", contactControlTypeId = "contact_control_type_id"
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: EncodingKeys.self)
+        
+        try container.encode(status, forKey: .status)
+        try container.encode(contactControlTypeId, forKey: .contactControlTypeId)
     }
 }
 
@@ -1972,6 +2048,19 @@ class PanelUser: Object, Decodable {
     private enum CodingKeys: String, CodingKey {
         case userId = "id_usuario", visitsFee = "num_visitas", visitsCycle = "visits_in_cycle_count"
     }
+    
+    override init() {
+        super.init()
+    }
+    
+    required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        self.userId = try DynamicUtils.intTypeDecoding(container: container, key: .userId)
+        self.visitsFee = try DynamicUtils.intTypeDecoding(container: container, key: .visitsFee)
+        self.visitsCycle = try DynamicUtils.intTypeDecoding(container: container, key: .visitsCycle)
+    }
+    
 }
 
 class GeneralRequest: Object, Codable, SyncEntity {

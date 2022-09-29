@@ -12,17 +12,33 @@ import AlertToast
 
 
 struct RouteView: View {
+    @EnvironmentObject var viewRouter: ViewRouter
     @ObservedObject private var moduleRouter = ModuleRouter()
+
     var body: some View {
-        switch moduleRouter.currentPage {
-        case "LIST":
-            RouteListView(moduleRouter: moduleRouter)
-        case "FORM":
-            RouteFormView(moduleRouter: moduleRouter)
-        default:
-            Text("")
+        VStack {
+            switch moduleRouter.currentPage {
+                case "LIST":
+                    RouteListView(moduleRouter: moduleRouter)
+                case "FORM":
+                    RouteFormView(moduleRouter: moduleRouter)
+                default:
+                    Text("")
+            }
+        }
+        .onAppear {
+            validate()
         }
     }
+    
+    func validate() {
+        if let date = viewRouter.data.options[Globals.EV_DIARY_DATE] as? String {
+            if !date.isEmpty {
+                moduleRouter.currentPage = "FORM"
+            }
+        }
+    }
+    
 }
 
 struct RouteListView: View {
@@ -156,6 +172,7 @@ class PanelItemModel: Identifiable {
 }
 
 struct RouteFormView: View {
+    @EnvironmentObject var viewRouter: ViewRouter
     @ObservedObject var moduleRouter: ModuleRouter
     
     @State private var modalPanelType = false
@@ -220,6 +237,18 @@ struct RouteFormView: View {
     }
     
     func initForm() {
+        if let date = viewRouter.data.options[Globals.EV_DIARY_DATE] as? String {
+            if !date.isEmpty {
+                group = Group()
+                DiaryDao(realm: realm).by(date: Utils.strToDate(value: date)).forEach { diary in
+                    if let panel = PanelUtils.panel(type: diary.panelType, objectId: diary.panelObjectId, id: diary.panelId) {
+                        members.append(PanelItemModel(objectId: panel.objectId, type: panel.type))
+                    }
+                }
+                viewRouter.data.options = [:]
+                return
+            }
+        }
         if let obId = moduleRouter.objectId {
             group = Group(value: GroupDao(realm: realm).by(objectId: obId) ?? Group())
             routeName = group?.name ?? ""

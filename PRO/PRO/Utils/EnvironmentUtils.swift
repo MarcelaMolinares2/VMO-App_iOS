@@ -550,3 +550,65 @@ class ApplicationUtils {
     
 }
 
+class DiaryUtils {
+    
+    static func contactType(realm: Realm, ids: [ObjectId], contactType: String, callback: () -> Void) {
+        let diaries = realm.objects(Diary.self).where {
+            $0.objectId.in(ids)
+        }
+        try! realm.write {
+            diaries.forEach { diary in
+                diary.contactType = contactType
+                if diary.transactionType.isEmpty {
+                    diary.transactionType = "UPDATE"
+                }
+            }
+            callback()
+        }
+    }
+    
+    static func contactPoint(realm: Realm, ids: [ObjectId], contactPoint: Bool, callback: () -> Void) {
+        let diaries = realm.objects(Diary.self).where {
+            $0.objectId.in(ids)
+        }
+        try! realm.write {
+            diaries.forEach { diary in
+                diary.isContactPoint = contactPoint ? "Y" : "N"
+                if diary.transactionType.isEmpty {
+                    diary.transactionType = "UPDATE"
+                }
+            }
+            callback()
+        }
+    }
+    
+    static func move(realm: Realm, ids: [ObjectId], date: Date, callback: () -> Void) {
+        let diaries = realm.objects(Diary.self).where {
+            $0.objectId.in(ids)
+        }
+        try! realm.write {
+            diaries.forEach { diary in
+                diary.date = Utils.dateFormat(date: date)
+                if diary.transactionType.isEmpty {
+                    diary.transactionType = "UPDATE"
+                }
+            }
+            callback()
+        }
+    }
+    
+    static func delete(realm: Realm, date: Date, callback: () -> Void) {
+        delete(realm: realm, ids: DiaryDao(realm: realm).by(date: date).map { $0.objectId }, callback: callback)
+    }
+    
+    static func delete(realm: Realm, ids: [ObjectId], callback: () -> Void) {
+        let diaries = realm.objects(Diary.self).where {
+            $0.objectId.in(ids)
+        }
+        try! realm.write {
+            realm.delete(diaries)
+            callback()
+        }
+    }
+    
+}

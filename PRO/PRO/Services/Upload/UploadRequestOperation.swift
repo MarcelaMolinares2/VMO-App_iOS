@@ -10,7 +10,7 @@ import RealmSwift
 import Amplify
 
 enum UploadRequestServices {
-    case activity, client, doctor, patient, pharmacy, potential
+    case activity, client, diary, doctor, movement, patient, pharmacy, potential
 }
 
 class UploadRequestOperation: Operation {
@@ -84,10 +84,16 @@ class UploadRequestOperation: Operation {
                     break
                 case .client:
                     break
+                case .diary:
+                    DiaryDao(realm: try! Realm()).local().forEach { diary in
+                        doRequest(path: "diary", data: Utils.jsonObjectArray(string: try! Utils.objToJSON(diary)), object: Diary(value: diary), from: Diary.self, table: "diary")
+                    }
                 case .doctor:
                     DoctorDao(realm: try! Realm()).local().forEach { doctor in
-                        post(path: "doctor", data: Utils.jsonObjectArray(string: try! Utils.objToJSON(doctor)), object: Doctor(value: doctor), from: Doctor.self, table: "doctor")
+                        doRequest(path: "doctor", data: Utils.jsonObjectArray(string: try! Utils.objToJSON(doctor)), object: Doctor(value: doctor), from: Doctor.self, table: "doctor")
                     }
+                case .movement:
+                    break
                 case .patient:
                     break
                 case .pharmacy:
@@ -99,10 +105,11 @@ class UploadRequestOperation: Operation {
         
         dispatchGroup.notify(queue: .main) {
             print("Finished all requests.")
+            self.finish()
         }
     }
     
-    func post<T: Object & Codable & SyncEntity>(path: String, data: [String : Any], object: T, from: T.Type, table: String) {
+    func doRequest<T: Object & Codable & SyncEntity>(path: String, data: [String : Any], object: T, from: T.Type, table: String) {
         dispatchGroup.enter()
         if object.transactionType == "CREATE" {
             AppServer().postRequest(data: data, path: "\(prefix)/\(path)") { (successful, code, data) in
@@ -119,19 +126,20 @@ class UploadRequestOperation: Operation {
         print(successful, code, data)
         if successful {
             let realm = try! Realm()
+            var obj = realm.object(ofType: from.self, forPrimaryKey: object.objectId)
             try! realm.write {
-                object.setValue(Utils.castInt(value: data), forKey: "id")
-                object.setValue("", forKey: "transactionType")
-                realm.add(object, update: .modified)
+                obj?.id = Utils.castInt(value: data)
+                obj?.transactionType = ""
             }
             let dispatchGroupMedia = DispatchGroup()
-            MediaItemDao(realm: realm).by(table: table, item: object.objectId).forEach { mediaItem in
+            MediaItemDao(realm: realm).by(table: table, item: object.objectId).forEach { m in
                 dispatchGroupMedia.enter()
-                mediaItem.id = Utils.castInt(value: data)
-                print(mediaItem)
+                let mediaItem = MediaItem(value: m)
+                mediaItem.serverId = Utils.castInt(value: data)
                 Amplify.Storage.uploadFile(key: MediaUtils.awsPath(media: mediaItem), local: MediaUtils.mediaURL(media: mediaItem)) { (event) in
                     switch event {
                         case .success:
+                            MediaUtils.remove(table: mediaItem.table, field: mediaItem.field, localId: mediaItem.localId)
                             print("SUCCESS / DELETE LOCAL RESOURCE")
                         case .failure:
                             print("FAILED / TRACK ERROR IN CRAHSLYTICS")
@@ -139,10 +147,12 @@ class UploadRequestOperation: Operation {
                     dispatchGroupMedia.leave()
                 }
             }
-            
             dispatchGroupMedia.notify(queue: .main) {
                 self.dispatchGroup.leave()
             }
+        } else {
+            fails[table] = [code: data as! String]
+            self.dispatchGroup.leave()
         }
     }
     

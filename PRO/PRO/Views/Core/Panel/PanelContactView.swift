@@ -38,7 +38,7 @@ struct PanelContactListView: View {
     @ObservedResults(PanelContact.self, sortDescriptor: SortDescriptor(keyPath: "name", ascending: true)) var contacts
     @Binding var searchText: String
     @State var menuIsPresented = false
-    @State var panel: Panel & SyncEntity = GenericPanel()
+    @State var panel: Panel = GenericPanel()
     
     var body: some View {
         ZStack(alignment: .bottomTrailing) {

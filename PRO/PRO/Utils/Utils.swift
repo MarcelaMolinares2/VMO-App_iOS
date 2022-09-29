@@ -77,6 +77,24 @@ class Utils {
         return result
     }
     
+    static func objArrayToJSON<T>(_ data: RealmSwift.List<T>) -> String where T : Encodable {
+        var result = [String]()
+        for item in data {
+            result.append(try! objToJSON(item))
+        }
+        return json(from: result) ?? "[]"
+    }
+    
+    static func objToJSON<T>(_ value: T) throws -> String where T : Encodable {
+        do {
+            let enc = try JSONEncoder().encode(value)
+            return String(data: enc, encoding: .utf8) ?? ""
+        } catch let error {
+            print(error)
+        }
+        return ""
+    }
+    
     static func json(from object: Any) -> String? {
         guard let data = try? JSONSerialization.data(withJSONObject: object, options: []) else {
             return nil
@@ -209,21 +227,11 @@ class Utils {
         return theCalendar.date(byAdding: dayComponent, to: date) ?? Date()
     }
     
-    static func objToJSON<T>(_ value: T) throws -> String where T : Encodable {
-        do {
-            let enc = try JSONEncoder().encode(value)
-            return String(data: enc, encoding: .utf8) ?? ""
-        } catch let error {
-            print(error)
-        }
-        return ""
-    }
-    
     static func genericList(data: String) -> [GenericSelectableItem]{
         var list = [GenericSelectableItem]()
         let json = Utils.jsonObject(string: data)
         for item in json {
-            list.append(GenericSelectableItem(id: Utils.castString(value: item["id"]), label: Utils.castString(value: item["label"])))
+            list.append(GenericSelectableItem(value: Utils.castString(value: item["id"]), label: Utils.castString(value: item["label"])))
         }
         return list
     }
@@ -667,7 +675,7 @@ class DynamicUtils {
         if !selected.isEmpty {
             let list = Utils.genericList(data: data)
             let rs = list.filter { item -> Bool in
-                item.id == selected[0]
+                item.value == selected[0]
             }
             if !rs.isEmpty {
                 return rs[0].label

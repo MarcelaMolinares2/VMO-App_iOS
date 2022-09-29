@@ -27,6 +27,55 @@ struct GoogleMapsView: UIViewRepresentable {
     
 }
 
+struct CustomMarkerStaticMapView: UIViewRepresentable {
+    @Binding var marker: GMSMarker
+    
+    private let zoom: Float = 15.0
+    
+    func makeUIView(context: Context) -> GMSMapView {
+        let camera = GMSCameraPosition.camera(withTarget: marker.position, zoom: zoom)
+        let mapView = GMSMapView.map(withFrame: CGRect.zero, camera: camera)
+        mapView.isMyLocationEnabled = false
+        mapView.isUserInteractionEnabled = false
+        if EnvironmentUtils.osTheme == .dark {
+            do {
+                if let styleURL = Bundle.main.url(forResource: "map_style_dark", withExtension: "json") {
+                    mapView.mapStyle = try GMSMapStyle(contentsOfFileURL: styleURL)
+                } else {
+                    NSLog("Unable to find style.json")
+                }
+            } catch {
+                NSLog("One or more of the map styles failed to load. \(error)")
+            }
+        }
+        mapView.delegate = context.coordinator
+        return mapView
+    }
+    
+    func makeCoordinator() -> MapViewCoordinator {
+        return MapViewCoordinator(self)
+    }
+    
+    func updateUIView(_ mapView: GMSMapView, context: Context) {
+        mapView.clear()
+        marker.map = mapView
+        let camera = GMSCameraPosition.camera(withTarget: marker.position, zoom: zoom)
+        mapView.animate(to: camera)
+    }
+    
+    final class MapViewCoordinator: NSObject, GMSMapViewDelegate {
+        var mapViewControllerBridge: CustomMarkerStaticMapView
+        
+        init(_ mapViewControllerBridge: CustomMarkerStaticMapView) {
+            self.mapViewControllerBridge = mapViewControllerBridge
+        }
+        
+        func mapView(_ mapView: GMSMapView, didTap marker: GMSMarker) -> Bool {
+            return true
+        }
+    }
+}
+
 struct CustomMarkerMapView: UIViewRepresentable {
     
     @ObservedObject var locationManager = LocationManager()

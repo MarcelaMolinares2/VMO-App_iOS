@@ -114,7 +114,7 @@ class CustomSheetViewController<Content: View>: UIViewController {
         
         let hostingController = UIHostingController(rootView: content)
         
-        hostingController.modalPresentationStyle = .popover
+        hostingController.modalPresentationStyle = .automatic
         hostingController.presentationController?.delegate = coordinator as UIAdaptivePresentationControllerDelegate
         hostingController.modalTransitionStyle = .coverVertical
         if let hostPopover = hostingController.popoverPresentationController {

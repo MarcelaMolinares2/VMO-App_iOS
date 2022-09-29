@@ -84,6 +84,7 @@ struct ActivityListView: View{
     @State private var selectedUser = [String]()
     @State private var modalOptions = false
     @State private var modalUserOpen = false
+    @State private var modalSummary = false
     
     var realm = try! Realm()
     
@@ -141,6 +142,9 @@ struct ActivityListView: View{
                 }
             }
         }
+        .sheet(isPresented: $modalSummary) {
+            ActivitySummaryView(activity: $activitySelected, modalSummary: $modalSummary)
+        }
     }
     
     func onAgentChanged() {
@@ -154,7 +158,7 @@ struct ActivityListView: View{
     
     func onDetail(_ activity: DifferentToVisit) {
         self.modalOptions = false
-        FormEntity(objectId: activity.objectId).go(path: "DTV-SUMMARY", router: viewRouter)
+        modalSummary = true
     }
 }
 
