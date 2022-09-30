@@ -63,8 +63,13 @@ class SyncObserver {
         //updateCurrentOperation(key: .diary, status: 0)
         //updateCurrentOperation(key: .doctor, status: 0)
         startObserver(realm: realm, from: Diary.self, key: .diary)
-        //startObserver(realm: realm, from: DifferentToVisit.self, key: .activity)
+        startObserver(realm: realm, from: DifferentToVisit.self, key: .activity)
+        startObserver(realm: realm, from: Client.self, key: .client)
         startObserver(realm: realm, from: Doctor.self, key: .doctor)
+        startObserver(realm: realm, from: Group.self, key: .group)
+        startObserver(realm: realm, from: Patient.self, key: .patient)
+        startObserver(realm: realm, from: Pharmacy.self, key: .pharmacy)
+        startObserver(realm: realm, from: PotentialProfessional.self, key: .potential)
     }
     
     private func startObserver<T: Object & SyncEntity>(realm: Realm, from: T.Type, key: UploadRequestServices) {
@@ -149,6 +154,8 @@ class SyncObserver {
                 return "pharmacy"
             case .potential:
                 return "potential"
+            case .group:
+                return "group"
         }
     }
     

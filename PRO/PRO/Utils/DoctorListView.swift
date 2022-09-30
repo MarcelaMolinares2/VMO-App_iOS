@@ -111,7 +111,8 @@ struct CustomPanelDoctorView: View {
             if serverLoading {
                 VStack {
                     Spacer()
-                    ProgressView("envLoading")
+                    LottieView(name: "search_animation", loopMode: .loop, speed: 1)
+                        .frame(width: 300, height: 200)
                     Spacer()
                 }
             } else {

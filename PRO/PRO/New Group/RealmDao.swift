@@ -114,6 +114,12 @@ class ClientDao: GenericDao {
         return Array(realm.objects(Client.self).sorted(byKeyPath: "name"))
     }
     
+    func local() -> [Client] {
+        return Array(realm.objects(Client.self).where {
+            ($0.transactionType != "") && ($0.transactionStatus == "")
+        })
+    }
+    
     func by(id: String) -> Client? {
         return realm.objects(Client.self).filter("id == \(id)").first
     }
@@ -200,6 +206,52 @@ class CycleDao: GenericDao {
     
     func by(id: String) -> Cycle? {
         return realm.objects(Cycle.self).filter("id == \(id)").first
+    }
+    
+}
+
+class DeleteDao: GenericDao {
+    
+    func panel(panel: Panel, reason: String) {
+        let generalRequest = GeneralRequest()
+        generalRequest.type = "DELETE"
+        generalRequest.content = reason
+        
+        let generalRequestSync = GeneralRequestSyncDao()
+        generalRequestSync.type = "DELETE"
+        generalRequestSync.content = reason
+        generalRequestSync.itemObjectId = panel.objectId
+        generalRequestSync.itemId = panel.id
+        generalRequestSync.itemType = panel.type
+        
+        try! realm.write {
+            switch panel.type {
+                case "M":
+                    if let doctor = DoctorDao(realm: realm).by(objectId: panel.objectId) {
+                        doctor.requests.append(generalRequest)
+                    }
+                case "F":
+                    if let pharmacy = PharmacyDao(realm: realm).by(objectId: panel.objectId) {
+                        pharmacy.requests.append(generalRequest)
+                    }
+                case "C":
+                    if let client = ClientDao(realm: realm).by(objectId: panel.objectId) {
+                        client.requests.append(generalRequest)
+                    }
+                case "P":
+                    if let patient = PatientDao(realm: realm).by(objectId: panel.objectId) {
+                        patient.requests.append(generalRequest)
+                    }
+                case "T":
+                    if let potential = PotentialDao(realm: realm).by(objectId: panel.objectId) {
+                        potential.requests.append(generalRequest)
+                    }
+                default:
+                    break
+            }
+            
+            realm.add(generalRequestSync)
+        }
     }
     
 }
@@ -318,6 +370,12 @@ class ActivityDao: GenericDao {
         return Array(realm.objects(DifferentToVisit.self).sorted(byKeyPath: "id"))
     }
     
+    func local() -> [DifferentToVisit] {
+        return Array(realm.objects(DifferentToVisit.self).where {
+            ($0.transactionType != "") && ($0.transactionStatus == "")
+        })
+    }
+    
     func by(id: String) -> DifferentToVisit? {
         return realm.objects(DifferentToVisit.self).filter("id == \(id)").first
     }
@@ -328,6 +386,9 @@ class ActivityDao: GenericDao {
     
     func store(activity: DifferentToVisit) {
         try! realm.write {
+            if activity.transactionType.isEmpty {
+                activity.transactionType = "UPDATE"
+            }
             realm.add(activity, update: .all)
         }
     }
@@ -394,6 +455,12 @@ class GroupDao: GenericDao {
         return Array(realm.objects(Group.self).sorted(byKeyPath: "objectId"))
     }
     
+    func local() -> [Group] {
+        return Array(realm.objects(Group.self).where {
+            ($0.transactionType != "") && ($0.transactionStatus == "")
+        })
+    }
+    
     func by(id: Int) -> Group? {
         return realm.objects(Group.self).filter("id == \(id)").first
     }
@@ -404,6 +471,9 @@ class GroupDao: GenericDao {
     
     func store(group: Group){
         try! realm.write {
+            if group.transactionType.isEmpty {
+                group.transactionType = "UPDATE"
+            }
             realm.add(group, update: .all)
         }
     }
@@ -464,6 +534,10 @@ class GenericSelectableDao: GenericDao {
     
     func materialsPlain() -> [GenericSelectableItem] {
         MaterialPlainDao(realm: self.realm).all().map { GenericSelectableItem(value: "\($0.id)", label: $0.name ?? "", complement: String(format: NSLocalizedString("envCodeArg", comment: "Code: %@"), $0.code ?? "--")) }
+    }
+    
+    func panelDeleteReasons(panelType: String) -> [GenericSelectableItem] {
+        PanelDeleteReasonDao(realm: self.realm).by(panelType: panelType).map { GenericSelectableItem(value: "\($0.id)", label: $0.content) }
     }
     
     func pharmacyChains() -> [GenericSelectableItem] {
@@ -676,10 +750,36 @@ class MediaItemDao: GenericDao {
     
 }
 
+class PanelDeleteReasonDao: GenericDao {
+    
+    func by(panelType: String) -> [PanelDeleteReason] {
+        return Array(
+            realm.objects(PanelDeleteReason.self).sorted(byKeyPath: "content")
+        ).filter { pdr in
+            pdr.panelType.components(separatedBy: ",").contains(panelType)
+        }
+    }
+    
+    func by(id: String) -> PanelDeleteReason? {
+        return realm.objects(PanelDeleteReason.self).filter("id == \(id)").first
+    }
+    
+    func by(id: Int?) -> PanelDeleteReason? {
+        return by(id: String(describing: id ?? 0))
+    }
+    
+}
+
 class PatientDao: GenericDao {
     
     func all() -> [Patient] {
         return Array(realm.objects(Patient.self).sorted(byKeyPath: "lastName"))
+    }
+    
+    func local() -> [Patient] {
+        return Array(realm.objects(Patient.self).where {
+            ($0.transactionType != "") && ($0.transactionStatus == "")
+        })
     }
     
     func by(id: String) -> Patient? {
@@ -702,6 +802,12 @@ class PharmacyDao: GenericDao {
     
     func all() -> [Pharmacy] {
         return Array(realm.objects(Pharmacy.self).sorted(byKeyPath: "name"))
+    }
+    
+    func local() -> [Pharmacy] {
+        return Array(realm.objects(Pharmacy.self).where {
+            ($0.transactionType != "") && ($0.transactionStatus == "")
+        })
     }
     
     func by(id: String) -> Pharmacy? {
@@ -756,6 +862,12 @@ class PotentialDao: GenericDao {
     
     func all() -> [PotentialProfessional] {
         return Array(realm.objects(PotentialProfessional.self).sorted(byKeyPath: "name"))
+    }
+    
+    func local() -> [PotentialProfessional] {
+        return Array(realm.objects(PotentialProfessional.self).where {
+            ($0.transactionType != "") && ($0.transactionStatus == "")
+        })
     }
     
     func by(id: String) -> PotentialProfessional? {

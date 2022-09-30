@@ -10,7 +10,7 @@ import RealmSwift
 import Amplify
 
 enum UploadRequestServices {
-    case activity, client, diary, doctor, movement, patient, pharmacy, potential
+    case activity, client, diary, doctor, group, movement, patient, pharmacy, potential
 }
 
 class UploadRequestOperation: Operation {
@@ -81,9 +81,13 @@ class UploadRequestOperation: Operation {
         if step < services.count {
             switch services[step] {
                 case .activity:
-                    break
+                    ActivityDao(realm: try! Realm()).local().forEach { activity in
+                        doRequest(path: "activity", data: Utils.jsonObjectArray(string: try! Utils.objToJSON(activity)), object: DifferentToVisit(value: activity), from: DifferentToVisit.self, table: "activity")
+                    }
                 case .client:
-                    break
+                    ClientDao(realm: try! Realm()).local().forEach { client in
+                        doRequest(path: "client", data: Utils.jsonObjectArray(string: try! Utils.objToJSON(client)), object: Client(value: client), from: Client.self, table: "client")
+                    }
                 case .diary:
                     DiaryDao(realm: try! Realm()).local().forEach { diary in
                         doRequest(path: "diary", data: Utils.jsonObjectArray(string: try! Utils.objToJSON(diary)), object: Diary(value: diary), from: Diary.self, table: "diary")
@@ -95,11 +99,21 @@ class UploadRequestOperation: Operation {
                 case .movement:
                     break
                 case .patient:
-                    break
+                    PatientDao(realm: try! Realm()).local().forEach { patient in
+                        doRequest(path: "patient", data: Utils.jsonObjectArray(string: try! Utils.objToJSON(patient)), object: Patient(value: patient), from: Patient.self, table: "patient")
+                    }
                 case .pharmacy:
-                    break
+                    PharmacyDao(realm: try! Realm()).local().forEach { pharmacy in
+                        doRequest(path: "pharmacy", data: Utils.jsonObjectArray(string: try! Utils.objToJSON(pharmacy)), object: Pharmacy(value: pharmacy), from: Pharmacy.self, table: "pharmacy")
+                    }
                 case .potential:
-                    break
+                    PotentialDao(realm: try! Realm()).local().forEach { potential in
+                        doRequest(path: "potential", data: Utils.jsonObjectArray(string: try! Utils.objToJSON(potential)), object: PotentialProfessional(value: potential), from: PotentialProfessional.self, table: "potential")
+                    }
+                case .group:
+                    GroupDao(realm: try! Realm()).local().forEach { group in
+                        doRequest(path: "group", data: Utils.jsonObjectArray(string: try! Utils.objToJSON(group)), object: Group(value: group), from: Group.self, table: "group")
+                    }
             }
         }
         

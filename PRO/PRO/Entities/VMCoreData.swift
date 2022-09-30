@@ -225,9 +225,11 @@ class DifferentToVisit: Object, Codable, SyncEntity, Identifiable {
         try container.encode(latitude, forKey: .latitude)
         try container.encode(longitude, forKey: .longitude)
         try container.encode(requestFreeDay, forKey: .requestFreeDay)
-        try container.encode(fields, forKey: .fields)
-        try container.encode(materials, forKey: .materials)
-        try container.encode(assistants, forKey: .assistants)
+        
+        try container.encode("{data:\(fields)}", forKey: .fields)
+        
+        try container.encode(Utils.objArrayToJSON(materials), forKey: .materials)
+        try container.encode(Utils.objArrayToJSON(assistants), forKey: .assistants)
     }
     
     static func primaryCodingKey() -> String {
@@ -625,13 +627,13 @@ class Client: Object, Codable, Panel, SyncEntity, Identifiable {
         try container.encode(zoneId, forKey: .zoneId)
         try container.encode(visitFTF, forKey: .visitFTF)
         try container.encode(visitVirtual, forKey: .visitVirtual)
-        try container.encode(visitingHours, forKey: .visitingHours)
-        try container.encode(locations, forKey: .locations)
-        try container.encode(categories, forKey: .categories)
-        try container.encode(contactControl, forKey: .contactControl)
-        try container.encode(requests, forKey: .requests)
         
-        try container.encode(contacts, forKey: .contacts)
+        try container.encode("{data:\(fields)}", forKey: .fields)
+        
+        try container.encode(Utils.objArrayToJSON(categories), forKey: .categories)
+        
+        try container.encode(Utils.objArrayToJSON(visitingHours), forKey: .visitingHours)
+        try container.encode(Utils.objArrayToJSON(locations), forKey: .locations)
     }
     
     static func primaryCodingKey() -> String {
@@ -947,7 +949,6 @@ class Doctor: Object, Codable, Panel, SyncEntity, Identifiable {
         self.users = try DynamicUtils.listTypeDecoding(container: container, key: .users)
         self.visitDates = try DynamicUtils.listTypeDecoding(container: container, key: .visitDates)
         
-        
         self.documentType = try DynamicUtils.stringTypeDecoding(container: container, key: .documentType)
         self.firstName = try DynamicUtils.stringTypeDecoding(container: container, key: .firstName)
         self.lastName = try DynamicUtils.stringTypeDecoding(container: container, key: .lastName)
@@ -1037,8 +1038,6 @@ class Doctor: Object, Codable, Panel, SyncEntity, Identifiable {
         try container.encode(Utils.objArrayToJSON(visitingHours), forKey: .visitingHours)
         try container.encode(Utils.objArrayToJSON(locations), forKey: .locations)
         try container.encode(Utils.objArrayToJSON(contactControl), forKey: .contactControl)
-        //try container.encode(requests, forKey: .requests)
-        
     }
     
     static func primaryCodingKey() -> String {
@@ -1072,6 +1071,19 @@ class Group: Object, Codable, SyncEntity, ObjectKeyIdentifiable {
     
     private enum CodingKeys: String, CodingKey {
         case id = "id_grupo", name = "grupo", members
+    }
+    
+    private enum EncodingKeys: String, CodingKey {
+        case id = "id_grupo", name = "grupo", members
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: EncodingKeys.self)
+        
+        try container.encode(id, forKey: .id)
+        try container.encode(name, forKey: .name)
+        
+        try container.encode(Utils.objArrayToJSON(members), forKey: .members)
     }
     
     static func primaryCodingKey() -> String {
@@ -1360,18 +1372,15 @@ class Patient: Object, Codable, Panel, SyncEntity, Identifiable {
         try container.encode(zoneId, forKey: .zoneId)
         try container.encode(visitFTF, forKey: .visitFTF)
         try container.encode(visitVirtual, forKey: .visitVirtual)
-        try container.encode(visitingHours, forKey: .visitingHours)
-        try container.encode(locations, forKey: .locations)
-        try container.encode(categories, forKey: .categories)
-        try container.encode(contactControl, forKey: .contactControl)
-        try container.encode(requests, forKey: .requests)
         
         try container.encode(firstName, forKey: .firstName)
         try container.encode(lastName, forKey: .lastName)
         try container.encode(habeasData, forKey: .habeasData)
         
-        try container.encode(clients, forKey: .clients)
-        try container.encode(doctors, forKey: .doctors)
+        try container.encode("{data:\(fields)}", forKey: .fields)
+        
+        try container.encode(Utils.objArrayToJSON(clients), forKey: .clients)
+        try container.encode(Utils.objArrayToJSON(doctors), forKey: .doctors)
     }
     
     static func primaryCodingKey() -> String {
@@ -1504,11 +1513,6 @@ class Pharmacy: Object, Codable, Panel, SyncEntity, Identifiable {
         try container.encode(zoneId, forKey: .zoneId)
         try container.encode(visitFTF, forKey: .visitFTF)
         try container.encode(visitVirtual, forKey: .visitVirtual)
-        try container.encode(visitingHours, forKey: .visitingHours)
-        try container.encode(locations, forKey: .locations)
-        try container.encode(categories, forKey: .categories)
-        try container.encode(contactControl, forKey: .contactControl)
-        try container.encode(requests, forKey: .requests)
         
         try container.encode(code, forKey: .code)
         try container.encode(neighborhood, forKey: .neighborhood)
@@ -1520,8 +1524,13 @@ class Pharmacy: Object, Codable, Panel, SyncEntity, Identifiable {
         try container.encode(pharmacyChainId, forKey: .pharmacyChainId)
         try container.encode(pharmacyTypeId, forKey: .pharmacyTypeId)
         
-        try container.encode(contacts, forKey: .contacts)
-        try container.encode(lines, forKey: .lines)
+        try container.encode("{data:\(fields)}", forKey: .fields)
+        
+        try container.encode(Utils.objArrayToJSON(categories), forKey: .categories)
+        try container.encode(Utils.objArrayToJSON(lines), forKey: .lines)
+        
+        try container.encode(Utils.objArrayToJSON(visitingHours), forKey: .visitingHours)
+        try container.encode(Utils.objArrayToJSON(locations), forKey: .locations)
     }
     
     static func primaryCodingKey() -> String {
@@ -1663,17 +1672,14 @@ class PotentialProfessional: Object, Codable, Panel, SyncEntity, Identifiable {
         try container.encode(zoneId, forKey: .zoneId)
         try container.encode(visitFTF, forKey: .visitFTF)
         try container.encode(visitVirtual, forKey: .visitVirtual)
-        try container.encode(visitingHours, forKey: .visitingHours)
-        try container.encode(locations, forKey: .locations)
-        try container.encode(categories, forKey: .categories)
-        try container.encode(contactControl, forKey: .contactControl)
-        try container.encode(requests, forKey: .requests)
         
         try container.encode(cityName, forKey: .cityName)
         try container.encode(address, forKey: .address)
         try container.encode(specialtyName, forKey: .specialtyName)
         try container.encode(joinDate, forKey: .joinDate)
         try container.encode(observations, forKey: .observations)
+        
+        try container.encode("{data:\(fields)}", forKey: .fields)
     }
     
     static func primaryCodingKey() -> String {
@@ -2063,12 +2069,37 @@ class PanelUser: Object, Decodable {
     
 }
 
-class GeneralRequest: Object, Codable, SyncEntity {
+class GeneralRequestSyncDao: Object, Encodable, SyncEntity {
     @Persisted(primaryKey: true) var objectId: ObjectId
     @Persisted(indexed: true) var id = 0
     @Persisted var transactionStatus: String = ""
     @Persisted var transactionType: String = ""
     @Persisted var transactionResponse: String = ""
+    
+    @Persisted var itemObjectId: ObjectId
+    @Persisted var itemId: Int = 0
+    @Persisted var itemType: String = ""
+    @Persisted var type: String = ""
+    @Persisted var content: String = ""
+    
+    private enum EncodingKeys: String, CodingKey {
+        case id = "general_request_id", itemId = "item_id", itemType = "item_type",
+             type = "type_", content
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: EncodingKeys.self)
+        
+        try container.encode(itemId, forKey: .itemId)
+        try container.encode(itemType, forKey: .itemType)
+        try container.encode(type, forKey: .type)
+        try container.encode(content, forKey: .content)
+    }
+    
+}
+
+class GeneralRequest: Object, Codable {
+    @Persisted var id = 0
     
     @Persisted var senderId: Int = 0
     @Persisted var recipientId: Int? = 0

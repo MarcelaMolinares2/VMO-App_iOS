@@ -70,7 +70,7 @@ class SyncTertiaryService: DownloadRequestOperation {
         self.prefix = "vm/config"
         
         step = 0
-        services = [.brick, .category, .city, .contact_control_type, .country, .menu, .pharmacy_chain, .product_brand, .specialty, .user, .zone, .user_preference]
+        services = [.brick, .category, .city, .contact_control_type, .country, .menu, .pharmacy_chain, .product_brand, .specialty, .user, .zone, .user_preference, .movement_fail_reason, .panel_delete_reason]
         get()
     }
     

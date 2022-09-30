@@ -33,10 +33,14 @@ struct ActivityFormView: View {
     var realm = try! Realm()
     
     private var dtvModel = DifferentToVisitModel()
+    
     @State private var assistants = [PanelItemModel]()
     @State private var materials = [AdvertisingMaterialDeliveryMaterial]()
     
     @State var differentToVisit: DifferentToVisit?
+    
+    @State private var dynamicForm = DynamicForm(tabs: [DynamicFormTab]())
+    @State private var dynamicOptions = DynamicFormFieldOptions(table: "activity", op: .create)
     
     @State private var route = 0
     @State private var modalPanelType = false
@@ -50,7 +54,7 @@ struct ActivityFormView: View {
             }
             ZStack(alignment: .bottom) {
                 TabView(selection: $route) {
-                    ActivityFormBasicView(realm: realm)
+                    ActivityFormBasicView(realm: realm, dynamicForm: $dynamicForm, dynamicOptions: $dynamicOptions)
                         .tag(0)
                         .tabItem {
                             Text("envBasic")
@@ -72,12 +76,14 @@ struct ActivityFormView: View {
                             Text("envAssistants")
                             Image("ic-client")
                         }
-                    MaterialDeliveryFormWrapperView(realm: realm, details: $materials)
-                        .tag(2)
-                        .tabItem {
-                            Text("envMaterial")
-                            Image("ic-material")
-                        }
+                    if dynamicOptions.op == .create {
+                        MaterialDeliveryFormWrapperView(realm: realm, details: $materials)
+                            .tag(2)
+                            .tabItem {
+                                Text("envMaterial")
+                                Image("ic-material")
+                            }
+                    }
                 }
                 .tabViewStyle(DefaultTabViewStyle())
                 HStack(alignment: .bottom) {
@@ -122,7 +128,13 @@ struct ActivityFormView: View {
                     assistants.append(PanelItemModel(objectId: panel.objectId, type: assistant.panelType))
                 }
             }
+        } else {
+            differentToVisit = DifferentToVisit()
+            differentToVisit?.transactionType = "CREATE"
         }
+        dynamicOptions.objectId = differentToVisit!.objectId
+        dynamicOptions.item = differentToVisit?.id ?? 0
+        dynamicOptions.op = viewRouter.data.objectId == nil ? .create : .update
     }
     
     func validate() {
@@ -136,7 +148,11 @@ struct ActivityFormView: View {
                 return
             }
         }
-        save()
+        if DynamicUtils.validate(form: dynamicForm) {
+            save()
+        } else {
+            self.showToast.toggle()
+        }
     }
     
     func save() {
@@ -145,7 +161,7 @@ struct ActivityFormView: View {
         differentToVisit?.dateTo = Utils.dateFormat(date: dtvModel.dateTo)
         differentToVisit?.hourFrom = Utils.hourFormat(date: dtvModel.hourFrom)
         differentToVisit?.hourTo = Utils.hourFormat(date: dtvModel.hourTo)
-        //differentToVisit?.fields = dtvModel.comment
+        differentToVisit?.fields = DynamicUtils.toJSON(form: dynamicForm)
         differentToVisit?.assistants.removeAll()
         assistants.forEach { pim in
             let assistant = DifferentToVisitAssistant()
@@ -199,11 +215,12 @@ struct ActivityFormView: View {
 
 struct ActivityFormBasicView: View {
     var realm: Realm
+    @Binding var dynamicForm: DynamicForm
+    @Binding var dynamicOptions: DynamicFormFieldOptions
+    
     @EnvironmentObject var dtvModel: DifferentToVisitModel
     
     @State private var dynamicData = Utils.jsonDictionary(string: Config.get(key: "P_OTHER_FORM_ADDITIONAL").complement ?? "")
-    @State private var dynamicForm = DynamicForm(tabs: [DynamicFormTab]())
-    @State private var dynamicOptions = DynamicFormFieldOptions(table: "activity", op: .view)
 
     @State private var modalRequestDayReason = false
     @State private var selectedReason = [String]()

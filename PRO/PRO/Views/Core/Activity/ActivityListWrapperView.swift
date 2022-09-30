@@ -23,7 +23,7 @@ struct ActivityListWrapperView: View {
 
 struct ActivityMapView: View{
     
-    @ObservedResults var items: Results<DifferentToVisit>
+    var items: [DifferentToVisit]
     
     let onEdit: (_ activity: DifferentToVisit) -> Void
     let onDetail: (_ activity: DifferentToVisit) -> Void
@@ -81,6 +81,10 @@ struct ActivityListView: View{
     @State private var activitySelected: DifferentToVisit = DifferentToVisit()
     
     @State private var userSelected: Int = 0
+    
+    @State private var serverLoading = false
+    @State private var serverResults = [DifferentToVisit]()
+    
     @State private var selectedUser = [String]()
     @State private var modalOptions = false
     @State private var modalUserOpen = false
@@ -89,44 +93,87 @@ struct ActivityListView: View{
     var realm = try! Realm()
     
     var body: some View {
-        ZStack(alignment: .bottomTrailing) {
-            switch layout {
-                case .map:
-                    ActivityMapView(items: $activities, onEdit: onEdit, onDetail: onDetail)
-                default:
-                    ScrollView {
-                        ForEach (activities.filter {
-                            self.masterRouter.search.isEmpty ? true :
-                            $0.comment.lowercased().contains(self.masterRouter.search.lowercased())
-                        }, id: \.objectId){ item in
-                            ActivityItemCardView(item: item).onTapGesture {
-                                self.activitySelected = item
-                                self.modalOptions = true
+        VStack {
+            if let filtered = filterRs() {
+                if serverLoading {
+                    VStack {
+                        Spacer()
+                        LottieView(name: "search_animation", loopMode: .loop, speed: 1)
+                            .frame(width: 300, height: 200)
+                        Spacer()
+                    }
+                } else {
+                    if userSelected > 0 {
+                        HStack {
+                            VStack {
+                                Image("ic-user")
+                                    .resizable()
+                                    .foregroundColor(.cIcon)
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(width: 22, height: 22, alignment: .center)
+                            }
+                            .frame(width: 40, height: 40, alignment: .center)
+                            let user = UserDao(realm: realm).by(id: userSelected)
+                            Text((user?.name ?? "").capitalized)
+                                .foregroundColor(.cTextHigh)
+                                .lineLimit(1)
+                                .frame(minWidth: 0, maxWidth: .infinity, alignment: .center)
+                            Button(action: {
+                                userSelected = 0
+                                selectedUser = []
+                            }) {
+                                Image("ic-close")
+                                    .resizable()
+                                    .foregroundColor(.cIcon)
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(width: 20, height: 20, alignment: .center)
+                            }
+                            .frame(width: 40, height: 40, alignment: .center)
+                        }
+                        .frame(height: 40)
+                    }
+                    ZStack(alignment: .bottomTrailing) {
+                        switch layout {
+                            case .map:
+                                ActivityMapView(items: filtered, onEdit: onEdit, onDetail: onDetail)
+                            default:
+                                ScrollView {
+                                    ForEach (filtered, id: \.objectId) { item in
+                                        ActivityItemCardView(item: item).onTapGesture {
+                                            self.activitySelected = item
+                                            if item.userId == JWTUtils.sub() {
+                                                self.modalOptions = true
+                                            } else {
+                                                onDetail(item)
+                                            }
+                                        }
+                                    }
+                                    ScrollViewFABBottom()
+                                }
+                        }
+                        HStack(alignment: .bottom) {
+                            VStack {
+                                if let user = UserDao(realm: realm).logged() {
+                                    if !user.hierarchy.isEmpty {
+                                        FAB(image: "ic-user") {
+                                            modalUserOpen = true
+                                        }
+                                    }
+                                }
+                                FAB(image: (layout == .list) ? "ic-map": "ic-list") {
+                                    layout = layout == .list ? .map : .list
+                                }
+                            }
+                            Spacer()
+                            FAB(image: "ic-plus") {
+                                FormEntity(objectId: nil).go(path: "DTV-FORM", router: viewRouter)
                             }
                         }
-                        ScrollViewFABBottom()
-                    }
-            }
-            HStack(alignment: .bottom) {
-                VStack {
-                    if let user = UserDao(realm: realm).logged() {
-                        if !user.hierarchy.isEmpty {
-                            FAB(image: "ic-user") {
-                                modalUserOpen = true
-                            }
-                        }
-                    }
-                    FAB(image: (layout == .list) ? "ic-map": "ic-list") {
-                        layout = layout == .list ? .map : .list
+                        .padding(.bottom, Globals.UI_FAB_VERTICAL)
+                        .padding(.horizontal, Globals.UI_FAB_HORIZONTAL)
                     }
                 }
-                Spacer()
-                FAB(image: "ic-plus") {
-                    FormEntity(objectId: nil).go(path: "DTV-FORM", router: viewRouter)
-                }
             }
-            .padding(.bottom, Globals.UI_FAB_VERTICAL)
-            .padding(.horizontal, Globals.UI_FAB_HORIZONTAL)
         }
         .partialSheet(isPresented: $modalOptions) {
             ActivityBottomMenu(onEdit: onEdit, onDetail: onDetail, activity: activitySelected)
@@ -147,8 +194,42 @@ struct ActivityListView: View{
         }
     }
     
+    func filterRs() -> [DifferentToVisit]? {
+        var rs: [DifferentToVisit]
+        if userSelected > 0 {
+            rs = serverResults
+        } else {
+            rs = Array(activities)
+        }
+        if !masterRouter.search.isEmpty {
+            rs = rs.filter {
+                $0.comment.lowercased().contains(self.masterRouter.search.lowercased())
+            }
+        }
+        rs.sort { d1, d2 in
+            return Utils.strToDate(value: d1.dateFrom) > Utils.strToDate(value: d2.dateFrom)
+        }
+        return rs
+    }
+    
     func onAgentChanged() {
+        serverLoading = true
+        serverResults.removeAll()
         
+        AppServer().postRequest(data: [
+            "id_usuario" : userSelected
+        ], path: "vm/activity/filter") { success, code, data in
+            serverLoading = false
+            if success {
+                if let rs = data as? [String] {
+                    for item in rs {
+                        let decoded = try! JSONDecoder().decode(DifferentToVisit.self, from: item.data(using: .utf8)!)
+                        serverResults.append(decoded)
+                    }
+                }
+            }
+            print(serverResults)
+        }
     }
     
     func onEdit(_ activity: DifferentToVisit) {

@@ -20,7 +20,7 @@ struct PROApp: SwiftUI.App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     
     init() {
-        Realm.Configuration.defaultConfiguration = Realm.Configuration(schemaVersion: 18)
+        Realm.Configuration.defaultConfiguration = Realm.Configuration(schemaVersion: 19)
         do {
             try Amplify.add(plugin: AWSCognitoAuthPlugin())
             try Amplify.add(plugin: AWSS3StoragePlugin())

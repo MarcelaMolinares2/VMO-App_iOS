@@ -11,7 +11,7 @@ import RealmSwift
 import Amplify
 
 enum DownloadRequestServices {
-    case brick, category, city, college, config, contact_control_type, country, cycle, day_request_reason, pharmacy_chain, pharmacy_type, prices_list, specialty, style, user, zone, concept_expense, menu, product_brand, user_preference, movement_fail_reason,//Tertiary
+    case brick, category, city, college, config, contact_control_type, country, cycle, day_request_reason, pharmacy_chain, pharmacy_type, prices_list, specialty, style, user, zone, concept_expense, menu, product_brand, user_preference, movement_fail_reason, panel_delete_reason,//Tertiary
          material, material_plain, product, line,//Secondary
          activity, diary, client, doctor, patient, pharmacy, potential//Primary
 }
@@ -271,6 +271,8 @@ class DownloadRequestOperation: Operation {
                     getRQ(from: Diary.self, path: "vm/diary/by/user/\(JWTUtils.sub())/\(Utils.dateFormat(date: date))", primaryKey: Diary.primaryCodingKey())
                 case .movement_fail_reason:
                     getRQ(from: MovementFailReason.self, path: "movement-fail-reason", primaryKey: MovementFailReason.primaryCodingKey())
+                case .panel_delete_reason:
+                    getRQ(from: PanelDeleteReason.self, path: "panel-delete-reason", primaryKey: PanelDeleteReason.primaryCodingKey())
             }
         } else {
             debugPrint("Sync Process End")

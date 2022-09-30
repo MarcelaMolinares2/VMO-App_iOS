@@ -512,7 +512,6 @@ struct DynamicFormImage: View {
                 }
             }
             ImageViewerWrapperView(value: $field.value, defaultIcon: icon(), table: options.table, field: field.key, id: options.item, localId: options.objectId) {
-                print(options.item)
                 switch field.controlType {
                     case "canvas":
                         onSourceSelected(s: "D")
@@ -853,4 +852,176 @@ extension RandomAccessCollection {
     func indexed() -> IndexedCollection<Self> {
         IndexedCollection(base: self)
     }
+}
+
+struct DynamicFormSummaryView: View {
+    
+    @Binding var form: DynamicForm
+    @Binding var tab: DynamicFormTab
+    var options: DynamicFormFieldOptions
+    
+    var body: some View {
+        ForEach($tab.groups) { $group in
+            DynamicFormSummarySection(form: $form, group: $group, options: options)
+        }
+    }
+}
+
+struct DynamicFormSummarySection: View {
+    
+    @Binding var form: DynamicForm
+    @Binding var group: DynamicFormGroup
+    var options: DynamicFormFieldOptions
+    
+    var body: some View {
+        let title = DynamicUtils.formatLabel(s: group.title).localized(defaultValue: group.title)
+        CustomSection(title) {
+            ForEach($group.fields) { $field in
+                if field.localVisible {
+                    DynamicFormSummaryFieldView(form: $form, field: $field, options: options)
+                }
+            }
+        }
+    }
+}
+
+struct DynamicFormSummaryFieldView: View {
+    @EnvironmentObject var userSettings: UserSettings
+    
+    @Binding var form: DynamicForm
+    @Binding var field: DynamicFormField
+    var options: DynamicFormFieldOptions
+    
+    @State var user: User?
+    @State var formConditions: DynamicConditionForm?
+    
+    var body: some View {
+        VStack {
+            switch(field.controlType) {
+                case "canvas", "habeas-data", "image":
+                    DynamicFormSummaryFieldImageView(field: $field, options: options)
+                case "list":
+                    DynamicFormSummaryFieldListView(field: $field)
+                default:
+                    DynamicFormSummaryFieldPlainView(field: $field)
+            }
+        }
+        .padding(.vertical, 6)
+        .onAppear {
+            load()
+        }
+    }
+    
+    func load() {
+        
+    }
+}
+
+struct DynamicFormSummaryFieldImageView: View {
+    
+    @Binding var field: DynamicFormField
+    var options: DynamicFormFieldOptions
+    
+    var body: some View {
+        let label = DynamicUtils.formatLabel(s: field.label).localized(defaultValue: field.label)
+        VStack {
+            Text(label)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .foregroundColor(.cTextMedium)
+                .font(.system(size: 13))
+            ImageViewerWrapperView(value: $field.value, defaultIcon: icon(), table: options.table, field: field.key, id: options.item, localId: options.objectId, couldOpenPicker: false) {
+            }
+        }
+    }
+    
+    func icon() -> String {
+        switch field.controlType {
+            case "canvas":
+                return "ic-draw"
+            case "habeas-data":
+                return "ic-habeas-data"
+            default:
+                return "ic-gallery"
+        }
+    }
+    
+}
+
+struct DynamicFormSummaryFieldListView: View {
+    
+    @Binding var field: DynamicFormField
+    
+    @State private var capitalized = true
+    @State var selectedLabel: String = ""
+    
+    var body: some View {
+        let label = DynamicUtils.formatLabel(s: field.label).localized(defaultValue: field.label)
+        VStack {
+            Text(label)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .foregroundColor(.cTextMedium)
+                .font(.system(size: 13))
+            Text(capitalized ? selectedLabel.capitalized : selectedLabel)
+                .foregroundColor(.cTextHigh)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .multilineTextAlignment(.leading)
+        }
+        .onAppear {
+            load()
+        }
+    }
+    
+    func load() {
+        let selected = field.value.components(separatedBy: ",")
+        if !field.value.isEmpty {
+            if field.multiple {
+                selectedLabel = "\(selected.count) \(NSLocalizedString("envItemsSelected", comment: ""))"
+            } else {
+                if !selected.isEmpty {
+                    switch field.sourceType {
+                        case "json":
+                            let list = Utils.genericList(data: field.source)
+                            let rs = list.filter { item -> Bool in
+                                item.value == selected[0]
+                            }
+                            if !rs.isEmpty {
+                                selectedLabel = rs[0].label
+                            }
+                        case "table":
+                            selectedLabel = DynamicUtils.tableValue(key: field.source, selected: selected)
+                        default:
+                            selectedLabel = ""
+                    }
+                }
+            }
+        }
+        switch field.source {
+            case "category":
+                capitalized = false
+                break
+            default:
+                break
+        }
+    }
+    
+}
+
+struct DynamicFormSummaryFieldPlainView: View {
+    
+    @Binding var field: DynamicFormField
+    
+    var body: some View {
+        let label = DynamicUtils.formatLabel(s: field.label).localized(defaultValue: field.label)
+        VStack {
+            Text(label)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .foregroundColor(.cTextMedium)
+                .font(.system(size: 13))
+            Text(field.value)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .multilineTextAlignment(.leading)
+                .foregroundColor(.cTextHigh)
+        }
+    }
+    
 }

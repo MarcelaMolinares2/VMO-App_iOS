@@ -19,7 +19,7 @@ struct PanelFormHeaderView: View {
     
     var body: some View {
         HStack {
-            Text(panel.name ?? "")
+            Text((panel.name ?? "").capitalized)
                 .fontWeight(.bold)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .lineLimit(1)
@@ -1379,7 +1379,29 @@ struct PanelKeyInfoView: View {
                     .frame(height: 160)
                 ScrollView {
                     VStack {
-                        
+                        VStack{
+                            Text(NSLocalizedString("envComment", comment: ""))
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .foregroundColor(.cTextMedium)
+                                .font(.system(size: 14))
+                            Text(panel.lastMovement?.comment ?? "--")
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .multilineTextAlignment(.leading)
+                                .foregroundColor(.cTextHigh)
+                                .font(.system(size: 16))
+                        }
+                        VStack{
+                            Text(NSLocalizedString("envTargetNextVisit", comment: ""))
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .foregroundColor(.cTextMedium)
+                                .font(.system(size: 14))
+                            Text(panel.lastMovement?.targetNext ?? "--")
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .multilineTextAlignment(.leading)
+                                .foregroundColor(.cTextHigh)
+                                .font(.system(size: 16))
+                        }
+                        Divider()
                     }
                 }
             }
@@ -1391,28 +1413,74 @@ struct PanelDeleteView: View {
     var panel: Panel
     let onActionDone: () -> Void
     
+    @State private var controlType = Config.get(key: "PANEL_DELETE_CONTROL_TYPE").value
     @State private var reason = ""
+    
+    @State private var selected = [String]()
+    @State private var modalReasonOpen = false
+    
+    var realm = try! Realm()
     
     var body: some View {
         VStack {
             PanelFormHeaderView(panel: panel)
-            VStack {
+            CustomCard {
                 Spacer()
-                VStack {
-                    Text("envDTVComment")
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .foregroundColor((reason.isEmpty) ? .cDanger : .cTextMedium)
-                        .font(.system(size: 14))
-                    VStack{
-                        TextEditor(text: $reason)
-                            .frame(height: 80)
+                Text("envPanelInactivationMessage")
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .foregroundColor(.cTextHigh)
+                    .font(.system(size: 14))
+                Spacer()
+                if controlType == 0 {
+                    Button(action: {
+                        modalReasonOpen = true
+                    }, label: {
+                        HStack {
+                            VStack{
+                                Text(NSLocalizedString("envReason", comment: ""))
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .foregroundColor((reason.isEmpty) ? .cDanger : .cTextMedium)
+                                    .font(.system(size: 14))
+                                Text(reason.isEmpty ? "envChoose" : reason)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .multilineTextAlignment(.leading)
+                                    .foregroundColor(.cTextHigh)
+                                    .font(.system(size: 16))
+                            }
+                            Spacer()
+                            Image("ic-arrow-expand-more")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 35)
+                                .foregroundColor(.cIcon)
+                        }
+                    })
+                    .sheet(isPresented: $modalReasonOpen) {
+                        DialogSourcePickerView(selected: $selected, key: "PANEL-DELETE-REASON", multiple: false, title: "envReason".localized(), extraData: ["panelType": panel.type]) { selected in
+                            modalReasonOpen = false
+                            if !selected.isEmpty {
+                                let panelDeleteReason = PanelDeleteReasonDao(realm: realm).by(id: Utils.castInt(value: selected[0]))
+                                reason = panelDeleteReason?.content ?? ""
+                            }
+                        }
+                    }
+                } else {
+                    VStack {
+                        Text("envReason")
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .foregroundColor((reason.isEmpty) ? .cDanger : .cTextMedium)
+                            .font(.system(size: 14))
+                        VStack{
+                            TextEditor(text: $reason)
+                                .frame(height: 80)
+                        }
                     }
                 }
                 Spacer()
                 Button {
                     save()
                 } label: {
-                    Text("envDelete")
+                    Text("envRequestInactivation")
                         .foregroundColor(.cDanger)
                         .frame(maxWidth: .infinity, minHeight: 44, maxHeight: 44, alignment: .center)
                 }
@@ -1424,6 +1492,7 @@ struct PanelDeleteView: View {
     }
     
     func save() {
+        DeleteDao(realm: realm).panel(panel: panel, reason: reason)
         onActionDone()
     }
     

@@ -36,6 +36,7 @@ struct PotentialListView: View {
     
     var body: some View {
         CustomPanelPotentialView(realm: realm, results: $potentials, selected: $selected) { panel in
+            print(panel)
             self.potentialTapped = panel
             menuIsPresented = true
         }

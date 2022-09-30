@@ -132,6 +132,7 @@ struct ClientFormView: View {
     
     func validate() {
         if DynamicUtils.validate(form: form) {
+            DynamicUtils.cloneObject(main: client, temporal: try! JSONDecoder().decode(Client.self, from: DynamicUtils.toJSON(form: form).data(using: .utf8)!), skipped: ["objectId", "id", "type"])
             if options.op == .create {
                 duplicates = PanelUtils.duplication(from: Client.self, object: client, panelType: options.panelType, classKeys: Client.classKeys())
                 if !duplicates.isEmpty {

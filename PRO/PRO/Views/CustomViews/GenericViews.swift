@@ -233,6 +233,7 @@ struct PanelItem: View {
             }
         }
         .contentShape(Rectangle())
+        .opacity(panel.hasDeleteRequest() ? 0.6 : 1)
         .onTapGesture {
             onItemTapped()
         }

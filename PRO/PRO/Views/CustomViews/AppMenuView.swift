@@ -140,20 +140,22 @@ struct PanelMenu: View {
                                 .font(.system(size: fontSize))
                         }
                     }
-                    Button(action: {
-                        self.isPresented = false
-                        onDeleteTapped()
-                    }) {
-                        VStack {
-                            Image("ic-forbidden")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
-                                .foregroundColor(.cIcon)
-                            Text("envDeactivate")
-                                .foregroundColor(.cTextMedium)
-                                .lineLimit(2)
-                                .font(.system(size: fontSize))
+                    if !panel.hasDeleteRequest() {
+                        Button(action: {
+                            self.isPresented = false
+                            onDeleteTapped()
+                        }) {
+                            VStack {
+                                Image("ic-forbidden")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
+                                    .foregroundColor(.cIcon)
+                                Text("envDeactivate")
+                                    .foregroundColor(.cTextMedium)
+                                    .lineLimit(2)
+                                    .font(.system(size: fontSize))
+                            }
                         }
                     }
                     if panel.type == "M" {

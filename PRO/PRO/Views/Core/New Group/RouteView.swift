@@ -260,6 +260,7 @@ struct RouteFormView: View {
             }
         } else {
             group = Group()
+            group?.transactionType = "CREATE"
         }
     }
     

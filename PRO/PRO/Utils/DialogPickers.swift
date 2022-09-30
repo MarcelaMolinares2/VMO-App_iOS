@@ -590,6 +590,8 @@ struct DialogSourcePickerView: View {
                 list = GenericSelectableDao(realm: try! Realm()).materials()
             case "MATERIAL-PLAIN":
                 list = GenericSelectableDao(realm: try! Realm()).materialsPlain()
+            case "PANEL-DELETE-REASON":
+                list = GenericSelectableDao(realm: try! Realm()).panelDeleteReasons(panelType: Utils.castString(value: extraData["panelType"]))
             case "PHARMACY-CHAIN":
                 list = GenericSelectableDao(realm: try! Realm()).pharmacyChains()
             case "PHARMACY-TYPE":

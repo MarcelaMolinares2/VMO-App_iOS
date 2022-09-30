@@ -65,6 +65,7 @@ struct ImageViewerWrapperView: View {
     var field: String
     var id: Int
     var localId: ObjectId
+    var couldOpenPicker = true
     var height: CGFloat = 180
     let onButtonTapped: () -> Void
     
@@ -82,17 +83,18 @@ struct ImageViewerWrapperView: View {
                         .foregroundColor(.cAccent)
                         .frame(maxWidth: .infinity, minHeight: height, maxHeight: height)
                 } else {
-                    Button {
-                        onButtonTapped()
-                    } label: {
-                        Image(defaultIcon)
-                            .resizable()
-                            .scaledToFit()
-                            .foregroundColor(.cIcon)
-                            .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
+                    if couldOpenPicker {
+                        Button {
+                            onButtonTapped()
+                        } label: {
+                            Image(defaultIcon)
+                                .resizable()
+                                .scaledToFit()
+                                .foregroundColor(.cIcon)
+                                .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
+                        }
                     }
                     Button(action: {
-                        print("id", id)
                         modalDialog = true
                     }) {
                         Text("envPreviewResource")
@@ -104,20 +106,22 @@ struct ImageViewerWrapperView: View {
                     }
                 }
             } else {
-                Button {
-                    onButtonTapped()
-                } label: {
-                    Image(defaultIcon)
-                        .resizable()
-                        .scaledToFit()
-                        .foregroundColor(.cIcon)
-                        .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
+                if couldOpenPicker {
+                    Button {
+                        onButtonTapped()
+                    } label: {
+                        Image(defaultIcon)
+                            .resizable()
+                            .scaledToFit()
+                            .foregroundColor(.cIcon)
+                            .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
+                    }
                 }
             }
         }
-        .onAppear {
+        .onChange(of: value, perform: { newValue in
             load()
-        }
+        })
     }
     
     func load() {
