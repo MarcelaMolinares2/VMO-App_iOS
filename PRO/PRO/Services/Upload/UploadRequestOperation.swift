@@ -10,7 +10,7 @@ import RealmSwift
 import Amplify
 
 enum UploadRequestServices {
-    case activity, client, diary, doctor, group, movement, patient, pharmacy, potential
+    case activity, agentLocation, client, diary, doctor, freeDayRequest, group, materialDelivery, materialRequest, movement, patient, pharmacy, potential
 }
 
 class UploadRequestOperation: Operation {
@@ -114,6 +114,22 @@ class UploadRequestOperation: Operation {
                     GroupDao(realm: try! Realm()).local().forEach { group in
                         doRequest(path: "group", data: Utils.jsonObjectArray(string: try! Utils.objToJSON(group)), object: Group(value: group), from: Group.self, table: "group")
                     }
+                case .agentLocation:
+                    AgentLocationDao(realm: try! Realm()).local().forEach { agentLocation in
+                        doRequest(path: "location", data: Utils.jsonObjectArray(string: try! Utils.objToJSON(agentLocation)), object: AgentLocation(value: agentLocation), from: AgentLocation.self, table: "agent-location")
+                    }
+                case .freeDayRequest:
+                    FreeDayRequestDao(realm: try! Realm()).local().forEach { freeDayRequest in
+                        doRequest(path: "free-day-request", data: Utils.jsonObjectArray(string: try! Utils.objToJSON(freeDayRequest)), object: FreeDayRequest(value: freeDayRequest), from: FreeDayRequest.self, table: "free-day-request")
+                    }
+                case .materialDelivery:
+                    AdvertisingMaterialDeliveryDao(realm: try! Realm()).local().forEach { materialDelivery in
+                        doRequest(path: "advertising-material/operation/delivery", data: Utils.jsonObjectArray(string: try! Utils.objToJSON(materialDelivery)), object: AdvertisingMaterialDelivery(value: materialDelivery), from: AdvertisingMaterialDelivery.self, table: "material-delivery")
+                    }
+                case .materialRequest:
+                    AdvertisingMaterialRequestDao(realm: try! Realm()).local().forEach { materialRequest in
+                        doRequest(path: "advertising-material/request", data: Utils.jsonObjectArray(string: try! Utils.objToJSON(materialRequest)), object: AdvertisingMaterialRequest(value: materialRequest), from: AdvertisingMaterialRequest.self, table: "material-request")
+                    }
             }
         }
         
@@ -123,7 +139,7 @@ class UploadRequestOperation: Operation {
         }
     }
     
-    func doRequest<T: Object & Codable & SyncEntity>(path: String, data: [String : Any], object: T, from: T.Type, table: String) {
+    func doRequest<T: Object & SyncEntity>(path: String, data: [String : Any], object: T, from: T.Type, table: String) {
         dispatchGroup.enter()
         if object.transactionType == "CREATE" {
             AppServer().postRequest(data: data, path: "\(prefix)/\(path)") { (successful, code, data) in
@@ -136,14 +152,22 @@ class UploadRequestOperation: Operation {
         }
     }
     
-    func handleRequest<T: Object & Codable & SyncEntity>(from: T.Type, object: T, table: String, successful: Bool, code: Int16, data: Any) {
+    func handleRequest<T: Object & SyncEntity>(from: T.Type, object: T, table: String, successful: Bool, code: Int16, data: Any) {
         print(successful, code, data)
         if successful {
             let realm = try! Realm()
             var obj = realm.object(ofType: from.self, forPrimaryKey: object.objectId)
-            try! realm.write {
-                obj?.id = Utils.castInt(value: data)
-                obj?.transactionType = ""
+            if ["agent-location", "free-day-request", "material-delivery", "material-request"].contains(table) {
+                if let o = obj {
+                    try! realm.write {
+                        realm.delete(o)
+                    }
+                }
+            } else {
+                try! realm.write {
+                    obj?.id = Utils.castInt(value: data)
+                    obj?.transactionType = ""
+                }
             }
             let dispatchGroupMedia = DispatchGroup()
             MediaItemDao(realm: realm).by(table: table, item: object.objectId).forEach { m in

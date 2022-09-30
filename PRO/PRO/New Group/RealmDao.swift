@@ -34,6 +34,12 @@ class AdvertisingMaterialRequestDao: GenericDao {
         }
     }
     
+    func local() -> [AdvertisingMaterialRequest] {
+        return Array(realm.objects(AdvertisingMaterialRequest.self).where {
+            ($0.transactionType != "") && ($0.transactionStatus == "")
+        })
+    }
+    
 }
 
 class AdvertisingMaterialDeliveryDao: GenericDao {
@@ -44,12 +50,24 @@ class AdvertisingMaterialDeliveryDao: GenericDao {
         }
     }
     
+    func local() -> [AdvertisingMaterialDelivery] {
+        return Array(realm.objects(AdvertisingMaterialDelivery.self).where {
+            ($0.transactionType != "") && ($0.transactionStatus == "")
+        })
+    }
+    
 }
 
 class AgentLocationDao: GenericDao {
     
     func all() -> [AgentLocation] {
         return Array(realm.objects(AgentLocation.self).sorted(by: \.date, ascending: false))
+    }
+    
+    func local() -> [AgentLocation] {
+        return Array(realm.objects(AgentLocation.self).where {
+            ($0.transactionType != "") && ($0.transactionStatus == "")
+        })
     }
     
     func store(agentLocation: AgentLocation) {
@@ -303,6 +321,12 @@ class FreeDayRequestDao: GenericDao {
         try! realm.write {
             realm.add(freeDayRequest, update: .all)
         }
+    }
+    
+    func local() -> [FreeDayRequest] {
+        return Array(realm.objects(FreeDayRequest.self).where {
+            ($0.transactionType != "") && ($0.transactionStatus == "")
+        })
     }
     
 }
@@ -694,18 +718,6 @@ class MaterialDeliveryDao: GenericDao {
     
     func by(id: String) -> AdvertisingMaterialDelivery? {
         return realm.objects(AdvertisingMaterialDelivery.self).filter("id == \(id)").first
-    }
-    
-    func store(deliveries: [AdvertisingMaterialDelivery]){
-        if realm.objects(AdvertisingMaterialDelivery.self).count == 0 {
-            try! realm.write {
-                realm.add(deliveries)
-            }
-        } else {
-            try! realm.write {
-                realm.add(deliveries)
-            }
-        }
     }
     
 }

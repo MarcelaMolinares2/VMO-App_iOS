@@ -216,9 +216,7 @@ struct ActivityListView: View{
         serverLoading = true
         serverResults.removeAll()
         
-        AppServer().postRequest(data: [
-            "id_usuario" : userSelected
-        ], path: "vm/activity/filter") { success, code, data in
+        AppServer().getRequest(path: "vm/activity/by/user/\(userSelected)") { success, code, data in
             serverLoading = false
             if success {
                 if let rs = data as? [String] {
@@ -228,7 +226,6 @@ struct ActivityListView: View{
                     }
                 }
             }
-            print(serverResults)
         }
     }
     

@@ -76,7 +76,13 @@ class DownloadRequestOperation: Operation {
         }
     }
     
-    func getRQ<T: Object & Codable>(from: T.Type, path: String, primaryKey: String, identifier: String = "", keys: [String: String] = [String: String]()) {
+    func getRQ<T: Object & Codable>(from: T.Type, path: String, primaryKey: String, identifier: String = "", keys: [String: String] = [String: String](), validate: Bool = false) {
+        if validate {
+            if !validateLocal(from: from) {
+                self.end()
+                return
+            }
+        }
         updateCurrentOperation(current: identifier.isEmpty ? path : identifier)
         AppServer().getRequest(path: "\(prefix)/\(path)") { (successful, code, data) in
             self.handleRequest(from: from, path: path, primaryKey: primaryKey, keys: keys, successful: successful, code: code, data: data)
@@ -192,12 +198,11 @@ class DownloadRequestOperation: Operation {
             case .material:
                 postRQ(from: AdvertisingMaterial.self, path: "advertising-material/stock", data: [String: Any](), primaryKey: AdvertisingMaterial.primaryCodingKey(), identifier: "advertising-material")
             case .activity:
-                postRQ(from: DifferentToVisit.self, path: "activity/filter", data:
-                        [
-                            "id_usuario" : JWTUtils.sub()
-                        ], primaryKey: DifferentToVisit.primaryCodingKey(),
-                       identifier: "activities",
-                       validate: true
+                getRQ(
+                    from: DifferentToVisit.self,
+                    path: "activity/by/user/\(JWTUtils.sub())", primaryKey: DifferentToVisit.primaryCodingKey(),
+                    identifier: "activities",
+                    validate: true
                 )
             case .client:
                 postRQ(from: Client.self, path: "client/filter", data:

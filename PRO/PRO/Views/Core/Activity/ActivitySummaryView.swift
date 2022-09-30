@@ -80,7 +80,6 @@ struct ActivitySummaryBasicView: View {
             ActivitySummaryMapView(item: activity)
                 .frame(maxHeight: 200)
             ScrollView {
-                
                 CustomForm {
                     CustomSection {
                         VStack{
@@ -174,6 +173,9 @@ struct ActivitySummaryBasicView: View {
     }
     
     func load() {
+        dynamicOptions.objectId = activity.objectId
+        dynamicOptions.item = activity.id
+        
         dynamicForm.tabs = DynamicUtils.initForm(data: dynamicData).sorted(by: { $0.key > $1.key })
         if !activity.fields.isEmpty {
             DynamicUtils.fillForm(form: &dynamicForm, base: activity.fields)

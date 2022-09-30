@@ -20,12 +20,30 @@ struct ImageViewerDialog: View {
     
     @State private var image: Image?
     
+    @State private var serverLoading = false
+    
     var body: some View {
         VStack {
-            if let i = image {
-                i
-                    .resizable()
-                    .scaledToFit()
+            if serverLoading {
+                Spacer()
+                LottieView(name: "gallery_animation", loopMode: .loop, speed: 1)
+                    .frame(width: 300, height: 200)
+                Spacer()
+            } else {
+                if let i = image {
+                    i
+                        .resizable()
+                        .scaledToFit()
+                } else {
+                    Spacer()
+                    LottieView(name: "not_found_animation", loopMode: .loop, speed: 1)
+                        .frame(width: 300, height: 200)
+                    Text("errResourceNF".localized())
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(.cTextHigh)
+                        .padding(.horizontal, 30)
+                    Spacer()
+                }
             }
         }
         .onAppear {
@@ -40,6 +58,7 @@ struct ImageViewerDialog: View {
         if FileUtils.exists(media: media) {
             image = Image(uiImage: UIImage(contentsOfFile: MediaUtils.mediaURL(media: media).path) ?? UIImage())
         } else {
+            serverLoading = true
             Amplify.Storage.downloadData(
                 key: MediaUtils.awsPath(media: media),
                 resultListener: { (event) in
@@ -51,6 +70,9 @@ struct ImageViewerDialog: View {
                             print("Completed: \(data)")
                         case let .failure(storageError):
                             print("Failed: \(storageError.errorDescription). \(storageError.recoverySuggestion)")
+                    }
+                    DispatchQueue.main.async {
+                        serverLoading = false
                     }
                 })
         }

@@ -174,6 +174,7 @@ struct RequestDayView: View {
             detail.percentage = d.percentage
             freeDayRequest.details.append(detail)
         }
+        freeDayRequest.transactionType = "CREATE"
         FreeDayRequestDao(realm: realm).store(freeDayRequest: freeDayRequest)
         goTo(page: "MASTER")
     }

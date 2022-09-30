@@ -136,6 +136,7 @@ struct MaterialRequestView: View {
             detail.comment = d.comment
             materialRequest.details.append(detail)
         }
+        materialRequest.transactionType = "CREATE"
         AdvertisingMaterialRequestDao(realm: realm).store(advertisingMaterialRequest: materialRequest)
         goTo(page: "MASTER")
     }

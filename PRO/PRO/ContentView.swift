@@ -70,6 +70,11 @@ class SyncObserver {
         startObserver(realm: realm, from: Patient.self, key: .patient)
         startObserver(realm: realm, from: Pharmacy.self, key: .pharmacy)
         startObserver(realm: realm, from: PotentialProfessional.self, key: .potential)
+        
+        startObserver(realm: realm, from: AgentLocation.self, key: .agentLocation)
+        startObserver(realm: realm, from: FreeDayRequest.self, key: .freeDayRequest)
+        startObserver(realm: realm, from: AdvertisingMaterialDelivery.self, key: .materialDelivery)
+        startObserver(realm: realm, from: AdvertisingMaterialRequest.self, key: .materialRequest)
     }
     
     private func startObserver<T: Object & SyncEntity>(realm: Realm, from: T.Type, key: UploadRequestServices) {
@@ -156,6 +161,14 @@ class SyncObserver {
                 return "potential"
             case .group:
                 return "group"
+            case .agentLocation:
+                return "agent-location"
+            case .freeDayRequest:
+                return "free-day-request"
+            case .materialDelivery:
+                return "material-delivery"
+            case .materialRequest:
+                return "material-request"
         }
     }
     

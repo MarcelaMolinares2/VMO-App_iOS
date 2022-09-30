@@ -64,7 +64,8 @@ class AdvertisingMaterialDelivery: Object, Encodable, SyncEntity {
         try container.encode(deliveredFrom, forKey: .deliveredFrom)
         try container.encode(date, forKey: .date)
         try container.encode(comment, forKey: .comment)
-        try container.encode(materials, forKey: .materials)
+        
+        try container.encode(Utils.objArrayToJSON(materials), forKey: .materials)
     }
 }
 
@@ -83,7 +84,8 @@ class AdvertisingMaterialDeliveryMaterial: Object, Encodable, Identifiable {
         
         try container.encode(materialId, forKey: .materialId)
         try container.encode(materialCategoryId, forKey: .materialCategoryId)
-        try container.encode(sets, forKey: .sets)
+        
+        try container.encode(Utils.objArrayToJSON(sets), forKey: .sets)
     }
 }
 
@@ -129,7 +131,8 @@ class AdvertisingMaterialRequest: Object, Codable, SyncEntity {
         
         try container.encode(id, forKey: .id)
         try container.encode(date, forKey: .date)
-        try container.encode(details, forKey: .details)
+        
+        try container.encode(Utils.objArrayToJSON(details), forKey: .details)
     }
 }
 
@@ -206,7 +209,7 @@ class DifferentToVisit: Object, Codable, SyncEntity, Identifiable {
     }
     
     private enum EncodingKeys: String, CodingKey {
-        case id = "id_actividad", cycleId = "ciclo", userId = "id_usuario", diaryId = "id_agenda", eventId = "id_evento", comment = "descripcion", dateFrom = "fecha_inicial", dateTo = "fecha_final", hourFrom = "hora_inicial", hourTo = "hora_final", latitude = "latitud", longitude = "longitud", requestFreeDay = "solicitar_dias_autorizados", fields, materials, assistants
+        case id = "id_actividad", cycleId = "ciclo", userId = "id_usuario", diaryId = "id_agenda", eventId = "id_evento", comment = "descripcion", dateFrom = "fecha_inicial", dateTo = "fecha_final", hourFrom = "hora_inicial", hourTo = "hora_final", latitude = "latitud", longitude = "longitud", requestFreeDay = "solicitar_dias_autorizados", fields, materials = "data_material", assistants
     }
     
     func encode(to encoder: Encoder) throws {
@@ -258,7 +261,8 @@ class DifferentToVisitMaterial: Object, Codable {
         
         try container.encode(materialId, forKey: .materialId)
         try container.encode(materialCategoryId, forKey: .materialCategoryId)
-        try container.encode(sets, forKey: .sets)
+        
+        try container.encode(Utils.objArrayToJSON(sets), forKey: .sets)
     }
     
 }
@@ -1102,6 +1106,17 @@ class GroupMember: Object, Codable {
     private enum CodingKeys: String, CodingKey {
         case panelId = "id", panelType = "type"
     }
+    
+    private enum EncodingKeys: String, CodingKey {
+        case panelId = "id", panelType = "type"
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: EncodingKeys.self)
+        
+        try container.encode(panelId, forKey: .panelId)
+        try container.encode(panelType, forKey: .panelType)
+    }
 }
 
 class MediaItem: Object, Codable, SyncEntity {
@@ -1713,13 +1728,18 @@ class FreeDayRequest: Object, Codable, SyncEntity {
     }
     
     private enum EncodingKeys: String, CodingKey {
-        case id = "free_day_request_id", reasonId = "free_day_reason_id", requestedAt = "requested_at", observations, solved, solvedAt = "solved_at", solvedBy = "solved_by", details
+        case id = "free_day_request_id", reasonId = "free_day_reason_id", userIds = "user_ids", requestedAt = "requested_at", observations, solved, solvedAt = "solved_at", solvedBy = "solved_by", details
     }
     
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: EncodingKeys.self)
         
-        try container.encode(id, forKey: .id)
+        try container.encode(JWTUtils.sub(), forKey: .userIds)
+        try container.encode(reasonId, forKey: .reasonId)
+        try container.encode(requestedAt, forKey: .requestedAt)
+        try container.encode(observations, forKey: .observations)
+        
+        try container.encode(Utils.objArrayToJSON(details), forKey: .details)
     }
     
     static func primaryCodingKey() -> String {
@@ -1750,6 +1770,12 @@ class FreeDayRequestDetail: Object, Codable {
         var container = encoder.container(keyedBy: EncodingKeys.self)
         
         try container.encode(date, forKey: .date)
+        
+        try container.encode(dayFull, forKey: .dayFull)
+        try container.encode(dayOnlyAM, forKey: .dayOnlyAM)
+        try container.encode(dayOnlyPM, forKey: .dayOnlyPM)
+        try container.encode(dayCustom, forKey: .dayCustom)
+        try container.encode(percentage, forKey: .percentage)
     }
 }
 

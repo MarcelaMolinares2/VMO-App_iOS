@@ -76,7 +76,7 @@ struct ActivityFormView: View {
                             Text("envAssistants")
                             Image("ic-client")
                         }
-                    if dynamicOptions.op == .create {
+                    if viewRouter.data.objectId == nil {
                         MaterialDeliveryFormWrapperView(realm: realm, details: $materials)
                             .tag(2)
                             .tabItem {
