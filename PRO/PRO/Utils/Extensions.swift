@@ -130,6 +130,10 @@ extension Date {
         return (month: month, day: day, hour: hour, minute: minute, second: second)
     }
     
+    func dayNumberOfWeek() -> Int? {
+        return Calendar.current.dateComponents([.weekday], from: self).weekday
+    }
+    
 }
 
 extension Date: Strideable {
@@ -168,6 +172,10 @@ extension UIApplication {
         return viewController
     }
     
+    func endEditing() {
+        sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+    }
+    
 }
 
 extension String {
@@ -195,5 +203,45 @@ struct Draggable: ViewModifier {
         } else {
             content
         }
+    }
+}
+
+extension View {
+    func snapshot() -> UIImage {
+        let controller = UIHostingController(rootView: self)
+        let view = controller.view
+        
+        let targetSize = controller.view.intrinsicContentSize
+        view?.bounds = CGRect(origin: .zero, size: targetSize)
+        view?.backgroundColor = .clear
+        
+        let renderer = UIGraphicsImageRenderer(size: targetSize)
+        
+        return renderer.image { _ in
+            view?.drawHierarchy(in: controller.view.bounds, afterScreenUpdates: true)
+        }
+    }
+}
+
+extension UIView {
+    func asImage() -> UIImage {
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = 1
+        return UIGraphicsImageRenderer(size: self.layer.frame.size, format: format).image { context in
+            self.drawHierarchy(in: self.layer.bounds, afterScreenUpdates: true)
+            //layer.render(in: context.cgContext)
+            
+        }
+    }
+}
+
+extension View {
+    func asImage(size: CGSize) -> UIImage {
+        let controller = UIHostingController(rootView: self)
+        controller.view.bounds = CGRect(origin: .zero, size: size)
+        //UIApplication.shared.windows.first!.rootViewController?.view.addSubview(controller.view)
+        let image = controller.view.asImage()
+        //controller.view.removeFromSuperview()
+        return image
     }
 }

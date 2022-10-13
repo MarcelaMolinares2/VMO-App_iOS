@@ -226,6 +226,70 @@ class CycleDao: GenericDao {
         return realm.objects(Cycle.self).filter("id == \(id)").first
     }
     
+    func active() -> [Cycle] {
+        if let user = UserDao(realm: realm).logged() {
+            let cycles = Array(
+                realm.objects(Cycle.self).where {
+                    $0.isActive == "Y"
+                }
+            )
+            
+            var cyclesByCountry: [Cycle]
+            let tmpByCountry = cycles.filter { $0.countryId == user.countryId }
+            if tmpByCountry.isEmpty {
+                cyclesByCountry = cycles
+            } else {
+                cyclesByCountry = tmpByCountry
+            }
+            
+            var cyclesByLine: [Cycle]
+            if (user.lineId ?? 0) > 0 {
+                let tmpByLine = cycles.filter { $0.lineId == user.lineId }
+                if tmpByLine.isEmpty {
+                    cyclesByLine = cyclesByCountry
+                } else {
+                    cyclesByLine = tmpByLine
+                }
+            } else {
+                cyclesByLine = cyclesByCountry
+            }
+            
+            var cyclesByRegion: [Cycle] = cyclesByLine
+            /*if (user.regionId ?? 0) > 0 {
+                let tmpByRegion = cycles.filter { $0.regions.map { r in r.id } == user.regionId }
+                if tmpByRegion.isEmpty {
+                    cyclesByRegion = cyclesByLine
+                } else {
+                    cyclesByRegion = tmpByRegion
+                }
+            } else {
+                cyclesByRegion = cyclesByLine
+            }*/
+            if !cyclesByRegion.isEmpty {
+                return cyclesByRegion
+            }
+            return cycles
+        }
+        return []
+    }
+    /*
+    fun all(context: Context): List<Cycle> {
+        
+        val cyclesByRegion = if ((user.regionId ?: 0) > 0) {
+            val tmpByRegion =
+            cyclesByLine.filter { it.regions.map { item -> item.id }.contains(user.regionId) }
+            tmpByRegion.ifEmpty {
+                cyclesByLine
+            }
+        } else {
+            cyclesByLine
+        }
+        
+        return cyclesByRegion.ifEmpty {
+            cycles
+        }
+    }
+     */
 }
 
 class DeleteDao: GenericDao {
@@ -360,6 +424,37 @@ class MenuDao: GenericDao {
         .sorted(byKeyPath: "order", ascending: true)
         .filter { menu in
             menu.userTypes.components(separatedBy: ",").contains(String(userType))
+        }
+    }
+    
+}
+
+class MovementDao: GenericDao {
+    
+    func all() -> [Movement] {
+        return Array(realm.objects(Movement.self).sorted(byKeyPath: "date"))
+    }
+    
+    func by(objectId: String) -> Movement? {
+        if !objectId.isEmpty {
+            return try! realm.object(ofType: Movement.self, forPrimaryKey: ObjectId(string: objectId))
+        }
+        return nil
+    }
+    
+    func open(panelObjectId: ObjectId, panelType: String) -> Movement? {
+        return realm.objects(Movement.self).where {
+            $0.panelObjectId == panelObjectId && $0.panelType == panelType && $0.transactionStatus == "OPEN"
+        }
+        .first
+    }
+    
+    func store(movement: Movement) {
+        try! realm.write {
+            if movement.transactionType.isEmpty {
+                movement.transactionType = "UPDATE"
+            }
+            realm.add(movement, update: .all)
         }
     }
     
@@ -537,7 +632,7 @@ class GenericSelectableDao: GenericDao {
     }
     
     func cycles() -> [GenericSelectableItem] {
-        CycleDao(realm: self.realm).all().map { GenericSelectableItem(value: "\($0.id)", label: $0.displayName) }
+        CycleDao(realm: self.realm).active().map { GenericSelectableItem(value: "\($0.id)", label: $0.displayName) }
     }
     
     func expenseConcepts() -> [GenericSelectableItem] {
@@ -560,6 +655,10 @@ class GenericSelectableDao: GenericDao {
         MaterialPlainDao(realm: self.realm).all().map { GenericSelectableItem(value: "\($0.id)", label: $0.name ?? "", complement: String(format: NSLocalizedString("envCodeArg", comment: "Code: %@"), $0.code ?? "--")) }
     }
     
+    func movementFailReasons(panelType: String) -> [GenericSelectableItem] {
+        MovementFailReasonDao(realm: self.realm).by(type: panelType).map { GenericSelectableItem(value: "\($0.id)", label: $0.content) }
+    }
+    
     func panelDeleteReasons(panelType: String) -> [GenericSelectableItem] {
         PanelDeleteReasonDao(realm: self.realm).by(panelType: panelType).map { GenericSelectableItem(value: "\($0.id)", label: $0.content) }
     }
@@ -570,6 +669,13 @@ class GenericSelectableDao: GenericDao {
     
     func pharmacyTypes() -> [GenericSelectableItem] {
         PharmacyTypeDao(realm: self.realm).all().map { GenericSelectableItem(value: "\($0.id)", label: $0.name) }
+    }
+    
+    func predefinedComments(table: String, field: String) -> [GenericSelectableItem] {
+        realm.objects(PredefinedComment.self).where {
+            $0.table == table && $0.field == field
+        }
+        .map { GenericSelectableItem(value: "\($0.id)", label: $0.content) }
     }
     
     func pricesLists() -> [GenericSelectableItem] {
@@ -610,6 +716,10 @@ class GenericSelectableDao: GenericDao {
         StyleDao(realm: self.realm).all().map { GenericSelectableItem(value: "\($0.id)", label: $0.name) }
     }
     
+    func usersInverseHierarchy() -> [GenericSelectableItem] {
+        UserDao(realm: self.realm).inverseHierarchy().map { GenericSelectableItem(value: "\($0.id)", label: $0.name.capitalized) }
+    }
+    
     func usersHierarchy() -> [GenericSelectableItem] {
         UserDao(realm: self.realm).hierarchy().map { GenericSelectableItem(value: "\($0.id)", label: $0.name.capitalized) }
     }
@@ -648,10 +758,35 @@ class MaterialDao: GenericDao {
     
 }
 
+class PredefinedCommentDao: GenericDao {
+    
+    func all() -> [PredefinedComment] {
+        return Array(realm.objects(PredefinedComment.self).sorted(byKeyPath: "name"))
+    }
+    
+    func by(id: String) -> PredefinedComment? {
+        return realm.objects(PredefinedComment.self).filter("id == \(id)").first
+    }
+    
+    func by(id: Int) -> PredefinedComment? {
+        return by(id: String(describing: id))
+    }
+    
+}
+
 class MovementFailReasonDao: GenericDao {
     
     func all() -> [MovementFailReason] {
         return Array(realm.objects(MovementFailReason.self).sorted(byKeyPath: "name"))
+    }
+    
+    func by(type: String) -> [MovementFailReason] {
+        return Array(
+            realm
+                .objects(MovementFailReason.self)
+                .sorted(byKeyPath: "content")
+                .filter { $0.panelType.components(separatedBy: ",").contains(type) }
+        )
     }
     
     func by(id: String) -> MovementFailReason? {
@@ -990,6 +1125,18 @@ class UserDao: GenericDao {
     
     func by(id: Int) -> User? {
         return realm.objects(User.self).filter("id == \(id)").first
+    }
+    
+    func by(id: String) -> User? {
+        return realm.objects(User.self).filter("id == \(id)").first
+    }
+    
+    func inverseHierarchy() -> [User] {
+        return Array(
+            realm.objects(User.self).where {
+                $0.hierarchy.userId == logged()?.id ?? 0
+            }.sorted(byKeyPath: "name")
+        )
     }
     
     func hierarchy() -> [User] {

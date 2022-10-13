@@ -336,6 +336,8 @@ class DynamicUtils {
                     return LineDao(realm: try! Realm()).by(id: selected[0])?.name ?? defaultValue
                 case "MATERIAL":
                     return MaterialDao(realm: try! Realm()).by(id: selected[0])?.name ?? defaultValue
+                case "PREDEFINED-COMMENT":
+                    return PredefinedCommentDao(realm: try! Realm()).by(id: selected[0])?.content ?? defaultValue
                 case "PHARMACY-CHAIN":
                     return PharmacyChainDao(realm: try! Realm()).by(id: selected[0])?.name ?? defaultValue
                 case "PHARMACY-TYPE":
@@ -350,6 +352,8 @@ class DynamicUtils {
                     return SpecialtyDao(realm: try! Realm()).by(id: selected[0])?.name ?? defaultValue
                 case "STYLE":
                     return StyleDao(realm: try! Realm()).by(id: selected[0])?.name ?? defaultValue
+                case "USER":
+                    return UserDao(realm: try! Realm()).by(id: selected[0])?.name ?? defaultValue
                 case "ZONE":
                     return ZoneDao(realm: try! Realm()).by(id: selected[0])?.name ?? defaultValue
                 default:
@@ -418,7 +422,8 @@ class DynamicUtils {
         form.tabs.forEach { tab in
             tab.groups.forEach { group in
                 group.fields.forEach { field in
-                    if field.localRequired && field.value.isEmpty {
+                    print(field.key, field.localVisible, field.localRequired, field.value)
+                    if field.localVisible && field.localRequired && field.value.isEmpty {
                         valid = false
                     }
                 }
@@ -671,7 +676,7 @@ class DynamicUtils {
         return action == .create ? "CREATE" : "UPDATE"
     }
     
-    static func jsonValue(data: String, selected: [String], defaultValue: String = "envSelect") -> String {
+    static func jsonValue(data: String, selected: [String], defaultValue: String = "envSelect".localized()) -> String {
         if !selected.isEmpty {
             let list = Utils.genericList(data: data)
             let rs = list.filter { item -> Bool in

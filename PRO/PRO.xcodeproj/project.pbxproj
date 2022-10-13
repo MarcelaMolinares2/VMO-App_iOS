@@ -96,6 +96,7 @@
 		AC893FD6254B1435009E1C43 /* EnvironmentRouters.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC893FD5254B1435009E1C43 /* EnvironmentRouters.swift */; };
 		AC893FEC254C80C9009E1C43 /* AuthSignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC893FEB254C80C9009E1C43 /* AuthSignInView.swift */; };
 		AC893FF4254C846E009E1C43 /* Widgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC893FF3254C846E009E1C43 /* Widgets.swift */; };
+		AC8E1D3328F7B6200088CF5D /* NotificationCenterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC8E1D3228F7B6200088CF5D /* NotificationCenterView.swift */; };
 		AC9CD89A28D96BE200CF0E60 /* ReportGenericViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC9CD89928D96BE200CF0E60 /* ReportGenericViews.swift */; };
 		AC9CD89C28D9707900CF0E60 /* ReportDiaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC9CD89B28D9707900CF0E60 /* ReportDiaryView.swift */; };
 		AC9CD89E28D9909200CF0E60 /* ReportLocationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC9CD89D28D9909200CF0E60 /* ReportLocationView.swift */; };
@@ -243,6 +244,7 @@
 		AC893FD5254B1435009E1C43 /* EnvironmentRouters.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EnvironmentRouters.swift; sourceTree = "<group>"; };
 		AC893FEB254C80C9009E1C43 /* AuthSignInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthSignInView.swift; sourceTree = "<group>"; };
 		AC893FF3254C846E009E1C43 /* Widgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Widgets.swift; sourceTree = "<group>"; };
+		AC8E1D3228F7B6200088CF5D /* NotificationCenterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationCenterView.swift; sourceTree = "<group>"; };
 		AC9CD89928D96BE200CF0E60 /* ReportGenericViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportGenericViews.swift; sourceTree = "<group>"; };
 		AC9CD89B28D9707900CF0E60 /* ReportDiaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportDiaryView.swift; sourceTree = "<group>"; };
 		AC9CD89D28D9909200CF0E60 /* ReportLocationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportLocationView.swift; sourceTree = "<group>"; };
@@ -673,6 +675,7 @@
 				2E28EF4627A2E86A00658855 /* MovementsView.swift */,
 				AC716E23289C33E4008944C7 /* RecordExpenseView.swift */,
 				AC716E25289C33FB008944C7 /* RequestDayView.swift */,
+				AC8E1D3228F7B6200088CF5D /* NotificationCenterView.swift */,
 			);
 			path = Others;
 			sourceTree = "<group>";
@@ -1147,6 +1150,7 @@
 				AC82D63A26D3E3D100701D3D /* ContactListView.swift in Sources */,
 				AC78D2E726D54A2D00674A4F /* EnvObjects.swift in Sources */,
 				AC893F982549C20B009E1C43 /* Globals.swift in Sources */,
+				AC8E1D3328F7B6200088CF5D /* NotificationCenterView.swift in Sources */,
 				ACD8262E27D902B1002EE5D9 /* MasterLoginView.swift in Sources */,
 				AC893FEC254C80C9009E1C43 /* AuthSignInView.swift in Sources */,
 				AC3445302563880F00C0D668 /* DashboardRouter.swift in Sources */,

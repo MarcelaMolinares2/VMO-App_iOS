@@ -303,9 +303,15 @@ struct DynamicFieldView: View {
     func optionsValue(key: String) -> Bool {
         if let panelTypes = Utils.jsonDictionary(string: field.options)["panelType"] as? Dictionary<String, Any> {
             if let panelOptions = panelTypes[options.panelType] as? Dictionary<String, Any> {
-                if let keyOptions = panelOptions[key] as? Dictionary<String, Any> {
-                    if let opValues = keyOptions[DynamicUtils.transactionType(action: options.op).lowercased()] as? String {
+                if key == "required" {
+                    if let opValues = panelOptions[key] as? String {
                         return opValues.components(separatedBy: ",").contains(String(user?.type ?? 0))
+                    }
+                } else {
+                    if let keyOptions = panelOptions[key] as? Dictionary<String, Any> {
+                        if let opValues = keyOptions[DynamicUtils.transactionType(action: options.op).lowercased()] as? String {
+                            return opValues.components(separatedBy: ",").contains(String(user?.type ?? 0))
+                        }
                     }
                 }
             }
@@ -316,7 +322,7 @@ struct DynamicFieldView: View {
     func movementOptsValue(key: String) -> Bool {
         if let panelTypes = Utils.jsonDictionary(string: field.options)["visitType"] as? Dictionary<String, Any> {
             if let visitOptions = panelTypes[options.type] as? Dictionary<String, Any> {
-                if let keyOptions = visitOptions["visible"] as? Int {
+                if let keyOptions = visitOptions[key] as? Int {
                     return keyOptions == 1
                 }
             }

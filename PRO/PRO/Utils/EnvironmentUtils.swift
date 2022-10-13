@@ -173,6 +173,45 @@ class MovementUtils {
         return true
     }
     
+    static func minReportDate() -> Date {
+        let date = Date()
+        var range = Config.get(key: "MOV_REPORT_RANGE").value
+        let extendWeekEnd = Config.get(key: "MOV_EXTEND_WEEKEND").value == 1
+        
+        if range == 0 && extendWeekEnd {
+            if date.dayNumberOfWeek() == 6 {
+                range = 1
+            } else if date.dayNumberOfWeek() == 1 {
+                range = 2
+            }
+        }
+        
+        if let d = Calendar.current.date(byAdding: .day, value: -range, to: Date()) {
+            return d
+        }
+        return date
+    }
+    
+/*
+    fun minReportDate(): Calendar {
+        val calendar = Calendar.getInstance()
+        var reportRange: Int = EnvConfig.get("MOV_REPORT_RANGE", 0).value
+        val extendWeekEnd = EnvConfig.get("MOV_EXTEND_WEEKEND", 0).value == 1
+        
+        if (reportRange == 0 && extendWeekEnd) {
+            if (calendar.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY) {
+                reportRange = 1
+            } else if (calendar.get(Calendar.DAY_OF_WEEK) == 0) {
+                reportRange = 2
+            }
+        }
+        
+        val calendarMin = Calendar.getInstance()
+        calendarMin.add(Calendar.DATE, -reportRange)
+        return calendarMin
+    }
+*/
+    
 }
 
 class PanelUtils {
@@ -250,6 +289,25 @@ class PanelUtils {
     
     static func duplicationKeyByPanelType(panelType: String) -> String {
         return valueByPanelType(by: .duplication, panelType: panelType) as! String
+    }
+    
+    static func awsPathByPanelType(panelType: String) -> String {
+        switch panelType {
+            case "M":
+                return "doctor"
+            case "F":
+                return "pharmacy"
+            case "C":
+                return "client"
+            case "P":
+                return "patient"
+            case "T":
+                return "potential"
+            case "CT":
+                return "contact"
+            default:
+                return ""
+        }
     }
     
     static func valueByPanelType(by type: PanelValueType, panelType: String) -> Any {
@@ -520,6 +578,14 @@ class TimeUtils {
     
     static func hourTo(time: String) -> Int {
         return Utils.castInt(value: time.replacingOccurrences(of: ":", with: ""))
+    }
+    
+    static func splitTime(value: Int) -> [Int] {
+        let seconds: Int = value % 60
+        let res: Int = (value - seconds) / 60
+        let minutes = res % 60
+        let hours = (res - minutes) / 60
+        return [hours, minutes, seconds]
     }
     
 }

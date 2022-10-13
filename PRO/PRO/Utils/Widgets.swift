@@ -92,6 +92,7 @@ struct SearchBar: View {
                     .scaledToFit()
                     .frame(width: 15, height: 15, alignment: .center)
                     .foregroundColor(.cIcon)
+                    .opacity(self.text.isEmpty ? 0 : 1)
             }
             .frame(width: 40, height: 40, alignment: .center)
         }

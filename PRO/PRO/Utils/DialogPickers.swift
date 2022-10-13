@@ -445,7 +445,7 @@ struct DialogPlainPickerView: View {
     var title: String = ""
     let onSelectionDone: (_ selected: [String]) -> Void
     
-    @ObservedObject var viewModel = ListGenericViewModel()
+    @StateObject var viewModel = ListGenericViewModel()
     @StateObject var headerRouter = TabRouter()
     @State var searchText = ""
     let headerHeight = CGFloat(40)
@@ -522,7 +522,7 @@ struct DialogSourcePickerView: View {
     var extraData: [String: Any] = [:]
     let onSelectionDone: (_ selected: [String]) -> Void
     
-    @ObservedObject var viewModel = ListGenericViewModel()
+    @StateObject var viewModel = ListGenericViewModel()
     @StateObject var headerRouter = TabRouter()
     @State var searchText = ""
     @State private var capitalized = true
@@ -576,6 +576,8 @@ struct DialogSourcePickerView: View {
                 list = GenericSelectableDao(realm: try! Realm()).cities()
             case "COLLEGE":
                 list = GenericSelectableDao(realm: try! Realm()).colleges()
+            case "COMPANION":
+                list = GenericSelectableDao(realm: try! Realm()).usersInverseHierarchy()
             case "COUNTRY":
                 list = GenericSelectableDao(realm: try! Realm()).countries()
             case "CYCLE":
@@ -590,12 +592,16 @@ struct DialogSourcePickerView: View {
                 list = GenericSelectableDao(realm: try! Realm()).materials()
             case "MATERIAL-PLAIN":
                 list = GenericSelectableDao(realm: try! Realm()).materialsPlain()
+            case "MOVEMENT-FAIL-REASON":
+                list = GenericSelectableDao(realm: try! Realm()).movementFailReasons(panelType: Utils.castString(value: extraData["panelType"]))
             case "PANEL-DELETE-REASON":
                 list = GenericSelectableDao(realm: try! Realm()).panelDeleteReasons(panelType: Utils.castString(value: extraData["panelType"]))
             case "PHARMACY-CHAIN":
                 list = GenericSelectableDao(realm: try! Realm()).pharmacyChains()
             case "PHARMACY-TYPE":
                 list = GenericSelectableDao(realm: try! Realm()).pharmacyTypes()
+            case "PREDEFINED-COMMENT":
+                list = GenericSelectableDao(realm: try! Realm()).predefinedComments(table: Utils.castString(value: extraData["table"]), field: Utils.castString(value: extraData["field"]))
             case "PRICES-LIST":
                 list = GenericSelectableDao(realm: try! Realm()).pricesLists()
             case "PRODUCT-PROMOTED":
@@ -893,223 +899,136 @@ struct RectGetter: View {
     }
 }
 
-extension View {
-    func snapshot() -> UIImage {
-        let controller = UIHostingController(rootView: self)
-        let view = controller.view
-        
-        let targetSize = controller.view.intrinsicContentSize
-        view?.bounds = CGRect(origin: .zero, size: targetSize)
-        view?.backgroundColor = .clear
-        
-        let renderer = UIGraphicsImageRenderer(size: targetSize)
-        
-        return renderer.image { _ in
-            view?.drawHierarchy(in: controller.view.bounds, afterScreenUpdates: true)
-        }
-    }
-}
-
-extension UIView {
-    func asImage() -> UIImage {
-        let format = UIGraphicsImageRendererFormat()
-        format.scale = 1
-        return UIGraphicsImageRenderer(size: self.layer.frame.size, format: format).image { context in
-            self.drawHierarchy(in: self.layer.bounds, afterScreenUpdates: true)
-            //layer.render(in: context.cgContext)
-            
-        }
-    }
-}
-
-extension View {
-    func asImage(size: CGSize) -> UIImage {
-        let controller = UIHostingController(rootView: self)
-        controller.view.bounds = CGRect(origin: .zero, size: size)
-        //UIApplication.shared.windows.first!.rootViewController?.view.addSubview(controller.view)
-        let image = controller.view.asImage()
-        //controller.view.removeFromSuperview()
-        return image
-    }
-}
-
-
-// DEPRECATED
-
-
-struct CustomDialogPicker: View {
-    let onSelectionDone: (_ selected: [String]) -> Void
-    
-    @Binding var selected: [String]
-    var key: String = ""
-    var multiple: Bool = false
-    var title: String = ""
-    var isSheet: Bool = false
-    
-    @ObservedObject var viewModel = ListGenericViewModel()
-    @StateObject var headerRouter = TabRouter()
-    @State var searchText = ""
-    let headerHeight = CGFloat(40)
+struct DialogDurationPickerView: View {
+    @StateObject var modelDuration: MovementDurationModel
+    let onSelectionDone: () -> Void
     
     var body: some View {
         VStack {
-            SearchBar(text: $searchText, placeholder: Text("\(NSLocalizedString("envSearch", comment: "Search")) \(title.lowercased())")) {
-                
-            }
-            ScrollView {
-                ForEach(viewModel.items.filter {
-                    searchText.isEmpty ? true : $0.label.lowercased().contains(searchText.lowercased())
-                }, id: \.id) { item in
-                    GenericDialogItemOld(item: item, alignment: .leading) {
-                        self.onItemSelected(item: item)
-                    }
-                }
-            }
-            if multiple {
+            Text("envDuration")
+                .foregroundColor(.cTextMedium)
+                .padding(.vertical, 4)
+            Spacer()
+            HStack {
                 VStack {
-                    Button(action: {
-                        self.done()
-                    }) {
-                        Image("ic-done")
+                    Button {
+                        if modelDuration.hour < 23 {
+                            modelDuration.hour += 1
+                        }
+                    } label: {
+                        Image("ic-plus")
                             .resizable()
                             .scaledToFit()
-                            .padding(5)
                             .foregroundColor(.cIcon)
+                            .frame(width: 20, height: 20, alignment: .center)
                     }
-                    .frame(minWidth: 0, maxWidth: .infinity, minHeight: headerHeight, maxHeight: headerHeight, alignment: .center)
-                }
-                .frame(height: headerHeight)
-                .padding([.leading, .trailing], 10)
-            }
-        }
-        .onAppear {
-            loadData()
-        }
-    }
-    
-    func loadData() {
-        print(key)
-        switch key.uppercased() {
-            case "BRICK":
-                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).bricks())
-            case "CATEGORY":
-                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).categories())
-            case "CITY":
-                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).cities())
-            case "COLLEGE":
-                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).colleges())
-            case "COUNTRY":
-                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).countries())
-            case "CYCLE":
-                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).cycles())
-            case "LINE":
-                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).lines())
-            case "MATERIAL":
-                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).materials())
-            case "PHARMACY-CHAIN":
-                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).pharmacyChains())
-            case "PHARMACY-TYPE":
-                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).pharmacyTypes())
-            case "PRICES-LIST":
-                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).pricesLists())
-            case "PRODUCT-PROMOTED", "PRODUCT-TRANSFERENCE":
-                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).products())
-            case "PRODUCT-BY-BRAND":
-                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).productBrands())
-            case "PRODUCT-SHOPPING":
-                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).productsWithCompetitors())
-            case "SPECIALTY":
-                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).specialties())
-            case "SECOND-SPECIALTY":
-                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).specialties(tp: "S"))
-            case "STYLE":
-                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).styles())
-            case "ZONE":
-                viewModel.put(list: GenericSelectableDao(realm: try! Realm()).zones())
-            default:
-                break
-        }
-    }
-    
-    func onItemSelected(item: GenericSelectableItem) {
-        item.selected = !item.selected
-        viewModel.toggle()
-        if !multiple {
-            done()
-        }
-    }
-    
-    func done() {
-        selected = viewModel.items.filter { item in item.selected }.map { $0.value }
-        onSelectionDone(selected)
-    }
-}
-
-struct SourceDynamicDialogPicker: View {
-    let onSelectionDone: (_ selected: [String]) -> Void
-    
-    @Binding var selected: [String]
-    var data: String = ""
-    var multiple: Bool = false
-    var title: String = ""
-    var isSheet: Bool = false
-    
-    @ObservedObject var viewModel = ListGenericViewModel()
-    @StateObject var headerRouter = TabRouter()
-    @State var searchText = ""
-    let headerHeight = CGFloat(40)
-    
-    var body: some View {
-        VStack {
-            SearchBar(text: $searchText, placeholder: Text("\(NSLocalizedString("envSearch", comment: "Search")) \(title.lowercased())")) {
-                
-            }
-            ScrollView {
-                ForEach(viewModel.items.filter {
-                    searchText.isEmpty ? true : $0.label.lowercased().contains(searchText.lowercased())
-                }, id: \.id) { item in
-                    GenericDialogItemOld(item: item, alignment: .leading) {
-                        self.onItemSelected(item: item)
-                    }
-                }
-            }
-            if multiple {
-                VStack {
-                    Button(action: {
-                        self.done()
-                    }) {
-                        Image("ic-done")
+                    .frame(maxWidth: .infinity, minHeight: 30, maxHeight: 30, alignment: .center)
+                    Text("\(Utils.zero(n: modelDuration.hour))")
+                        .foregroundColor(.cTextHigh)
+                        .font(.system(size: 26))
+                    Text("envHours")
+                        .foregroundColor(.cTextMedium)
+                        .font(.system(size: 13))
+                    Button {
+                        if modelDuration.hour > 0 {
+                            modelDuration.hour -= 1
+                        }
+                    } label: {
+                        Image("ic-remove")
                             .resizable()
                             .scaledToFit()
-                            .padding(5)
                             .foregroundColor(.cIcon)
+                            .frame(width: 20, height: 20, alignment: .center)
                     }
-                    .frame(minWidth: 0, maxWidth: .infinity, minHeight: headerHeight, maxHeight: headerHeight, alignment: .center)
+                    .frame(maxWidth: .infinity, minHeight: 30, maxHeight: 30, alignment: .center)
                 }
-                .frame(height: headerHeight)
-                .padding([.leading, .trailing], 10)
+                Text(":")
+                    .foregroundColor(.cTextMedium)
+                    .font(.system(size: 22))
+                VStack {
+                    Button {
+                        if modelDuration.minute < 23 {
+                            modelDuration.minute += 1
+                        }
+                    } label: {
+                        Image("ic-plus")
+                            .resizable()
+                            .scaledToFit()
+                            .foregroundColor(.cIcon)
+                            .frame(width: 20, height: 20, alignment: .center)
+                    }
+                    .frame(maxWidth: .infinity, minHeight: 30, maxHeight: 30, alignment: .center)
+                    Text("\(Utils.zero(n: modelDuration.minute))")
+                        .foregroundColor(.cTextHigh)
+                        .font(.system(size: 26))
+                    Text("envMinutes")
+                        .foregroundColor(.cTextMedium)
+                        .font(.system(size: 13))
+                    Button {
+                        if modelDuration.minute > 0 {
+                            modelDuration.minute -= 1
+                        }
+                    } label: {
+                        Image("ic-remove")
+                            .resizable()
+                            .scaledToFit()
+                            .foregroundColor(.cIcon)
+                            .frame(width: 20, height: 20, alignment: .center)
+                    }
+                    .frame(maxWidth: .infinity, minHeight: 30, maxHeight: 30, alignment: .center)
+                }
+                Text(":")
+                    .foregroundColor(.cTextMedium)
+                    .font(.system(size: 22))
+                VStack {
+                    Button {
+                        if modelDuration.second < 23 {
+                            modelDuration.second += 1
+                        }
+                    } label: {
+                        Image("ic-plus")
+                            .resizable()
+                            .scaledToFit()
+                            .foregroundColor(.cIcon)
+                            .frame(width: 20, height: 20, alignment: .center)
+                    }
+                    .frame(maxWidth: .infinity, minHeight: 30, maxHeight: 30, alignment: .center)
+                    Text("\(Utils.zero(n: modelDuration.second))")
+                        .foregroundColor(.cTextHigh)
+                        .font(.system(size: 26))
+                    Text("envSeconds")
+                        .foregroundColor(.cTextMedium)
+                        .font(.system(size: 13))
+                    Button {
+                        if modelDuration.second > 0 {
+                            modelDuration.second -= 1
+                        }
+                    } label: {
+                        Image("ic-remove")
+                            .resizable()
+                            .scaledToFit()
+                            .foregroundColor(.cIcon)
+                            .frame(width: 20, height: 20, alignment: .center)
+                    }
+                    .frame(maxWidth: .infinity, minHeight: 30, maxHeight: 30, alignment: .center)
+                }
             }
+            Spacer()
+            VStack {
+                Button(action: {
+                    self.onSelectionDone()
+                }) {
+                    Image("ic-done")
+                        .resizable()
+                        .scaledToFit()
+                        .padding(5)
+                        .foregroundColor(.cIcon)
+                }
+                .frame(minWidth: 0, maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
+            }
+            .frame(height: 40)
+            .padding([.leading, .trailing], 10)
         }
-        .onAppear {
-            loadData()
-        }
-    }
-    
-    func loadData() {
-        viewModel.put(list: Utils.genericList(data: data))
-    }
-    
-    func onItemSelected(item: GenericSelectableItem) {
-        item.selected = !item.selected
-        viewModel.toggle()
-        if !multiple {
-            done()
-        }
-    }
-    
-    func done() {
-        selected = viewModel.items.filter { item in item.selected }.map { $0.value }
-        onSelectionDone(selected)
     }
     
 }

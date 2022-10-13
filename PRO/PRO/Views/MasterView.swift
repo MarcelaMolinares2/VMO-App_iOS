@@ -12,6 +12,7 @@ import RealmSwift
 import AlertToast
 
 struct MasterView: View {
+    @EnvironmentObject var viewRouter: ViewRouter
     @EnvironmentObject var masterRouter: MasterRouter
     @EnvironmentObject var userSettings: UserSettings
     
@@ -50,7 +51,7 @@ struct MasterView: View {
                         HStack {
                             Spacer()
                             Button(action: {
-                                
+                                viewRouter.currentPage = "NOTIFICATION-CENTER-VIEW"
                             }) {
                                 Image("ic-notification")
                                     .resizable()

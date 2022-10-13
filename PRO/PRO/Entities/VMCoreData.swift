@@ -1149,8 +1149,10 @@ class Movement: Object, Codable, SyncEntity {
     @Persisted var hour: String = ""
     @Persisted var comment: String? = ""
     @Persisted var target: String? = ""
-    @Persisted var duration: Float?
-    @Persisted var executed: String = ""
+    @Persisted var duration: Int? = 0
+    @Persisted var executed: Int = 1
+    @Persisted var visitType: String = ""
+    @Persisted var movementFailReasonId: Int? = 0
     @Persisted var latitude: Float?
     @Persisted var longitude: Float?
     @Persisted var companionId: Int?
@@ -1175,7 +1177,7 @@ class Movement: Object, Codable, SyncEntity {
     var tmpDate = Date()
     
     private enum CodingKeys: String, CodingKey {
-        case id = "id_movimiento", panelId = "id_medico", panelType = "tipo", date = "fecha_visita", realDate = "fecha_real", hour = "hora_visita", comment = "comentario", target = "objetivo_proxima", duration = "duracion", executed = "no_efect", latitude = "latitud", longitude = "longitud", companionId = "id_acompanante", wasScheduled = "agendado", rqAssistance = "asistencia", openAt = "fecha_inicio", closedAt = "fecha_fin", contactType = "tipo_contacto", contactedBy = "contactado_por", dataContacts = "contacto", additionalFields = "fields", cycleId = "ciclo", dataPromoted = "productos_prom", dataMaterial = "rl_material_deliveries", dataStock = "rl_product_stock", dataShopping = "rl_shopping", dataTransference = "rl_product_transference"
+        case id = "id_movimiento", panelId = "id_medico", panelType = "tipo", date = "fecha_visita", realDate = "fecha_real", hour = "hora_visita", comment = "comentario", target = "objetivo_proxima", duration = "duracion", executed, visitType = "visit_type", movementFailReasonId = "movement_fail_reason_id", latitude = "latitud", longitude = "longitud", companionId = "id_acompanante", wasScheduled = "agendado", rqAssistance = "asistencia", openAt = "fecha_inicio", closedAt = "fecha_fin", contactType = "tipo_contacto", contactedBy = "contactado_por", dataContacts = "contacto", additionalFields = "fields", cycleId = "ciclo", dataPromoted = "productos_prom", dataMaterial = "rl_material_deliveries", dataStock = "rl_product_stock", dataShopping = "rl_shopping", dataTransference = "rl_product_transference"
     }
     
     override init() {
@@ -1194,13 +1196,13 @@ class Movement: Object, Codable, SyncEntity {
 class MovementMaterial: Object, Codable {
     @Persisted(primaryKey: true) var objectId: ObjectId
     @Persisted var id: Int = 0//material_id
-    @Persisted var category: String = ""
+    @Persisted var category: Int = 0
     @Persisted var sets = List<MovementMaterialSet>()
 }
 
 class MovementMaterialSet: Object, Codable {
     @Persisted(primaryKey: true) var objectId: ObjectId
-    @Persisted var id: String = ""
+    @Persisted var id: Int = 0
     @Persisted var quantity: Int = 0
 }
 

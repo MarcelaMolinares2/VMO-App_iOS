@@ -60,6 +60,8 @@ struct WrapperView: View {
                 SupportMainView()
             case "PANEL-GLOBAL-SEARCH-VIEW":
                 PanelGlobalSearchView()
+            case "NOTIFICATION-CENTER-VIEW":
+                NotificationCenterView()
             case "RP-DIARY-VIEW":
                 ReportDiaryView()
             case "RP-LOCATIONS-VIEW":
@@ -69,11 +71,5 @@ struct WrapperView: View {
             default:
                 Text(viewRouter.currentPage)
         }
-    }
-}
-
-struct WrapperView_Previews: PreviewProvider {
-    static var previews: some View {
-        WrapperView()
     }
 }
