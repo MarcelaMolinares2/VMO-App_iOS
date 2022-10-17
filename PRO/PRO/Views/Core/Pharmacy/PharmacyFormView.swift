@@ -100,6 +100,8 @@ struct PharmacyFormView: View {
     
     func initDynamic(data: Dictionary<String, Any>) {
         form.tabs = DynamicUtils.initForm(data: data).sorted(by: { $0.key > $1.key })
+        print(form.tabs)
+        print(plainData)
         if !plainData.isEmpty {
             DynamicUtils.fillForm(form: &form, base: plainData, additional: additionalData)
             

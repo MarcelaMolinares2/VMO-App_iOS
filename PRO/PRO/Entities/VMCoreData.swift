@@ -460,6 +460,39 @@ extension Panel {
         return true
     }
     
+    func generic() -> GenericPanel {
+        let generic = GenericPanel()
+        generic.objectId = self.objectId
+        
+        generic.type = self.type
+        generic.email = self.email
+        generic.phone = self.phone
+        generic.brickId = self.brickId
+        generic.countryId = self.countryId
+        generic.pricesListId = self.pricesListId
+        generic.zoneId = self.zoneId
+        generic.visitFTF = self.visitFTF
+        generic.visitVirtual = self.visitVirtual
+        generic.idNumber = self.idNumber
+        generic.name = self.name
+        generic.createdAt = self.createdAt
+        generic.fields = self.fields
+        generic.cityId = self.cityId
+        generic.visitsFeeWasEdited = self.visitsFeeWasEdited
+        generic.lastMove = self.lastMove
+        generic.lastMovement = self.lastMovement
+        generic.visitingHours = self.visitingHours
+        generic.locations = self.locations
+        generic.categories = self.categories
+        generic.contactControl = self.contactControl
+        generic.requests = self.requests
+        generic.users = self.users
+        generic.visitDates = self.visitDates
+        generic.id = self.id
+        
+        return generic
+    }
+    
 }
 
 class GenericPanel: Decodable, Panel {
@@ -1191,6 +1224,36 @@ class Movement: Object, Codable, SyncEntity {
         self.additionalFields = try DynamicUtils.adFieldsTypeDecoding(container: container, key: .additionalFields)
     }
     
+    func report(realm: Realm) -> MovementReport {
+        let movementReport = MovementReport()
+        movementReport.objectId = self.objectId
+        
+        movementReport.id = self.id
+        movementReport.reportedBy = JWTUtils.sub()
+        movementReport.panelType = self.panelType
+        movementReport.date = self.date
+        movementReport.hour = self.hour
+        movementReport.comment = self.comment ?? ""
+        movementReport.targetNext = self.target ?? ""
+        movementReport.executed = self.executed
+        movementReport.visitType = self.visitType
+        movementReport.movementFailReasonId = self.movementFailReasonId
+        movementReport.contactType = self.contactType
+        movementReport.contactedBy = self.contactedBy ?? ""
+        movementReport.latitude = self.latitude ?? 0
+        movementReport.longitude = self.longitude ?? 0
+        
+        if let panel = PanelUtils.panel(type: self.panelType, objectId: self.panelObjectId, id: self.panelId) {
+            movementReport.visitsQuota = panel.mainUser()?.visitsFee ?? 0
+            movementReport.visitsInCycle = panel.mainUser()?.visitsCycle ?? 0
+            movementReport.panel = panel.generic()
+        }
+        
+        movementReport.cycle = CycleDao(realm: realm).by(id: self.cycleId)
+        
+        return movementReport
+    }
+    
 }
 
 class MovementMaterial: Object, Codable {
@@ -1519,6 +1582,7 @@ class Pharmacy: Object, Codable, Panel, SyncEntity, Identifiable {
         
         try container.encode(id, forKey: .id)
         try container.encode(idNumber, forKey: .idNumber)
+        try container.encode(name, forKey: .name)
         try container.encode(email, forKey: .email)
         try container.encode(createdAt, forKey: .createdAt)
         try container.encode(phone, forKey: .phone)

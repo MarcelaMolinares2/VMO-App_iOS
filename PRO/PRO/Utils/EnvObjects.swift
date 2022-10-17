@@ -398,6 +398,7 @@ class PanelVisitingHourModel: ObservableObject, Identifiable {
 }
 
 class MovementReport: Decodable, Identifiable {
+    var objectId = ObjectId()
     var id = 0
     var reportedBy = 0
     var panelType = ""

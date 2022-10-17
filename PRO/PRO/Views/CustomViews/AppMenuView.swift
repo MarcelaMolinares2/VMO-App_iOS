@@ -850,6 +850,95 @@ struct ExpensePhotoBottomMenu: View {
     }
 }
 
+struct MovementBottomMenu: View {
+    @State var movement: MovementReport
+    
+    let onEdit: () -> Void
+    let onSummary: () -> Void
+    
+    @State private var panel: Panel = GenericPanel()
+    
+    let layout = [
+        GridItem(.flexible()),
+        GridItem(.flexible())
+    ]
+    
+    var body: some View {
+        VStack {
+            VStack {
+                PanelFormHeaderView(panel: panel)
+                VStack {
+                    VStack{
+                        Text(NSLocalizedString("envComment", comment: ""))
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .foregroundColor(.cTextMedium)
+                            .font(.system(size: 14))
+                        Text(panel.lastMovement?.comment ?? "--")
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .multilineTextAlignment(.leading)
+                            .foregroundColor(.cTextHigh)
+                            .font(.system(size: 16))
+                    }
+                    VStack{
+                        Text(NSLocalizedString("envTargetNextVisit", comment: ""))
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .foregroundColor(.cTextMedium)
+                            .font(.system(size: 14))
+                        Text(panel.lastMovement?.targetNext ?? "--")
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .multilineTextAlignment(.leading)
+                            .foregroundColor(.cTextHigh)
+                            .font(.system(size: 16))
+                    }
+                }
+                Divider()
+            }
+            LazyVGrid(columns: layout, spacing: 20) {
+                Button(action: {
+                    onEdit()
+                }) {
+                    VStack {
+                        Image("ic-edit")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
+                            .foregroundColor(.cIcon)
+                        Text("envEdit")
+                            .foregroundColor(.cTextMedium)
+                            .lineLimit(2)
+                            .font(.system(size: CGFloat(15)))
+                    }
+                }
+                Button(action: {
+                    onSummary()
+                }) {
+                    VStack {
+                        Image("ic-summary")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
+                            .foregroundColor(.cIcon)
+                        Text("envSummary")
+                            .foregroundColor(.cTextMedium)
+                            .lineLimit(2)
+                            .font(.system(size: CGFloat(15)))
+                    }
+                }
+            }
+        }
+        .onAppear {
+            load()
+        }
+    }
+    
+    func load() {
+        if let p = movement.panel {
+            panel = p
+        }
+    }
+    
+}
+
 //DEPRECATED
 
 

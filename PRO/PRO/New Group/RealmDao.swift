@@ -226,6 +226,10 @@ class CycleDao: GenericDao {
         return realm.objects(Cycle.self).filter("id == \(id)").first
     }
     
+    func by(id: Int?) -> Cycle? {
+        return by(id: String(describing: id ?? 0))
+    }
+    
     func active() -> [Cycle] {
         if let user = UserDao(realm: realm).logged() {
             let cycles = Array(
@@ -433,6 +437,16 @@ class MovementDao: GenericDao {
     
     func all() -> [Movement] {
         return Array(realm.objects(Movement.self).sorted(byKeyPath: "date"))
+    }
+    
+    func by(date: Date) -> [Movement] {
+        return Array(
+            realm.objects(Movement.self)
+                .where {
+                    $0.date == Utils.dateFormat(date: date)
+                }
+                .sorted(byKeyPath: "date")
+        )
     }
     
     func by(objectId: String) -> Movement? {

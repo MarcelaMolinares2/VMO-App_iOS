@@ -8,6 +8,7 @@
 
 import SwiftUI
 import RealmSwift
+import SheeKit
 
 struct DashboardView: View {
     @EnvironmentObject var masterRouter: MasterRouter
@@ -60,29 +61,49 @@ struct DashboardMasterCenterView: View {
     @State private var isProcessing = false
     @State private var movements: [MovementReport] = []
     
+    @State private var diarySelected: Diary = Diary()
+    @State private var modalDiary = false
+    
+    @State private var movementSelected: MovementReport = MovementReport()
+    @State private var modalMovement = false
+    
     private var realm = try! Realm()
     
     var body: some View {
         ZStack(alignment: .bottom) {
             if masterRouter.diaryLayout == .map {
                 DiaryListMapView(items: $diaries) { diary in
-                    
+                    if diary.type == "P" {
+                        diarySelected = diary
+                        modalDiary = true
+                    }
                 }
             } else {
                 ScrollView {
                     ForEach($itemWrappers) { $iw in
                         DiaryViewerWrapperItemView(realm: realm, iw: $iw, dateDiaries: $diaries, interval: $interval) { diary in
-                            
+                            if diary.type == "P" {
+                                diarySelected = diary
+                                modalDiary = true
+                            }
                         }
                     }
+                    Divider()
+                        .padding(.vertical, 10)
                     if isProcessing {
                         LottieView(name: "sync_animation", loopMode: .loop, speed: 1)
                             .frame(width: 300, height: 200)
                     } else {
                         ForEach($movements) { $movement in
-                            ReportMovementItemView(realm: realm, item: movement, userId: JWTUtils.sub())
+                            Button {
+                                //movementSelected = movement
+                                modalMovement = true
+                            } label: {
+                                ReportMovementItemView(realm: realm, item: movement, userId: JWTUtils.sub())
+                            }
                         }
                     }
+                    ScrollViewFABBottom()
                 }
             }
             HStack(alignment: .bottom) {
@@ -96,11 +117,27 @@ struct DashboardMasterCenterView: View {
             .padding(.bottom, Globals.UI_FAB_VERTICAL)
             .padding(.horizontal, Globals.UI_FAB_HORIZONTAL)
         }
+        .shee(isPresented: $modalDiary, presentationStyle: .formSheet(properties: .init(detents: [.medium(), .large()]))) {
+            DiaryReportView(realm: realm, diary: diarySelected)
+        }
+        .shee(isPresented: $modalMovement, presentationStyle: .formSheet(properties: .init(detents: [.medium(), .large()]))) {
+            MovementBottomMenu(movement: movementSelected) {
+                
+            } onSummary: {
+                
+            }
+
+        }
         .onAppear {
             initForm()
         }
         .onChange(of: masterRouter.date) { newValue in
             refresh()
+        }
+        .onChange(of: masterRouter.diaryLayout) { newValue in
+            if newValue == .main {
+                refresh()
+            }
         }
     }
     
@@ -130,6 +167,7 @@ struct DashboardMasterCenterView: View {
     
     func refresh() {
         diaries.removeAll()
+        movements.removeAll()
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
             diaries.append(contentsOf: DiaryDao(realm: realm).by(date: masterRouter.date).map { Diary(value: $0) })
         }
@@ -147,6 +185,9 @@ struct DashboardMasterCenterView: View {
                         movements.append(decoded)
                     }
                 }
+            }
+            MovementDao(realm: realm).by(date: masterRouter.date).forEach { m in
+                movements.append(m.report(realm: realm))
             }
             DispatchQueue.main.async {
                 isProcessing = false
@@ -274,6 +315,41 @@ struct DashboardWrapperView: View {
                     .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
             default:
                 DiaryListTabView()
+        }
+    }
+    
+}
+
+struct DiaryReportView: View {
+    let realm: Realm
+    let diary: Diary
+    
+    var body: some View {
+        let panel = PanelUtils.panel(type: diary.panelType, objectId: diary.panelObjectId, id: diary.panelId)
+        VStack {
+            if let p = panel {
+                let headerColor = PanelUtils.colorByPanelType(panel: p)
+                let headerIcon = PanelUtils.iconByPanelType(panel: p)
+                HStack {
+                    Text(p.name ?? "")
+                        .fontWeight(.bold)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .lineLimit(1)
+                        .padding(.horizontal, 5)
+                        .foregroundColor(.cTextHigh)
+                    Image(headerIcon)
+                        .resizable()
+                        .scaledToFit()
+                        .foregroundColor(headerColor)
+                        .frame(width: 34, height: 34, alignment: .center)
+                        .padding(4)
+                }
+                PanelItemMapView(item: p)
+                    .frame(maxHeight: 200)
+            }
+            ScrollView {
+                
+            }
         }
     }
     
