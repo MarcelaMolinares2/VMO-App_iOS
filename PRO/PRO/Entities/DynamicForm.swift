@@ -93,6 +93,8 @@ struct DynamicFormField: Identifiable, Decodable {
             self.condition = DynamicConditionForm()
         } catch DecodingError.keyNotFound {
             self.condition = DynamicConditionForm()
+        } catch DecodingError.valueNotFound {
+            self.condition = DynamicConditionForm()
         }
         do {
             self.acceptedValues = try container.decode(String?.self, forKey: .acceptedValues)

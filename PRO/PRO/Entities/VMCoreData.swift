@@ -1689,7 +1689,7 @@ class PotentialProfessional: Object, Codable, Panel, SyncEntity, Identifiable {
     var zone: Zone?
     
     private enum CodingKeys: String, CodingKey {
-        case id = "id", idNumber = "cedula", name = "nombre", email = "email", createdAt = "created_at", phone = "telefono", fields, brickId = "id_brick", cityId = "id_ciudad", countryId = "id_pais", pricesListId = "id_lista_precios", zoneId = "id_zona", visitFTF = "visit_ftf", visitVirtual = "visit_virtual", visitsFeeWasEdited = "visits_fee_was_edited", lastMove = "last_move", lastMovement = "last_movement", visitingHours = "visiting_hours", locations, categories, contactControl = "contact_control", requests = "general_requests", users = "panel_user", visitDates = "visited_on", contacts, cityName = "ciudad", address = "direccion", specialtyName = "especialidad", joinDate = "fecha_ingre", observations = "observaciones"
+        case id = "id_profesional_potencial", idNumber = "cedula", name = "nombre", email = "email", createdAt = "created_at", phone = "telefono", fields, brickId = "id_brick", cityId = "id_ciudad", countryId = "id_pais", pricesListId = "id_lista_precios", zoneId = "id_zona", visitFTF = "visit_ftf", visitVirtual = "visit_virtual", visitsFeeWasEdited = "visits_fee_was_edited", lastMove = "last_move", lastMovement = "last_movement", visitingHours = "visiting_hours", locations, categories, contactControl = "contact_control", requests = "general_requests", users = "panel_user", visitDates = "visited_on", contacts, cityName = "ciudad", address = "direccion", specialtyName = "especialidad", joinDate = "fecha_ingre", observations = "observaciones"
     }
     
     override init() {

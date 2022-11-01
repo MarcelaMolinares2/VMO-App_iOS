@@ -118,7 +118,7 @@ struct DashboardMasterCenterView: View {
             .padding(.horizontal, Globals.UI_FAB_HORIZONTAL)
         }
         .shee(isPresented: $modalDiary, presentationStyle: .formSheet(properties: .init(detents: [.medium(), .large()]))) {
-            DiaryReportView(realm: realm, diary: diarySelected)
+            DiaryReportView(viewRouter: viewRouter, realm: realm, diary: diarySelected)
         }
         .shee(isPresented: $modalMovement, presentationStyle: .formSheet(properties: .init(detents: [.medium(), .large()]))) {
             MovementBottomMenu(movement: movementSelected) {
@@ -321,8 +321,16 @@ struct DashboardWrapperView: View {
 }
 
 struct DiaryReportView: View {
+    let viewRouter: ViewRouter
     let realm: Realm
     let diary: Diary
+    
+    @State private var visitType = 0//1 - Normal, 2 - Start Visit, 3 - Resume, 4 - Extra
+    @State private var visitErrorText = ""
+    
+    let reportType = Config.get(key: "MOV_REPORT_TYPE", defaultValue: 1).value
+    let allowExtra = Config.get(key: "MOV_ALLOW_EXTRA").value == 1
+    let extraAlwaysOn = Config.get(key: "MOV_EXTRA_ALWAYS_ON").value == 1
     
     var body: some View {
         let panel = PanelUtils.panel(type: diary.panelType, objectId: diary.panelObjectId, id: diary.panelId)
@@ -350,6 +358,136 @@ struct DiaryReportView: View {
             ScrollView {
                 
             }
+            VStack {
+                switch visitType {
+                    case 1:
+                        Button {
+                            goToVisit(type: "normal")
+                        } label: {
+                            HStack {
+                                Image("ic-visit")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 34, height: 34)
+                                    .foregroundColor(.cIcon)
+                                Text("envReportVisit")
+                                    .foregroundColor(.cTextHigh)
+                                    .frame(maxWidth: .infinity)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.horizontal, 15)
+                        }
+                    case 2:
+                        Button {
+                            goToVisit(type: "normal")
+                        } label: {
+                            HStack {
+                                Image("ic-visit")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 34, height: 34)
+                                    .foregroundColor(.cHighlighted)
+                                Text("envStartVisit")
+                                    .foregroundColor(.cHighlighted)
+                                    .frame(maxWidth: .infinity)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.horizontal, 15)
+                        }
+                    case 3:
+                        Button {
+                            goToVisit(type: "normal")
+                        } label: {
+                            HStack {
+                                Image("ic-visit")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 34, height: 34)
+                                    .foregroundColor(.cHighlighted)
+                                Text("envResumeVisit")
+                                    .foregroundColor(.cHighlighted)
+                                    .frame(maxWidth: .infinity)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.horizontal, 15)
+                        }
+                    case 4:
+                        Button {
+                            goToVisit(type: "extra")
+                        } label: {
+                            HStack {
+                                Image("ic-visit")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 34, height: 34)
+                                    .foregroundColor(.cWarning)
+                                Text("envReportExtraVisit")
+                                    .foregroundColor(.cWarning)
+                                    .frame(maxWidth: .infinity)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.horizontal, 15)
+                        }
+                    default:
+                        VStack {
+                            Text(visitErrorText)
+                                .foregroundColor(.cTextHigh)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 7)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .background(Color.cWarning)
+                }
+            }
+        }
+        .onAppear {
+            load()
+        }
+    }
+    
+    func load() {
+        if let panel = PanelUtils.panel(type: diary.panelType, objectId: diary.panelObjectId, id: diary.panelId) {
+            var couldStartVisit = false
+            if reportType == 2 {
+                if MovementUtils.existsMovementOpen(objectId: panel.objectId, type: panel.type) {
+                    visitType = 3
+                } else {
+                    couldStartVisit = true
+                }
+            } else {
+                couldStartVisit = true
+            }
+            if couldStartVisit {
+                let couldVisitByNumber = panel.couldVisitByNumber()
+                let couldVisitToday = panel.couldVisitToday()
+                if couldVisitToday && couldVisitByNumber {
+                    visitType = reportType == 2 ? 2 : 1
+                } else {
+                    if !couldVisitToday {
+                        visitErrorText = NSLocalizedString("envVisitedToday", comment: "The panel member was visited today")
+                    } else if !couldVisitByNumber {
+                        visitErrorText = String(format: NSLocalizedString("envMaximumVisits", comment: "Maximum visits (%@/%@)"), String(panel.mainUser()?.visitsCycle ?? 0), String(panel.mainUser()?.visitsFee ?? 0))
+                    } else {
+                        visitErrorText = NSLocalizedString("envVisitNotAllowed", comment: "Visit not allowed")
+                    }
+                }
+            }
+            if allowExtra {
+                let mainUser = panel.mainUser()
+                if (mainUser?.visitsCycle ?? 0) < (mainUser?.visitsFee ?? 0) {
+                    if extraAlwaysOn {
+                        visitType = 4
+                    }
+                } else {
+                    visitType = 4
+                }
+            }
+        }
+    }
+    
+    func goToVisit(type: String) {
+        if let panel = PanelUtils.panel(type: diary.panelType, objectId: diary.panelObjectId, id: diary.panelId) {
+            FormEntity(objectId: panel.objectId, type: panel.type, options: [ "visitType": type ]).go(path: "MOVEMENT-FORM", router: viewRouter)
         }
     }
     

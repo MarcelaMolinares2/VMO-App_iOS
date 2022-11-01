@@ -81,6 +81,14 @@ struct DiaryFormView: View {
     @State private var hourFrom: Date = Date()
     @State private var hourTo: Date = Date()
     
+    @State private var dateCurrent: Date = Date()
+    
+    @State private var dateRangeAdd: Date = (Calendar.current.date(byAdding: .day, value: Config.get(key: "DIA_RANGE_ADD", defaultValue: 0).value, to: Date()) ?? Date())
+    @State private var dateRangeDelete: Date = (Calendar.current.date(byAdding: .day, value: Config.get(key: "DIA_RANGE_DELETE", defaultValue: 0).value, to: Date()) ?? Date())
+    @State private var dateRangeMove: Date = (Calendar.current.date(byAdding: .day, value: Config.get(key: "DIA_RANGE_MOVE", defaultValue: 0).value, to: Date()) ?? Date())
+    @State private var dateRangeDrag: Date = (Calendar.current.date(byAdding: .day, value: Config.get(key: "DIA_RANGE_DRAG", defaultValue: 0).value, to: Date()) ?? Date())
+    @State private var dateRangeMax: Date = (Calendar.current.date(byAdding: .day, value: Config.get(key: "DIA_MAX_DATE", defaultValue: 60).value, to: Date()) ?? Date())
+    
     var body: some View {
         VStack {
             HeaderToggleView(title: "envDiary") {
@@ -116,7 +124,7 @@ struct DiaryFormView: View {
                                 }
                                 .frame(width: 44, height: 44, alignment: .center)
                                 Spacer()
-                                DatePicker(selection: $date, displayedComponents: .date) {}
+                                DatePicker(selection: $date, in:...dateRangeMax, displayedComponents: .date) {}
                                     .labelsHidden()
                                     .id(date)
                                     .onChange(of: date) { d in
@@ -125,9 +133,11 @@ struct DiaryFormView: View {
                                     }
                                 Spacer()
                                 Button(action: {
-                                    var dateComponent = DateComponents()
-                                    dateComponent.day = 1
-                                    date = Calendar.current.date(byAdding: dateComponent, to: date) ?? Date()
+                                    if ((dateRangeMax - date).day ?? 0) > 0 {
+                                        var dateComponent = DateComponents()
+                                        dateComponent.day = 1
+                                        date = Calendar.current.date(byAdding: dateComponent, to: date) ?? Date()
+                                    }
                                 }) {
                                     Image("ic-double-arrow-right")
                                         .resizable()
@@ -175,8 +185,11 @@ struct DiaryFormView: View {
                                         diarySelected = diary
                                         modalMenuEdit = true
                                     }) { diw in
-                                        predefinedTime = Utils.hourFormat(date: diw.time)
-                                        modalPanelType = true
+                                        let inRangeAdd = dateRangeAdd - date
+                                        if inRangeAdd.day ?? 0 <= 0 {
+                                            predefinedTime = Utils.hourFormat(date: diw.time)
+                                            modalPanelType = true
+                                        }
                                     }
                                 }
                             }
@@ -242,7 +255,8 @@ struct DiaryFormView: View {
                         }
                     }
                 }
-                if layout != .selection {
+                let inRangeAdd = dateRangeAdd - date
+                if layout != .selection && (inRangeAdd.day ?? 0) <= 0 {
                     VStack {
                         FAB(image: "ic-plus", size: 60, margin: 32) {
                             predefinedTime = ""
@@ -338,6 +352,7 @@ struct DiaryFormView: View {
                 .background(Color.cBackground1dp)
                 .cornerRadius(5)
                 VStack {
+                    let couldMove = ((dateRangeMove - date).day ?? 0) <= 0
                     Button {
                         diariesSelected = diaries.map { $0.objectId }
                         modalMainMenu = false
@@ -348,7 +363,10 @@ struct DiaryFormView: View {
                             .frame(maxWidth: .infinity, minHeight: 44, maxHeight: 44, alignment: .center)
                     }
                     .frame(height: 44)
+                    .disabled(!couldMove)
+                    .opacity(couldMove ? 1 : 0.4)
                     Divider()
+                    let couldDelete = ((dateRangeDelete - date).day ?? 0) <= 0
                     Button {
                         modalMainMenu = false
                         modalDeleteAll = true
@@ -358,6 +376,8 @@ struct DiaryFormView: View {
                             .frame(maxWidth: .infinity, minHeight: 44, maxHeight: 44, alignment: .center)
                     }
                     .frame(height: 44)
+                    .disabled(!couldDelete)
+                    .opacity(couldDelete ? 1 : 0.4)
                 }
                 .background(Color.cBackground1dp)
                 .cornerRadius(5)
@@ -430,6 +450,7 @@ struct DiaryFormView: View {
                 .background(Color.cBackground1dp)
                 .cornerRadius(5)
                 VStack {
+                    let couldMove = ((dateRangeMove - date).day ?? 0) <= 0
                     Button {
                         modalSelectionMenu = false
                         modalMove = true
@@ -439,7 +460,10 @@ struct DiaryFormView: View {
                             .frame(maxWidth: .infinity, minHeight: 44, maxHeight: 44, alignment: .center)
                     }
                     .frame(height: 44)
+                    .disabled(!couldMove)
+                    .opacity(couldMove ? 1 : 0.4)
                     Divider()
+                    let couldDelete = ((dateRangeDelete - date).day ?? 0) <= 0
                     Button {
                         modalSelectionMenu = false
                         modalDeleteSelected = true
@@ -449,6 +473,8 @@ struct DiaryFormView: View {
                             .frame(maxWidth: .infinity, minHeight: 44, maxHeight: 44, alignment: .center)
                     }
                     .frame(height: 44)
+                    .disabled(!couldDelete)
+                    .opacity(couldDelete ? 1 : 0.4)
                 }
                 .background(Color.cBackground1dp)
                 .cornerRadius(5)
@@ -482,7 +508,7 @@ struct DiaryFormView: View {
             .background(Color(UIColor(named: "Color")?.resolvedColor(with: UITraitCollection(userInterfaceStyle: .dark)) ?? UIColor.black).edgesIgnoringSafeArea(.all))
         }
         .shee(isPresented: $modalMove, presentationStyle: .formSheet(properties: .init(detents: [.medium()]))) {
-            DiaryMoveFormView(selected: diariesSelected.count) { d in
+            DiaryMoveFormView(dateRangeAdd: dateRangeAdd, dateRangeMax: dateRangeMax, selected: diariesSelected.count) { d in
                 DiaryUtils.move(realm: realm, ids: diariesSelected, date: d) {
                     modalMove = false
                     refresh()
@@ -1131,6 +1157,21 @@ struct DiaryMenuEdit: View {
     @State private var contactType: String = ""
     @State private var isContactPoint: Bool = false
     
+    @State private var dateRangeAdd: Date = (Calendar.current.date(byAdding: .day, value: Config.get(key: "DIA_RANGE_ADD", defaultValue: 0).value, to: Date()) ?? Date())
+    @State private var dateRangeDelete: Date = (Calendar.current.date(byAdding: .day, value: Config.get(key: "DIA_RANGE_DELETE", defaultValue: 0).value, to: Date()) ?? Date())
+    @State private var dateRangeMove: Date = (Calendar.current.date(byAdding: .day, value: Config.get(key: "DIA_RANGE_MOVE", defaultValue: 0).value, to: Date()) ?? Date())
+    @State private var dateRangeMax: Date = (Calendar.current.date(byAdding: .day, value: Config.get(key: "DIA_MAX_DATE", defaultValue: 60).value, to: Date()) ?? Date())
+    
+    /*
+    var dateClosedRange: ClosedRange<Date> {
+        var min = dateRangeAdd
+        if date < dateRangeAdd {
+            min = date
+        }
+        return min...dateRangeMax
+    }
+    */
+    
     var body: some View {
         let panel = PanelUtils.panel(type: diary.panelType, objectId: diary.panelObjectId, id: diary.panelId)
         VStack {
@@ -1156,11 +1197,17 @@ struct DiaryMenuEdit: View {
                         .frame(maxHeight: 200)
                 }
             }
+            let couldMove = ((dateRangeMove - date).day ?? 0) <= 0
             CustomSection {
                 VStack(spacing: 15) {
                     HStack(spacing: 15) {
-                        DatePicker("envDate", selection: $date, displayedComponents: [.date])
-                            .id(date)
+                        if couldMove {
+                            DatePicker("envDate", selection: $date, in: dateRangeAdd...dateRangeMax, displayedComponents: [.date])
+                                .id(date)
+                        } else {
+                            DatePicker("envDate", selection: $date, in: date...date, displayedComponents: [.date])
+                                .id(date)
+                        }
                         Image("ic-calendar")
                             .resizable()
                             .scaledToFit()
@@ -1171,6 +1218,7 @@ struct DiaryMenuEdit: View {
                         HStack(spacing: 15) {
                             DatePicker("envHour", selection: $hourFrom, displayedComponents: [.hourAndMinute])
                                 .id(hourFrom)
+                                .disabled(!couldMove)
                             Image("ic-clock")
                                 .resizable()
                                 .scaledToFit()
@@ -1249,6 +1297,7 @@ struct DiaryMenuEdit: View {
                         .frame(width: 26, height: 26, alignment: .center)
                 }
                 .frame(maxWidth: .infinity, minHeight: 44, maxHeight: 44, alignment: .center)
+                let couldDelete = ((dateRangeDelete - date).day ?? 0) <= 0
                 Button(action: {
                     delete()
                 }) {
@@ -1259,6 +1308,8 @@ struct DiaryMenuEdit: View {
                         .frame(width: 26, height: 26, alignment: .center)
                 }
                 .frame(maxWidth: .infinity, minHeight: 44, maxHeight: 44, alignment: .center)
+                .disabled(!couldDelete)
+                .opacity(couldDelete ? 1 : 0.4)
             }
         }
         .onAppear {
@@ -1306,6 +1357,8 @@ struct DiaryMenuEdit: View {
 }
 
 struct DiaryMoveFormView: View {
+    let dateRangeAdd: Date
+    let dateRangeMax: Date
     let selected: Int
     let onMove: (_ date: Date) -> Void
 
@@ -1321,7 +1374,7 @@ struct DiaryMoveFormView: View {
                 Text(String(format: "envMoveMessage".localized(), String(selected)))
                     .foregroundColor(.cTextHigh)
                     .multilineTextAlignment(.center)
-                DatePicker(selection: $date, in: Date()..., displayedComponents: .date) {}
+                DatePicker(selection: $date, in: dateRangeAdd...dateRangeMax, displayedComponents: .date) {}
                     .labelsHidden()
                     .id(date)
                 Text("envMoveAdvice")
