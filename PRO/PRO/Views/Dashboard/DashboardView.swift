@@ -66,6 +66,7 @@ struct DashboardMasterCenterView: View {
     
     @State private var movementSelected: MovementReport = MovementReport()
     @State private var modalMovement = false
+    @State private var modalMovementSummary = false
     
     private var realm = try! Realm()
     
@@ -96,8 +97,11 @@ struct DashboardMasterCenterView: View {
                     } else {
                         ForEach($movements) { $movement in
                             Button {
-                                //movementSelected = movement
-                                modalMovement = true
+                                if MovementUtils.isCycleActive(realm: realm, id: movement.cycle?.id ?? 0) && movement.reportedBy == JWTUtils.sub() && movement.executed == 1 {
+                                    modalMovement = true
+                                } else {
+                                    modalMovementSummary = true
+                                }
                             } label: {
                                 ReportMovementItemView(realm: realm, item: movement, userId: JWTUtils.sub())
                             }
@@ -122,11 +126,13 @@ struct DashboardMasterCenterView: View {
         }
         .shee(isPresented: $modalMovement, presentationStyle: .formSheet(properties: .init(detents: [.medium(), .large()]))) {
             MovementBottomMenu(movement: movementSelected) {
-                
+                FormEntity(objectId: nil, type: "", options: [ "oId": movementSelected.objectId, "id": movementSelected.id ]).go(path: "MOVEMENT-FORM", router: viewRouter)
             } onSummary: {
-                
+                modalMovementSummary = true
             }
-
+        }
+        .sheet(isPresented: $modalMovementSummary) {
+            
         }
         .onAppear {
             initForm()
@@ -187,7 +193,9 @@ struct DashboardMasterCenterView: View {
                 }
             }
             MovementDao(realm: realm).by(date: masterRouter.date).forEach { m in
-                movements.append(m.report(realm: realm))
+                if m.transactionStatus != "OPEN" {
+                    movements.append(m.report(realm: realm))
+                }
             }
             DispatchQueue.main.async {
                 isProcessing = false

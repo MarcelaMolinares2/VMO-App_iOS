@@ -174,7 +174,7 @@ struct ReportMovementItemView: View {
                     }
                 }
             }
-            .background(Color.cBackground1dp)
+            .background(item.open == "OPEN" ? Color.cBackground1dp : (Color.cBackground1dp))
         }
         .padding(.horizontal, Globals.UI_SC_PADDING_HORIZONTAL)
         .padding(.vertical, 5)

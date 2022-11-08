@@ -75,6 +75,8 @@ class SyncObserver {
         startObserver(realm: realm, from: FreeDayRequest.self, key: .freeDayRequest)
         startObserver(realm: realm, from: AdvertisingMaterialDelivery.self, key: .materialDelivery)
         startObserver(realm: realm, from: AdvertisingMaterialRequest.self, key: .materialRequest)
+        
+        startObserver(realm: realm, from: Movement.self, key: .movement)
     }
     
     private func startObserver<T: Object & SyncEntity>(realm: Realm, from: T.Type, key: UploadRequestServices) {

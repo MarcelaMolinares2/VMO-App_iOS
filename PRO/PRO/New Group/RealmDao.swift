@@ -56,6 +56,36 @@ class AdvertisingMaterialDeliveryDao: GenericDao {
         })
     }
     
+    func updateStock(movement: Movement) {
+        movement.dataMaterial.forEach { mm in
+            if let material = MaterialDao(realm: realm).by(id: mm.id) {
+                material.sets.forEach { materialSet in
+                    let delivered = mm.sets.filter { $0.id == materialSet.id }
+                    if !delivered.isEmpty {
+                        try! realm.write {
+                            materialSet.delivered = materialSet.delivered + delivered[0].quantity
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    func updateStock(activity: DifferentToVisit) {
+        activity.materials.forEach { mm in
+            if let material = MaterialDao(realm: realm).by(id: mm.materialId) {
+                material.sets.forEach { materialSet in
+                    let delivered = mm.sets.filter { $0.id == materialSet.id }
+                    if !delivered.isEmpty {
+                        try! realm.write {
+                            materialSet.delivered = materialSet.delivered + delivered[0].quantity
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
 }
 
 class AgentLocationDao: GenericDao {
@@ -439,6 +469,12 @@ class MovementDao: GenericDao {
         return Array(realm.objects(Movement.self).sorted(byKeyPath: "date"))
     }
     
+    func local() -> [Patient] {
+        return Array(realm.objects(Patient.self).where {
+            ($0.transactionType != "") && ($0.transactionStatus == "")
+        })
+    }
+    
     func by(date: Date) -> [Movement] {
         return Array(
             realm.objects(Movement.self)
@@ -454,6 +490,16 @@ class MovementDao: GenericDao {
             return try! realm.object(ofType: Movement.self, forPrimaryKey: ObjectId(string: objectId))
         }
         return nil
+    }
+    
+    func open() -> [Movement] {
+        return Array(
+            realm.objects(Movement.self)
+                .where {
+                    $0.transactionStatus == "OPEN"
+                }
+                .sorted(byKeyPath: "date")
+        )
     }
     
     func open(panelObjectId: ObjectId, panelType: String) -> Movement? {

@@ -97,6 +97,9 @@ class UploadRequestOperation: Operation {
                         doRequest(path: "doctor", data: Utils.jsonObjectArray(string: try! Utils.objToJSON(doctor)), object: Doctor(value: doctor), from: Doctor.self, table: "doctor")
                     }
                 case .movement:
+                    MovementDao(realm: try! Realm()).local().forEach { movement in
+                        doRequest(path: "movement", data: Utils.jsonObjectArray(string: try! Utils.objToJSON(movement)), object: Movement(value: movement), from: Movement.self, table: "movement")
+                    }
                     break
                 case .patient:
                     PatientDao(realm: try! Realm()).local().forEach { patient in
@@ -157,7 +160,7 @@ class UploadRequestOperation: Operation {
         if successful {
             let realm = try! Realm()
             var obj = realm.object(ofType: from.self, forPrimaryKey: object.objectId)
-            if ["agent-location", "free-day-request", "material-delivery", "material-request"].contains(table) {
+            if ["agent-location", "free-day-request", "material-delivery", "material-request", "movement"].contains(table) {
                 if let o = obj {
                     try! realm.write {
                         realm.delete(o)

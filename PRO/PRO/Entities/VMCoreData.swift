@@ -1221,14 +1221,84 @@ class Movement: Object, Codable, SyncEntity {
         super.init()
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
+        self.id = try DynamicUtils.intTypeDecoding(container: container, key: .id)
+        self.panelId = try DynamicUtils.intTypeDecoding(container: container, key: .panelId)
+        self.panelType = try DynamicUtils.stringTypeDecoding(container: container, key: .panelType)
+        self.date = try DynamicUtils.stringTypeDecoding(container: container, key: .id)
+        self.realDate = try DynamicUtils.stringTypeDecoding(container: container, key: .realDate)
+        self.hour = try DynamicUtils.stringTypeDecoding(container: container, key: .hour)
+        self.comment = try DynamicUtils.stringTypeDecoding(container: container, key: .comment)
+        self.target = try DynamicUtils.stringTypeDecoding(container: container, key: .target)
+        self.duration = try DynamicUtils.intTypeDecoding(container: container, key: .duration)
+        self.executed = try DynamicUtils.intTypeDecoding(container: container, key: .executed)
+        self.visitType = try DynamicUtils.stringTypeDecoding(container: container, key: .visitType)
+        self.movementFailReasonId = try DynamicUtils.intTypeDecoding(container: container, key: .movementFailReasonId)
+        self.latitude = try DynamicUtils.floatTypeDecoding(container: container, key: .latitude)
+        self.longitude = try DynamicUtils.floatTypeDecoding(container: container, key: .longitude)
+        self.companionId = try DynamicUtils.intTypeDecoding(container: container, key: .companionId)
+        self.wasScheduled = try DynamicUtils.stringTypeDecoding(container: container, key: .wasScheduled)
+        self.rqAssistance = try DynamicUtils.intTypeDecoding(container: container, key: .rqAssistance)
+        self.openAt = try DynamicUtils.stringTypeDecoding(container: container, key: .openAt)
+        self.closedAt = try DynamicUtils.stringTypeDecoding(container: container, key: .closedAt)
+        self.contactType = try DynamicUtils.stringTypeDecoding(container: container, key: .contactType)
+        self.contactedBy = try DynamicUtils.stringTypeDecoding(container: container, key: .contactedBy)
+        self.dataContacts = try DynamicUtils.stringTypeDecoding(container: container, key: .dataContacts)
+        self.cycleId = try DynamicUtils.intTypeDecoding(container: container, key: .cycleId)
+        self.dataPromoted = try DynamicUtils.stringTypeDecoding(container: container, key: .dataPromoted)
+        
+        self.dataMaterial = try DynamicUtils.listTypeDecoding(container: container, key: .dataMaterial)
+        self.dataStock = try DynamicUtils.listTypeDecoding(container: container, key: .dataStock)
+        self.dataShopping = try DynamicUtils.listTypeDecoding(container: container, key: .dataShopping)
+        self.dataTransference = try DynamicUtils.listTypeDecoding(container: container, key: .dataTransference)
+        
         self.additionalFields = try DynamicUtils.adFieldsTypeDecoding(container: container, key: .additionalFields)
+    }
+    
+    private enum EncodingKeys: String, CodingKey {
+        case id = "id_movimiento", panelId = "id_medico", panelType = "tipo", date = "fecha_visita", realDate = "fecha_real", hour = "hora_visita", comment = "comentario", target = "objetivo_proxima", duration = "duracion", executed, visitType = "visit_type", movementFailReasonId = "movement_fail_reason_id", latitude = "latitud", longitude = "longitud", companionId = "id_acompanante", wasScheduled = "agendado", rqAssistance = "asistencia", openAt = "fecha_inicio", closedAt = "fecha_fin", contactType = "tipo_contacto", contactedBy = "contactado_por", dataContacts = "contacto", additionalFields = "dynamic_fields", cycleId = "ciclo", dataPromoted = "productos_prom", dataMaterial = "data_material", dataStock = "data_stock", dataShopping = "data_shopping", dataTransference = "data_transference"
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: EncodingKeys.self)
+        
+        //try container.encode(id, forKey: .id)
+        try container.encode(panelId, forKey: .panelId)
+        try container.encode(panelType, forKey: .panelType)
+        try container.encode(date, forKey: .date)
+        try container.encode(realDate, forKey: .realDate)
+        try container.encode(hour, forKey: .hour)
+        try container.encode(comment, forKey: .comment)
+        try container.encode(target, forKey: .target)
+        try container.encode(duration, forKey: .duration)
+        try container.encode(executed, forKey: .executed)
+        try container.encode(visitType, forKey: .visitType)
+        try container.encode(movementFailReasonId, forKey: .movementFailReasonId)
+        try container.encode(latitude, forKey: .latitude)
+        try container.encode(longitude, forKey: .longitude)
+        try container.encode(companionId, forKey: .companionId)
+        try container.encode(wasScheduled, forKey: .wasScheduled)
+        try container.encode(rqAssistance, forKey: .rqAssistance)
+        try container.encode(openAt, forKey: .openAt)
+        try container.encode(closedAt, forKey: .closedAt)
+        try container.encode(contactType, forKey: .contactType)
+        try container.encode(contactedBy, forKey: .contactedBy)
+        try container.encode(dataContacts, forKey: .dataContacts)
+        try container.encode(cycleId, forKey: .cycleId)
+        try container.encode(dataPromoted, forKey: .dataPromoted)
+        
+        try container.encode("{data:\(additionalFields ?? "{}")}", forKey: .additionalFields)
+        
+        try container.encode(Utils.objArrayToJSON(dataMaterial), forKey: .dataMaterial)
+        try container.encode(Utils.objArrayToJSON(dataStock), forKey: .dataStock)
+        try container.encode(Utils.objArrayToJSON(dataShopping), forKey: .dataShopping)
+        try container.encode(Utils.objArrayToJSON(dataTransference), forKey: .dataTransference)
     }
     
     func report(realm: Realm) -> MovementReport {
         let movementReport = MovementReport()
         movementReport.objectId = self.objectId
         
-        movementReport.id = self.id
+        movementReport.serverId = self.id
         movementReport.reportedBy = JWTUtils.sub()
         movementReport.panelType = self.panelType
         movementReport.date = self.date
@@ -1257,46 +1327,163 @@ class Movement: Object, Codable, SyncEntity {
 }
 
 class MovementMaterial: Object, Codable {
-    @Persisted(primaryKey: true) var objectId: ObjectId
     @Persisted var id: Int = 0//material_id
     @Persisted var category: Int = 0
     @Persisted var sets = List<MovementMaterialSet>()
+    
+    private enum CodingKeys: String, CodingKey {
+        case id = "material_id", category, sets
+    }
+    
+    override init() {
+        super.init()
+    }
+    
+    required init(from decoder: Decoder) throws {
+        super.init()
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        self.id = try DynamicUtils.intTypeDecoding(container: container, key: .id)
+        self.category = try DynamicUtils.intTypeDecoding(container: container, key: .category)
+        self.sets = try DynamicUtils.listTypeDecoding(container: container, key: .sets)
+    }
+    
+    private enum EncodingKeys: String, CodingKey {
+        case id = "material_id", category, sets
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: EncodingKeys.self)
+        
+        try container.encode(id, forKey: .id)
+        try container.encode(category, forKey: .category)
+        try container.encode(Utils.objArrayToJSON(sets), forKey: .sets)
+    }
 }
 
 class MovementMaterialSet: Object, Codable {
-    @Persisted(primaryKey: true) var objectId: ObjectId
     @Persisted var id: Int = 0
     @Persisted var quantity: Int = 0
+    
+    private enum CodingKeys: String, CodingKey {
+        case id, quantity
+    }
+    
+    private enum EncodingKeys: String, CodingKey {
+        case id, quantity
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: EncodingKeys.self)
+        
+        try container.encode(id, forKey: .id)
+        try container.encode(quantity, forKey: .quantity)
+    }
 }
 
 class MovementProductStock: Object, Codable {
-    @Persisted(primaryKey: true) var objectId: ObjectId
     @Persisted var id: Int = 0//product_id
     @Persisted var hasStock: Bool = false//has_stock
     @Persisted var quantity: Float = 0
     @Persisted var noStockReason: String = ""//no_stock_reason
+    
+    private enum CodingKeys: String, CodingKey {
+        case id = "product_id", hasStock = "has_stock", quantity, noStockReason = "no_stock_reason"
+    }
+    
+    private enum EncodingKeys: String, CodingKey {
+        case id = "product_id", hasStock = "has_stock", quantity, noStockReason = "no_stock_reason"
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: EncodingKeys.self)
+        
+        try container.encode(id, forKey: .id)
+        try container.encode(hasStock, forKey: .hasStock)
+        try container.encode(quantity, forKey: .quantity)
+        try container.encode(noStockReason, forKey: .noStockReason)
+    }
 }
 
 class MovementProductShopping: Object, Codable {
-    @Persisted(primaryKey: true) var objectId: ObjectId
     @Persisted var id: Int = 0//product_id
     @Persisted var price: Float = 0
     @Persisted var competitors = List<MovementProductShoppingCompetitor>()
+    
+    private enum CodingKeys: String, CodingKey {
+        case id = "product_id", price, competitors
+    }
+    
+    override init() {
+        super.init()
+    }
+    
+    required init(from decoder: Decoder) throws {
+        super.init()
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        self.id = try DynamicUtils.intTypeDecoding(container: container, key: .id)
+        self.price = try DynamicUtils.floatTypeDecoding(container: container, key: .price)
+        self.competitors = try DynamicUtils.listTypeDecoding(container: container, key: .competitors)
+    }
+    
+    private enum EncodingKeys: String, CodingKey {
+        case id = "product_id", price, competitors
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: EncodingKeys.self)
+        
+        try container.encode(id, forKey: .id)
+        try container.encode(price, forKey: .price)
+        try container.encode(Utils.objArrayToJSON(competitors), forKey: .competitors)
+    }
 }
 
 class MovementProductShoppingCompetitor: Object, Codable {
-    @Persisted(primaryKey: true) var objectId: ObjectId
     @Persisted var id: String = ""//Competitor Name
     @Persisted var price: Float = 0
+    
+    private enum CodingKeys: String, CodingKey {
+        case id, price
+    }
+    
+    private enum EncodingKeys: String, CodingKey {
+        case id, price
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: EncodingKeys.self)
+        
+        try container.encode(id, forKey: .id)
+        try container.encode(price, forKey: .price)
+    }
 }
 
 class MovementProductTransference: Object, Codable {
-    @Persisted(primaryKey: true) var objectId: ObjectId
     @Persisted var id: Int = 0 //product_id
     @Persisted var quantity: Float = 0
     @Persisted var price: Float = 0
     @Persisted var bonusProduct: Int = 0//bonus_product
     @Persisted var bonusQuantity: Float = 0//bonus_quantity
+    
+    private enum CodingKeys: String, CodingKey {
+        case id = "product_id", quantity, price, bonusProduct = "bonus_product", bonusQuantity = "bonus_quantity"
+    }
+    
+    private enum EncodingKeys: String, CodingKey {
+        case id = "product_id", quantity, price, bonusProduct = "bonus_product", bonusQuantity = "bonus_quantity"
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: EncodingKeys.self)
+        
+        try container.encode(id, forKey: .id)
+        try container.encode(quantity, forKey: .quantity)
+        try container.encode(price, forKey: .price)
+        try container.encode(bonusProduct, forKey: .bonusProduct)
+        try container.encode(bonusQuantity, forKey: .bonusQuantity)
+    }
 }
 
 class MovementSummarized: Object, Decodable {
@@ -1311,6 +1498,19 @@ class MovementSummarized: Object, Decodable {
     private enum CodingKeys: String, CodingKey {
         case id = "id_movimiento", cycleId = "ciclo", date = "fecha_visita", dateReal = "fecha_real", comment = "comentario", targetNext = "objetivo_proxima", type = "tipo"
     }
+    
+    static func from(movement: Movement) -> MovementSummarized {
+        let movementSummarized = MovementSummarized()
+        movementSummarized.id = movement.id
+        movementSummarized.cycleId = movement.cycleId
+        movementSummarized.date = movement.date
+        movementSummarized.dateReal = movement.realDate
+        movementSummarized.comment = movement.comment
+        movementSummarized.targetNext = movement.target
+        movementSummarized.type = movement.panelType
+        return movementSummarized
+    }
+    
 }
 
 class PanelLocation: Object, Codable {
@@ -2240,8 +2440,9 @@ class PanelVisitedOn: Object, Decodable {
     @Persisted var id = 0
     @Persisted var userID = 0
     @Persisted var date: String = ""
+    @Persisted var hour: String = ""
     
     private enum CodingKeys: String, CodingKey {
-        case id = "id_movimiento", userID = "id_usuario", date = "fecha_visita"
+        case id = "id_movimiento", userID = "id_usuario", date = "fecha_visita", hour = "hora_visita"
     }
 }

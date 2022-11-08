@@ -39,6 +39,10 @@ class MovementDurationModel: ObservableObject {
     @Published var second: Int = 0
 }
 
+enum MovementAfterSaveAction {
+case panel, diary, vt, order, home
+}
+
 class MovementFieldModel: ObservableObject {
     @Published var required: Bool
     @Published var visible: Bool
@@ -165,70 +169,9 @@ struct MovementFormView: View {
             }
         }
         .shee(isPresented: $modalSave, presentationStyle: .formSheet(properties: .init(detents: [.medium()]))) {
-            VStack {
-                CustomCard {
-                    Toggle(isOn: $scheduleNextVisit) {
-                        Text("envScheduleNextVisit")
-                            .foregroundColor(.cTextHigh)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                    }
-                    VStack {
-                        DatePicker(selection: $scheduleNextDate, displayedComponents: .date) {
-                            Text("envDate")
-                                .foregroundColor(.cTextHigh)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                        }
-                        DatePicker(selection: $scheduleNextTime, displayedComponents: .hourAndMinute) {
-                            Text("envTime")
-                                .foregroundColor(.cTextHigh)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                        }
-                    }
-                    .disabled(!scheduleNextVisit)
-                }
-                Spacer()
-                CustomCard {
-                    Text("envSaveAndGoTo")
-                        .foregroundColor(.cTextMedium)
-                        .font(.system(size: 13))
-                    HStack {
-                        Button {
-                            save(goToPage: "MASTER")
-                        } label: {
-                            VStack {
-                                Image("ic-home")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
-                                    .foregroundColor(.cIcon)
-                                Text("envHome")
-                                    .foregroundColor(.cTextMedium)
-                                    .lineLimit(2)
-                                    .font(.system(size: 13))
-                            }
-                            .frame(maxWidth: .infinity)
-                        }
-                        Button {
-                            save(goToPage: "DIARY-VIEW")
-                        } label: {
-                            VStack {
-                                Image("ic-diary")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
-                                    .foregroundColor(.cIcon)
-                                Text("envDiary")
-                                    .foregroundColor(.cTextMedium)
-                                    .lineLimit(2)
-                                    .font(.system(size: 13))
-                            }
-                            .frame(maxWidth: .infinity)
-                        }
-                    }
-                    .frame(maxWidth: .infinity)
-                }
+            MovementSaveBottomView(panelType: movement.panelType, panelObjectId: movement.panelObjectId, panelId: movement.panelId) { action in
+                save(action: action)
             }
-            .padding(.horizontal, Globals.UI_SC_PADDING_HORIZONTAL)
         }
         .toast(isPresenting: $showValidationError) {
             AlertToast(type: .error(.cDanger), title: NSLocalizedString("errFormEmpty", comment: ""))
@@ -271,15 +214,13 @@ struct MovementFormView: View {
                 if reportType == 2 {
                     if let m = MovementDao(realm: realm).open(panelObjectId: oId, panelType: viewRouter.data.type) {
                         movement = Movement(value: m)
+                    } else {
+                        initMovementCreate(oId: oId)
+                        movement.transactionStatus = "OPEN"
+                        movement.openAt = Utils.currentDateTime()
                     }
                 } else {
-                    movement.panelId = panel?.id ?? 0
-                    movement.panelObjectId = oId
-                    movement.panelType = viewRouter.data.type
-                    movement.visitType = visitType.lowercased()
-                    movement.date = Utils.currentDate()
-                    movement.contactType = "P"
-                    movement.cycleId = CycleDao(realm: realm).active().first?.id ?? 0
+                    initMovementCreate(oId: oId)
                 }
                 
                 dynamicOptions.op = .create
@@ -294,6 +235,16 @@ struct MovementFormView: View {
                 getMovement(id: movementId)
             }
         }
+    }
+    
+    func initMovementCreate(oId: ObjectId) {
+        movement.panelId = panel?.id ?? 0
+        movement.panelObjectId = oId
+        movement.panelType = viewRouter.data.type
+        movement.visitType = visitType.lowercased()
+        movement.date = Utils.currentDate()
+        movement.contactType = "P"
+        movement.cycleId = CycleDao(realm: realm).active().first?.id ?? 0
     }
     
     func initForm() {
@@ -325,7 +276,6 @@ struct MovementFormView: View {
         if !model.fields.isEmpty {
             DynamicUtils.fillForm(form: &dynamicForm, base: movement.additionalFields ?? "{}")
         }
-        dynamicOptions.op = .create
         dynamicOptions.type = movement.visitType
         dynamicOptions.panelType = movement.panelType
     }
@@ -343,7 +293,7 @@ struct MovementFormView: View {
         }
     }
     
-    func save(goToPage: String) {
+    func save(action: MovementAfterSaveAction) {
         movement.cycleId = model.cycleId
         movement.date = Utils.dateFormat(date: model.date)
         movement.comment = model.comment
@@ -359,23 +309,26 @@ struct MovementFormView: View {
         
         fillNested()
         
-        MovementDao(realm: realm).store(movement: movement)
-        
-        if scheduleNextVisit {
-            let diary = Diary()
-            diary.date = Utils.dateFormat(date: scheduleNextDate)
-            diary.panelType = movement.panelType
-            diary.panelObjectId = movement.panelObjectId
-            diary.panelId = movement.panelId
-            diary.type = "P"
-            diary.contactType = "P"
-            diary.transactionType = "CREATE"
-            diary.hourStart = Utils.hourFormat(date: scheduleNextTime)
-            DiaryDao(realm: realm).store(diary: diary)
+        if reportType == 2 {
+            movement.transactionStatus = ""
+            movement.closedAt = Utils.currentDateTime()
         }
         
+        if movement.executed == 1 && dynamicOptions.op == .create {
+            AdvertisingMaterialDeliveryDao(realm: realm).updateStock(movement: movement)
+        }
+        if dynamicOptions.op == .create {
+            movement.hour = Utils.currentTime()
+            movement.realDate = Utils.currentDate()
+            movement.transactionStatus = movement.panelId <= 0 ? "PENDING" : ""
+        }
+        
+        MovementUtils.finishSavePanel(movement: movement, location: model.attachPanelLocation ? PanelLocation() : nil, habeasData: model.habeasData, action: dynamicOptions.op)
+        
+        MovementDao(realm: realm).store(movement: movement)
+        
         modalSave = false
-        goTo(page: goToPage)
+        goTo(action: action)
     }
     
     func fillNested() {
@@ -431,10 +384,10 @@ struct MovementFormView: View {
         }
     }
     
-    func goTo(page: String) {
+    func goTo(action: MovementAfterSaveAction) {
         savedToast = true
         DispatchQueue.main.asyncAfter(deadline: .now() + Globals.ENV_SAVE_DELAY) {
-            viewRouter.currentPage = page
+            MovementUtils.afterSave(viewRouter: viewRouter, movement: movement, action: action)
         }
     }
 }
@@ -973,12 +926,11 @@ struct MovementFormTabBasicView: View {
                 modalFailedForm = true
             }
         }
-        .shee(isPresented: $modalFailedForm, presentationStyle: .formSheet(properties: .init(detents: [.medium()]))) {
+        .shee(isPresented: $modalFailedForm, presentationStyle: .formSheet(properties: .init(detents: [.medium(), .large()]))) {
             VStack {
                 Text("envVisitFailed")
                     .foregroundColor(.cTextMedium)
                     .padding(.vertical, 8)
-                Spacer()
                 CustomCard {
                     VStack {
                         Text("\("envComment".localized()) (\("envOptional".localized()))")
@@ -993,22 +945,9 @@ struct MovementFormTabBasicView: View {
                 }
                 .padding(.horizontal, Globals.UI_SC_PADDING_HORIZONTAL)
                 Spacer()
-                HStack {
-                    Button(action: {
-                        modalFailedForm = false
-                    }) {
-                        Text("envCancel")
-                            .foregroundColor(.cTextHigh)
-                    }
-                    .frame(minWidth: 0, maxWidth: .infinity, minHeight: 44, maxHeight: 44, alignment: .center)
-                    Button(action: {
-                        saveFailed()
-                        modalFailedForm = false
-                    }) {
-                        Text("envSave")
-                            .foregroundColor(.cTextHigh)
-                    }
-                    .frame(minWidth: 0, maxWidth: .infinity, minHeight: 44, maxHeight: 44, alignment: .center)
+                MovementSaveBottomView(panelType: model.panelType, panelObjectId: model.panelObjectId, panelId: model.panelId) { action in
+                    modalFailedForm = false
+                    saveFailed(action: action)
                 }
             }
         }
@@ -1090,7 +1029,7 @@ struct MovementFormTabBasicView: View {
         return true
     }
     
-    func saveFailed() {
+    func saveFailed(action: MovementAfterSaveAction) {
         let movement = Movement()
         movement.panelType = model.panelType
         movement.panelId = model.panelId
@@ -1107,7 +1046,7 @@ struct MovementFormTabBasicView: View {
         movement.transactionType = "CREATE"
         MovementDao(realm: try! Realm()).store(movement: movement)
         
-        viewRouter.currentPage = "MASTER"
+        MovementUtils.afterSave(viewRouter: viewRouter, movement: movement, action: action)
     }
     
     func validate() {
@@ -1134,6 +1073,199 @@ struct MovementFormTabBasicView: View {
             return
         }
         valid = true
+    }
+    
+}
+
+struct MovementSaveBottomView: View {
+    let panelType: String
+    let panelObjectId: ObjectId
+    let panelId: Int
+    let onSaveActionTapped: (_ action: MovementAfterSaveAction) -> Void
+    
+    let menuOptions = Config.get(key: "MOV_SAVE_OPTS", defaultValue: 1)
+    let tvModule = Config.get(key: "MOD_TV").value
+    
+    @State private var scheduleNextVisit = false
+    @State private var scheduleNextDate = Date()
+    @State private var scheduleNextTime = Date()
+    
+    @State private var panelIcon = "ic-home"
+    @State private var panelTitle = ""
+    
+    var realm = try! Realm()
+    
+    var body: some View {
+        VStack {
+            CustomCard {
+                Toggle(isOn: $scheduleNextVisit) {
+                    Text("envScheduleNextVisit")
+                        .foregroundColor(.cTextHigh)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                VStack {
+                    DatePicker(selection: $scheduleNextDate, displayedComponents: .date) {
+                        Text("envDate")
+                            .foregroundColor(.cTextHigh)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    DatePicker(selection: $scheduleNextTime, displayedComponents: .hourAndMinute) {
+                        Text("envTime")
+                            .foregroundColor(.cTextHigh)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                }
+                .disabled(!scheduleNextVisit)
+            }
+            Spacer()
+            CustomCard {
+                if menuOptions.value == 1 {
+                    Text("envSaveAndGoTo")
+                        .foregroundColor(.cTextMedium)
+                        .font(.system(size: 13))
+                    let opts = menuOptions.complement?.components(separatedBy: ",") ?? []
+                    HStack {
+                        if opts.contains("PANEL") {
+                            Button {
+                                save(action: .panel)
+                            } label: {
+                                VStack {
+                                    Image(panelIcon)
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
+                                        .foregroundColor(.cIcon)
+                                    Text(panelTitle)
+                                        .foregroundColor(.cTextMedium)
+                                        .lineLimit(2)
+                                        .font(.system(size: 13))
+                                }
+                                .frame(maxWidth: .infinity)
+                            }
+                        }
+                        if opts.contains("DIARY") {
+                            Button {
+                                save(action: .diary)
+                            } label: {
+                                VStack {
+                                    Image("ic-diary")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
+                                        .foregroundColor(.cIcon)
+                                    Text("envDiary")
+                                        .foregroundColor(.cTextMedium)
+                                        .lineLimit(2)
+                                        .font(.system(size: 13))
+                                }
+                                .frame(maxWidth: .infinity)
+                            }
+                        }
+                        if panelType == "F" && opts.contains("ORDER") {
+                            Button {
+                                save(action: .order)
+                            } label: {
+                                VStack {
+                                    Image("ic-order")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
+                                        .foregroundColor(.cIcon)
+                                    Text("envOrder")
+                                        .foregroundColor(.cTextMedium)
+                                        .lineLimit(2)
+                                        .font(.system(size: 13))
+                                }
+                                .frame(maxWidth: .infinity)
+                            }
+                        }
+                        if panelType == "M" && tvModule == 1 && opts.contains("TV") {
+                            Button {
+                                save(action: .vt)
+                            } label: {
+                                VStack {
+                                    Image("ic-vt")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
+                                        .foregroundColor(.cIcon)
+                                    Text("envValueTransferenceAV")
+                                        .foregroundColor(.cTextMedium)
+                                        .lineLimit(2)
+                                        .font(.system(size: 13))
+                                }
+                                .frame(maxWidth: .infinity)
+                            }
+                        }
+                        if opts.contains("HOME") {
+                            Button {
+                                save(action: .home)
+                            } label: {
+                                VStack {
+                                    Image("ic-home")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
+                                        .foregroundColor(.cIcon)
+                                    Text("envHome")
+                                        .foregroundColor(.cTextMedium)
+                                        .lineLimit(2)
+                                        .font(.system(size: 13))
+                                }
+                                .frame(maxWidth: .infinity)
+                            }
+                        }
+                    }
+                    .frame(maxWidth: .infinity)
+                } else {
+                    Button {
+                        save(action: .home)
+                    } label: {
+                        VStack {
+                            Image("ic-cloud")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
+                                .foregroundColor(.cIcon)
+                            Text("envSave")
+                                .foregroundColor(.cTextMedium)
+                                .lineLimit(2)
+                                .font(.system(size: 13))
+                        }
+                        .frame(maxWidth: .infinity)
+                    }
+                }
+            }
+        }
+        .padding(.horizontal, Globals.UI_SC_PADDING_HORIZONTAL)
+        .onAppear {
+            load()
+        }
+    }
+    
+    func load() {
+        panelIcon = PanelUtils.iconByPanelType(panelType: panelType)
+        panelTitle = PanelUtils.titleByPanelType(panelType: panelType)
+    }
+    
+    func saveDiary() {
+        if scheduleNextVisit {
+            let diary = Diary()
+            diary.date = Utils.dateFormat(date: scheduleNextDate)
+            diary.panelType = panelType
+            diary.panelObjectId = panelObjectId
+            diary.panelId = panelId
+            diary.type = "P"
+            diary.contactType = "P"
+            diary.transactionType = "CREATE"
+            diary.hourStart = Utils.hourFormat(date: scheduleNextTime)
+            DiaryDao(realm: realm).store(diary: diary)
+        }
+    }
+    
+    func save(action: MovementAfterSaveAction) {
+        saveDiary()
+        onSaveActionTapped(action)
     }
     
 }

@@ -199,6 +199,10 @@ class Utils {
         return dateFormat(date: Date(), format: "yyyy-MM-dd HH:mm:ss")
     }
     
+    static func currentTime() -> String {
+        return dateFormat(date: Date(), format: "HH:mm:ss")
+    }
+    
     static func formatStringDate(date: String) -> String {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd"

@@ -192,25 +192,232 @@ class MovementUtils {
         return date
     }
     
-/*
-    fun minReportDate(): Calendar {
-        val calendar = Calendar.getInstance()
-        var reportRange: Int = EnvConfig.get("MOV_REPORT_RANGE", 0).value
-        val extendWeekEnd = EnvConfig.get("MOV_EXTEND_WEEKEND", 0).value == 1
-        
-        if (reportRange == 0 && extendWeekEnd) {
-            if (calendar.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY) {
-                reportRange = 1
-            } else if (calendar.get(Calendar.DAY_OF_WEEK) == 0) {
-                reportRange = 2
-            }
+    static func afterSave(viewRouter: ViewRouter, movement: Movement, action: MovementAfterSaveAction) {
+        switch action {
+            case .panel:
+                FormEntity(objectId: movement.panelObjectId, type: movement.panelType, options: [ "tab": "BASIC" ])
+                    .go(path: PanelUtils.formByPanelType(type: movement.panelType), router: viewRouter)
+            case .diary:
+                viewRouter.currentPage = "DIARY-VIEW"
+            case .vt:
+                print(2)
+            case .order:
+                viewRouter.currentPage = "DIARY-VIEW"
+            case .home:
+                viewRouter.currentPage = "MASTER"
         }
-        
-        val calendarMin = Calendar.getInstance()
-        calendarMin.add(Calendar.DATE, -reportRange)
-        return calendarMin
     }
-*/
+    
+    static func finishSavePanel(movement: Movement, location: PanelLocation?, habeasData: String, action: FormAction) {
+        let realm = try! Realm()
+        switch movement.panelType {
+            case "M":
+                let doctorDao = DoctorDao(realm: realm)
+                if let doctor = doctorDao.by(objectId: movement.panelObjectId) {
+                    try! realm.write {
+                        if action == .create {
+                            if movement.executed == 1 && movement.visitType == "normal" {
+                                let visitsCycle = doctor.mainUser()?.visitsCycle ?? 0
+                                doctor.mainUser()?.visitsCycle = visitsCycle + 1
+                                let panelVisitedOn = PanelVisitedOn()
+                                panelVisitedOn.userID = JWTUtils.sub()
+                                panelVisitedOn.date = movement.date
+                                panelVisitedOn.hour = movement.hour
+                                doctor.visitDates.append(panelVisitedOn)
+                            }
+                            if let panelLocation = location {
+                                doctor.locations.append(panelLocation)
+                            }
+                        }
+                        if movement.executed == 1 {
+                            if action == .create {
+                                doctor.lastMovement = MovementSummarized.from(movement: movement)
+                            } else {
+                                if let lastVisit = doctor.visitDates.sorted (by: { pv1, pv2 in
+                                    if pv1.date == pv2.date {
+                                        return pv1.hour > pv2.hour
+                                    }
+                                    return pv1.date > pv2.date
+                                }).first {
+                                    if lastVisit.date == movement.date && lastVisit.hour == movement.hour {
+                                        doctor.lastMovement = MovementSummarized.from(movement: movement)
+                                    }
+                                } else {
+                                    doctor.lastMovement = MovementSummarized.from(movement: movement)
+                                }
+                            }
+                            if habeasData == "Y" {
+                                doctor.habeasData = "Y"
+                            }
+                        }
+                    }
+                }
+            case "F":
+                let pharmacyDao = PharmacyDao(realm: realm)
+                if let pharmacy = pharmacyDao.by(objectId: movement.panelObjectId) {
+                    try! realm.write {
+                        if action == .create {
+                            if movement.executed == 1 && movement.visitType == "normal" {
+                                let visitsCycle = pharmacy.mainUser()?.visitsCycle ?? 0
+                                pharmacy.mainUser()?.visitsCycle = visitsCycle + 1
+                                let panelVisitedOn = PanelVisitedOn()
+                                panelVisitedOn.userID = JWTUtils.sub()
+                                panelVisitedOn.date = movement.date
+                                panelVisitedOn.hour = movement.hour
+                                pharmacy.visitDates.append(panelVisitedOn)
+                            }
+                            if let panelLocation = location {
+                                pharmacy.locations.append(panelLocation)
+                            }
+                        }
+                        if movement.executed == 1 {
+                            if action == .create {
+                                pharmacy.lastMovement = MovementSummarized.from(movement: movement)
+                            } else {
+                                if let lastVisit = pharmacy.visitDates.sorted (by: { pv1, pv2 in
+                                    if pv1.date == pv2.date {
+                                        return pv1.hour > pv2.hour
+                                    }
+                                    return pv1.date > pv2.date
+                                }).first {
+                                    if lastVisit.date == movement.date && lastVisit.hour == movement.hour {
+                                        pharmacy.lastMovement = MovementSummarized.from(movement: movement)
+                                    }
+                                } else {
+                                    pharmacy.lastMovement = MovementSummarized.from(movement: movement)
+                                }
+                            }
+                        }
+                    }
+                }
+            case "C":
+                let clientDao = ClientDao(realm: realm)
+                if let client = clientDao.by(objectId: movement.panelObjectId) {
+                    try! realm.write {
+                        if action == .create {
+                            if movement.executed == 1 && movement.visitType == "normal" {
+                                let visitsCycle = client.mainUser()?.visitsCycle ?? 0
+                                client.mainUser()?.visitsCycle = visitsCycle + 1
+                                let panelVisitedOn = PanelVisitedOn()
+                                panelVisitedOn.userID = JWTUtils.sub()
+                                panelVisitedOn.date = movement.date
+                                panelVisitedOn.hour = movement.hour
+                                client.visitDates.append(panelVisitedOn)
+                            }
+                            if let panelLocation = location {
+                                client.locations.append(panelLocation)
+                            }
+                        }
+                        if movement.executed == 1 {
+                            if action == .create {
+                                client.lastMovement = MovementSummarized.from(movement: movement)
+                            } else {
+                                if let lastVisit = client.visitDates.sorted (by: { pv1, pv2 in
+                                    if pv1.date == pv2.date {
+                                        return pv1.hour > pv2.hour
+                                    }
+                                    return pv1.date > pv2.date
+                                }).first {
+                                    if lastVisit.date == movement.date && lastVisit.hour == movement.hour {
+                                        client.lastMovement = MovementSummarized.from(movement: movement)
+                                    }
+                                } else {
+                                    client.lastMovement = MovementSummarized.from(movement: movement)
+                                }
+                            }
+                        }
+                    }
+                }
+            case "P":
+                let patientDao = PatientDao(realm: realm)
+                if let patient = patientDao.by(objectId: movement.panelObjectId) {
+                    try! realm.write {
+                        if action == .create {
+                            if movement.executed == 1 && movement.visitType == "normal" {
+                                let visitsCycle = patient.mainUser()?.visitsCycle ?? 0
+                                patient.mainUser()?.visitsCycle = visitsCycle + 1
+                                let panelVisitedOn = PanelVisitedOn()
+                                panelVisitedOn.userID = JWTUtils.sub()
+                                panelVisitedOn.date = movement.date
+                                panelVisitedOn.hour = movement.hour
+                                patient.visitDates.append(panelVisitedOn)
+                            }
+                            if let panelLocation = location {
+                                patient.locations.append(panelLocation)
+                            }
+                        }
+                        if movement.executed == 1 {
+                            if action == .create {
+                                patient.lastMovement = MovementSummarized.from(movement: movement)
+                            } else {
+                                if let lastVisit = patient.visitDates.sorted (by: { pv1, pv2 in
+                                    if pv1.date == pv2.date {
+                                        return pv1.hour > pv2.hour
+                                    }
+                                    return pv1.date > pv2.date
+                                }).first {
+                                    if lastVisit.date == movement.date && lastVisit.hour == movement.hour {
+                                        patient.lastMovement = MovementSummarized.from(movement: movement)
+                                    }
+                                } else {
+                                    patient.lastMovement = MovementSummarized.from(movement: movement)
+                                }
+                            }
+                        }
+                        if habeasData == "Y" {
+                            patient.habeasData = "Y"
+                        }
+                    }
+                }
+            case "T":
+                let potentialDao = PotentialDao(realm: realm)
+                if let potential = potentialDao.by(objectId: movement.panelObjectId) {
+                    try! realm.write {
+                        if action == .create {
+                            if movement.executed == 1 && movement.visitType == "normal" {
+                                let visitsCycle = potential.mainUser()?.visitsCycle ?? 0
+                                potential.mainUser()?.visitsCycle = visitsCycle + 1
+                                let panelVisitedOn = PanelVisitedOn()
+                                panelVisitedOn.userID = JWTUtils.sub()
+                                panelVisitedOn.date = movement.date
+                                panelVisitedOn.hour = movement.hour
+                                potential.visitDates.append(panelVisitedOn)
+                            }
+                            if let panelLocation = location {
+                                potential.locations.append(panelLocation)
+                            }
+                        }
+                        if movement.executed == 1 {
+                            if action == .create {
+                                potential.lastMovement = MovementSummarized.from(movement: movement)
+                            } else {
+                                if let lastVisit = potential.visitDates.sorted (by: { pv1, pv2 in
+                                    if pv1.date == pv2.date {
+                                        return pv1.hour > pv2.hour
+                                    }
+                                    return pv1.date > pv2.date
+                                }).first {
+                                    if lastVisit.date == movement.date && lastVisit.hour == movement.hour {
+                                        potential.lastMovement = MovementSummarized.from(movement: movement)
+                                    }
+                                } else {
+                                    potential.lastMovement = MovementSummarized.from(movement: movement)
+                                }
+                            }
+                        }
+                    }
+                }
+            default:
+                break
+        }
+    }
+    
+    static func isCycleActive(realm: Realm, id: Int) -> Bool {
+        if let cycle = CycleDao(realm: realm).by(id: id) {
+            return cycle.isActive == "Y"
+        }
+        return false
+    }
     
 }
 

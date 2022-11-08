@@ -398,8 +398,9 @@ class PanelVisitingHourModel: ObservableObject, Identifiable {
 }
 
 class MovementReport: Decodable, Identifiable {
+    var id = UUID()
     var objectId = ObjectId()
-    var id = 0
+    var serverId = 0
     var reportedBy = 0
     var panelType = ""
     var date = ""
@@ -421,7 +422,7 @@ class MovementReport: Decodable, Identifiable {
     var cycle: Cycle?
     
     private enum CodingKeys: String, CodingKey {
-        case id = "id_movimiento", reportedBy = "id_usuario", panelType = "tipo", date = "fecha_visita", hour = "hora_visita", comment = "comentario", targetNext = "objetivo_proxima", executed, visitType = "visit_type", movementFailReasonId = "movement_fail_reason_id", contactType = "tipo_contacto", contactedBy = "contactado_por", latitude = "latitud", longitude = "longitud", panel, cycle
+        case serverId = "id_movimiento", reportedBy = "id_usuario", panelType = "tipo", date = "fecha_visita", hour = "hora_visita", comment = "comentario", targetNext = "objetivo_proxima", executed, visitType = "visit_type", movementFailReasonId = "movement_fail_reason_id", contactType = "tipo_contacto", contactedBy = "contactado_por", latitude = "latitud", longitude = "longitud", panel, cycle
     }
     
 }
