@@ -18,6 +18,7 @@ struct PanelMenu: View {
     
     let onInfoTapped: () -> Void
     let onDeleteTapped: () -> Void
+    let onVisitsFeeTapped: () -> Void
     
     @State var modalHabeasData = false
     @State var modalSummary = false
@@ -42,6 +43,7 @@ struct PanelMenu: View {
     
     @State private var couldVisit = false
     @State private var couldVisitExtra = false
+    @State private var couldEditVisitNumber = true
     @State private var visitError = false
     @State private var visitText = ""
     @State private var visitErrorText = ""
@@ -121,7 +123,6 @@ struct PanelMenu: View {
                         PanelSummaryView(panel: panel) {
                             modalSummary = false
                         }
-                        .interactiveDismissDisabled()
                     }
                     Button(action: {
                         self.isPresented = false
@@ -217,7 +218,8 @@ struct PanelMenu: View {
                     }
                     if couldVisitExtra {
                         Button(action: {
-                            
+                            self.isPresented = false
+                            FormEntity(objectId: panel.objectId, type: panel.type, options: [ "visitType": "extra" ]).go(path: "MOVEMENT-FORM", router: viewRouter)
                         }) {
                             VStack {
                                 Image("ic-visit")
@@ -226,6 +228,24 @@ struct PanelMenu: View {
                                     .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
                                     .foregroundColor(.cIcon)
                                 Text("envExtraVisit")
+                                    .foregroundColor(.cTextMedium)
+                                    .lineLimit(2)
+                                    .font(.system(size: fontSize))
+                            }
+                        }
+                    }
+                    if couldEditVisitNumber {
+                        Button(action: {
+                            self.isPresented = false
+                            onVisitsFeeTapped()
+                        }) {
+                            VStack {
+                                Image("ic-visit")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40, alignment: .center)
+                                    .foregroundColor(.cIcon)
+                                Text("envVisitNumber")
                                     .foregroundColor(.cTextMedium)
                                     .lineLimit(2)
                                     .font(.system(size: fontSize))
@@ -866,32 +886,37 @@ struct MovementBottomMenu: View {
     var body: some View {
         VStack {
             VStack {
-                PanelFormHeaderView(panel: panel)
+                if let p = movement.panel {
+                    PanelFormHeaderView(panel: p)
+                }
+                MovementSummaryMapView(item: movement)
+                    .frame(maxHeight: 200)
                 VStack {
-                    VStack{
+                    VStack {
                         Text(NSLocalizedString("envComment", comment: ""))
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .foregroundColor(.cTextMedium)
                             .font(.system(size: 14))
-                        Text(panel.lastMovement?.comment ?? "--")
+                        Text(movement.comment)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .multilineTextAlignment(.leading)
                             .foregroundColor(.cTextHigh)
                             .font(.system(size: 16))
                     }
-                    VStack{
+                    VStack {
                         Text(NSLocalizedString("envTargetNextVisit", comment: ""))
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .foregroundColor(.cTextMedium)
                             .font(.system(size: 14))
-                        Text(panel.lastMovement?.targetNext ?? "--")
+                        Text(movement.targetNext)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .multilineTextAlignment(.leading)
                             .foregroundColor(.cTextHigh)
                             .font(.system(size: 16))
                     }
+                    Divider()
                 }
-                Divider()
+                .padding(.horizontal, Globals.UI_SC_PADDING_HORIZONTAL)
             }
             LazyVGrid(columns: layout, spacing: 20) {
                 Button(action: {
@@ -925,15 +950,6 @@ struct MovementBottomMenu: View {
                     }
                 }
             }
-        }
-        .onAppear {
-            load()
-        }
-    }
-    
-    func load() {
-        if let p = movement.panel {
-            panel = p
         }
     }
     

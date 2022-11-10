@@ -1286,7 +1286,7 @@ class Movement: Object, Codable, SyncEntity {
         try container.encode(cycleId, forKey: .cycleId)
         try container.encode(dataPromoted, forKey: .dataPromoted)
         
-        try container.encode("{data:\(additionalFields ?? "{}")}", forKey: .additionalFields)
+        try container.encode(additionalFields ?? "{}", forKey: .additionalFields)
         
         try container.encode(Utils.objArrayToJSON(dataMaterial), forKey: .dataMaterial)
         try container.encode(Utils.objArrayToJSON(dataStock), forKey: .dataStock)

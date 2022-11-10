@@ -112,9 +112,12 @@ struct ReportMovementItemView: View {
     let realm: Realm
     let item: MovementReport
     let userId: Int
+    let isOpen: Bool = false
     
     @State private var headerColor: Color = Color.white
     @State private var headerIcon: String = ""
+    
+    @State private var cardBackground = Color.cBackground1dp
     
     var body: some View {
         VStack {
@@ -174,13 +177,32 @@ struct ReportMovementItemView: View {
                     }
                 }
             }
-            .background(item.open == "OPEN" ? Color.cBackground1dp : (Color.cBackground1dp))
+            .background(cardBackground)
         }
         .padding(.horizontal, Globals.UI_SC_PADDING_HORIZONTAL)
         .padding(.vertical, 5)
         .onAppear {
-            self.headerColor = PanelUtils.colorByPanelType(panelType: item.panelType)
-            self.headerIcon = PanelUtils.iconByPanelType(panelType: item.panelType)
+            load()
+        }
+    }
+    
+    func load() {
+        self.headerColor = PanelUtils.colorByPanelType(panelType: item.panelType)
+        self.headerIcon = PanelUtils.iconByPanelType(panelType: item.panelType)
+        
+        if isOpen {
+            cardBackground = Color.cMovementOpen
+        } else {
+            if (item.executed == 1) {
+                switch item.visitType {
+                    case "extra":
+                        cardBackground = Color.cMovementExtra
+                    default:
+                        cardBackground = Color.cBackground1dp
+                }
+            } else {
+                cardBackground = Color.cMovementFailed
+            }
         }
     }
     

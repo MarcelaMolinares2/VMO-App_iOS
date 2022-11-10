@@ -113,6 +113,7 @@
 		ACB1C26A28581FE9000D3AD2 /* AuthCognitoConfirmView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACB1C26928581FE9000D3AD2 /* AuthCognitoConfirmView.swift */; };
 		ACB50CC6274321C800F9D6B7 /* CommonUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACB50CC5274321C800F9D6B7 /* CommonUtils.swift */; };
 		ACB50CCB2743563700F9D6B7 /* FileUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACB50CCA2743563700F9D6B7 /* FileUtils.swift */; };
+		ACBC09FF291C0E5F007F1C60 /* MovementSummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACBC09FE291C0E5F007F1C60 /* MovementSummaryView.swift */; };
 		ACC05338255057C600B9753A /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACC05337255057C600B9753A /* Extensions.swift */; };
 		ACC053412550629500B9753A /* NetworkService.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACC0533E2550628F00B9753A /* NetworkService.swift */; };
 		ACC053422550629500B9753A /* AppServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACC0533F2550629500B9753A /* AppServer.swift */; };
@@ -260,6 +261,7 @@
 		ACB1C26928581FE9000D3AD2 /* AuthCognitoConfirmView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthCognitoConfirmView.swift; sourceTree = "<group>"; };
 		ACB50CC5274321C800F9D6B7 /* CommonUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommonUtils.swift; sourceTree = "<group>"; };
 		ACB50CCA2743563700F9D6B7 /* FileUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileUtils.swift; sourceTree = "<group>"; };
+		ACBC09FE291C0E5F007F1C60 /* MovementSummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovementSummaryView.swift; sourceTree = "<group>"; };
 		ACC05337255057C600B9753A /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		ACC0533E2550628F00B9753A /* NetworkService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetworkService.swift; sourceTree = "<group>"; };
 		ACC0533F2550629500B9753A /* AppServer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppServer.swift; sourceTree = "<group>"; };
@@ -371,6 +373,7 @@
 			children = (
 				AC13263B25B737E5007CF049 /* MovementFormView.swift */,
 				AC1AF8C3274DEC67002658B6 /* MovementFormTabsView.swift */,
+				ACBC09FE291C0E5F007F1C60 /* MovementSummaryView.swift */,
 			);
 			path = Movement;
 			sourceTree = "<group>";
@@ -1140,6 +1143,7 @@
 				ACC05338255057C600B9753A /* Extensions.swift in Sources */,
 				AC893F8E2549C1CC009E1C43 /* UserSettings.swift in Sources */,
 				ACA15F4C25923BF700E92FF2 /* LocationManager.swift in Sources */,
+				ACBC09FF291C0E5F007F1C60 /* MovementSummaryView.swift in Sources */,
 				AC9CD8A028DAC1D800CF0E60 /* ReportVisitView.swift in Sources */,
 				AC34451925637F3700C0D668 /* DashboardTabView.swift in Sources */,
 				ACC128312581184E00595078 /* MovementListView.swift in Sources */,

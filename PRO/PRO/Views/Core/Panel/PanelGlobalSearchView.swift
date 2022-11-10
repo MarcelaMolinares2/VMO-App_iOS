@@ -28,6 +28,7 @@ struct PanelGlobalSearchView: View {
     @State private var modalFormRequestMove = false
     @State private var modalInfo = false
     @State private var modalDelete = false
+    @State private var modalVisitsFee = false
     
     @State private var actionSavedToast = false
     
@@ -101,6 +102,8 @@ struct PanelGlobalSearchView: View {
                 modalInfo = true
             } onDeleteTapped: {
                 modalDelete = true
+            } onVisitsFeeTapped: {
+                modalVisitsFee = true
             }
         }
         .shee(isPresented: $modalInfo, presentationStyle: .formSheet(properties: .init(detents: [.medium(), .large()]))) {
@@ -109,6 +112,11 @@ struct PanelGlobalSearchView: View {
         .shee(isPresented: $modalDelete, presentationStyle: .formSheet(properties: .init(detents: [.medium()]))) {
             PanelDeleteView(panel: panelTapped) {
                 modalDelete = false
+            }
+        }
+        .shee(isPresented: $modalVisitsFee, presentationStyle: .formSheet(properties: .init(detents: [.medium()]))) {
+            PanelVisitsFeeView(panel: panelTapped) {
+                modalVisitsFee = false
             }
         }
         .partialSheet(isPresented: $modalFormRequestActivation) {

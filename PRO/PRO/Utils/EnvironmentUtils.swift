@@ -498,6 +498,10 @@ class PanelUtils {
         return valueByPanelType(by: .duplication, panelType: panelType) as! String
     }
     
+    static func infoFieldsKeyByPanelType(panelType: String) -> String {
+        return valueByPanelType(by: .infoFields, panelType: panelType) as! String
+    }
+    
     static func awsPathByPanelType(panelType: String) -> String {
         switch panelType {
             case "M":
@@ -558,6 +562,14 @@ class PanelUtils {
                 "P": "P_PAT_DUPLICATION_FIELDS",
                 "T": "P_PPT_DUPLICATION_FIELDS",
                 "D": ""
+            ],
+            [
+                "M": "P_DOC_INFO_FIELDS",
+                "F": "P_PHA_INFO_FIELDS",
+                "C": "P_CLI_INFO_FIELDS",
+                "P": "P_PAT_INFO_FIELDS",
+                "T": "P_PPT_INFO_FIELDS",
+                "D": ""
             ]
         ]
         var index = -1
@@ -572,6 +584,8 @@ class PanelUtils {
                 index = 3
             case .duplication:
                 index = 4
+            case .infoFields:
+                index = 5
         }
         
         if let val = data[index][panelType] {
@@ -591,7 +605,7 @@ class PanelUtils {
     }
     
     enum PanelValueType {
-        case color, icon, form, title, duplication
+        case color, icon, form, title, duplication, infoFields
     }
     
     static func castLocations(lm: [PanelLocationModel]) -> [PanelLocation] {
@@ -715,6 +729,69 @@ class PanelUtils {
             }
         }
         return PanelCategorizationSettings()
+    }
+    
+    static func dynamicFormByPanel(realm: Realm, panel: Panel, form: inout DynamicForm, options: inout DynamicFormFieldOptions) {
+        var plainData = ""
+        var additionalData = ""
+        var dynamicData = Dictionary<String, Any>()
+        
+        switch panel.type {
+            case "M":
+                options.table = "doctor"
+                let doctor = Doctor(value: DoctorDao(realm: realm).by(objectId: panel.objectId) ?? Doctor())
+                plainData = try! Utils.objToJSON(doctor)
+                additionalData = doctor.fields
+                dynamicData = Utils.jsonDictionary(string: Config.get(key: "P_DOC_DYNAMIC_FORM").complement ?? "")
+            case "F":
+                options.table = "pharmacy"
+                let pharmacy = Pharmacy(value: PharmacyDao(realm: realm).by(objectId: panel.objectId) ?? Pharmacy())
+                plainData = try! Utils.objToJSON(pharmacy)
+                additionalData = pharmacy.fields
+                dynamicData = Utils.jsonDictionary(string: Config.get(key: "P_PHA_DYNAMIC_FORM").complement ?? "")
+            case "C":
+                options.table = "client"
+                let client = Client(value: ClientDao(realm: realm).by(objectId: panel.objectId) ?? Client())
+                plainData = try! Utils.objToJSON(client)
+                additionalData = client.fields
+                dynamicData = Utils.jsonDictionary(string: Config.get(key: "P_CLI_DYNAMIC_FORM").complement ?? "")
+            case "P":
+                options.table = "patient"
+                let patient = Patient(value: PatientDao(realm: realm).by(objectId: panel.objectId) ?? Patient())
+                plainData = try! Utils.objToJSON(patient)
+                additionalData = patient.fields
+                dynamicData = Utils.jsonDictionary(string: Config.get(key: "P_PAT_DYNAMIC_FORM").complement ?? "")
+            case "T":
+                options.table = "potential"
+                let potential = PotentialProfessional(value: PotentialDao(realm: realm).by(objectId: panel.objectId) ?? PotentialProfessional())
+                plainData = try! Utils.objToJSON(potential)
+                additionalData = potential.fields
+                dynamicData = Utils.jsonDictionary(string: Config.get(key: "P_PPT_DYNAMIC_FORM").complement ?? "")
+            default:
+                break
+        }
+        
+        form.tabs = DynamicUtils.initForm(data: dynamicData).sorted(by: { $0.key > $1.key })
+        if !plainData.isEmpty {
+            DynamicUtils.fillForm(form: &form, base: plainData, additional: additionalData)
+            DynamicUtils.fillFormCategories(realm: realm, form: &form, categories: Array(panel.categories))
+        }
+        
+        switch panel.type {
+            case "M":
+                let doctor = Doctor(value: DoctorDao(realm: realm).by(objectId: panel.objectId) ?? Doctor())
+                DynamicUtils.fillFormField(form: &form, key: "clients", value: doctor.clients.map { String($0.relatedToId) }.joined(separator: ","))
+                DynamicUtils.fillFormField(form: &form, key: "lines", value: doctor.lines.map { String($0.lineId) }.joined(separator: ","))
+            case "F":
+                let pharmacy = Pharmacy(value: PharmacyDao(realm: realm).by(objectId: panel.objectId) ?? Pharmacy())
+                DynamicUtils.fillFormField(form: &form, key: "lines", value: pharmacy.lines.map { String($0.lineId) }.joined(separator: ","))
+            case "P":
+                let patient = Patient(value: PatientDao(realm: realm).by(objectId: panel.objectId) ?? Patient())
+                DynamicUtils.fillFormField(form: &form, key: "clients", value: patient.clients.map { String($0.relatedToId) }.joined(separator: ","))
+                DynamicUtils.fillFormField(form: &form, key: "doctors", value: patient.doctors.map { String($0.relatedToId) }.joined(separator: ","))
+            default:
+                break
+        }
     }
     
 }

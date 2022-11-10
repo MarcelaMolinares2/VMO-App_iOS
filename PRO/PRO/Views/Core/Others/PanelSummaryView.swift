@@ -22,17 +22,13 @@ struct PanelSummaryView: View {
     @State private var locations: [PanelLocationModel] = []
     @State private var visitingHours: [PanelVisitingHourModel] = []
     
-    @State private var plainData = ""
-    @State private var additionalData = ""
-    @State private var dynamicData = Dictionary<String, Any>()
-    
     @StateObject var tabRouter = TabRouter()
     
     let realm = try! Realm()
     
     var body: some View {
         VStack {
-            HStack {
+            /*HStack {
                 Button(action: {
                     onClosePressed()
                 }) {
@@ -43,8 +39,8 @@ struct PanelSummaryView: View {
                         .frame(width: 20, height: 20, alignment: .center)
                 }
                 .frame(width: 44, height: 44, alignment: .center)
-                PanelFormHeaderView(panel: panel)
-            }
+            }*/
+            PanelFormHeaderView(panel: panel)
             ZStack(alignment: .bottom) {
                 TabView(selection: $tabRouter.current) {
                     VStack {
@@ -81,16 +77,12 @@ struct PanelSummaryView: View {
                                 Image("ic-contact-control")
                             }
                     }
-                    VStack {
-                        ScrollView {
-                            
+                    PanelRecordListView(viewRouter: viewRouter, panel: panel)
+                        .tag("RECORD")
+                        .tabItem {
+                            Text("envVisits".localized())
+                            Image("ic-visit")
                         }
-                    }
-                    .tag("RECORD")
-                    .tabItem {
-                        Text("envVisits".localized())
-                        Image("ic-visit")
-                    }
                 }
                 .tabViewStyle(DefaultTabViewStyle())
                 HStack(alignment: .bottom) {
@@ -116,63 +108,24 @@ struct PanelSummaryView: View {
         options.op = .view
         options.panelType = panel.type
         
+        PanelUtils.dynamicFormByPanel(realm: realm, panel: panel, form: &form, options: &options)
+        
         switch panel.type {
             case "M":
-                options.table = "doctor"
                 tabs = ["visiting-hours", "contact-control"]
-                let doctor = Doctor(value: DoctorDao(realm: realm).by(objectId: panel.objectId) ?? Doctor())
-                plainData = try! Utils.objToJSON(doctor)
-                additionalData = doctor.fields
-                dynamicData = Utils.jsonDictionary(string: Config.get(key: "P_DOC_DYNAMIC_FORM").complement ?? "")
-                
-                initDynamic(data: dynamicData)
-                
-                DynamicUtils.fillFormField(form: &form, key: "clients", value: doctor.clients.map { String($0.relatedToId) }.joined(separator: ","))
-                DynamicUtils.fillFormField(form: &form, key: "lines", value: doctor.lines.map { String($0.lineId) }.joined(separator: ","))
             case "F":
-                options.table = "pharmacy"
                 tabs = ["visiting-hours"]
-                let pharmacy = Pharmacy(value: PharmacyDao(realm: realm).by(objectId: panel.objectId) ?? Pharmacy())
-                plainData = try! Utils.objToJSON(pharmacy)
-                additionalData = pharmacy.fields
-                dynamicData = Utils.jsonDictionary(string: Config.get(key: "P_PHA_DYNAMIC_FORM").complement ?? "")
-                
-                initDynamic(data: dynamicData)
-                
-                DynamicUtils.fillFormField(form: &form, key: "lines", value: pharmacy.lines.map { String($0.lineId) }.joined(separator: ","))
             case "C":
-                options.table = "client"
                 tabs = ["visiting-hours"]
-                let client = Client(value: ClientDao(realm: realm).by(objectId: panel.objectId) ?? Client())
-                plainData = try! Utils.objToJSON(client)
-                additionalData = client.fields
-                dynamicData = Utils.jsonDictionary(string: Config.get(key: "P_CLI_DYNAMIC_FORM").complement ?? "")
-                
-                initDynamic(data: dynamicData)
             case "P":
-                options.table = "patient"
                 tabs = []
-                let patient = Patient(value: PatientDao(realm: realm).by(objectId: panel.objectId) ?? Patient())
-                plainData = try! Utils.objToJSON(patient)
-                additionalData = patient.fields
-                dynamicData = Utils.jsonDictionary(string: Config.get(key: "P_PAT_DYNAMIC_FORM").complement ?? "")
-                
-                initDynamic(data: dynamicData)
-                
-                DynamicUtils.fillFormField(form: &form, key: "clients", value: patient.clients.map { String($0.relatedToId) }.joined(separator: ","))
-                DynamicUtils.fillFormField(form: &form, key: "doctors", value: patient.doctors.map { String($0.relatedToId) }.joined(separator: ","))
             case "T":
-                options.table = "potential"
                 tabs = []
-                let potential = PotentialProfessional(value: PotentialDao(realm: realm).by(objectId: panel.objectId) ?? PotentialProfessional())
-                plainData = try! Utils.objToJSON(potential)
-                additionalData = potential.fields
-                dynamicData = Utils.jsonDictionary(string: Config.get(key: "P_PPT_DYNAMIC_FORM").complement ?? "")
-                
-                initDynamic(data: dynamicData)
             default:
                 break
         }
+        
+        tabRouter.current = "BASIC"
         
         ContactControlTypeDao(realm: realm).all().forEach { ccType in
             var status = false
@@ -194,14 +147,6 @@ struct PanelSummaryView: View {
         }
     }
     
-    func initDynamic(data: Dictionary<String, Any>) {
-        form.tabs = DynamicUtils.initForm(data: data).sorted(by: { $0.key > $1.key })
-        if !plainData.isEmpty {
-            DynamicUtils.fillForm(form: &form, base: plainData, additional: additionalData)
-            DynamicUtils.fillFormCategories(realm: realm, form: &form, categories: Array(panel.categories))
-        }
-        tabRouter.current = "BASIC"
-    }
 }
 
 struct DetailCardView: View {

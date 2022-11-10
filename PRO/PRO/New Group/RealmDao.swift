@@ -469,8 +469,8 @@ class MovementDao: GenericDao {
         return Array(realm.objects(Movement.self).sorted(byKeyPath: "date"))
     }
     
-    func local() -> [Patient] {
-        return Array(realm.objects(Patient.self).where {
+    func local() -> [Movement] {
+        return Array(realm.objects(Movement.self).where {
             ($0.transactionType != "") && ($0.transactionStatus == "")
         })
     }
@@ -480,6 +480,16 @@ class MovementDao: GenericDao {
             realm.objects(Movement.self)
                 .where {
                     $0.date == Utils.dateFormat(date: date)
+                }
+                .sorted(byKeyPath: "date")
+        )
+    }
+    
+    func by(type: String, objectId: ObjectId) -> [Movement] {
+        return Array(
+            realm.objects(Movement.self)
+                .where {
+                    $0.panelType == type && $0.panelObjectId == objectId
                 }
                 .sorted(byKeyPath: "date")
         )

@@ -97,6 +97,7 @@ struct DashboardMasterCenterView: View {
                     } else {
                         ForEach($movements) { $movement in
                             Button {
+                                movementSelected = movement
                                 if MovementUtils.isCycleActive(realm: realm, id: movement.cycle?.id ?? 0) && movement.reportedBy == JWTUtils.sub() && movement.executed == 1 {
                                     modalMovement = true
                                 } else {
@@ -124,15 +125,16 @@ struct DashboardMasterCenterView: View {
         .shee(isPresented: $modalDiary, presentationStyle: .formSheet(properties: .init(detents: [.medium(), .large()]))) {
             DiaryReportView(viewRouter: viewRouter, realm: realm, diary: diarySelected)
         }
-        .shee(isPresented: $modalMovement, presentationStyle: .formSheet(properties: .init(detents: [.medium(), .large()]))) {
+        .shee(isPresented: $modalMovement, presentationStyle: .formSheet(properties: .init(detents: [.medium()]))) {
             MovementBottomMenu(movement: movementSelected) {
-                FormEntity(objectId: nil, type: "", options: [ "oId": movementSelected.objectId, "id": movementSelected.id ]).go(path: "MOVEMENT-FORM", router: viewRouter)
+                FormEntity(objectId: nil, type: "", options: [ "oId": movementSelected.objectId.stringValue, "id": String(movementSelected.serverId) ]).go(path: "MOVEMENT-FORM", router: viewRouter)
             } onSummary: {
+                modalMovement = false
                 modalMovementSummary = true
             }
         }
         .sheet(isPresented: $modalMovementSummary) {
-            
+            MovementSummaryView(movementReport: $movementSelected, modalSummary: $modalMovementSummary)
         }
         .onAppear {
             initForm()
@@ -197,6 +199,9 @@ struct DashboardMasterCenterView: View {
                     movements.append(m.report(realm: realm))
                 }
             }
+            movements.sort { mr1, mr2 in
+                return mr1.hour < mr2.hour
+            }
             DispatchQueue.main.async {
                 isProcessing = false
             }
@@ -209,28 +214,31 @@ struct DashboardTabContentWrapperView: View {
     var key: String
     
     var body: some View {
-        switch key {
-            case "client":
-                ClientListView()
-            case "doctor":
-                DoctorListView()
-            case "patient":
-                PatientListView()
-            case "pharmacy":
-                PharmacyListView()
-            case "potential":
-                PotentialListView()
-            case "dashboard":
-                DashboardTabView()
-            case "birthdays":
-                BirthdayTabView()
-            case "home":
-                DashboardMasterCenterView()
-            default:
-                ScrollView {
-                    
-                }
+        VStack {
+            switch key {
+                case "client":
+                    ClientListView()
+                case "doctor":
+                    DoctorListView()
+                case "patient":
+                    PatientListView()
+                case "pharmacy":
+                    PharmacyListView()
+                case "potential":
+                    PotentialListView()
+                case "dashboard":
+                    DashboardTabView()
+                case "birthdays":
+                    BirthdayTabView()
+                case "home":
+                    DashboardMasterCenterView()
+                default:
+                    ScrollView {
+                        
+                    }
+            }
         }
+        .padding(.bottom, 50)
     }
     
 }
@@ -255,6 +263,8 @@ struct DashboardTabWrapperView: View {
         .tabViewStyle(DefaultTabViewStyle())
         .onAppear {
             loadTabs()
+            let appearance: UITabBarAppearance = UITabBarAppearance()
+            UITabBar.appearance().scrollEdgeAppearance = appearance
         }
     }
     
@@ -304,30 +314,6 @@ struct DashboardTabWrapperView: View {
     
 }
 
-struct DashboardWrapperView: View {
-    @Binding var route: String
-    
-    var body: some View {
-        switch route {
-            case "MEDIC":
-                DoctorListView()
-            /*case "CLIENT":
-                ClientListView(searchText: self.$searchText)
-            case "PHARMACY":
-                PharmacyListView(searchText: self.$searchText)
-            case "ACTIVITY":
-                ActivityListView(searchText: self.$searchText)*/
-            case "DIARY-MAP":
-                GoogleMapsView()
-                    .edgesIgnoringSafeArea(.all)
-                    .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
-            default:
-                DiaryListTabView()
-        }
-    }
-    
-}
-
 struct DiaryReportView: View {
     let viewRouter: ViewRouter
     let realm: Realm
@@ -362,9 +348,14 @@ struct DiaryReportView: View {
                 }
                 PanelItemMapView(item: p)
                     .frame(maxHeight: 200)
-            }
-            ScrollView {
-                
+                ScrollView {
+                    VStack {
+                        PanelKeyInfoVisitView(panel: p)
+                        Divider()
+                        PanelKeyInfoSummaryView(panel: p)
+                    }
+                    .padding(.horizontal, Globals.UI_SC_PADDING_HORIZONTAL)
+                }
             }
             VStack {
                 switch visitType {

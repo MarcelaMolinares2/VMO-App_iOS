@@ -21,7 +21,7 @@ struct ActivitySummaryView: View {
     @State private var modalPanelType = false
     @State private var assistants = [PanelItemModel]()
     
-    var realm = try! Realm()
+    let realm = try! Realm()
     
     var body: some View {
         ZStack(alignment: .bottom) {

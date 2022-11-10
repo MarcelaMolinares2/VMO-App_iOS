@@ -33,6 +33,7 @@ struct PotentialListView: View {
     @State private var menuIsPresented = false
     @State private var modalInfo = false
     @State private var modalDelete = false
+    @State private var modalVisitsFee = false
     
     var body: some View {
         CustomPanelPotentialView(realm: realm, results: $potentials, selected: $selected) { panel in
@@ -45,6 +46,8 @@ struct PotentialListView: View {
                 modalInfo = true
             } onDeleteTapped: {
                 modalDelete = true
+            } onVisitsFeeTapped: {
+                modalVisitsFee = true
             }
         }
         .shee(isPresented: $modalInfo, presentationStyle: .formSheet(properties: .init(detents: [.medium(), .large()]))) {
@@ -53,6 +56,11 @@ struct PotentialListView: View {
         .shee(isPresented: $modalDelete, presentationStyle: .formSheet(properties: .init(detents: [.medium()]))) {
             PanelDeleteView(panel: potentialTapped) {
                 modalDelete = false
+            }
+        }
+        .shee(isPresented: $modalVisitsFee, presentationStyle: .formSheet(properties: .init(detents: [.medium()]))) {
+            PanelVisitsFeeView(panel: potentialTapped) {
+                modalVisitsFee = false
             }
         }
     }

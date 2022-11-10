@@ -34,6 +34,7 @@ struct PharmacyListView: View {
     @State private var menuIsPresented = false
     @State private var modalInfo = false
     @State private var modalDelete = false
+    @State private var modalVisitsFee = false
     
     var body: some View {
         CustomPanelPharmacyView(realm: realm, results: $pharmacies, selected: $selected) { panel in
@@ -45,6 +46,8 @@ struct PharmacyListView: View {
                 modalInfo = true
             } onDeleteTapped: {
                 modalDelete = true
+            } onVisitsFeeTapped: {
+                modalVisitsFee = true
             }
         }
         .shee(isPresented: $modalInfo, presentationStyle: .formSheet(properties: .init(detents: [.medium(), .large()]))) {
@@ -53,6 +56,11 @@ struct PharmacyListView: View {
         .shee(isPresented: $modalDelete, presentationStyle: .formSheet(properties: .init(detents: [.medium()]))) {
             PanelDeleteView(panel: pharmacyTapped) {
                 modalDelete = false
+            }
+        }
+        .shee(isPresented: $modalVisitsFee, presentationStyle: .formSheet(properties: .init(detents: [.medium()]))) {
+            PanelVisitsFeeView(panel: pharmacyTapped) {
+                modalVisitsFee = false
             }
         }
     }

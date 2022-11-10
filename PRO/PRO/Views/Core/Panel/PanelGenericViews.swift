@@ -414,6 +414,95 @@ struct PanelFormContactControlView: View {
     
 }
 
+struct PanelRecordListView: View {
+    var viewRouter: ViewRouter
+    var panel: Panel
+    
+    @State private var isProcessing = false
+    @State private var movements: [MovementReport] = []
+    
+    @State private var movementSelected: MovementReport = MovementReport()
+    @State private var modalMovement = false
+    @State private var modalMovementSummary = false
+    
+    let realm = try! Realm()
+    
+    var body: some View {
+        VStack {
+            if isProcessing {
+                Spacer()
+                LottieView(name: "sync_animation", loopMode: .loop, speed: 1)
+                    .frame(width: 300, height: 200)
+                Spacer()
+            } else {
+                ScrollView {
+                    ForEach($movements) { $movement in
+                        Button {
+                            movementSelected = movement
+                            if MovementUtils.isCycleActive(realm: realm, id: movement.cycle?.id ?? 0) && movement.reportedBy == JWTUtils.sub() && movement.executed == 1 {
+                                modalMovement = true
+                            } else {
+                                modalMovementSummary = true
+                            }
+                        } label: {
+                            ReportMovementItemView(realm: realm, item: movement, userId: JWTUtils.sub())
+                        }
+                    }
+                    ScrollViewFABBottom()
+                }
+            }
+        }
+        .shee(isPresented: $modalMovement, presentationStyle: .formSheet(properties: .init(detents: [.medium()]))) {
+            MovementBottomMenu(movement: movementSelected) {
+                FormEntity(objectId: nil, type: "", options: [ "oId": movementSelected.objectId.stringValue, "id": String(movementSelected.serverId) ]).go(path: "MOVEMENT-FORM", router: viewRouter)
+            } onSummary: {
+                modalMovement = false
+                modalMovementSummary = true
+            }
+        }
+        .sheet(isPresented: $modalMovementSummary) {
+        }
+        .onAppear {
+            load()
+        }
+    }
+    
+    func load() {
+        movements.removeAll()
+        
+        isProcessing = true
+        AppServer().postRequest(data: [
+            "panel_id": panel.id,
+            "panel_type": panel.type,
+            "user_id": JWTUtils.sub()
+        ], path: "vm/movement/mobile") { success, code, data in
+            if success {
+                if let rs = data as? [String] {
+                    for item in rs {
+                        let decoded = try! JSONDecoder().decode(MovementReport.self, from: item.data(using: .utf8)!)
+                        movements.append(decoded)
+                    }
+                }
+            }
+            MovementDao(realm: realm).by(type: panel.type, objectId: panel.objectId).forEach { m in
+                if m.transactionStatus != "OPEN" {
+                    movements.append(m.report(realm: realm))
+                }
+            }
+            movements.sort { mr1, mr2 in
+                if mr1.date == mr2.date {
+                    return mr1.hour > mr2.hour
+                }
+                return mr1.date > mr2.date
+            }
+            DispatchQueue.main.async {
+                isProcessing = false
+            }
+        }
+    }
+    
+}
+
 struct PanelListHeader: View {
     
     var total: Int
@@ -500,44 +589,6 @@ struct BottomNavigationBarDynamic: View {
             .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
         }
         .frame(minWidth: 0, maxWidth: .infinity, minHeight: 46, maxHeight: 46)
-    }
-    
-}
-
-struct PanelInfoDialog: View {
-    
-    @State var panel: Panel
-    
-    @State var headerColor = Color.cPrimary
-    @State var headerIcon = "ic-home"
-    
-    var body: some View {
-        VStack {
-            HStack {
-                Text(panel.name ?? "")
-                    .fontWeight(.bold)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .lineLimit(1)
-                    .padding(.horizontal, 5)
-                    .foregroundColor(.white)
-                Image(headerIcon)
-                    .resizable()
-                    .scaledToFit()
-                    .foregroundColor(.white)
-                    .frame(width: 34, height: 34, alignment: .center)
-                    .padding(4)
-            }
-            .background(headerColor)
-            .frame(maxWidth: .infinity)
-        }
-        .onAppear {
-            initUI()
-        }
-    }
-    
-    func initUI() {
-        self.headerColor = PanelUtils.colorByPanelType(panel: panel)
-        self.headerIcon = PanelUtils.iconByPanelType(panel: panel)
     }
     
 }
@@ -682,6 +733,7 @@ struct PanelListMapView: View {
     @State private var menuIsPresented = false
     @State private var modalInfo = false
     @State private var modalDelete = false
+    @State private var modalVisitsFee = false
     
     var body: some View {
         ZStack(alignment: .topTrailing) {
@@ -720,6 +772,8 @@ struct PanelListMapView: View {
                 modalInfo = true
             } onDeleteTapped: {
                 modalDelete = true
+            } onVisitsFeeTapped: {
+                modalVisitsFee = true
             }
         }
         .shee(isPresented: $modalInfo, presentationStyle: .formSheet(properties: .init(detents: [.medium(), .large()]))) {
@@ -728,6 +782,11 @@ struct PanelListMapView: View {
         .shee(isPresented: $modalDelete, presentationStyle: .formSheet(properties: .init(detents: [.medium()]))) {
             PanelDeleteView(panel: panelTapped) {
                 modalDelete = false
+            }
+        }
+        .shee(isPresented: $modalVisitsFee, presentationStyle: .formSheet(properties: .init(detents: [.medium()]))) {
+            PanelVisitsFeeView(panel: panelTapped) {
+                modalVisitsFee = false
             }
         }
     }
@@ -1032,6 +1091,7 @@ struct PanelItemGenericSwitchView: View {
     @State private var menuIsPresented = false
     @State private var modalInfo = false
     @State private var modalDelete = false
+    @State private var modalVisitsFee = false
     
     var body: some View {
         List {
@@ -1137,6 +1197,8 @@ struct PanelItemGenericSwitchView: View {
                 modalInfo = true
             } onDeleteTapped: {
                 modalDelete = true
+            } onVisitsFeeTapped: {
+                modalVisitsFee = true
             }
         }
         .shee(isPresented: $modalInfo, presentationStyle: .formSheet(properties: .init(detents: [.medium(), .large()]))) {
@@ -1145,6 +1207,11 @@ struct PanelItemGenericSwitchView: View {
         .shee(isPresented: $modalDelete, presentationStyle: .formSheet(properties: .init(detents: [.medium()]))) {
             PanelDeleteView(panel: panelTapped) {
                 modalDelete = false
+            }
+        }
+        .shee(isPresented: $modalVisitsFee, presentationStyle: .formSheet(properties: .init(detents: [.medium()]))) {
+            PanelVisitsFeeView(panel: panelTapped) {
+                modalVisitsFee = false
             }
         }
     }
@@ -1373,40 +1440,149 @@ struct PanelKeyInfoView: View {
     var body: some View {
         VStack {
             PanelFormHeaderView(panel: panel)
-                .padding()
             VStack {
                 PanelItemMapView(item: panel)
                     .frame(height: 160)
                 ScrollView {
                     VStack {
-                        VStack{
-                            Text(NSLocalizedString("envComment", comment: ""))
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .foregroundColor(.cTextMedium)
-                                .font(.system(size: 14))
-                            Text(panel.lastMovement?.comment ?? "--")
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .multilineTextAlignment(.leading)
-                                .foregroundColor(.cTextHigh)
-                                .font(.system(size: 16))
-                        }
-                        VStack{
-                            Text(NSLocalizedString("envTargetNextVisit", comment: ""))
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .foregroundColor(.cTextMedium)
-                                .font(.system(size: 14))
-                            Text(panel.lastMovement?.targetNext ?? "--")
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .multilineTextAlignment(.leading)
-                                .foregroundColor(.cTextHigh)
-                                .font(.system(size: 16))
-                        }
+                        PanelKeyInfoVisitView(panel: panel)
                         Divider()
+                        PanelKeyInfoSummaryView(panel: panel)
                     }
+                    .padding(.horizontal, Globals.UI_SC_PADDING_HORIZONTAL)
                 }
             }
         }
     }
+    
+}
+
+struct PanelKeyInfoVisitView: View {
+    var panel: Panel
+    
+    var body: some View {
+        VStack {
+            VStack {
+                Text(NSLocalizedString("envComment", comment: ""))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .foregroundColor(.cTextMedium)
+                    .font(.system(size: 14))
+                Text(panel.lastMovement?.comment ?? "--")
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .multilineTextAlignment(.leading)
+                    .foregroundColor(.cTextHigh)
+                    .font(.system(size: 16))
+            }
+            VStack {
+                Text(NSLocalizedString("envTargetNextVisit", comment: ""))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .foregroundColor(.cTextMedium)
+                    .font(.system(size: 14))
+                Text(panel.lastMovement?.targetNext ?? "--")
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .multilineTextAlignment(.leading)
+                    .foregroundColor(.cTextHigh)
+                    .font(.system(size: 16))
+            }
+        }
+    }
+}
+
+struct PanelKeyInfoSummaryView: View {
+    var panel: Panel
+    
+    let realm = try! Realm()
+    
+    @State private var form: DynamicForm = DynamicForm(tabs: [])
+    @State private var options: DynamicFormFieldOptions = DynamicFormFieldOptions(table: "", op: .view, panelType: "")
+    var body: some View {
+        VStack {
+            ForEach($form.tabs) { $tab in
+                DynamicFormSummaryView(form: $form, tab: $tab, options: options)
+            }
+        }
+        .onAppear {
+            load()
+        }
+    }
+    
+    func load() {
+        options.objectId = panel.objectId
+        options.item = panel.id
+        options.op = .view
+        options.panelType = panel.type
+        
+        let infoFields = Config.get(key: PanelUtils.infoFieldsKeyByPanelType(panelType: panel.type)).complement ?? ""
+        if !infoFields.isEmpty {
+            form.tabs.append(DynamicFormTab(key: "", title: "", groups: [DynamicFormGroup(title: "envKeyInformation".localized(), fields: [])]))
+            var tmpForm: DynamicForm = DynamicForm(tabs: [])
+            PanelUtils.dynamicFormByPanel(realm: realm, panel: panel, form: &tmpForm, options: &options)
+            
+            infoFields.components(separatedBy: ",").forEach { key in
+                if let field = tmpForm.find(key: key) {
+                    form.tabs[0].groups[0].fields.append(field)
+                }
+            }
+        }
+    }
+}
+
+struct PanelVisitsFeeView: View {
+    var panel: Panel
+    let onActionDone: () -> Void
+    
+    @State private var fee = 0
+    
+    let realm = try! Realm()
+    
+    var body: some View {
+        VStack {
+            PanelFormHeaderView(panel: panel)
+            CustomCard {
+                Spacer()
+                Text("envVisitsNumber")
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .foregroundColor((fee < 0) ? Color.cDanger : .cTextMedium)
+                TextField("envVisitsNumber", value: $fee, formatter: NumberFormatter())
+                    .cornerRadius(CGFloat(4))
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                Spacer()
+                Button {
+                    save()
+                } label: {
+                    Text("envSave")
+                        .foregroundColor(.cDanger)
+                        .frame(maxWidth: .infinity, minHeight: 44, maxHeight: 44, alignment: .center)
+                }
+                .disabled(fee < 1)
+                .opacity(fee < 1 ? 0.4 : 1)
+            }
+        }
+        .padding()
+        .onAppear {
+            load()
+        }
+    }
+    
+    func load() {
+        fee = panel.mainUser()?.visitsFee ?? 1
+    }
+    
+    func save() {
+        switch panel.type {
+            case "M":
+                let doctorDao = DoctorDao(realm: realm)
+                if let doctor = doctorDao.by(objectId: panel.objectId) {
+                    try! realm.write {
+                        doctor.mainUser()?.visitsFee = fee
+                    }
+                }
+            default:
+                break
+        }
+        onActionDone()
+    }
+    
 }
 
 struct PanelDeleteView: View {

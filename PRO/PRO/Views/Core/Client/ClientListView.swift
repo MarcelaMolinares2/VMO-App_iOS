@@ -34,6 +34,7 @@ struct ClientListView: View {
     @State private var menuIsPresented = false
     @State private var modalInfo = false
     @State private var modalDelete = false
+    @State private var modalVisitsFee = false
     
     var body: some View {
         CustomPanelClientView(realm: realm, results: $clients, selected: $selected) { panel in
@@ -45,6 +46,8 @@ struct ClientListView: View {
                 modalInfo = true
             } onDeleteTapped: {
                 modalDelete = true
+            } onVisitsFeeTapped: {
+                modalVisitsFee = true
             }
         }
         .shee(isPresented: $modalInfo, presentationStyle: .formSheet(properties: .init(detents: [.medium(), .large()]))) {
@@ -53,6 +56,11 @@ struct ClientListView: View {
         .shee(isPresented: $modalDelete, presentationStyle: .formSheet(properties: .init(detents: [.medium()]))) {
             PanelDeleteView(panel: clientTapped) {
                 modalDelete = false
+            }
+        }
+        .shee(isPresented: $modalVisitsFee, presentationStyle: .formSheet(properties: .init(detents: [.medium()]))) {
+            PanelVisitsFeeView(panel: clientTapped) {
+                modalVisitsFee = false
             }
         }
     }

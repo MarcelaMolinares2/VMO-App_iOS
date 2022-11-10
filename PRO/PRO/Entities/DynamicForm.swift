@@ -12,6 +12,20 @@ import SwiftUI
 struct DynamicForm: Identifiable {
     let id = UUID()
     var tabs: [DynamicFormTab]
+    
+    func find(key: String) -> DynamicFormField? {
+        var f: DynamicFormField? = nil
+        tabs.forEach { tab in
+            tab.groups.forEach { group in
+                group.fields.forEach { field in
+                    if field.key == key {
+                        f = field
+                    }
+                }
+            }
+        }
+        return f
+    }
 }
 
 struct DynamicFormTab: Identifiable {

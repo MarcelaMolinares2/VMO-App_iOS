@@ -17,6 +17,7 @@ class MovementModel: ObservableObject {
     @Published var panelId: Int = 0
     @Published var panelType: String = ""
     
+    @Published var visitType: String = ""
     @Published var cycleId: Int = 0
     @Published var date: Date = Date()
     @Published var comment: String = ""
@@ -71,7 +72,6 @@ struct MovementFormView: View {
     var title = ""
     var icon = "ic-home"
     var color = Color.cPrimary
-    var visitType = "NORMAL"
     
     @State private var locationRequired = Config.get(key: "MOV_LOCATION_REQUIRED").value == 1
     @State private var reportType = Config.get(key: "MOV_LOCATION_REQUIRED").value
@@ -84,6 +84,8 @@ struct MovementFormView: View {
     @State private var stock = [MovementProductStockModel]()
     @State private var shopping = [MovementProductShoppingModel]()
     @State private var transference = [MovementProductTransferenceModel]()
+    
+    @State private var isProcessing = false
     
     @State private var mainTabsLayout = true
     @State private var basicFormValid = false
@@ -111,58 +113,65 @@ struct MovementFormView: View {
             HeaderToggleView(title: "modVisit") {
                 viewRouter.currentPage = "MASTER"
             }
-            let locationAvailable = !(locationService.location == nil || (locationService.location?.coordinate.latitude == 0 && locationService.location?.coordinate.longitude == 0))
-            if locationRequired && !locationAvailable {
+            if isProcessing {
                 Spacer()
-                VStack {
-                    Text("envMovementLocationRequired")
-                }
+                LottieView(name: "sync_animation", loopMode: .loop, speed: 1)
+                    .frame(width: 300, height: 200)
                 Spacer()
             } else {
-                if panel == nil {
+                let locationAvailable = !(locationService.location == nil || (locationService.location?.coordinate.latitude == 0 && locationService.location?.coordinate.longitude == 0))
+                if locationRequired && !locationAvailable {
                     Spacer()
                     VStack {
-                        Text("envPanelNotFound")
+                        Text("envMovementLocationRequired")
                     }
                     Spacer()
                 } else {
-                    VStack {
+                    if panel == nil {
+                        Spacer()
                         VStack {
-                            PanelFormHeaderView(panel: panel!)
+                            Text("envPanelNotFound")
                         }
-                        .background(Color.cBackground1dp)
-                        ZStack(alignment: .bottom) {
-                            if mainTabsLayout {
-                                TabView(selection: $tabRouter.current) {
-                                    ForEach(mainTabs) { tab in
-                                        MovementTabContentWrapperView(realm: realm, key: tab.key, visitType: visitType, isEditable: true, locationAvailable: locationAvailable, extraData: extraData, model: model, dynamicForm: $dynamicForm, dynamicOptions: $dynamicOptions, materials: $materials, promoted: $promoted, stock: $stock, shopping: $shopping, transference: $transference, basicValid: $basicFormValid)
-                                            .tag(tab.key)
-                                            .tabItem {
-                                                Text(tab.label.localized())
-                                                Image(tab.icon)
-                                            }
+                        Spacer()
+                    } else {
+                        VStack {
+                            VStack {
+                                PanelFormHeaderView(panel: panel!)
+                            }
+                            .background(Color.cBackground1dp)
+                            ZStack(alignment: .bottom) {
+                                if mainTabsLayout {
+                                    TabView(selection: $tabRouter.current) {
+                                        ForEach(mainTabs) { tab in
+                                            MovementTabContentWrapperView(realm: realm, key: tab.key, visitType: model.visitType, isEditable: true, locationAvailable: locationAvailable, extraData: extraData, model: model, dynamicForm: $dynamicForm, dynamicOptions: $dynamicOptions, materials: $materials, promoted: $promoted, stock: $stock, shopping: $shopping, transference: $transference, basicValid: $basicFormValid)
+                                                .tag(tab.key)
+                                                .tabItem {
+                                                    Text(tab.label.localized())
+                                                    Image(tab.icon)
+                                                }
+                                        }
+                                    }
+                                } else {
+                                    TabView(selection: $tabRouter.current) {
+                                        ForEach(moreTabs) { tab in
+                                            MovementTabContentWrapperView(realm: realm, key: tab.key, visitType: model.visitType, isEditable: true, locationAvailable: locationAvailable, extraData: extraData, model: model, dynamicForm: $dynamicForm, dynamicOptions: $dynamicOptions, materials: $materials, promoted: $promoted, stock: $stock, shopping: $shopping, transference: $transference, basicValid: $basicFormValid)
+                                                .tag(tab.key)
+                                                .tabItem {
+                                                    Text(tab.label.localized())
+                                                    Image(tab.icon)
+                                                }
+                                        }
                                     }
                                 }
-                            } else {
-                                TabView(selection: $tabRouter.current) {
-                                    ForEach(moreTabs) { tab in
-                                        MovementTabContentWrapperView(realm: realm, key: tab.key, visitType: visitType, isEditable: true, locationAvailable: locationAvailable, extraData: extraData, model: model, dynamicForm: $dynamicForm, dynamicOptions: $dynamicOptions, materials: $materials, promoted: $promoted, stock: $stock, shopping: $shopping, transference: $transference, basicValid: $basicFormValid)
-                                            .tag(tab.key)
-                                            .tabItem {
-                                                Text(tab.label.localized())
-                                                Image(tab.icon)
-                                            }
+                                HStack(alignment: .bottom) {
+                                    Spacer()
+                                    FAB(image: "ic-cloud") {
+                                        validate()
                                     }
                                 }
+                                .padding(.bottom, Globals.UI_FAB_VERTICAL + 50)
+                                .padding(.horizontal, Globals.UI_FAB_HORIZONTAL)
                             }
-                            HStack(alignment: .bottom) {
-                                Spacer()
-                                FAB(image: "ic-cloud") {
-                                    validate()
-                                }
-                            }
-                            .padding(.bottom, Globals.UI_FAB_VERTICAL + 50)
-                            .padding(.horizontal, Globals.UI_FAB_HORIZONTAL)
                         }
                     }
                 }
@@ -199,13 +208,9 @@ struct MovementFormView: View {
     }
     
     func initMovement() {
-        let tabs = MovementUtils.initTabs(data: MovementUtils.tabs(panelType: viewRouter.data.type, visitType: Utils.castString(value: viewRouter.data.options["visitType"]).lowercased()))
-        mainTabs = tabs[0]
-        moreTabs = tabs[1]
-        tabRouter.current = "BASIC"
-        
         let movementObjectId = viewRouter.option(key: "oId", default: "")
         let movementId = viewRouter.option(key: "id", default: "")
+        let visitType = viewRouter.option(key: "visitType", default: "normal")
         
         if movementObjectId.isEmpty && movementId.isEmpty {
             if let oId = viewRouter.data.objectId {
@@ -215,12 +220,12 @@ struct MovementFormView: View {
                     if let m = MovementDao(realm: realm).open(panelObjectId: oId, panelType: viewRouter.data.type) {
                         movement = Movement(value: m)
                     } else {
-                        initMovementCreate(oId: oId)
+                        initMovementCreate(oId: oId, visitType: visitType)
                         movement.transactionStatus = "OPEN"
                         movement.openAt = Utils.currentDateTime()
                     }
                 } else {
-                    initMovementCreate(oId: oId)
+                    initMovementCreate(oId: oId, visitType: visitType)
                 }
                 
                 dynamicOptions.op = .create
@@ -229,6 +234,7 @@ struct MovementFormView: View {
         } else {
             if let m = MovementDao(realm: realm).by(objectId: movementObjectId) {
                 movement = Movement(value: m)
+                panel = PanelUtils.panel(type: movement.panelType, objectId: movement.panelObjectId, id: movement.panelId)
                 dynamicOptions.op = .update
                 initForm()
             } else {
@@ -237,7 +243,7 @@ struct MovementFormView: View {
         }
     }
     
-    func initMovementCreate(oId: ObjectId) {
+    func initMovementCreate(oId: ObjectId, visitType: String) {
         movement.panelId = panel?.id ?? 0
         movement.panelObjectId = oId
         movement.panelType = viewRouter.data.type
@@ -245,11 +251,20 @@ struct MovementFormView: View {
         movement.date = Utils.currentDate()
         movement.contactType = "P"
         movement.cycleId = CycleDao(realm: realm).active().first?.id ?? 0
+        movement.transactionType = "CREATE"
     }
     
     func initForm() {
+        let tabs = MovementUtils.initTabs(data: MovementUtils.tabs(panelType: movement.panelType, visitType: movement.visitType.lowercased()))
+        mainTabs = tabs[0]
+        moreTabs = tabs[1]
+        tabRouter.current = "BASIC"
+        
         model.panelObjectId = movement.panelObjectId
         model.panelType = movement.panelType
+        model.panelId = movement.panelId
+        
+        model.visitType = movement.visitType.lowercased()
         
         model.cycleId = movement.cycleId
         model.date = Utils.strToDate(value: movement.date, format: "yyyy-MM-dd")
@@ -262,6 +277,7 @@ struct MovementFormView: View {
         model.contacts = movement.dataContacts ?? ""
         model.requestAssistance = movement.rqAssistance == 1
         model.attachPanelLocation = movement.assocPanelLocation
+        model.fields = movement.additionalFields ?? "{}"
         
         if movement.panelType == "F" {
             let pharmacy = PharmacyDao(realm: realm).by(objectId: movement.panelObjectId)
@@ -269,19 +285,90 @@ struct MovementFormView: View {
         }
         
         initDynamic()
+        initNested()
     }
     
     func initDynamic() {
         dynamicForm.tabs = DynamicUtils.initForm(data: dynamicData).sorted(by: { $0.key > $1.key })
+        print(model.fields)
         if !model.fields.isEmpty {
-            DynamicUtils.fillForm(form: &dynamicForm, base: movement.additionalFields ?? "{}")
+            DynamicUtils.fillForm(form: &dynamicForm, base: model.fields)
         }
         dynamicOptions.type = movement.visitType
         dynamicOptions.panelType = movement.panelType
     }
     
-    func getMovement(id: String) {
+    func initNested() {
+        promoted = movement.dataPromoted.isEmpty ? [] : movement.dataPromoted.components(separatedBy: ",")
+
+        materials.removeAll()
+        movement.dataMaterial.forEach { movementMaterial in
+            let materialDelivery = AdvertisingMaterialDeliveryMaterial()
+            materialDelivery.materialId = movementMaterial.id
+            materialDelivery.materialCategoryId = movementMaterial.category
+            movementMaterial.sets.forEach { movementMaterialSet in
+                let set = AdvertisingMaterialDeliveryMaterialSet()
+                set.id = movementMaterialSet.id
+                set.quantity = movementMaterialSet.quantity
+                materialDelivery.sets.append(set)
+            }
+            materials.append(materialDelivery)
+        }
         
+        shopping.removeAll()
+        movement.dataShopping.forEach { movementProductShopping in
+            let productShopping = MovementProductShoppingModel()
+            productShopping.productId = movementProductShopping.id
+            productShopping.price = movementProductShopping.price
+            movementProductShopping.competitors.forEach { mpsCompetitor in
+                let competitor = MovementProductShoppingCompetitorModel()
+                competitor.id = mpsCompetitor.id
+                competitor.price = mpsCompetitor.price
+                productShopping.competitors.append(competitor)
+            }
+            shopping.append(productShopping)
+        }
+        
+        transference.removeAll()
+        movement.dataTransference.forEach { movementProductTransference in
+            let productTransference = MovementProductTransferenceModel()
+            productTransference.productId = movementProductTransference.id
+            productTransference.price = movementProductTransference.price
+            productTransference.quantity = movementProductTransference.quantity
+            productTransference.bonusQuantity = movementProductTransference.bonusQuantity
+            productTransference.bonusProduct = movementProductTransference.bonusProduct
+        }
+        
+        stock.removeAll()
+        movement.dataStock.forEach { movementProductStock in
+            let productStock = MovementProductStockModel()
+            productStock.productId = movementProductStock.id
+            productStock.quantity = movementProductStock.quantity
+            productStock.hasStock = movementProductStock.hasStock
+            productStock.noStockReason = movementProductStock.noStockReason
+        }
+    }
+    
+    func getMovement(id: String) {
+        isProcessing = true
+        AppServer().postRequest(data: [:], path: "vm/movement/mobile/detail/\(id)") { success, code, data in
+            if success {
+                if let rs = data as? Dictionary<String, Any> {
+                    let item = Utils.dictionaryToJSON(data: rs)
+                    if let decoded = try? JSONDecoder().decode(Movement.self, from: item.data(using: .utf8)!) {
+                        movement = decoded
+                        panel = PanelUtils.panel(type: movement.panelType, objectId: movement.panelObjectId, id: movement.panelId)
+                        dynamicOptions.op = .update
+                        DispatchQueue.main.async {
+                            initForm()
+                        }
+                    }
+                }
+            }
+            DispatchQueue.main.async {
+                isProcessing = false
+            }
+        }
     }
     
     func validate() {
@@ -917,7 +1004,7 @@ struct MovementFormTabBasicView: View {
         }
         .shee(isPresented: $modalInfo, presentationStyle: .formSheet(properties: .init(detents: [.medium(), .large()]))) {
             if let p = PanelUtils.panel(type: model.panelType, objectId: model.panelObjectId) {
-                PanelInfoDialog(panel: p)
+                PanelKeyInfoView(panel: p)
             }
         }
         .sheet(isPresented: $modalFailedReason) {
@@ -937,7 +1024,7 @@ struct MovementFormTabBasicView: View {
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .foregroundColor(.cTextMedium)
                             .font(.system(size: 14))
-                        VStack{
+                        VStack {
                             TextEditor(text: $commentFailed)
                                 .frame(height: 80)
                         }
@@ -1044,6 +1131,7 @@ struct MovementFormTabBasicView: View {
         movement.hour = Utils.hourFormat(date: Date(), format: "HH:mm")
         movement.cycleId = CycleDao(realm: try! Realm()).active().first?.id ?? 0
         movement.transactionType = "CREATE"
+        
         MovementDao(realm: try! Realm()).store(movement: movement)
         
         MovementUtils.afterSave(viewRouter: viewRouter, movement: movement, action: action)
@@ -1294,6 +1382,8 @@ struct MovementTabContentWrapperView: View {
         switch key {
             case "MATERIAL":
                 MovementFormTabMaterialView(realm: realm, materials: $materials)
+                    .disabled(dynamicOptions.op == .update)
+                    .opacity(dynamicOptions.op == .create ? 1 : 0.4)
             case "PROMOTED":
                 MovementFormTabPromotedView(realm: realm, isEditable: isEditable, extraData: extraData, selected: $promoted)
             case "SHOPPING":

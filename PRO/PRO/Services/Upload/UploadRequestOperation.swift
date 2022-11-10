@@ -144,6 +144,7 @@ class UploadRequestOperation: Operation {
     
     func doRequest<T: Object & SyncEntity>(path: String, data: [String : Any], object: T, from: T.Type, table: String) {
         dispatchGroup.enter()
+        print(object.transactionType)
         if object.transactionType == "CREATE" {
             AppServer().postRequest(data: data, path: "\(prefix)/\(path)") { (successful, code, data) in
                 self.handleRequest(from: from, object: object, table: table, successful: successful, code: code, data: data)

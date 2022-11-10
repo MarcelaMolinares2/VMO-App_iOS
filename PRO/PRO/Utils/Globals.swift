@@ -98,5 +98,9 @@ extension Color {
     static let cWarning = Color("colorWarning")
     static let cInfo = Color("colorInfo")
     static let cForm = Color("colorForm")
+    
+    static let cMovementExtra = Color("colorMovementExtra")
+    static let cMovementFailed = Color("colorMovementFailed")
+    static let cMovementOpen = Color("colorMovementOpen")
 
 }
