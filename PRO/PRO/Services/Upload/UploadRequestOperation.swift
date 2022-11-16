@@ -10,7 +10,7 @@ import RealmSwift
 import Amplify
 
 enum UploadRequestServices {
-    case activity, agentLocation, client, diary, doctor, freeDayRequest, group, materialDelivery, materialRequest, movement, patient, pharmacy, potential
+    case activity, agentLocation, client, diary, doctor, freeDayRequest, group, materialDelivery, materialRequest, movement, patient, pharmacy, potential, panelUserVisitsFee
 }
 
 class UploadRequestOperation: Operation {
@@ -26,7 +26,6 @@ class UploadRequestOperation: Operation {
     
     var prefix = ""
     var services: [UploadRequestServices] = []
-    
     
     private var _state = State.ready
     private let stateQueue = DispatchQueue(label: Bundle.main.bundleIdentifier! + ".op.state", attributes: .concurrent)
@@ -133,6 +132,10 @@ class UploadRequestOperation: Operation {
                     AdvertisingMaterialRequestDao(realm: try! Realm()).local().forEach { materialRequest in
                         doRequest(path: "advertising-material/request", data: Utils.jsonObjectArray(string: try! Utils.objToJSON(materialRequest)), object: AdvertisingMaterialRequest(value: materialRequest), from: AdvertisingMaterialRequest.self, table: "material-request")
                     }
+                case .panelUserVisitsFee:
+                    PanelUserVisitsFeeDao(realm: try! Realm()).local().forEach { panelUserVisitsFee in
+                        doRequest(path: "panel/user/update/unique", data: Utils.jsonObjectArray(string: try! Utils.objToJSON(panelUserVisitsFee)), object: PanelUserVisitsFee(value: panelUserVisitsFee), from: PanelUserVisitsFee.self, table: "panel-user-vf")
+                    }
             }
         }
         
@@ -145,6 +148,7 @@ class UploadRequestOperation: Operation {
     func doRequest<T: Object & SyncEntity>(path: String, data: [String : Any], object: T, from: T.Type, table: String) {
         dispatchGroup.enter()
         print(object.transactionType)
+        print(data)
         if object.transactionType == "CREATE" {
             AppServer().postRequest(data: data, path: "\(prefix)/\(path)") { (successful, code, data) in
                 self.handleRequest(from: from, object: object, table: table, successful: successful, code: code, data: data)
@@ -161,7 +165,7 @@ class UploadRequestOperation: Operation {
         if successful {
             let realm = try! Realm()
             var obj = realm.object(ofType: from.self, forPrimaryKey: object.objectId)
-            if ["agent-location", "free-day-request", "material-delivery", "material-request", "movement"].contains(table) {
+            if ["agent-location", "free-day-request", "material-delivery", "material-request", "movement", "panel-user-vf"].contains(table) {
                 if let o = obj {
                     try! realm.write {
                         realm.delete(o)

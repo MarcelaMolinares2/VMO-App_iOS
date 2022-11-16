@@ -58,6 +58,7 @@ struct ImageViewerDialog: View {
         if FileUtils.exists(media: media) {
             image = Image(uiImage: UIImage(contentsOfFile: MediaUtils.mediaURL(media: media).path) ?? UIImage())
         } else {
+            print(MediaUtils.awsPath(media: media))
             serverLoading = true
             Amplify.Storage.downloadData(
                 key: MediaUtils.awsPath(media: media),

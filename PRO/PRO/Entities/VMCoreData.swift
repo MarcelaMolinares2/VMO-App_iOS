@@ -1207,10 +1207,12 @@ class Movement: Object, Codable, SyncEntity {
     @Persisted var dataShopping = List<MovementProductShopping>()
     @Persisted var dataTransference = List<MovementProductTransference>()
     
+    var panel: GenericPanel?
+    
     var tmpDate = Date()
     
     private enum CodingKeys: String, CodingKey {
-        case id = "id_movimiento", panelId = "id_medico", panelType = "tipo", date = "fecha_visita", realDate = "fecha_real", hour = "hora_visita", comment = "comentario", target = "objetivo_proxima", duration = "duracion", executed, visitType = "visit_type", movementFailReasonId = "movement_fail_reason_id", latitude = "latitud", longitude = "longitud", companionId = "id_acompanante", wasScheduled = "agendado", rqAssistance = "asistencia", openAt = "fecha_inicio", closedAt = "fecha_fin", contactType = "tipo_contacto", contactedBy = "contactado_por", dataContacts = "contacto", additionalFields = "fields", cycleId = "ciclo", dataPromoted = "productos_prom", dataMaterial = "rl_material_deliveries", dataStock = "rl_product_stock", dataShopping = "rl_shopping", dataTransference = "rl_product_transference"
+        case id = "id_movimiento", panelId = "id_medico", panelType = "tipo", date = "fecha_visita", realDate = "fecha_real", hour = "hora_visita", comment = "comentario", target = "objetivo_proxima", duration = "duracion", executed, visitType = "visit_type", movementFailReasonId = "movement_fail_reason_id", latitude = "latitud", longitude = "longitud", companionId = "id_acompanante", wasScheduled = "agendado", rqAssistance = "asistencia", openAt = "fecha_inicio", closedAt = "fecha_fin", contactType = "tipo_contacto", contactedBy = "contactado_por", dataContacts = "contacto", additionalFields = "fields", cycleId = "ciclo", dataPromoted = "productos_prom", dataMaterial = "rl_material_deliveries", dataStock = "rl_product_stock", dataShopping = "rl_shopping", dataTransference = "rl_product_transference", panel
     }
     
     override init() {
@@ -1224,7 +1226,7 @@ class Movement: Object, Codable, SyncEntity {
         self.id = try DynamicUtils.intTypeDecoding(container: container, key: .id)
         self.panelId = try DynamicUtils.intTypeDecoding(container: container, key: .panelId)
         self.panelType = try DynamicUtils.stringTypeDecoding(container: container, key: .panelType)
-        self.date = try DynamicUtils.stringTypeDecoding(container: container, key: .id)
+        self.date = try DynamicUtils.stringTypeDecoding(container: container, key: .date)
         self.realDate = try DynamicUtils.stringTypeDecoding(container: container, key: .realDate)
         self.hour = try DynamicUtils.stringTypeDecoding(container: container, key: .hour)
         self.comment = try DynamicUtils.stringTypeDecoding(container: container, key: .comment)
@@ -1252,6 +1254,8 @@ class Movement: Object, Codable, SyncEntity {
         self.dataTransference = try DynamicUtils.listTypeDecoding(container: container, key: .dataTransference)
         
         self.additionalFields = try DynamicUtils.adFieldsTypeDecoding(container: container, key: .additionalFields)
+        
+        self.panel = try DynamicUtils.objectPlainTypeDecoding(container: container, key: .panel)
     }
     
     private enum EncodingKeys: String, CodingKey {
@@ -1357,7 +1361,7 @@ class MovementMaterial: Object, Codable {
         
         try container.encode(id, forKey: .id)
         try container.encode(category, forKey: .category)
-        try container.encode(Utils.objArrayToJSON(sets), forKey: .sets)
+        try container.encode(sets, forKey: .sets)
     }
 }
 
@@ -1365,8 +1369,23 @@ class MovementMaterialSet: Object, Codable {
     @Persisted var id: Int = 0
     @Persisted var quantity: Int = 0
     
+    var materialSet: AdvertisingMaterialSet = AdvertisingMaterialSet()
+    
     private enum CodingKeys: String, CodingKey {
-        case id, quantity
+        case id, quantity, materialSet = "material_set"
+    }
+    
+    override init() {
+        super.init()
+    }
+    
+    required init(from decoder: Decoder) throws {
+        super.init()
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        self.id = try DynamicUtils.intTypeDecoding(container: container, key: .id)
+        self.quantity = try DynamicUtils.intTypeDecoding(container: container, key: .quantity)
+        self.materialSet = try DynamicUtils.objectTypeDecoding(container: container, key: .materialSet)
     }
     
     private enum EncodingKeys: String, CodingKey {
@@ -1389,6 +1408,20 @@ class MovementProductStock: Object, Codable {
     
     private enum CodingKeys: String, CodingKey {
         case id = "product_id", hasStock = "has_stock", quantity, noStockReason = "no_stock_reason"
+    }
+    
+    override init() {
+        super.init()
+    }
+    
+    required init(from decoder: Decoder) throws {
+        super.init()
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        self.id = try DynamicUtils.intTypeDecoding(container: container, key: .id)
+        self.hasStock = try DynamicUtils.boolTypeDecoding(container: container, key: .hasStock)
+        self.quantity = try DynamicUtils.floatTypeDecoding(container: container, key: .quantity)
+        self.noStockReason = try DynamicUtils.stringTypeDecoding(container: container, key: .noStockReason)
     }
     
     private enum EncodingKeys: String, CodingKey {
@@ -1436,7 +1469,7 @@ class MovementProductShopping: Object, Codable {
         
         try container.encode(id, forKey: .id)
         try container.encode(price, forKey: .price)
-        try container.encode(Utils.objArrayToJSON(competitors), forKey: .competitors)
+        try container.encode(competitors, forKey: .competitors)
     }
 }
 
@@ -1469,6 +1502,21 @@ class MovementProductTransference: Object, Codable {
     
     private enum CodingKeys: String, CodingKey {
         case id = "product_id", quantity, price, bonusProduct = "bonus_product", bonusQuantity = "bonus_quantity"
+    }
+    
+    override init() {
+        super.init()
+    }
+    
+    required init(from decoder: Decoder) throws {
+        super.init()
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        self.id = try DynamicUtils.intTypeDecoding(container: container, key: .id)
+        self.quantity = try DynamicUtils.floatTypeDecoding(container: container, key: .quantity)
+        self.price = try DynamicUtils.floatTypeDecoding(container: container, key: .price)
+        self.bonusProduct = try DynamicUtils.intTypeDecoding(container: container, key: .bonusProduct)
+        self.bonusQuantity = try DynamicUtils.floatTypeDecoding(container: container, key: .bonusQuantity)
     }
     
     private enum EncodingKeys: String, CodingKey {
@@ -2359,6 +2407,34 @@ class PanelUser: Object, Decodable {
         self.visitsCycle = try DynamicUtils.intTypeDecoding(container: container, key: .visitsCycle)
     }
     
+}
+
+class PanelUserVisitsFee: Object, Encodable, SyncEntity {
+    @Persisted(primaryKey: true) var objectId: ObjectId
+    @Persisted(indexed: true) var id = 0
+    @Persisted var transactionStatus: String = ""
+    @Persisted var transactionType: String = ""
+    @Persisted var transactionResponse: String = ""
+    
+    @Persisted var panelObjectId: ObjectId
+    @Persisted var panelId: Int = 0
+    @Persisted var panelType: String = ""
+    @Persisted var userId: Int = 0
+    @Persisted var fee: Int = 0
+    
+    private enum EncodingKeys: String, CodingKey {
+        case id, itemId = "panel_id", itemType = "panel_type",
+             userId = "user_id", fee = "visitsFee"
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: EncodingKeys.self)
+        
+        try container.encode(itemId, forKey: .itemId)
+        try container.encode(itemType, forKey: .itemType)
+        try container.encode(userId, forKey: .userId)
+        try container.encode(fee, forKey: .fee)
+    }
 }
 
 class GeneralRequestSyncDao: Object, Encodable, SyncEntity {

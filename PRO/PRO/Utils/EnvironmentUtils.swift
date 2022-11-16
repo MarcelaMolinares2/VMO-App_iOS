@@ -127,11 +127,16 @@ class MovementUtils {
         return tabs
     }
     
-    static func initTabs(data: [String: [String: Any]]) -> [[MovementTab]] {
+    static func initTabs(data: [String: [String: Any]], summary: Bool = false) -> [[MovementTab]] {
         var mainTabs = [MovementTab]()
         var moreTabs = [MovementTab]()
+        var available = 4
         
         mainTabs.append(MovementTab(key: "BASIC", icon: iconTabs(key: "BASIC"), label: "envBasic", required: true))
+        if summary {
+            mainTabs.append(MovementTab(key: "NOTES", icon: iconTabs(key: "NOTES"), label: "envNotes", required: true))
+            available = 3
+        }
         moreTabs.append(MovementTab(key: "BACK", icon: iconTabs(key: "BACK"), label: "envBack", required: true))
         
         var i = 0
@@ -142,14 +147,14 @@ class MovementUtils {
             return false
         })
         baseTabs.forEach { (key: String, value: [String : Any]) in
-            if baseTabs.count > 4 && i > 2 {
+            if baseTabs.count > available && i > available - 2 {
                 moreTabs.append(MovementTab(key: key, icon: iconTabs(key: key), label: "env\(key.capitalized)", required: value["required"] as! Bool))
             } else {
                 mainTabs.append(MovementTab(key: key, icon: iconTabs(key: key), label: "env\(key.capitalized)", required: value["required"] as! Bool))
             }
             i += 1
         }
-        if baseTabs.count > 4 {
+        if baseTabs.count > available {
             mainTabs.append(MovementTab(key: "MORE", icon: iconTabs(key: "MORE"), label: "envMore", required: true))
         }
         return [mainTabs, moreTabs]

@@ -1546,6 +1546,7 @@ struct PanelVisitsFeeView: View {
                 TextField("envVisitsNumber", value: $fee, formatter: NumberFormatter())
                     .cornerRadius(CGFloat(4))
                     .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .keyboardType(.numberPad)
                 Spacer()
                 Button {
                     save()
@@ -1574,12 +1575,46 @@ struct PanelVisitsFeeView: View {
                 let doctorDao = DoctorDao(realm: realm)
                 if let doctor = doctorDao.by(objectId: panel.objectId) {
                     try! realm.write {
+                        doctor.visitsFeeWasEdited = true
                         doctor.mainUser()?.visitsFee = fee
+                    }
+                }
+            case "F":
+                let pharmacyDao = PharmacyDao(realm: realm)
+                if let pharmacy = pharmacyDao.by(objectId: panel.objectId) {
+                    try! realm.write {
+                        pharmacy.visitsFeeWasEdited = true
+                        pharmacy.mainUser()?.visitsFee = fee
+                    }
+                }
+            case "C":
+                let clientDao = ClientDao(realm: realm)
+                if let client = clientDao.by(objectId: panel.objectId) {
+                    try! realm.write {
+                        client.visitsFeeWasEdited = true
+                        client.mainUser()?.visitsFee = fee
+                    }
+                }
+            case "P":
+                let patientDao = PatientDao(realm: realm)
+                if let patient = patientDao.by(objectId: panel.objectId) {
+                    try! realm.write {
+                        patient.visitsFeeWasEdited = true
+                        patient.mainUser()?.visitsFee = fee
+                    }
+                }
+            case "T":
+                let potentialDao = PotentialDao(realm: realm)
+                if let potential = potentialDao.by(objectId: panel.objectId) {
+                    try! realm.write {
+                        potential.visitsFeeWasEdited = true
+                        potential.mainUser()?.visitsFee = fee
                     }
                 }
             default:
                 break
         }
+        PanelUserVisitsFeeDao(realm: realm).store(objectId: panel.objectId, id: panel.id, type: panel.type, fee: fee)
         onActionDone()
     }
     

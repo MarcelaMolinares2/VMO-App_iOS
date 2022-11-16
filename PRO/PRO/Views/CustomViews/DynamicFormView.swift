@@ -358,9 +358,30 @@ struct DynamicFormTextField: View {
             Text(label)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .foregroundColor((field.localRequired && field.value.isEmpty) ? Color.cDanger : .cTextMedium)
-            TextField(label, text: $field.value)
-                .cornerRadius(CGFloat(4))
-                .textFieldStyle(RoundedBorderTextFieldStyle())
+            switch field.dataType {
+                case "int":
+                    let binding = Binding(
+                        get: { Utils.castInt(value: self.field.value) },
+                        set: { self.field.value = String($0) }
+                    )
+                    TextField(label, value: binding, formatter: NumberFormatter())
+                        .cornerRadius(CGFloat(4))
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .keyboardType(.numberPad)
+                case "float":
+                    let binding = Binding(
+                        get: { Utils.castFloat(value: self.field.value) },
+                        set: { self.field.value = String(describing: $0) }
+                    )
+                    TextField(label, value: binding, formatter: NumberFormatter())
+                        .cornerRadius(CGFloat(4))
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .keyboardType(.decimalPad)
+                default:
+                    TextField(label, text: $field.value)
+                        .cornerRadius(CGFloat(4))
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+            }
             DynamicFormDescriptionView(field: field)
         }
     }

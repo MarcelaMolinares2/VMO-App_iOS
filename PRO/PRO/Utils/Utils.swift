@@ -548,6 +548,18 @@ class DynamicUtils {
         }
     }
     
+    static func objectPlainTypeDecoding<T: CodingKey, R: Decodable>(container: KeyedDecodingContainer<T>, key: KeyedDecodingContainer<T>.Key) throws -> R? {
+        do {
+            return try container.decode(R.self, forKey: key)
+        } catch DecodingError.keyNotFound {
+            return nil
+        } catch DecodingError.valueNotFound {
+            return nil
+        } catch DecodingError.typeMismatch {
+            return nil
+        }
+    }
+    
     static func flagTypeDecoding<T: CodingKey>(container: KeyedDecodingContainer<T>, key: KeyedDecodingContainer<T>.Key) throws -> Int {
         do {
             return try container.decode(Int.self, forKey: key)
@@ -673,6 +685,9 @@ class DynamicUtils {
     }
     
     static func formatLabel(s: String) -> String {
+        if s.isEmpty {
+            return ""
+        }
         return "env\(s.components(separatedBy: ".").last?.replacingOccurrences(of: "-", with: " ").replacingOccurrences(of: "_", with: " ").capitalized.replacingOccurrences(of: " ", with: "") ?? "")"
     }
     
@@ -721,6 +736,20 @@ class EnvironmentUtils {
     
     static var osTheme: UIUserInterfaceStyle {
         return UIScreen.main.traitCollection.userInterfaceStyle
+    }
+    
+}
+
+class FormatUtils {
+    
+    static func currency(value: Float, locale: Locale = Locale.current) -> String {
+        let formatter = NumberFormatter()
+        formatter.locale = locale
+        formatter.numberStyle = .currency
+        if let formattedValue = formatter.string(from: value as NSNumber) {
+            return formattedValue
+        }
+        return String(value)
     }
     
 }

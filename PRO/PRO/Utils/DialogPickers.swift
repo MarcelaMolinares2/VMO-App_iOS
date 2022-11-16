@@ -104,10 +104,12 @@ struct DialogDatePicker: View {
                         .foregroundColor(.cHighlighted)
                 }
             }
-            .padding(.vertical, 5)
-            .padding(.horizontal, 10)
-            DatePicker("", selection: $date, displayedComponents: [.date])
-                .datePickerStyle(.graphical)
+            .padding(.vertical, 10)
+            .padding(.horizontal, 12)
+            ScrollView {
+                DatePicker("", selection: $date, displayedComponents: [.date])
+                    .datePickerStyle(.graphical)
+            }
         }
     }
     

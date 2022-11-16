@@ -294,6 +294,8 @@ struct MovementFormView: View {
         if !model.fields.isEmpty {
             DynamicUtils.fillForm(form: &dynamicForm, base: model.fields)
         }
+        dynamicOptions.objectId = movement.objectId
+        dynamicOptions.item = movement.id
         dynamicOptions.type = movement.visitType
         dynamicOptions.panelType = movement.panelType
     }
@@ -832,7 +834,7 @@ struct MovementFormTabBasicView: View {
                             }
                         } label: {
                             VStack {
-                                Text(NSLocalizedString("envDuration", comment: ""))
+                                Text(NSLocalizedString("envVisitDuration", comment: ""))
                                     .frame(maxWidth: .infinity, alignment: .center)
                                     .foregroundColor(model.duration <= 0 && ctDuration.required ? Color.cDanger : .cTextMedium)
                                     .font(.system(size: 14))

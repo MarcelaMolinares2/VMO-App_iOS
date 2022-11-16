@@ -326,6 +326,37 @@ class CycleDao: GenericDao {
      */
 }
 
+class PanelUserVisitsFeeDao: GenericDao {
+    
+    func store(objectId: ObjectId, id: Int, type: String, fee: Int) {
+        if let exists = realm.objects(PanelUserVisitsFee.self).where ({
+            $0.panelType == type && ($0.panelId == id || $0.panelObjectId == objectId)
+        }).first {
+            try! realm.write {
+                exists.fee = fee
+            }
+        } else {
+            let panelUserVF = PanelUserVisitsFee()
+            panelUserVF.panelObjectId = objectId
+            panelUserVF.panelId = id
+            panelUserVF.panelType = type
+            panelUserVF.fee = fee
+            panelUserVF.transactionType = "CREATE"
+            panelUserVF.transactionStatus = id > 0 ? "" : "PENDING"
+            try! realm.write {
+                realm.add(panelUserVF)
+            }
+        }
+    }
+    
+    func local() -> [PanelUserVisitsFee] {
+        return Array(realm.objects(PanelUserVisitsFee.self).where {
+            ($0.transactionType != "") && ($0.transactionStatus == "")
+        })
+    }
+    
+}
+
 class DeleteDao: GenericDao {
     
     func panel(panel: Panel, reason: String) {
