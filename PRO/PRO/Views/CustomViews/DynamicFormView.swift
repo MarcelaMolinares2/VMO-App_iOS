@@ -368,6 +368,7 @@ struct DynamicFormTextField: View {
                         .cornerRadius(CGFloat(4))
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .keyboardType(.numberPad)
+                        .disabled(!field.localEditable)
                 case "float":
                     let binding = Binding(
                         get: { Utils.castFloat(value: self.field.value) },
@@ -377,10 +378,12 @@ struct DynamicFormTextField: View {
                         .cornerRadius(CGFloat(4))
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .keyboardType(.decimalPad)
+                        .disabled(!field.localEditable)
                 default:
                     TextField(label, text: $field.value)
                         .cornerRadius(CGFloat(4))
                         .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .disabled(!field.localEditable)
             }
             DynamicFormDescriptionView(field: field)
         }
@@ -421,6 +424,7 @@ struct DynamicFormDate: View {
             DatePicker("", selection: $date.onChange(dateChanged), displayedComponents: .date)
                 .labelsHidden()
                 .clipped()
+                .disabled(!field.localEditable)
             DynamicFormDescriptionView(field: field)
         }
         .onAppear {
@@ -453,6 +457,7 @@ struct DynamicFormTime: View {
             DatePicker("", selection: $date.onChange(dateChanged), displayedComponents: .hourAndMinute)
                 .labelsHidden()
                 .clipped()
+                .disabled(!field.localEditable)
             DynamicFormDescriptionView(field: field)
         }
         .onAppear {
@@ -480,6 +485,7 @@ struct DynamicFormCheckbox: View {
         VStack {
             Toggle(label, isOn: $checked.onChange(valueChanged))
                 .foregroundColor((field.localRequired && field.value.isEmpty) ? Color.cDanger : .cTextMedium)
+                .disabled(!field.localEditable)
             DynamicFormDescriptionView(field: field)
         }
         .onAppear {
@@ -526,16 +532,19 @@ struct DynamicFormImage: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .foregroundColor((field.localRequired && field.value.isEmpty) ? Color.cDanger : .cTextMedium)
                 if field.value == "Y" {
-                    Button(action: {
-                        delete()
-                    }) {
-                        Image("ic-delete")
-                            .resizable()
-                            .scaledToFit()
-                            .foregroundColor(.cDanger)
-                            .frame(width: 24, height: 24, alignment: .center)
+                    let media = MediaUtils.item(table: options.table, field: field.key, id: options.item, localId: options.objectId, ext: "jpg")
+                    if FileUtils.exists(media: media) {
+                        Button(action: {
+                            delete()
+                        }) {
+                            Image("ic-delete")
+                                .resizable()
+                                .scaledToFit()
+                                .foregroundColor(.cDanger)
+                                .frame(width: 24, height: 24, alignment: .center)
+                        }
+                        .frame(width: 44, height: 44, alignment: .center)
                     }
-                    .frame(width: 44, height: 44, alignment: .center)
                 }
             }
             ImageViewerWrapperView(value: $field.value, defaultIcon: icon(), table: options.table, field: field.key, id: options.item, localId: options.objectId) {
@@ -548,6 +557,7 @@ struct DynamicFormImage: View {
             }
             DynamicFormDescriptionView(field: field)
         }
+        .disabled(!field.localEditable)
         .actionSheet(isPresented: $actionSheet) {
             ActionSheet(title: Text("envSelect"), message: nil, buttons: Widgets.mediaSourcePickerButtons(available: availableSources, action: onSourceSelected))
         }
@@ -578,8 +588,11 @@ struct DynamicFormImage: View {
     }
     
     func delete() {
-        field.value = initialValue
         MediaUtils.remove(table: options.table, field: field.key, localId: options.objectId)
+        field.value = ""
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+            field.value = initialValue
+        }
     }
     
     func icon() -> String {
@@ -698,6 +711,7 @@ struct DynamicFormDayMonth: View {
                     }
                 }
             }
+            .disabled(!field.localEditable)
             DynamicFormDescriptionView(field: field)
         }
         .partialSheet(isPresented: $modalMonth) {
@@ -776,12 +790,26 @@ struct DynamicFormList: View {
                         }
                     }
                     Spacer()
-                    Image("ic-arrow-expand-more")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 24, height: 24, alignment: .center)
-                        .foregroundColor(.cIcon)
+                    if field.value.isEmpty {
+                        Image("ic-arrow-expand-more")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 24, height: 24, alignment: .center)
+                            .foregroundColor(.cIcon)
+                    } else {
+                        Button {
+                            selected = []
+                            onSelectionDone([])
+                        } label: {
+                            Image("ic-delete")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 20, height: 20, alignment: .center)
+                                .foregroundColor(.cIcon)
+                        }
+                    }
                 }
+                .disabled(!field.localEditable)
                 DynamicFormDescriptionView(field: field)
             }
         }

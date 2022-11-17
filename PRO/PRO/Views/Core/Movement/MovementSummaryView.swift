@@ -225,6 +225,7 @@ struct MovementSummaryBasicView: View {
                                     .multilineTextAlignment(.leading)
                             }
                         }
+                        Divider()
                         VStack {
                             Text("envContacts".localized())
                                 .frame(maxWidth: .infinity, alignment: .leading)

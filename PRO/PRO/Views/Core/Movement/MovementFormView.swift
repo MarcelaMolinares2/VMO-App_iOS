@@ -92,6 +92,7 @@ struct MovementFormView: View {
     @State private var showValidationError = false
     @State private var savedToast = false
     @State private var modalSave = false
+    @State private var modalOptions = false
     
     @State private var scheduleNextVisit = false
     @State private var scheduleNextDate = Date()
@@ -164,6 +165,9 @@ struct MovementFormView: View {
                                     }
                                 }
                                 HStack(alignment: .bottom) {
+                                    FAB(image: "ic-more") {
+                                        modalOptions = true
+                                    }
                                     Spacer()
                                     FAB(image: "ic-cloud") {
                                         validate()
@@ -180,6 +184,15 @@ struct MovementFormView: View {
         .shee(isPresented: $modalSave, presentationStyle: .formSheet(properties: .init(detents: [.medium()]))) {
             MovementSaveBottomView(panelType: movement.panelType, panelObjectId: movement.panelObjectId, panelId: movement.panelId) { action in
                 save(action: action)
+            }
+        }
+        .shee(isPresented: $modalOptions, presentationStyle: .formSheet(properties: .init(detents: [.medium()]))) {
+            VStack {
+                Text("envVisualAids".localized())
+                    .foregroundColor(.cTextMedium)
+                Divider()
+                Text("envCallOptions".localized())
+                    .foregroundColor(.cTextMedium)
             }
         }
         .toast(isPresenting: $showValidationError) {

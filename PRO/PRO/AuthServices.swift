@@ -69,6 +69,7 @@ class AppAuthService: ObservableObject {
                                     print("Sign in succeeded")
                                     DispatchQueue.main.async {
                                         self.isProcesing = false
+                                        self.viewRouter?.currentPage = "MASTER"
                                         userSettings.successfullAuth(data: data as! [String : Any])
                                     }
                                 case .failure(let error):

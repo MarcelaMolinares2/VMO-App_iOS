@@ -502,8 +502,8 @@ struct GlobalMenu: View {
         VStack {
             HStack {
                 Button(action: {
-                    userSettings.successfullLogout()
                     self.isPresented = false
+                    userSettings.successfullLogout()
                 }) {
                     HStack {
                         Image("ic-logout")

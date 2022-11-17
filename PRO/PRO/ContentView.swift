@@ -60,8 +60,6 @@ class SyncObserver {
     init() {
         let realm = try! Realm()
         
-        //updateCurrentOperation(key: .diary, status: 0)
-        //updateCurrentOperation(key: .doctor, status: 0)
         startObserver(realm: realm, from: Diary.self, key: .diary)
         startObserver(realm: realm, from: DifferentToVisit.self, key: .activity)
         startObserver(realm: realm, from: Client.self, key: .client)
@@ -75,6 +73,8 @@ class SyncObserver {
         startObserver(realm: realm, from: FreeDayRequest.self, key: .freeDayRequest)
         startObserver(realm: realm, from: AdvertisingMaterialDelivery.self, key: .materialDelivery)
         startObserver(realm: realm, from: AdvertisingMaterialRequest.self, key: .materialRequest)
+        
+        startObserver(realm: realm, from: PanelUserVisitsFee.self, key: .panelUserVisitsFee)
         
         startObserver(realm: realm, from: Movement.self, key: .movement)
     }
@@ -171,6 +171,8 @@ class SyncObserver {
                 return "material-delivery"
             case .materialRequest:
                 return "material-request"
+            case .panelUserVisitsFee:
+                return "panel-user-vf"
         }
     }
     

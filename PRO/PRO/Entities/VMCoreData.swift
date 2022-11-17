@@ -2430,8 +2430,8 @@ class PanelUserVisitsFee: Object, Encodable, SyncEntity {
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: EncodingKeys.self)
         
-        try container.encode(itemId, forKey: .itemId)
-        try container.encode(itemType, forKey: .itemType)
+        try container.encode(panelId, forKey: .itemId)
+        try container.encode(panelType, forKey: .itemType)
         try container.encode(userId, forKey: .userId)
         try container.encode(fee, forKey: .fee)
     }

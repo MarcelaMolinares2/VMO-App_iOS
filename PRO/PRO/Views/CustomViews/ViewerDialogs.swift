@@ -150,6 +150,7 @@ struct ImageViewerWrapperView: View {
     func load() {
         let media = MediaUtils.item(table: table, field: field, id: id, localId: localId)
         media.ext = "jpg"
+        image = nil
         if FileUtils.exists(media: media) {
             image = Image(uiImage: UIImage(contentsOfFile: MediaUtils.mediaURL(media: media).path) ?? UIImage())
         }

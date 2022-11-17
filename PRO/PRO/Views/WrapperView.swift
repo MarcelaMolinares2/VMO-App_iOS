@@ -44,8 +44,6 @@ struct WrapperView: View {
                 MovementFormView()
             case "MOVEMENTS-VIEW":
                 MovementsView()
-            //case "PANEL-CARD":
-                //    PanelSummaryView(panel: viewRouter.panel(), defaultTab: viewRouter.option(key: "tab", default: "CARD"))
             case "REQUEST-MATERIAL-VIEW":
                 MaterialRequestView()
             case "GROUPS-VIEW":

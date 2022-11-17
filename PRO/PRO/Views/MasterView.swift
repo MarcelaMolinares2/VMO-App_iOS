@@ -125,6 +125,12 @@ struct MasterView: View {
             }
             doSync()
         }
+        .onChange(of: masterRouter.tabRight) { newValue in
+            resetHeader()
+        }
+        .onChange(of: masterRouter.tabCenter) { newValue in
+            resetHeader()
+        }
     }
     
     func doSync() {
@@ -139,6 +145,12 @@ struct MasterView: View {
             operationQueue.addOperations([syncOperation], waitUntilFinished: false)
         }
     }
+    
+    func resetHeader() {
+        masterRouter.search = ""
+        searchBarOpen = false
+    }
+    
 }
 
 struct MasterHeaderDynamicView: View {

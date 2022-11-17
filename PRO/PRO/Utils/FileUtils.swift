@@ -17,12 +17,13 @@ class MediaUtils {
         media.date = Utils.currentDateTime()
     }
     
-    static func item(table: String, field: String, id: Int, localId: ObjectId) -> MediaItem {
+    static func item(table: String, field: String, id: Int, localId: ObjectId, ext: String = "") -> MediaItem {
         let media = MediaItem()
         media.table = table
         media.field = field
         media.serverId = id
         media.localId = localId
+        media.ext = ext
         return media
     }
     

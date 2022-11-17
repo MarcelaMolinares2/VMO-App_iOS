@@ -30,13 +30,15 @@ class UserSettings: ObservableObject {
     }
     
     func successfullLogout() {
-        let realm = try! Realm()
-        try! realm.write {
-            realm.deleteAll()
-        }
         toggle(status: false)
         toggleInit(value: false)
         SyncUtils.clear()
+        DispatchQueue.main.async {
+            let realm = try! Realm()
+            try! realm.write {
+                realm.deleteAll()
+            }
+        }
     }
     
     func toggle(status: Bool) {
